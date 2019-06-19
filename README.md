@@ -1,6 +1,6 @@
 # pygraphblas
 
-Python extension for GraphBLAS C API
+GraphBLAS for Python
 
 # Summary
 
