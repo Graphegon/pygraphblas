@@ -4,7 +4,7 @@ from . import lib, ffi, _check, _gb_from_type, _cffi_type_from
 
 class Matrix:
 
-    def __init__(self, A, ncols=None, nrows=None):
+    def __init__(self, A, nrows=None, ncols=None):
         if isinstance(A, Matrix):
             _B = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_dup(_B, A.matrix[0]))
@@ -13,7 +13,7 @@ class Matrix:
         else:
             _A = ffi.new('GrB_Matrix*')
             gb_type = _gb_from_type(A)
-            _check(lib.GrB_Matrix_new(_A, gb_type, ncols, nrows))
+            _check(lib.GrB_Matrix_new(_A, gb_type, nrows, ncols))
             self.matrix = _A
             self.gb_type = gb_type
 
@@ -54,6 +54,12 @@ class Matrix:
     def clear(self):
         _check(lib.GrB_Matrix_clear(self.matrix[0]))
 
+    def resize(self, nrows, ncols):
+        _check(lib.GxB_Matrix_resize(
+            self.matrix[0],
+            nrows,
+            ncols))
+
     def __setitem__(self, index, value):
         if isinstance(index, int):
             return # TODO set row vector
@@ -62,10 +68,9 @@ class Matrix:
                 _check(lib.GrB_Matrix_setElement_INT64(
                     self.matrix[0],
                     ffi.cast('int64_t', value),
-                    ffi.cast('GrB_Index', index[0]),
-                    ffi.cast('GrB_Index', index[1])))
-                            
-    
+                    index[0],
+                    index[1]))
+
     def __getitem__(self, index):
         if isinstance(index, int):
             return # TODO return row vector
