@@ -37,11 +37,13 @@ Some example usage of the library.  Not all of these work yet!
 
     a = Matrix.from_type(int, 10, 10)   # a 10x10 matrix of integers (GrB_INT64)
 
+    a.read_mm('data_file.mm') # read MatrixMarket format
+
     a[3]                      # extract the 3rd row as vector
     a[:,3]                    # extract the 3rd column as vector
     a[3,3]                    # extract element at row 3, col 3
     a[2:4,3:8]                # extract submatrix by row/col ranges
-    a[(2,1,4):(3,5)]          # extract submatrix by row/col
+    a[(2,1,4):(3,5)]          # extract submatrix by explicit row/col
     a[3:10:2]                 # extract vector range by steps
     a[10:1:-2]                # extract vector descending range by steps
     
@@ -49,17 +51,21 @@ Some example usage of the library.  Not all of these work yet!
 
     b = Matrix.from_type(lib.GrB_FP32, 10, 10) # 10x10 matrix of 32-bit floats
 
+    b.from_mm('...literal MatrixMarket string data...')
+
     a @ b                     # mxm(a, b) with default PLUS_TIMES semiring
 
     with min_plus:
-        a @ b                 # mxm(a, b) with MIN_PLUS semiring
+        c = a @ b             # mxm(a, b) with MIN_PLUS semiring
 
-    m = Matrix.from_type(bool, 10, 10)  # a 10x10 boolean matrix (same as GrB_BOOL)
+    import numpy as np
+    m = Matrix.from_numpy(np.random.choice(a=[True, False], size=(10, 10))) # from numpy array
 
     with min_plus(mask=m, inp1='tran'):
-        a @ b                 # min_plus masked mxm(a, b) with transposed b
+        c = a @ b             # min_plus masked mxm(a, b) with transposed b
 
     dupa = Matrix.dup(a)      # make a dup of a
     a.clear()                 # clear a
+
 ```
     
