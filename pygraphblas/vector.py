@@ -56,5 +56,3 @@ class Vector:
 
     def __repr__(self):
         return '<Vector (%s: %s)>' % (self.size, self.nvals)
-
-    
