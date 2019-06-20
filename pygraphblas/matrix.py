@@ -1,37 +1,30 @@
 from itertools import chain
-from . import lib, ffi, _check, _gb_from_type, _cffi_type_from
+from . import lib, ffi, _check, _gb_from_type
 
 
 class Matrix:
 
-    def __init__(self, A, nrows=None, ncols=None):
-        if isinstance(A, Matrix):
-            _B = ffi.new('GrB_Matrix*')
-            _check(lib.GrB_Matrix_dup(_B, A.matrix[0]))
-            self.matrix = _B
-            self.gb_type = A.gb_type
-        else:
-            _A = ffi.new('GrB_Matrix*')
-            gb_type = _gb_from_type(A)
-            _check(lib.GrB_Matrix_new(_A, gb_type, nrows, ncols))
-            self.matrix = _A
-            self.gb_type = gb_type
+    def __init__(self, matrix):
+        self.matrix = matrix
 
-    @property
-    def matrix(self):
-        return self._A
+    @classmethod
+    def from_type(cls, py_type, nrows=0, ncols=0):
+        new_mat = ffi.new('GrB_Matrix*')
+        gb_type = _gb_from_type(py_type)
+        _check(lib.GrB_Matrix_new(new_mat, gb_type, nrows, ncols))
+        return cls(new_mat)
 
-    @matrix.setter
-    def matrix(self, A):
-        self._A = A
+    @classmethod
+    def dup(cls, mat):
+        new_mat = ffi.new('GrB_Matrix*')
+        _check(lib.GrB_Matrix_dup(new_mat, mat.matrix[0]))
+        return cls(new_mat)
 
     @property
     def gb_type(self):
-        return self._gb_type
-
-    @gb_type.setter
-    def gb_type(self, gb_type):
-        self._gb_type = gb_type
+        new_type = ffi.new('GrB_Type*')
+        _check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
+        return new_type[0]
 
     @property
     def nrows(self):
