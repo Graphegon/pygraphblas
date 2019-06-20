@@ -63,35 +63,3 @@ Some example usage of the library.  Not all of these work yet!
     a.clear()                 # clear a
 ```
     
-
-# Introduction
-
-For a long time, mathematicians have known that matrices are powerful
-representations of graphs, as described [in this mathmatical
-introduction to
-GraphBLAS](http://www.mit.edu/~kepner/GraphBLAS/GraphBLAS-Math-release.pdf)
-by [Dr. Jermey Kepner](http://www.mit.edu/~kepner/) head and founder
-of [MIT Lincoln Laboratory Supercomputing
-Center](http://news.mit.edu/2016/lincoln-laboratory-establishes-supercomputing-center-0511).
-
-As Kepner's paper describes, there are two useful matrix
-representations of graphs: [Adjacency
-Matrices](https://en.wikipedia.org/wiki/Adjacency_matrix) and
-[Incidence Matrices](https://en.wikipedia.org/wiki/Incidence_matrix).
-For this introduction we will focus on the adjacency type as they are
-simpler, but the same ideas apply to both, and it is easy to switch
-back and forth between them.
-
-![Alt text](./docs/AdjacencyMatrix.svg)
-
-(Image Credit: [Dr. Jermey Kepner](http://www.mit.edu/~kepner/))
-
-On the left is a *directed* graph, and on the right, the adjacency
-matrix that represents it. The matrix has a row and column for every
-vertex.  If there is an going from node A to B, then there will be a
-value present in the intersection of As row with Bs column.  For
-example, vertex 1 connects to 4, so there is a value (dot) at the
-intersction of the first row and the fourth column.  4 also connects
-*back* to 1 so there are two values in the matrix to represent these
-two edges, the one at the (1, 4) position and the other at the (4,1)
-position.
