@@ -1,6 +1,6 @@
 from itertools import chain
 from . import lib, ffi, _check, _gb_from_type
-
+from .vector import Vector
 
 class Matrix:
 
@@ -64,10 +64,38 @@ class Matrix:
                     index[0],
                     index[1]))
 
+    def _slice_vector(self, index, trans=False):
+        new_vec = ffi.new('GrB_Vector*')
+        desc = ffi.new('GrB_Descriptor*')
+        if trans:
+            _check(lib.GrB_Descriptor_new(desc))
+            _check(lib.GrB_Descriptor_set(
+                desc[0],
+                lib.GrB_INP1,
+                lib.GrB_TRAN))
+        else:
+            desc[0] = ffi.NULL
+            
+        _check(lib.GrB_Vector_new(
+            new_vec,
+            self.gb_type,
+            self.ncols))
+        _check(lib.GrB_Col_extract(
+            new_vec[0],
+            ffi.NULL,
+            ffi.NULL,
+            self.matrix[0],
+            lib.GrB_ALL,
+            0,
+            index,
+            desc[0]
+            ))
+        return Vector(new_vec)
+
     def __getitem__(self, index):
         if isinstance(index, int):
-            return # TODO return row vector
-        if isinstance(index, tuple):
+            return self._slice_vector(index, True)
+        if isinstance(index, tuple) and len(index) == 2:
             if isinstance(index[0], int) and isinstance(index[1], int):
                 result = ffi.new('int64_t*')
                 _check(lib.GrB_Matrix_extractElement_INT64(
@@ -78,4 +106,7 @@ class Matrix:
                 return result[0]
 
     def __repr__(self):
-        return '<Matrix (%sx%s: %s)>' % (self.nrows, self.ncols, self.nvals)
+        return '<Matrix (%sx%s: %s)>' % (
+            self.nrows,
+            self.ncols,
+            self.nvals)
