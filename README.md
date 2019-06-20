@@ -54,9 +54,6 @@ Some example usage of the library.  Not all of these work yet!
     with min_plus:
         a @ b                 # mxm(a, b) with MIN_PLUS semiring
 
-    with min_plus:
-        a @ b                 # mxm(a, b) with MIN_PLUS semiring
-
     m = Matrix.from_type(bool, 10, 10)  # a 10x10 boolean matrix (same as GrB_BOOL)
 
     with min_plus(mask=m, inp1='tran'):
