@@ -37,7 +37,7 @@ Some example usage of the library.  Not all of these work yet!
 
     a = Matrix.from_type(int, 10, 10)   # a 10x10 matrix of integers (GrB_INT64)
 
-    a.read_mm('data_file.mm') # read MatrixMarket format
+    a_mm = Matrix.read_mm('data_file.mm') # read MatrixMarket format
 
     a[3]                      # extract the 3rd row as vector
     a[:,3]                    # extract the 3rd column as vector
@@ -51,7 +51,7 @@ Some example usage of the library.  Not all of these work yet!
 
     b = Matrix.from_type(lib.GrB_FP32, 10, 10) # 10x10 matrix of 32-bit floats
 
-    b.from_mm('...literal MatrixMarket string data...')
+    b_mm = Matrix.from_mm('...literal MatrixMarket string data...')
 
     a @ b                     # mxm(a, b) with default PLUS_TIMES semiring
 
@@ -59,9 +59,9 @@ Some example usage of the library.  Not all of these work yet!
         c = a @ b             # mxm(a, b) with MIN_PLUS semiring
 
     import numpy as np
-    m = Matrix.from_numpy(np.random.choice(a=[True, False], size=(10, 10))) # from numpy array
+    mask = Matrix.from_numpy(np.random.choice(a=[True, False], size=(10, 10))) # from numpy array
 
-    with min_plus(mask=m, inp1='tran'):
+    with min_plus(mask=mask, inp1='tran'):
         c = a @ b             # min_plus masked mxm(a, b) with transposed b
 
     dupa = Matrix.dup(a)      # make a dup of a
