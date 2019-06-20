@@ -53,21 +53,10 @@ class Matrix:
             nrows,
             ncols))
 
-    def __setitem__(self, index, value):
-        if isinstance(index, int):
-            return # TODO set row vector
-        if isinstance(index, tuple):
-            if isinstance(index[0], int) and isinstance(index[1], int):
-                _check(lib.GrB_Matrix_setElement_INT64(
-                    self.matrix[0],
-                    ffi.cast('int64_t', value),
-                    index[0],
-                    index[1]))
-
-    def _slice_vector(self, index, trans=False):
+    def slice(self, index, row=True):
         new_vec = ffi.new('GrB_Vector*')
         desc = ffi.new('GrB_Descriptor*')
-        if trans:
+        if row:
             _check(lib.GrB_Descriptor_new(desc))
             _check(lib.GrB_Descriptor_set(
                 desc[0],
@@ -92,9 +81,20 @@ class Matrix:
             ))
         return Vector(new_vec)
 
+    def __setitem__(self, index, value):
+        if isinstance(index, int):
+            return # TODO set row vector
+        if isinstance(index, tuple):
+            if isinstance(index[0], int) and isinstance(index[1], int):
+                _check(lib.GrB_Matrix_setElement_INT64(
+                    self.matrix[0],
+                    ffi.cast('int64_t', value),
+                    index[0],
+                    index[1]))
+
     def __getitem__(self, index):
         if isinstance(index, int):
-            return self._slice_vector(index, True)
+            return self.slice(index, True)
         if isinstance(index, tuple) and len(index) == 2:
             if isinstance(index[0], int) and isinstance(index[1], int):
                 result = ffi.new('int64_t*')
