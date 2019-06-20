@@ -73,8 +73,8 @@ class Matrix:
                 _check(lib.GrB_Matrix_extractElement_INT64(
                     result,
                     self.matrix[0],
-                    ffi.cast('GrB_Index', index[0]),
-                    ffi.cast('GrB_Index', index[1])))
+                    index[0],
+                    index[1]))
                 return result[0]
 
     def __repr__(self):
