@@ -3377,6 +3377,10 @@ extern const uint64_t *GrB_ALL ;
 /* #define GxB_STRIDE      (INT64_MAX-1) */
 /* #define GxB_BACKWARDS   (INT64_MAX-2) */
 
+static int64_t const GxB_RANGE;
+static int64_t const GxB_STRIDE;
+static int64_t const GxB_BACKWARDS;
+
 /* // for the strided range begin:inc:end, I [GxB_BEGIN] is the value of begin, I */
 /* // [GxB_END] is the value end, I [GxB_INC] is the magnitude of the stride.  If */
 /* // the stride is negative, use ni = GxB_BACKWARDS. */

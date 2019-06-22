@@ -1,11 +1,13 @@
 
-from . import lib, ffi, _check, _gb_from_type
-
+from .base import lib, ffi, _check, _gb_from_type
 
 class Vector:
 
     def __init__(self, vec):
         self.vector = vec
+
+    def __del__(self):
+        _check(lib.GrB_Vector_free(self.vector[0]))
 
     @classmethod
     def from_type(cls, py_type, size=0):
