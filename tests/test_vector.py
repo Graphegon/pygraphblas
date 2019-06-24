@@ -21,3 +21,33 @@ def test_vector_create_dup():
     assert n.size == 10
     assert n.nvals == 1
     assert n[3] == 3
+
+def test_vector_from_list():
+    v = Vector.from_list(list(range(10)))
+    assert v.size == 10
+    assert v.nvals == 10
+    for i in range(10):
+        assert i == v[i]
+
+def test_vector_eq():
+    v = Vector.from_list(list(range(10)))
+    w = Vector.from_list(list(range(10)))
+    x = Vector.from_list(list(range(1,11)))
+    assert v == w
+    assert v != x
+
+def test_vector_ewise_add():
+    v = Vector.from_list(list(range(10)))
+    w = Vector.from_list(list(range(10)))
+    x = v.ewise_add(w)
+    assert x == Vector.from_lists(
+        list(range(10)),
+        list(range(0, 20, 2)))
+    
+def test_vector_ewise_mult():
+    v = Vector.from_list(list(range(10)))
+    w = Vector.from_list(list(range(10)))
+    x = v.ewise_mult(w)
+    assert x == Vector.from_lists(
+        list(range(10)),
+        list(map(lambda x: x*x, list(range(10)))))

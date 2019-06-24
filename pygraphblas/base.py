@@ -1,5 +1,5 @@
 from _pygraphblas import lib, ffi
-lib.GrB_init(lib.GrB_NONBLOCKING)
+lib.LAGraph_init()
 
 class GraphBLASException(Exception):
     pass
@@ -59,6 +59,21 @@ _error_codes = {
     13: Panic,
     }
 
+_default_type_ops = {
+    lib.GrB_INT64: (lib.GrB_PLUS_INT64,
+                    lib.GrB_TIMES_INT64),
+    lib.GrB_FP64: (lib.GrB_PLUS_FP64,
+                   lib.GrB_TIMES_FP64),
+    lib.GrB_BOOL: (lib.GrB_PLUS_BOOL,
+                   lib.GrB_TIMES_BOOL),
+    }
+
+def _default_add_op(obj):
+    return _default_type_ops(obj.gb_type)[0]
+
+def _default_mul_op(obj):
+    return _default_type_ops(obj.gb_type)[1]
+
 def _check(res):
     if res != lib.GrB_SUCCESS:
         raise _error_codes[res]
@@ -80,3 +95,4 @@ def _cffi_type_from(typ):
     if typ is bool:
         return 'bool*'
     raise TypeError('Unknown type to map to cffi')
+

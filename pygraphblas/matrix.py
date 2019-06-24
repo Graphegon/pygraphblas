@@ -10,6 +10,15 @@ class Matrix:
     def __del__(self):
         _check(lib.GrB_Matrix_free(self.matrix))
 
+    def __eq__(self, other):
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            ffi.NULL))
+        return result[0]
+
     @classmethod
     def from_type(cls, py_type, nrows=0, ncols=0):
         new_mat = ffi.new('GrB_Matrix*')
@@ -68,9 +77,13 @@ class Matrix:
             nrows,
             ncols))
 
-    def build_range(self, rslice, stop_val):
-        if rslice is None or (rslice.start is None and rslice.stop is None and rslice.step is None):
+    def _build_range(self, rslice, stop_val):
+        if rslice is None or \
+           (rslice.start is None and
+            rslice.stop is None and
+            rslice.step is None):
             return lib.GrB_ALL, 0
+        
         if rslice.start is None:
             rslice.start = 0
         if rslice.stop is None:
@@ -98,15 +111,26 @@ class Matrix:
             desc[0] = ffi.NULL
 
         if isinstance(rindex, slice):
-            I, ni = self.build_range(rindex, self.nrows)
+            I, ni = self._build_range(rindex, self.nrows)
         elif isinstance(rindex, int):
             pass
         if isinstance(cindex, slice):
-            J, nj = self.build_range(cindex, self.ncols)
+            J, nj = self._build_range(cindex, self.ncols)
         elif isinstance(cindex, int):
             pass
 
     def slice_vector(self, index, vslice=None, transpose=False):
+        """Slice a column or row vector out of the matrix.
+
+        `index` is the column or row index to slice out.
+
+        `vslice` is an optional slice object that applies to the
+        vector.
+
+        `transpose` if True, transpose the input to slice rows.
+        Otherwise slice columns.
+
+        """
         desc = ffi.new('GrB_Descriptor*')
         if transpose:
             # transpose input to get row
@@ -118,33 +142,14 @@ class Matrix:
         else:
             desc[0] = ffi.NULL
 
-        # if vslice is not None:
-        #     if vslice.start is None:
-        #         vslice.start = 0
-        #     if vslice.stop is None:
-        #         if row:
-        #             vslice.stop = self.nrows
-        #         else:
-        #             vslice.stop = self.ncols
-        #     if vslice.step is None:
-        #         I = ffi.new('GrB_Index[2]',
-        #                     [rindex.start, rindex.stop])
-        #         ni = lib.GxB_RANGE
-        #     else:
-        #         I = ffi.new('GrB_Index[3]',
-        #                     [rindex.start, rindex.step, rindex.stop])
-        #         ni = lib.GxB_STRIDE
-        # else:
-        #     I = lib.GrB_ALL
-        #     ni = 0
-
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_new(
             new_vec,
             self.gb_type,
             self.ncols))
 
-        I, ni = self.build_range(vslice, self.nrows if transpose else self.ncols)
+        stop_val = self.nrows if transpose else self.ncols
+        I, ni = self._build_range(vslice, stop_val)
 
         _check(lib.GrB_Col_extract(
             new_vec[0],
