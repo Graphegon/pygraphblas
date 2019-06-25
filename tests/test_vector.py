@@ -1,4 +1,5 @@
 from pygraphblas.vector import Vector
+from pygraphblas.base import lib
 
 def test_vector_create_from_type():
     m = Vector.from_type(int)
@@ -7,12 +8,30 @@ def test_vector_create_from_type():
     m = Vector.from_type(int, 10)
     assert m.size == 10
 
+def test_vector_gb_type():
+    v = Vector.from_type(bool, 10)
+    assert v.gb_type == lib.GrB_BOOL
+    v = Vector.from_type(int, 10)
+    assert v.gb_type == lib.GrB_INT64
+    v = Vector.from_type(float, 10)
+    assert v.gb_type == lib.GrB_FP64
+
 def test_vector_set_element():
     m = Vector.from_type(int, 10)
     m[3] = 3
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == 3
+    m = Vector.from_type(bool, 10)
+    m[3] = True
+    assert m.size == 10
+    assert m.nvals == 1
+    assert m[3] == True
+    m = Vector.from_type(float, 10)
+    m[3] = 3.3
+    assert m.size == 10
+    assert m.nvals == 1
+    assert m[3] == 3.3
 
 def test_vector_create_dup():
     m = Vector.from_type(int, 10)
@@ -43,7 +62,7 @@ def test_vector_ewise_add():
     assert x == Vector.from_lists(
         list(range(10)),
         list(range(0, 20, 2)))
-    
+
 def test_vector_ewise_mult():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
@@ -51,3 +70,27 @@ def test_vector_ewise_mult():
     assert x == Vector.from_lists(
         list(range(10)),
         list(map(lambda x: x*x, list(range(10)))))
+
+def test_vector_reduce_bool():
+    v = Vector.from_type(bool, 10)
+    assert not v.reduce_bool()
+    v[3] = True
+    assert v.reduce_bool()
+
+def test_vector_reduce_int():
+    v = Vector.from_type(int, 10)
+    r = v.reduce_int()
+    assert type(r) is int
+    assert r == 0
+    v[3] = 3
+    v[4] = 4
+    assert v.reduce_int() == 7
+
+def test_vector_reduce_float():
+    v = Vector.from_type(float, 10)
+    r = v.reduce_float()
+    assert type(r) is float
+    assert r == 0.0
+    v[3] = 3.3
+    v[4] = 4.4
+    assert v.reduce_float() == 7.7

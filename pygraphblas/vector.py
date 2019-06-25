@@ -10,6 +10,30 @@ from .base import (
 
 class Vector:
 
+    _type_funcs = {
+        lib.GrB_BOOL: {
+            'C': '_Bool',
+            'setElement': lib.GrB_Vector_setElement_BOOL,
+            'extractElement': lib.GrB_Vector_extractElement_BOOL,
+            'add_op': lib.GrB_PLUS_BOOL,
+            'mult_op': lib.GrB_TIMES_BOOL,
+        },
+        lib.GrB_INT64: {
+            'C': 'int64_t',
+            'setElement': lib.GrB_Vector_setElement_INT64,
+            'extractElement': lib.GrB_Vector_extractElement_INT64,
+            'add_op': lib.GrB_PLUS_INT64,
+            'mult_op': lib.GrB_TIMES_INT64,
+        },
+        lib.GrB_FP64: {
+            'C': 'double',
+            'setElement': lib.GrB_Vector_setElement_FP64,
+            'extractElement': lib.GrB_Vector_extractElement_FP64,
+            'add_op': lib.GrB_PLUS_FP64,
+            'mult_op': lib.GrB_TIMES_FP64,
+        },
+    }
+
     def __init__(self, vec):
         self.vector = vec
 
@@ -34,10 +58,12 @@ class Vector:
 
     @classmethod
     def from_lists(cls, I, V, size=None):
+        assert len(I) == len(V)
+        assert len(I) > 0 # must be non empty
         if not size:
             size = len(I)
         # TODO use ffi and GrB_Vector_build
-        m = cls.from_type(int, size)
+        m = cls.from_type(type(V[0]), size)
         for i, v in zip(I, V):
             m[i] = v
         return m
@@ -45,8 +71,9 @@ class Vector:
     @classmethod
     def from_list(cls, I):
         size = len(I)
+        assert size > 0
         # TODO use ffi and GrB_Vector_build
-        m = cls.from_type(int, size)
+        m = cls.from_type(type(I[0]), size)
         for i, v in enumerate(I):
             m[i] = v
         return m
@@ -84,7 +111,7 @@ class Vector:
         if accum is None:
             accum = ffi.NULL
         if add_op is None:
-            add_op = lib.GrB_PLUS_INT64
+            add_op = self._type_funcs[self.gb_type]['add_op']
         if desc is None:
             desc = ffi.NULL
         if out is None:
@@ -108,7 +135,7 @@ class Vector:
         if accum is None:
             accum = ffi.NULL
         if mult_op is None:
-            mult_op = lib.GrB_TIMES_INT64
+            mult_op = self._type_funcs[self.gb_type]['mult_op']
         if desc is None:
             desc = ffi.NULL
         if out is None:
@@ -133,15 +160,67 @@ class Vector:
             self.vector[0],
             size))
 
-    def __setitem__(self, index, value):
-        _check(lib.GrB_Vector_setElement_INT64(
+    def reduce_bool(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_LOR_BOOL_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('_Bool*')
+        _check(lib.GrB_Vector_reduce_BOOL(
+            result,
+            accum,
+            monoid,
             self.vector[0],
-            ffi.cast('int64_t', value),
+            desc))
+        return result[0]
+
+    def reduce_int(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_PLUS_INT64_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('int64_t*')
+        _check(lib.GrB_Vector_reduce_INT64(
+            result,
+            accum,
+            monoid,
+            self.vector[0],
+            desc))
+        return result[0]
+
+    def reduce_float(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_PLUS_FP64_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('double*')
+        _check(lib.GrB_Vector_reduce_FP64(
+            result,
+            accum,
+            monoid,
+            self.vector[0],
+            desc))
+        return result[0]
+
+    def __setitem__(self, index, value):
+        func = self._type_funcs[self.gb_type]['setElement']
+        C = self._type_funcs[self.gb_type]['C']
+        _check(func(
+            self.vector[0],
+            ffi.cast(C, value),
             index))
 
     def __getitem__(self, index):
-        result = ffi.new('int64_t*')
-        _check(lib.GrB_Vector_extractElement_INT64(
+        C = self._type_funcs[self.gb_type]['C']
+        result = ffi.new(C + '*')
+        func = self._type_funcs[self.gb_type]['extractElement']
+        _check(func(
             result,
             self.vector[0],
             ffi.cast('GrB_Index', index)))
