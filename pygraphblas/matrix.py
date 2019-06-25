@@ -4,6 +4,29 @@ from .vector import Vector
 
 class Matrix:
 
+    _type_funcs = {
+        lib.GrB_BOOL: {
+            'C': '_Bool',
+            'setElement': lib.GrB_Matrix_setElement_BOOL,
+            'extractElement': lib.GrB_Matrix_extractElement_BOOL,
+            'add_op': lib.GrB_PLUS_BOOL,
+            'mult_op': lib.GrB_TIMES_BOOL,
+        },
+        lib.GrB_INT64: {
+            'C': 'int64_t',
+            'setElement': lib.GrB_Matrix_setElement_INT64,
+            'extractElement': lib.GrB_Matrix_extractElement_INT64,
+            'add_op': lib.GrB_PLUS_INT64,
+            'mult_op': lib.GrB_TIMES_INT64,
+        },
+        lib.GrB_FP64: {
+            'C': 'double',
+            'setElement': lib.GrB_Matrix_setElement_FP64,
+            'extractElement': lib.GrB_Matrix_extractElement_FP64,
+            'add_op': lib.GrB_PLUS_FP64,
+            'mult_op': lib.GrB_TIMES_FP64,
+        },
+    }
     def __init__(self, matrix):
         self.matrix = matrix
 
@@ -33,7 +56,7 @@ class Matrix:
         return cls(new_mat)
 
     @classmethod
-    def from_edgelists(cls, I, J, V, nrows=None, ncols=None):
+    def from_lists(cls, I, J, V, nrows=None, ncols=None):
         if not nrows:
             nrows = len(I)
         if not ncols:
@@ -76,6 +99,62 @@ class Matrix:
             self.matrix[0],
             nrows,
             ncols))
+
+    def ewise_add(self, other, out=None,
+                  mask=None, accum=None, add_op=None, desc=None):
+        if mask is None:
+            mask = ffi.NULL
+        if accum is None:
+            accum = ffi.NULL
+        if add_op is None:
+            add_op = self._type_funcs[self.gb_type]['add_op']
+        if desc is None:
+            desc = ffi.NULL
+        if out is None:
+            _out = ffi.new('GrB_Matrix*')
+            _check(lib.GrB_Matrix_new(
+                _out, self.gb_type, self.nrows, self.ncols))
+            out = Matrix(_out)
+        _check(lib.GrB_eWiseAdd_Matrix_BinaryOp(
+            out.matrix[0],
+            mask,
+            accum,
+            add_op,
+            self.matrix[0],
+            other.matrix[0],
+            desc))
+        return out
+
+    def __and__(self, other):
+        return self.ewise_add(other)
+
+    def ewise_mult(self, other, out=None,
+                  mask=None, accum=None, mult_op=None, desc=None):
+        if mask is None:
+            mask = ffi.NULL
+        if accum is None:
+            accum = ffi.NULL
+        if mult_op is None:
+            mult_op = self._type_funcs[self.gb_type]['mult_op']
+        if desc is None:
+            desc = ffi.NULL
+        if out is None:
+            _out = ffi.new('GrB_Matrix*')
+            _check(lib.GrB_Matrix_new(
+                _out, self.gb_type, self.nrows, self.ncols))
+            out = Matrix(_out)
+        _check(lib.GrB_eWiseMult_Matrix_BinaryOp(
+            out.matrix[0],
+            mask,
+            accum,
+            mult_op,
+            self.matrix[0],
+            other.matrix[0],
+            desc))
+        return out
+
+    def __or__(self, other):
+        return self.ewise_mult(other)
 
     def _build_range(self, rslice, stop_val):
         if rslice is None or \
