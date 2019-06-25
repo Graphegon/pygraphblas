@@ -153,3 +153,6 @@ def test_mxm():
         [2,0,1],
         [3,8,6])
     assert o == r
+    assert r == m @ n
+    m @= n
+    assert r == m

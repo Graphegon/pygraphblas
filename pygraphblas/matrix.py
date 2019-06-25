@@ -258,6 +258,12 @@ class Matrix:
             desc))
         return out
 
+    def __matmul__(self, other):
+        return self.mxm(other)
+
+    def __imatmul__(self, other):
+        return self.mxm(other, out=self)
+
     def _build_range(self, rslice, stop_val):
         if rslice is None or \
            (rslice.start is None and
