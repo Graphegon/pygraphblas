@@ -215,17 +215,19 @@ class Vector:
         return result[0]
 
     def __setitem__(self, index, value):
-        func = self._type_funcs[self.gb_type]['setElement']
-        C = self._type_funcs[self.gb_type]['C']
+        tf = self._type_funcs[self.gb_type]
+        C = tf['C']
+        func = tf['setElement']
         _check(func(
             self.vector[0],
             ffi.cast(C, value),
             index))
 
     def __getitem__(self, index):
-        C = self._type_funcs[self.gb_type]['C']
+        tf = self._type_funcs[self.gb_type]
+        C = tf['C']
+        func = tf['extractElement']
         result = ffi.new(C + '*')
-        func = self._type_funcs[self.gb_type]['extractElement']
         _check(func(
             result,
             self.vector[0],
