@@ -1,4 +1,4 @@
-from pygraphblas.matrix import Matrix
+from pygraphblas.matrix import Matrix, Vector
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
@@ -126,3 +126,11 @@ def test_matrix_reduce_float():
     v[3,3] = 3.3
     v[4,4] = 4.4
     assert v.reduce_float() == 7.7
+
+def test_matrix_reduce_vector():
+    m = Matrix.from_lists(
+        list(range(10)),
+        list(range(10)),
+        list(range(10)))
+    v = m.reduce_vector()
+    v == Vector.from_list(list(range(10)))

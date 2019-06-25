@@ -11,6 +11,7 @@ class Matrix:
             'extractElement': lib.GrB_Matrix_extractElement_BOOL,
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
+            'monoid': lib.GxB_LOR_BOOL_MONOID,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -18,6 +19,7 @@ class Matrix:
             'extractElement': lib.GrB_Matrix_extractElement_INT64,
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
+            'monoid': lib.GxB_PLUS_INT64_MONOID,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -25,6 +27,7 @@ class Matrix:
             'extractElement': lib.GrB_Matrix_extractElement_FP64,
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
+            'monoid': lib.GxB_PLUS_FP64_MONOID,
         },
     }
     def __init__(self, matrix):
@@ -209,6 +212,26 @@ class Matrix:
             self.matrix[0],
             desc))
         return result[0]
+
+    def reduce_vector(self, out=None, mask=None, accum=None, monoid=None, desc=None):
+        if mask is None:
+            mask = ffi.NULL
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = self._type_funcs[self.gb_type]['monoid']
+        if desc is None:
+            desc = ffi.NULL
+        if out is None:
+            out = Vector.from_type(self.gb_type, self.nrows)
+        _check(lib.GrB_Matrix_reduce_Monoid(
+            out.vector[0],
+            mask,
+            accum,
+            monoid,
+            self.matrix[0],
+            desc))
+        return out
 
     def _build_range(self, rslice, stop_val):
         if rslice is None or \
