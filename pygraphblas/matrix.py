@@ -156,6 +156,54 @@ class Matrix:
     def __or__(self, other):
         return self.ewise_mult(other)
 
+    def reduce_bool(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_LOR_BOOL_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('_Bool*')
+        _check(lib.GrB_Matrix_reduce_BOOL(
+            result,
+            accum,
+            monoid,
+            self.matrix[0],
+            desc))
+        return result[0]
+
+    def reduce_int(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_PLUS_INT64_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('int64_t*')
+        _check(lib.GrB_Matrix_reduce_INT64(
+            result,
+            accum,
+            monoid,
+            self.matrix[0],
+            desc))
+        return result[0]
+
+    def reduce_float(self, accum=None, monoid=None, desc=None):
+        if accum is None:
+            accum = ffi.NULL
+        if monoid is None:
+            monoid = lib.GxB_PLUS_FP64_MONOID
+        if desc is None:
+            desc = ffi.NULL
+        result = ffi.new('double*')
+        _check(lib.GrB_Matrix_reduce_FP64(
+            result,
+            accum,
+            monoid,
+            self.matrix[0],
+            desc))
+        return result[0]
+
     def _build_range(self, rslice, stop_val):
         if rslice is None or \
            (rslice.start is None and
@@ -257,8 +305,11 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
-            result = ffi.new('int64_t*')
-            _check(lib.GrB_Matrix_extractElement_INT64(
+            tf = self._type_funcs[self.gb_type]
+            C = tf['C']
+            func = tf['extractElement']
+            result = ffi.new(C + '*')
+            _check(func(
                 result,
                 self.matrix[0],
                 index[0],
@@ -280,9 +331,12 @@ class Matrix:
             return # TODO set row vector
         if isinstance(index, tuple):
             if isinstance(index[0], int) and isinstance(index[1], int):
-                _check(lib.GrB_Matrix_setElement_INT64(
+                tf = self._type_funcs[self.gb_type]
+                C = tf['C']
+                func = tf['setElement']
+                _check(func(
                     self.matrix[0],
-                    ffi.cast('int64_t', value),
+                    ffi.cast(C, value),
                     index[0],
                     index[1]))
 

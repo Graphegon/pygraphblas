@@ -128,6 +128,12 @@ class Vector:
             desc))
         return out
 
+    def __and__(self, other):
+        return self.ewise_add(other)
+
+    def __or__(self, other):
+        return self.ewise_mult(other)
+
     def ewise_mult(self, other, out=None,
                   mask=None, accum=None, mult_op=None, desc=None):
         if mask is None:

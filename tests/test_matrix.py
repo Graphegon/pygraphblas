@@ -98,3 +98,27 @@ def test_vector_ewise_mult():
 
     z = v | w
     assert x == z
+
+def test_matrix_reduce_bool():
+    v = Matrix.from_type(bool, 10, 10)
+    assert not v.reduce_bool()
+    v[3,3] = True
+    assert v.reduce_bool()
+
+def test_matrix_reduce_int():
+    v = Matrix.from_type(int, 10, 10)
+    r = v.reduce_int()
+    assert type(r) is int
+    assert r == 0
+    v[3,3] = 3
+    v[4,4] = 4
+    assert v.reduce_int() == 7
+
+def test_matrix_reduce_float():
+    v = Matrix.from_type(float, 10, 10)
+    r = v.reduce_float()
+    assert type(r) is float
+    assert r == 0.0
+    v[3,3] = 3.3
+    v[4,4] = 4.4
+    assert v.reduce_float() == 7.7
