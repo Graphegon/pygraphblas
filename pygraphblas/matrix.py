@@ -12,6 +12,7 @@ class Matrix:
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
             'monoid': lib.GxB_LOR_BOOL_MONOID,
+            'semiring': lib.GxB_LOR_LAND_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -20,6 +21,7 @@ class Matrix:
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
             'monoid': lib.GxB_PLUS_INT64_MONOID,
+            'semiring': lib.GxB_PLUS_TIMES_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -28,6 +30,7 @@ class Matrix:
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
             'monoid': lib.GxB_PLUS_FP64_MONOID,
+            'semiring': lib.GxB_PLUS_TIMES_FP64,
         },
     }
     def __init__(self, matrix):
@@ -230,6 +233,28 @@ class Matrix:
             accum,
             monoid,
             self.matrix[0],
+            desc))
+        return out
+
+    def mxm(self, other, out=None,
+            mask=None, accum=None, semiring=None, desc=None):
+        if out is None:
+            out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
+        if mask is None:
+            mask = ffi.NULL
+        if accum is None:
+            accum = ffi.NULL
+        if semiring is None:
+            semiring = self._type_funcs[self.gb_type]['semiring']
+        if desc is None:
+            desc = ffi.NULL
+        _check(lib.GrB_mxm(
+            out.matrix[0],
+            mask,
+            accum,
+            semiring,
+            self.matrix[0],
+            other.matrix[0],
             desc))
         return out
 

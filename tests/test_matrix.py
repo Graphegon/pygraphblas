@@ -134,3 +134,22 @@ def test_matrix_reduce_vector():
         list(range(10)))
     v = m.reduce_vector()
     v == Vector.from_list(list(range(10)))
+
+def test_mxm():
+    m = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [1,2,3])
+    n = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [2,3,4])
+    o = m.mxm(n)
+    assert o.nrows == 3
+    assert o.ncols == 3
+    assert o.nvals == 3
+    r = Matrix.from_lists(
+        [0,1,2],
+        [2,0,1],
+        [3,8,6])
+    assert o == r
