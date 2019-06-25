@@ -125,9 +125,6 @@ class Matrix:
             desc))
         return out
 
-    def __and__(self, other):
-        return self.ewise_add(other)
-
     def ewise_mult(self, other, out=None,
                   mask=None, accum=None, mult_op=None, desc=None):
         if mask is None:
@@ -153,8 +150,17 @@ class Matrix:
             desc))
         return out
 
-    def __or__(self, other):
+    def __add__(self, other):
+        return self.ewise_add(other)
+
+    def __iadd__(self, other):
+        return self.ewise_add(other, out=self)
+
+    def __mul__(self, other):
         return self.ewise_mult(other)
+
+    def __imul__(self, other):
+        return self.ewise_mult(other, out=self)
 
     def reduce_bool(self, accum=None, monoid=None, desc=None):
         if accum is None:

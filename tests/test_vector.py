@@ -63,8 +63,10 @@ def test_vector_ewise_add():
         list(range(10)),
         list(range(0, 20, 2)))
 
-    z = v & w
+    z = v + w
     assert x == z
+    v += w
+    assert v == z
 
 def test_vector_ewise_mult():
     v = Vector.from_list(list(range(10)))
@@ -74,8 +76,10 @@ def test_vector_ewise_mult():
         list(range(10)),
         list(map(lambda x: x*x, list(range(10)))))
 
-    z = v | w
+    z = v * w
     assert x == z
+    v *= w
+    assert v == z
 
 def test_vector_reduce_bool():
     v = Vector.from_type(bool, 10)
