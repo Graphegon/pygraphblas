@@ -62,7 +62,6 @@ def test_vector_ewise_add():
     assert x == Vector.from_lists(
         list(range(10)),
         list(range(0, 20, 2)))
-
     z = v + w
     assert x == z
     v += w
@@ -75,7 +74,6 @@ def test_vector_ewise_mult():
     assert x == Vector.from_lists(
         list(range(10)),
         list(map(lambda x: x*x, list(range(10)))))
-
     z = v * w
     assert x == z
     v *= w
@@ -104,3 +102,18 @@ def test_vector_reduce_float():
     v[3] = 3.3
     v[4] = 4.4
     assert v.reduce_float() == 7.7
+
+def test_vector_slice():
+    v = Vector.from_list(list(range(10)))
+    w = v[:9]
+    assert w.size == 10
+    assert w.nvals == 10
+    w = v[1:9]
+    assert w.size == 9
+    assert w.nvals == 9
+    w = v[1:]
+    assert w.size == 9
+    assert w.nvals == 9
+    w = v[1:9:2]
+    assert w.size == 5
+    assert w.nvals == 5

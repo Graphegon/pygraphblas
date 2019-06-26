@@ -76,7 +76,7 @@ def _default_mul_op(obj):
 
 def _check(res):
     if res != lib.GrB_SUCCESS:
-        raise _error_codes[res]
+        raise _error_codes[res](ffi.string(lib.GrB_error()))
 
 def _gb_from_type(typ):
     if typ is int:
@@ -95,4 +95,30 @@ def _cffi_type_from(typ):
     if typ is bool:
         return 'bool*'
     raise TypeError('Unknown type to map to cffi')
+
+def _build_range(rslice, stop_val):
+    if rslice is None or \
+       (rslice.start is None and
+        rslice.stop is None and
+        rslice.step is None):
+        return lib.GrB_ALL, 0, None
+
+    start = rslice.start
+    stop = rslice.stop
+    step = rslice.step
+    if start is None:
+        start = 0
+    if stop is None:
+        stop = stop_val
+    if step is None:
+        size = (stop - start) + 1
+        I = ffi.new('GrB_Index[2]',
+                    [start, stop])
+        ni = lib.GxB_RANGE
+    else:
+        size = int((stop - start)/step) + 1
+        I = ffi.new('GrB_Index[3]',
+                    [start, stop, step])
+        ni = lib.GxB_STRIDE
+    return I, ni, size
 

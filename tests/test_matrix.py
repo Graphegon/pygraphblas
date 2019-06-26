@@ -1,3 +1,4 @@
+import sys
 from pygraphblas.matrix import Matrix, Vector
 from pygraphblas.base import lib
 
@@ -76,7 +77,6 @@ def test_vector_ewise_add():
         list(range(10)),
         list(range(10)),
         list(range(0, 20, 2)))
-
     z = v + w
     assert x == z
     v += w
@@ -97,7 +97,6 @@ def test_vector_ewise_mult():
         list(range(10)),
         list(range(10)),
         list(map(lambda x: x*x, list(range(10)))))
-
     z = v * w
     assert x == z
     v *= w
@@ -156,3 +155,36 @@ def test_mxm():
     assert r == m @ n
     m @= n
     assert r == m
+
+def test_matrix_pattern():
+    v = Matrix.from_lists(
+        list(range(10)),
+        list(range(10)),
+        list(range(10)))
+    p = v.pattern()
+    assert p.gb_type == lib.GrB_BOOL
+    assert p.nrows == 10
+    assert p.ncols == 10
+    assert p.nvals == 10
+
+def test_matrix_mm_read_write(tmp_path):
+    mmf = tmp_path / 'mmwrite_test.mm'
+    mmf.touch()
+    m = Matrix.from_lists(
+        [0,1,2],
+        [0,1,2],
+        [2,3,4])
+    with mmf.open('w') as f:
+        m.to_mm(f)
+    with mmf.open() as f:
+        assert f.readlines() == [
+            '%%MatrixMarket matrix coordinate integer symmetric\n',
+            '%%GraphBLAS GrB_INT64\n',
+            '3 3 3\n',
+            '1 1 2\n',
+            '2 2 3\n',
+            '3 3 4\n']
+
+    with mmf.open() as f:
+        n = Matrix.from_mm(f)
+    assert n == m

@@ -1,4 +1,3 @@
-
 from .base import lib, ffi, _check, _gb_from_type
 from .vector import Vector
 
@@ -73,6 +72,12 @@ class Matrix:
             m[i, j] = v
         return m
 
+    @classmethod
+    def from_mm(cls, mm_file):
+        m = ffi.new('GrB_Matrix*')
+        _check(lib.LAGraph_mmread(m, mm_file))
+        return cls(m)
+
     @property
     def gb_type(self):
         new_type = ffi.new('GrB_Type*')
@@ -96,6 +101,14 @@ class Matrix:
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
+
+    def pattern(self):
+        r = ffi.new('GrB_Matrix*')
+        _check(lib.LAGraph_pattern(r, self.matrix[0]))
+        return Matrix(r)
+
+    def to_mm(self, fileobj):
+        _check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def clear(self):
         _check(lib.GrB_Matrix_clear(self.matrix[0]))
@@ -263,27 +276,6 @@ class Matrix:
 
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
-
-    def _build_range(self, rslice, stop_val):
-        if rslice is None or \
-           (rslice.start is None and
-            rslice.stop is None and
-            rslice.step is None):
-            return lib.GrB_ALL, 0
-        
-        if rslice.start is None:
-            rslice.start = 0
-        if rslice.stop is None:
-            rslice.stop = stop_val
-        if rslice.step is None:
-            I = ffi.new('GrB_Index[2]',
-                        [rslice.start, rslice.stop])
-            ni = lib.GxB_RANGE
-        else:
-            I = ffi.new('GrB_Index[3]',
-                        [rslice.start, rslice.step, rslice.stop])
-            ni = lib.GxB_STRIDE
-        return I, ni
 
     def slice_matrix(self, rindex=slice(None), cindex=slice(None), trans=False):
         desc = ffi.new('GrB_Descriptor*')

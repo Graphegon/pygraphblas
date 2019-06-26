@@ -6,6 +6,7 @@ from .base import (
     _gb_from_type,
     _default_add_op,
     _default_mul_op,
+    _build_range,
     )
 
 class Vector:
@@ -230,15 +231,30 @@ class Vector:
             index))
 
     def __getitem__(self, index):
-        tf = self._type_funcs[self.gb_type]
-        C = tf['C']
-        func = tf['extractElement']
-        result = ffi.new(C + '*')
-        _check(func(
-            result,
-            self.vector[0],
-            ffi.cast('GrB_Index', index)))
-        return result[0]
+        if isinstance(index, int):
+            tf = self._type_funcs[self.gb_type]
+            C = tf['C']
+            func = tf['extractElement']
+            result = ffi.new(C + '*')
+            _check(func(
+                result,
+                self.vector[0],
+                ffi.cast('GrB_Index', index)))
+            return result[0]
+        if isinstance(index, slice):
+            srange = _build_range(index, self.size - 1)
+            if srange[2] is None:
+                srange[2] = self.size
+            result = Vector.from_type(self.gb_type, srange[2])
+            _check(lib.GrB_Vector_extract(
+                result.vector[0],
+                ffi.NULL,
+                ffi.NULL,
+                self.vector[0],
+                srange[0],
+                srange[1],
+                ffi.NULL))
+            return result
 
     def __repr__(self):
         return '<Vector (%s: %s)>' % (self.size, self.nvals)
