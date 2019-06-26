@@ -115,8 +115,20 @@ def _build_range(rslice, stop_val):
         I = ffi.new('GrB_Index[2]',
                     [start, stop])
         ni = lib.GxB_RANGE
+    elif step < 0:
+        step = abs(step)
+        if start < stop:
+            size = 0
+        else:
+            size = int((start-stop)/step) + 1
+        I = ffi.new('GrB_Index[3]',
+                    [start, stop, step])
+        ni = lib.GxB_BACKWARDS
     else:
-        size = int((stop - start)/step) + 1
+        if start > stop or step == 0:
+            size = 0
+        else:
+            size = int((stop - start)/step) + 1
         I = ffi.new('GrB_Index[3]',
                     [start, stop, step])
         ni = lib.GxB_STRIDE

@@ -1,3 +1,4 @@
+import sys
 from pygraphblas.vector import Vector
 from pygraphblas.base import lib
 
@@ -117,6 +118,6 @@ def test_vector_slice():
     w = v[1:9:2]
     assert w.size == 5
     assert w.nvals == 5
-    w = v[9:1:-2]
-    assert w.size == 5
-    assert w.nvals == 5
+    w = v[7:1:-2]
+    assert w.size == 4
+    assert w.nvals == 4
