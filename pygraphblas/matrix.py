@@ -1,3 +1,5 @@
+import sys
+from random import randint
 from .base import lib, ffi, _check, _gb_from_type
 from .vector import Vector
 
@@ -77,6 +79,30 @@ class Matrix:
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_mmread(m, mm_file))
         return cls(m)
+
+    @classmethod
+    def from_random(cls, gb_type, nrows, ncols, nvals,
+                    make_pattern=False, make_symmetric=False,
+                    make_skew_symmetric=False, make_hermitian=False,
+                    no_diagonal=False, seed=None):
+        result = ffi.new('GrB_Matrix*')
+        fseed = ffi.new('uint64_t*')
+        if seed is None:
+            seed = randint(0, sys.maxsize)
+        fseed[0] = seed
+        _check(lib.LAGraph_random(
+            result,
+            _gb_from_type(gb_type),
+            nrows,
+            ncols,
+            nvals,
+            make_pattern,
+            make_symmetric,
+            make_skew_symmetric,
+            make_hermitian,
+            no_diagonal,
+            fseed))
+        return cls(result)
 
     @property
     def gb_type(self):

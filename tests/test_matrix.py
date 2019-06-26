@@ -188,3 +188,10 @@ def test_matrix_mm_read_write(tmp_path):
     with mmf.open() as f:
         n = Matrix.from_mm(f)
     assert n == m
+
+def test_matrix_random():
+    m = Matrix.from_random(int, 10, 10, 5)
+    assert m.nrows == 10
+    assert m.ncols == 10
+    assert m.nvals == 5
+    
