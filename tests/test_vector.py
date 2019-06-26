@@ -117,3 +117,6 @@ def test_vector_slice():
     w = v[1:9:2]
     assert w.size == 5
     assert w.nvals == 5
+    w = v[9:1:-2]
+    assert w.size == 5
+    assert w.nvals == 5
