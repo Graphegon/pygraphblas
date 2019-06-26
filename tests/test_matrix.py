@@ -62,7 +62,7 @@ def test_matrix_gb_type():
     v = Matrix.from_type(float, 10)
     assert v.gb_type == lib.GrB_FP64
 
-def test_vector_ewise_add():
+def test_matrix_ewise_add():
     v = Matrix.from_lists(
         list(range(10)),
         list(range(10)),
