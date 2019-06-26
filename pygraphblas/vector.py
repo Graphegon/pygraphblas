@@ -16,6 +16,7 @@ class Vector:
             'C': '_Bool',
             'setElement': lib.GrB_Vector_setElement_BOOL,
             'extractElement': lib.GrB_Vector_extractElement_BOOL,
+            'extractTuples': lib.GrB_Vector_extractTuples_BOOL,
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
         },
@@ -23,6 +24,7 @@ class Vector:
             'C': 'int64_t',
             'setElement': lib.GrB_Vector_setElement_INT64,
             'extractElement': lib.GrB_Vector_extractElement_INT64,
+            'extractTuples': lib.GrB_Vector_extractTuples_INT64,
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
         },
@@ -30,6 +32,7 @@ class Vector:
             'C': 'double',
             'setElement': lib.GrB_Vector_setElement_FP64,
             'extractElement': lib.GrB_Vector_extractElement_FP64,
+            'extractTuples': lib.GrB_Vector_extractTuples_FP64,
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
         },
@@ -84,6 +87,22 @@ class Vector:
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
         return cls(new_vec)
+
+    def to_lists(self):
+        tf = self._type_funcs[self.gb_type]
+        C = tf['C']
+        I = ffi.new('GrB_Index[]', self.nvals)
+        V = ffi.new(C + '[]', self.nvals)
+        n = ffi.new('GrB_Index*')
+        n[0] = self.nvals
+        func = tf['extractTuples']
+        _check(func(
+            I,
+            V,
+            n,
+            self.vector[0]
+            ))
+        return [list(I), list(V)]
 
     @property
     def size(self):

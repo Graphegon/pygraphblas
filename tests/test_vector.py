@@ -49,6 +49,13 @@ def test_vector_from_list():
     for i in range(10):
         assert i == v[i]
 
+def test_vector_to_lists():
+    v = Vector.from_list(list(range(10)))
+    assert v.to_lists() == [
+        list(range(10)),
+        list(range(10)),
+        ]
+
 def test_vector_eq():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
@@ -109,15 +116,30 @@ def test_vector_slice():
     w = v[:9]
     assert w.size == 10
     assert w.nvals == 10
-    w = v[1:9]
-    assert w.size == 9
-    assert w.nvals == 9
+    assert w.to_lists() == [
+        list(range(10)),
+        list(range(10))]
+    w = v[1:8]
+    assert w.size == 8
+    assert w.nvals == 8
+    assert w.to_lists() == [
+        [0, 1, 2, 3, 4, 5, 6, 7],
+        [1, 2, 3, 4, 5, 6, 7, 8]]
     w = v[1:]
     assert w.size == 9
     assert w.nvals == 9
+    assert w.to_lists() == [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9]]
     w = v[1:9:2]
     assert w.size == 5
     assert w.nvals == 5
+    assert w.to_lists() == [
+        [0, 1, 2, 3, 4],
+        [1, 3, 5, 7, 9]]
     w = v[7:1:-2]
     assert w.size == 4
     assert w.nvals == 4
+    assert w.to_lists() == [
+        [0, 1, 2, 3],
+        [7, 5, 3, 1]]
