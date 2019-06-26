@@ -29,7 +29,7 @@ def test_matrix_create_dup():
     assert n.nvals == 1
     assert n[3,3] == 3
 
-def test_matrix_from_lists():
+def test_matrix_to_from_lists():
     v = Matrix.from_lists(
         list(range(10)),
         list(range(10)),
@@ -37,6 +37,11 @@ def test_matrix_from_lists():
     assert v.nrows == 10
     assert v.ncols == 10
     assert v.nvals == 10
+    assert v.to_lists() == [
+        list(range(10)),
+        list(range(10)),
+        list(range(10)),
+        ]
 
 def test_matrix_eq():
     v = Matrix.from_lists(
@@ -194,4 +199,4 @@ def test_matrix_random():
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 5
-    
+

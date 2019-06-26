@@ -10,6 +10,7 @@ class Matrix:
             'C': '_Bool',
             'setElement': lib.GrB_Matrix_setElement_BOOL,
             'extractElement': lib.GrB_Matrix_extractElement_BOOL,
+            'extractTuples': lib.GrB_Matrix_extractTuples_BOOL,
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
             'monoid': lib.GxB_LOR_BOOL_MONOID,
@@ -19,6 +20,7 @@ class Matrix:
             'C': 'int64_t',
             'setElement': lib.GrB_Matrix_setElement_INT64,
             'extractElement': lib.GrB_Matrix_extractElement_INT64,
+            'extractTuples': lib.GrB_Matrix_extractTuples_INT64,
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
             'monoid': lib.GxB_PLUS_INT64_MONOID,
@@ -28,6 +30,7 @@ class Matrix:
             'C': 'double',
             'setElement': lib.GrB_Matrix_setElement_FP64,
             'extractElement': lib.GrB_Matrix_extractElement_FP64,
+            'extractTuples': lib.GrB_Matrix_extractTuples_FP64,
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
             'monoid': lib.GxB_PLUS_FP64_MONOID,
@@ -135,6 +138,24 @@ class Matrix:
 
     def to_mm(self, fileobj):
         _check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
+
+    def to_lists(self):
+        tf = self._type_funcs[self.gb_type]
+        C = tf['C']
+        I = ffi.new('GrB_Index[]', self.nvals)
+        J = ffi.new('GrB_Index[]', self.nvals)
+        V = ffi.new(C + '[]', self.nvals)
+        n = ffi.new('GrB_Index*')
+        n[0] = self.nvals
+        func = tf['extractTuples']
+        _check(func(
+            I,
+            J,
+            V,
+            n,
+            self.matrix[0]
+            ))
+        return [list(I), list(J), list(V)]
 
     def clear(self):
         _check(lib.GrB_Matrix_clear(self.matrix[0]))
