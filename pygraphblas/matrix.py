@@ -1,6 +1,6 @@
 import sys
 from random import randint
-from .base import lib, ffi, _check, _gb_from_type
+from .base import lib, ffi, _check, _gb_from_type, _build_range
 from .vector import Vector
 
 class Matrix:
@@ -337,11 +337,11 @@ class Matrix:
             desc[0] = ffi.NULL
 
         if isinstance(rindex, slice):
-            I, ni = self._build_range(rindex, self.nrows)
+            I, ni = build_range(rindex, self.nrows)
         elif isinstance(rindex, int):
             pass
         if isinstance(cindex, slice):
-            J, nj = self._build_range(cindex, self.ncols)
+            J, nj = build_range(cindex, self.ncols)
         elif isinstance(cindex, int):
             pass
 
@@ -375,7 +375,7 @@ class Matrix:
             self.ncols))
 
         stop_val = self.nrows if transpose else self.ncols
-        I, ni = self._build_range(vslice, stop_val)
+        I, ni, size = _build_range(vslice, stop_val)
 
         _check(lib.GrB_Col_extract(
             new_vec[0],
