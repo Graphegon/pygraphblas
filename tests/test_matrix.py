@@ -207,3 +207,8 @@ def test_matrix_random():
     assert m.ncols == 10
     # assert m.nvals == 5 # sometimes this fails?
 
+def test_matrix_slice():
+    I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
+    V = list(range(9))
+    m = Matrix.from_lists(I, J, V)
+    import pdb; pdb.set_trace()

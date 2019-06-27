@@ -261,17 +261,17 @@ class Vector:
                 ffi.cast('GrB_Index', index)))
             return result[0]
         if isinstance(index, slice):
-            srange = _build_range(index, self.size - 1)
-            if srange[2] is None:
-                srange[2] = self.size
+            I, ni, size = _build_range(index, self.size - 1)
+            if size is None:
+                size = self.size
             result = Vector.from_type(self.gb_type, srange[2])
             _check(lib.GrB_Vector_extract(
                 result.vector[0],
                 ffi.NULL,
                 ffi.NULL,
                 self.vector[0],
-                srange[0],
-                srange[1],
+                I,
+                ni,
                 ffi.NULL))
             return result
 

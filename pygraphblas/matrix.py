@@ -324,9 +324,9 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def slice_matrix(self, rindex=slice(None), cindex=slice(None), trans=False):
+    def slice_matrix(self, rindex=None, cindex=None, transpose=False):
         desc = ffi.new('GrB_Descriptor*')
-        if row:
+        if transpose:
             # transpose input to get row
             _check(lib.GrB_Descriptor_new(desc))
             _check(lib.GrB_Descriptor_set(
@@ -336,14 +336,25 @@ class Matrix:
         else:
             desc[0] = ffi.NULL
 
-        if isinstance(rindex, slice):
-            I, ni = build_range(rindex, self.nrows)
-        elif isinstance(rindex, int):
-            pass
-        if isinstance(cindex, slice):
-            J, nj = build_range(cindex, self.ncols)
-        elif isinstance(cindex, int):
-            pass
+        I, ni, isize = _build_range(rindex, self.nrows - 1)
+        J, nj, jsize = _build_range(cindex, self.ncols - 1)
+        if isize is None:
+            isize = self.nrows
+        if jsize is None:
+            jsize = self.ncols
+
+        result = Matrix.from_type(self.gb_type, isize, jsize)
+        _check(lib.GrB_Matrix_extract(
+            result.matrix[0],
+            ffi.NULL,
+            ffi.NULL,
+            self.matrix[0],
+            I,
+            ni,
+            J,
+            nj,
+            ffi.NULL))
+        return result
 
     def slice_vector(self, index, vslice=None, transpose=False):
         """Slice a column or row vector out of the matrix.
@@ -395,7 +406,7 @@ class Matrix:
             return self.slice_vector(index, None, True)
         if isinstance(index, slice):
             # a[:] submatrix of rows
-            return self.slice_matrix(index)
+            return self.slice_matrix(index, None)
 
         if not isinstance(index, (tuple, list)):
             raise TypeError
@@ -423,7 +434,7 @@ class Matrix:
             return
         if isinstance(i0, (slice, tuple)) and isinstance(i1, (slice, tuple)):
             # a[:,:] extract submatrix
-            return
+            return self.slice_matrix(i0, i1)
 
     def __setitem__(self, index, value):
         if isinstance(index, (int, slice)):
