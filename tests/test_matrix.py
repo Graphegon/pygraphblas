@@ -1,4 +1,6 @@
 import sys
+from itertools import product
+
 from pygraphblas.matrix import Matrix, Vector
 from pygraphblas.base import lib
 
@@ -207,8 +209,21 @@ def test_matrix_random():
     assert m.ncols == 10
     # assert m.nvals == 5 # sometimes this fails?
 
-def test_matrix_slice():
+def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
-    m = Matrix.from_lists(I, J, V)
-    import pdb; pdb.set_trace()
+    m = Matrix.from_lists(I, J, V, 3, 3)
+    n = m[:]
+    assert n == m
+    n = m[:,:]
+    assert n == m
+    n = m[1:,:]
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [3, 4, 5, 6, 7, 8], 2, 3)
+    n = m[:,1:]
+    assert n == Matrix.from_lists(
+        [0, 0, 1, 1, 2, 2],
+        [0, 1, 0, 1, 0, 1],
+        [1, 2, 4, 5, 7, 8], 3, 2)

@@ -264,7 +264,7 @@ class Vector:
             I, ni, size = _build_range(index, self.size - 1)
             if size is None:
                 size = self.size
-            result = Vector.from_type(self.gb_type, srange[2])
+            result = Vector.from_type(self.gb_type, size)
             _check(lib.GrB_Vector_extract(
                 result.vector[0],
                 ffi.NULL,
