@@ -1,7 +1,7 @@
 import sys
 from itertools import product
 
-from pygraphblas.matrix import Matrix, Vector
+from pygraphblas import Matrix, Vector, semiring
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
@@ -169,6 +169,12 @@ def test_mxm():
     assert r == m @ n
     m @= n
     assert r == m
+    o = m.mxm(n, semiring=semiring.lor_land_bool)
+    assert o == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 1, 1]
+        )
 
 def test_matrix_pattern():
     v = Matrix.from_lists(

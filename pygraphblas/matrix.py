@@ -2,6 +2,7 @@ import sys
 from random import randint
 from .base import lib, ffi, _check, _gb_from_type, _build_range
 from .vector import Vector
+from .semiring import Semiring
 
 class Matrix:
 
@@ -306,6 +307,8 @@ class Matrix:
             accum = ffi.NULL
         if semiring is None:
             semiring = self._type_funcs[self.gb_type]['semiring']
+        elif isinstance(semiring, Semiring):
+            semiring = semiring.semiring
         if desc is None:
             desc = ffi.NULL
         _check(lib.GrB_mxm(
