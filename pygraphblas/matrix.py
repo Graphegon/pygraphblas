@@ -393,17 +393,6 @@ class Matrix:
         return result
 
     def slice_vector(self, index, vslice=None, transpose=False):
-        """Slice a column or row vector out of the matrix.
-
-        `index` is the column or row index to slice out.
-
-        `vslice` is an optional slice object that applies to the
-        vector.
-
-        `transpose` if True, transpose the input to slice rows.
-        Otherwise slice columns.
-
-        """
         desc = ffi.new('GrB_Descriptor*')
         if transpose:
             # transpose input to get row
@@ -438,10 +427,8 @@ class Matrix:
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            # a[3] extract row vector
             return self.slice_vector(index, None, True)
         if isinstance(index, slice):
-            # a[:] submatrix of rows
             return self.slice_matrix(index, None)
 
         if not isinstance(index, (tuple, list)):
