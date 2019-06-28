@@ -303,6 +303,8 @@ class Matrix:
             out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
         if mask is None:
             mask = ffi.NULL
+        elif isinstance(mask, Matrix):
+            mask = mask.matrix[0]
         if accum is None:
             accum = ffi.NULL
         if semiring is None:
@@ -321,8 +323,39 @@ class Matrix:
             desc))
         return out
 
+    def mxv(self, other, out=None,
+            mask=None, accum=None, semiring=None, desc=None):
+        if out is None:
+            out = Vector.from_type(self.gb_type, self.ncols)
+        elif not isinstance(out, Vector):
+            raise TypeError('Output hand argument must be Vector.')
+        if mask is None:
+            mask = ffi.NULL
+        elif isinstance(mask, Matrix):
+            mask = mask.matrix[0]
+        if accum is None:
+            accum = ffi.NULL
+        if semiring is None:
+            semiring = self._type_funcs[self.gb_type]['semiring']
+        elif isinstance(semiring, Semiring):
+            semiring = semiring.semiring
+        if desc is None:
+            desc = ffi.NULL
+        _check(lib.GrB_mxv(
+            out.vector[0],
+            mask,
+            accum,
+            semiring,
+            self.matrix[0],
+            other.vector[0],
+            desc))
+        return out
+
     def __matmul__(self, other):
-        return self.mxm(other)
+        if isinstance(other, Matrix):
+            return self.mxm(other)
+        elif isinstance(other, Vector):
+            return self.mxv(other)
 
     def __imatmul__(self, other):
         return self.mxm(other, out=self)

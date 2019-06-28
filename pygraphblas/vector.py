@@ -1,4 +1,5 @@
 
+from .semiring import Semiring
 from .base import (
     lib,
     ffi,
@@ -19,6 +20,7 @@ class Vector:
             'extractTuples': lib.GrB_Vector_extractTuples_BOOL,
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
+            'semiring': lib.GxB_LOR_LAND_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -27,6 +29,7 @@ class Vector:
             'extractTuples': lib.GrB_Vector_extractTuples_INT64,
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
+            'semiring': lib.GxB_PLUS_TIMES_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -35,6 +38,7 @@ class Vector:
             'extractTuples': lib.GrB_Vector_extractTuples_FP64,
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
+            'semiring': lib.GxB_PLUS_TIMES_FP64,
         },
     }
 
@@ -147,6 +151,40 @@ class Vector:
             other.vector[0],
             desc))
         return out
+
+    def vxm(self, other, out=None,
+            mask=None, accum=None, semiring=None, desc=None):
+        if out is None:
+            out = Vector.from_type(self.gb_type, self.size)
+        elif not isinstance(out, Vector):
+            raise TypeError('Output argument must be Vector.')
+        if mask is None:
+            mask = ffi.NULL
+        elif isinstance(mask, Matrix):
+            mask = mask.matrix[0]
+        if accum is None:
+            accum = ffi.NULL
+        if semiring is None:
+            semiring = self._type_funcs[self.gb_type]['semiring']
+        elif isinstance(semiring, Semiring):
+            semiring = semiring.semiring
+        if desc is None:
+            desc = ffi.NULL
+        _check(lib.GrB_vxm(
+            out.vector[0],
+            mask,
+            accum,
+            semiring,
+            self.vector[0],
+            other.matrix[0],
+            desc))
+        return out
+
+    def __matmul__(self, other):
+        return self.vxm(other)
+
+    def __imatmul__(self, other):
+        return self.vxm(other, out=self)
 
     def __add__(self, other):
         return self.ewise_add(other)

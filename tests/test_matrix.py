@@ -175,6 +175,21 @@ def test_mxm():
         [0, 1, 2],
         [1, 1, 1])
 
+def test_mxm():
+    m = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [1,2,3])
+    v = Vector.from_lists(
+        [0,1,2],
+        [2,3,4])
+    o = m.mxv(v)
+    assert o == Vector.from_lists(
+        [0, 1, 2],
+        [3, 8, 6])
+
+    assert m @ v == o
+
 def test_matrix_pattern():
     v = Matrix.from_lists(
         list(range(10)),

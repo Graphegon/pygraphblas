@@ -1,5 +1,5 @@
 import sys
-from pygraphblas.vector import Vector
+from pygraphblas import Vector, Matrix, semiring
 from pygraphblas.base import lib
 
 def test_vector_create_from_type():
@@ -143,3 +143,20 @@ def test_vector_slice():
     assert w.to_lists() == [
         [0, 1, 2, 3],
         [7, 5, 3, 1]]
+
+def test_vxm():
+    m = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [1,2,3])
+    v = Vector.from_lists(
+        [0,1,2],
+        [2,3,4])
+    o = v.vxm(m)
+    assert o == Vector.from_lists(
+        [0, 1, 2],
+        [12, 2, 6])
+
+    assert v @ m == o
+    v @= m
+    assert v == o
