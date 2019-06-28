@@ -29,6 +29,28 @@ def test_matrix_slice_vector():
         list(range(10)))
     assert v[5] == Vector.from_lists([5], [5], 10)
 
+def test_clear():
+    v = Matrix.from_lists(
+        list(range(10)),
+        list(range(10)),
+        list(range(10)))
+    assert v.nvals == 10
+    v.clear()
+    assert v.nvals == 0
+
+def test_resize():
+    v = Matrix.from_lists(
+        list(range(10)),
+        list(range(10)),
+        list(range(10)))
+    assert v.nrows == 10
+    assert v.ncols == 10
+    assert v.nvals == 10
+    v.resize(20, 20)
+    assert v.nrows == 20
+    assert v.ncols == 20
+    assert v.nvals == 10
+
 def test_matrix_create_dup():
     m = Matrix.from_type(int, 10, 10)
     m[3,3] = 3

@@ -87,15 +87,6 @@ def _gb_from_type(typ):
         return lib.GrB_BOOL
     return typ
 
-def _cffi_type_from(typ):
-    if typ is int:
-        return 'int*'
-    if typ is float:
-        return 'float*'
-    if typ is bool:
-        return 'bool*'
-    raise TypeError('Unknown type to map to cffi')
-
 def _build_range(rslice, stop_val):
     if rslice is None or \
        (rslice.start is None and
