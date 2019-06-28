@@ -223,35 +223,44 @@ def test_matrix_slicing():
         [0, 1, 2],
         [6, 7, 8])
 
+    # slice copy
+    n = m[:]
+    assert n == m
+    # also slice copy
+    n = m[:,:]
+    assert n == m
+
+    # submatrix slice out rows
     sm = m[0:1]
     assert sm == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
         [0, 1, 2, 3, 4, 5], 2, 3)
 
-    sm = m[:,0:1]
-    assert sm == Matrix.from_lists(
-        [0, 0, 1, 1, 2, 2],
-        [0, 1, 0, 1, 0, 1],
-        [0, 1, 3, 4, 6, 7], 3, 2)
-
-    sm = m[0:1,:]
-    assert sm == Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5], 2, 3)
-
-    n = m[:]
-    assert n == m
-    n = m[:,:]
-    assert n == m
-    n = m[1:,:]
-    assert n == Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [3, 4, 5, 6, 7, 8], 2, 3)
+    # submatrix slice out columns
     n = m[:,1:]
     assert n == Matrix.from_lists(
         [0, 0, 1, 1, 2, 2],
         [0, 1, 0, 1, 0, 1],
         [1, 2, 4, 5, 7, 8], 3, 2)
+
+    # submatrix slice out column range
+    sm = m[:,1:2]
+    assert sm == Matrix.from_lists(
+        [0, 0, 1, 1, 2, 2],
+        [0, 1, 0, 1, 0, 1],
+        [1, 2, 4, 5, 7, 8], 3, 2)
+
+    # submatrix slice out row range
+    n = m[1:,:]
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [3, 4, 5, 6, 7, 8], 2, 3)
+
+    # submatrix slice out row range
+    sm = m[1:2,:]
+    assert sm == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [3, 4, 5, 6, 7, 8], 2, 3)
