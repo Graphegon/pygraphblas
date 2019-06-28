@@ -173,8 +173,7 @@ def test_mxm():
     assert o == Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1]
-        )
+        [1, 1, 1])
 
 def test_matrix_pattern():
     v = Matrix.from_lists(
@@ -219,6 +218,29 @@ def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
+    v = m[2]
+    assert v == Vector.from_lists(
+        [0, 1, 2],
+        [6, 7, 8])
+
+    sm = m[0:1]
+    assert sm == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [0, 1, 2, 3, 4, 5], 2, 3)
+
+    sm = m[:,0:1]
+    assert sm == Matrix.from_lists(
+        [0, 0, 1, 1, 2, 2],
+        [0, 1, 0, 1, 0, 1],
+        [0, 1, 3, 4, 6, 7], 3, 2)
+
+    sm = m[0:1,:]
+    assert sm == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [0, 1, 2, 3, 4, 5], 2, 3)
+
     n = m[:]
     assert n == m
     n = m[:,:]
