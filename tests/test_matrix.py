@@ -197,7 +197,7 @@ def test_mxm():
         [0, 1, 2],
         [1, 1, 1])
 
-def test_mxm():
+def test_mxv():
     m = Matrix.from_lists(
         [0,1,2],
         [1,2,0],
