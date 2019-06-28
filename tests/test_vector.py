@@ -144,6 +144,20 @@ def test_vector_slice():
         [0, 1, 2, 3],
         [7, 5, 3, 1]]
 
+def test_vector_assign():
+    v = Vector.from_type(int, 10)
+    assert v.nvals == 0
+    w = Vector.from_lists(
+        list(range(10)),
+        list(range(10)))
+    v[:] = w
+    assert v == w
+
+    v[1:] = w[9:1:-1]
+    assert v == Vector.from_lists(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [0, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+
 def test_vxm():
     m = Matrix.from_lists(
         [0,1,2],

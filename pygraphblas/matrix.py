@@ -449,13 +449,15 @@ class Matrix:
                 index[1]))
             return result[0]
 
-        if isinstance(i1, int) and isinstance(i1, (slice, tuple)):
+        if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
-            return
-        if isinstance(i1, (slice, tuple)) and isinstance(i1, int):
+            return self.slice_vector(i0, i1, True)
+
+        if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector
-            return
-        if isinstance(i0, (slice, tuple)) and isinstance(i1, (slice, tuple)):
+            return self.slice_vector(i1, i0, False)
+
+        if isinstance(i0, slice) and isinstance(i1, slice):
             # a[:,:] extract submatrix
             return self.slice_matrix(i0, i1)
 

@@ -280,12 +280,28 @@ class Vector:
 
     def __setitem__(self, index, value):
         tf = self._type_funcs[self.gb_type]
-        C = tf['C']
-        func = tf['setElement']
-        _check(func(
-            self.vector[0],
-            ffi.cast(C, value),
-            index))
+        if isinstance(index, int):
+            C = tf['C']
+            func = tf['setElement']
+            _check(func(
+                self.vector[0],
+                ffi.cast(C, value),
+                index))
+            return
+        if isinstance(index, slice) and isinstance(value, Vector):
+            I, ni, size = _build_range(index, self.size - 1)
+            _check(lib.GrB_Vector_assign(
+                self.vector[0],
+                ffi.NULL,
+                ffi.NULL,
+                value.vector[0],
+                I,
+                ni,
+                ffi.NULL
+                ))
+            return
+        if isinstance(index, slice) and isinstance(value, (bool, int, float)):
+            return
 
     def __getitem__(self, index):
         if isinstance(index, int):
