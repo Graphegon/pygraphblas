@@ -180,12 +180,8 @@ class Matrix:
             ncols))
 
     def ewise_add(self, other, out=None,
-                  mask=None, accum=None, add_op=None, desc=descriptor.oooo):
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if add_op is None:
+                  mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+        if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if out is None:
             _out = ffi.new('GrB_Matrix*')
@@ -203,12 +199,8 @@ class Matrix:
         return out
 
     def ewise_mult(self, other, out=None,
-                   mask=None, accum=None, mult_op=None, desc=descriptor.oooo):
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if mult_op is None:
+                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+        if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if out is None:
             _out = ffi.new('GrB_Matrix*')
@@ -237,10 +229,8 @@ class Matrix:
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
 
-    def reduce_bool(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
         result = ffi.new('_Bool*')
         _check(lib.GrB_Matrix_reduce_BOOL(
@@ -251,10 +241,8 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_int(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
         result = ffi.new('int64_t*')
         _check(lib.GrB_Matrix_reduce_INT64(
@@ -265,10 +253,8 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_float(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
@@ -279,12 +265,9 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_vector(self, out=None, mask=None, accum=None, monoid=None, desc=descriptor.oooo):
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_vector(self, out=None,
+                      mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = self._type_funcs[self.gb_type]['monoid']
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
@@ -298,16 +281,12 @@ class Matrix:
         return out
 
     def mxm(self, other, out=None,
-            mask=None, accum=None, semiring=None, desc=descriptor.oooo):
+            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
-        if mask is None:
-            mask = NULL
-        elif isinstance(mask, Matrix):
+        if isinstance(mask, Matrix):
             mask = mask.matrix[0]
-        if accum is None:
-            accum = NULL
-        if semiring is None:
+        if semiring is NULL:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
@@ -322,18 +301,14 @@ class Matrix:
         return out
 
     def mxv(self, other, out=None,
-            mask=None, accum=None, semiring=None, desc=descriptor.oooo):
+            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
         if out is None:
             out = Vector.from_type(self.gb_type, self.ncols)
         elif not isinstance(out, Vector):
             raise TypeError('Output hand argument must be Vector.')
-        if mask is None:
-            mask = NULL
-        elif isinstance(mask, Matrix):
+        if isinstance(mask, Matrix):
             mask = mask.matrix[0]
-        if accum is None:
-            accum = NULL
-        if semiring is None:
+        if semiring is NULL:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
@@ -356,16 +331,13 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kron(self, other, out=None, mask=None, accum=None, op=None, desc=descriptor.oooo):
+    def kron(self, other, out=None,
+             mask=NULL, accum=NULL, op=NULL, desc=descriptor.oooo):
         if out is None:
             out = Matrix.from_type(self.gb_type,
                                    self.nrows*other.nrows,
                                    self.ncols*other.ncols)
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if op is None:
+        if op is NULL:
             op = self._type_funcs[self.gb_type]['mult_op']
         _check(lib.GxB_kron(
             out.matrix[0],

@@ -135,12 +135,8 @@ class Vector:
         return typ[0]
 
     def ewise_add(self, other, out=None,
-                  mask=None, accum=None, add_op=None, desc=descriptor.oooo):
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if add_op is None:
+                  mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+        if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if out is None:
             _out = ffi.new('GrB_Vector*')
@@ -157,18 +153,15 @@ class Vector:
         return out
 
     def vxm(self, other, out=None,
-            mask=None, accum=None, semiring=None, desc=descriptor.oooo):
+            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+        from .matrix import Matrix
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
-        if mask is None:
-            mask = NULL
-        elif isinstance(mask, Matrix):
+        if isinstance(mask, Matrix):
             mask = mask.matrix[0]
-        if accum is None:
-            accum = NULL
-        if semiring is None:
+        if semiring is NULL:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
@@ -201,12 +194,8 @@ class Vector:
         return self.ewise_mult(other, out=self)
 
     def ewise_mult(self, other, out=None,
-                   mask=None, accum=None, mult_op=None, desc=descriptor.oooo):
-        if mask is None:
-            mask = NULL
-        if accum is None:
-            accum = NULL
-        if mult_op is None:
+                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+        if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if out is None:
             _out = ffi.new('GrB_Vector*')
@@ -230,10 +219,8 @@ class Vector:
             self.vector[0],
             size))
 
-    def reduce_bool(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
@@ -244,10 +231,8 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_int(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
@@ -258,10 +243,8 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_float(self, accum=None, monoid=None, desc=descriptor.oooo):
-        if accum is None:
-            accum = NULL
-        if monoid is None:
+    def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
@@ -271,6 +254,19 @@ class Vector:
             self.vector[0],
             desc))
         return result[0]
+
+    def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        if out is None:
+            out = Vector.from_type(self.gb_type, self.size)
+        _check(lib.GrB_Vector_apply(
+            out.vector[0],
+            mask,
+            accum,
+            op,
+            self.vector[0],
+            desc
+            ))
+        return out
 
     def __setitem__(self, index, value):
         tf = self._type_funcs[self.gb_type]
