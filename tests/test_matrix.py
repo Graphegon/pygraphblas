@@ -1,5 +1,5 @@
 import sys
-from itertools import product
+from itertools import product, repeat
 
 from pygraphblas import Matrix, Vector, semiring
 from pygraphblas.base import lib
@@ -313,3 +313,26 @@ def test_matrix_slicing():
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
         [3, 4, 5, 6, 7, 8], 2, 3)
+
+def test_matrix_assign():
+
+    m = Matrix.from_lists(
+        list(range(3)),
+        list(range(3)),
+        list(range(3)))
+    assert m.nvals == 3
+    m[2,:] = Vector.from_list(list(repeat(0, 3)))
+    assert m.nvals == 5
+    assert m == Matrix.from_lists(
+        [0, 1, 2, 2, 2],
+        [0, 1, 0, 1, 2],
+        [0, 1, 0, 0, 0], 3, 3)
+
+    m = Matrix.from_type(int, 3, 3)
+    assert m.nvals == 0
+    n = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 1, 2])
+    m[:,:] = n
+    assert m == n

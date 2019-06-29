@@ -457,7 +457,7 @@ class Matrix:
             # a[:,:] extract submatrix
             return self.slice_matrix(i0, i1)
 
-    def col_assign(self, index, value, vslice=None, transpose=False):
+    def assign_col(self, index, value, vslice=None, transpose=False):
         desc = _get_descriptor(transpose)
 
         stop_val = self.ncols if transpose else self.nrows
@@ -474,7 +474,7 @@ class Matrix:
             desc[0]
             ))
 
-    def row_assign(self, index, value, vslice=None, transpose=False):
+    def assign_row(self, index, value, vslice=None, transpose=False):
         desc = _get_descriptor(transpose)
 
         stop_val = self.nrows if transpose else self.ncols
@@ -485,13 +485,13 @@ class Matrix:
             NULL,
             NULL,
             value.vector[0],
+            index,
             I,
             ni,
-            index,
             desc[0]
             ))
 
-    def matrix_assign(self, value, rindex=None, cindex=None, transpose=False):
+    def assign_matrix(self, value, rindex=None, cindex=None, transpose=False):
         desc = _get_descriptor(transpose)
 
         I, ni, isize = _build_range(rindex, self.nrows - 1)
@@ -546,14 +546,17 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] assign slice of row vector or scalar
+            self.assign_row(i0, value, i1)
             return
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector or scalar
+            self.assign_col(i1, value, i0)
             return
 
         if isinstance(i0, slice) and isinstance(i1, slice):
             # a[:,:] assign submatrix
+            self.assign_matrix(value, i0, i1)
             return
         raise TypeError('Unknown index or value for matrix assignment.')
 
