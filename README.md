@@ -137,8 +137,6 @@ matrices to be used interchangeably with pygraphblas.
 
 # TODO
 
-    - GrB_apply()
-
     - GxB_select()
 
     - All the docstrings.

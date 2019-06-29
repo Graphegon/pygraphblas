@@ -1,7 +1,7 @@
 import sys
 from itertools import repeat
 
-from pygraphblas import Vector, Matrix, semiring
+from pygraphblas import Vector, Matrix, semiring, unaryop
 from pygraphblas.base import lib
 
 def test_vector_create_from_type():
@@ -175,12 +175,12 @@ def test_vector_assign():
 
 def test_vxm():
     m = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [1,2,3])
+        [0, 1, 2],
+        [1, 2, 0],
+        [1, 2, 3])
     v = Vector.from_lists(
-        [0,1,2],
-        [2,3,4])
+        [0, 1, 2],
+        [2, 3, 4])
     o = v.vxm(m)
     assert o == Vector.from_lists(
         [0, 1, 2],
@@ -189,3 +189,12 @@ def test_vxm():
     assert v @ m == o
     v @= m
     assert v == o
+
+def test_apply():
+    v = Vector.from_lists(
+        [0, 1, 2],
+        [2, 3, 4])
+    w = v.apply(unaryop.ainv_int64)
+    assert w == Vector.from_lists(
+        [0, 1, 2],
+        [-2, -3, -4])

@@ -1,5 +1,7 @@
 
 from .semiring import Semiring
+from .unaryop import UnaryOp
+
 from .base import (
     lib,
     ffi,
@@ -258,6 +260,8 @@ class Vector:
     def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
+        if isinstance(op, UnaryOp):
+            op = op.unaryop
         _check(lib.GrB_Vector_apply(
             out.vector[0],
             mask,

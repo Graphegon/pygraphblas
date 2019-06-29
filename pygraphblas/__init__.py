@@ -6,3 +6,5 @@ from .semiring import build_semirings
 build_semirings()
 from .binaryop import build_binaryops
 build_binaryops()
+from .unaryop import build_unaryops
+build_unaryops()
