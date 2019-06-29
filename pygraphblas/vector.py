@@ -9,6 +9,7 @@ from .base import (
     _default_mul_op,
     _build_range,
 )
+from . import descriptor
 
 NULL = ffi.NULL
 
@@ -134,15 +135,13 @@ class Vector:
         return typ[0]
 
     def ewise_add(self, other, out=None,
-                  mask=None, accum=None, add_op=None, desc=None):
+                  mask=None, accum=None, add_op=None, desc=descriptor.oooo):
         if mask is None:
             mask = NULL
         if accum is None:
             accum = NULL
         if add_op is None:
             add_op = self._type_funcs[self.gb_type]['add_op']
-        if desc is None:
-            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -158,7 +157,7 @@ class Vector:
         return out
 
     def vxm(self, other, out=None,
-            mask=None, accum=None, semiring=None, desc=None):
+            mask=None, accum=None, semiring=None, desc=descriptor.oooo):
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
         elif not isinstance(out, Vector):
@@ -173,8 +172,6 @@ class Vector:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
-        if desc is None:
-            desc = NULL
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
@@ -204,15 +201,13 @@ class Vector:
         return self.ewise_mult(other, out=self)
 
     def ewise_mult(self, other, out=None,
-                  mask=None, accum=None, mult_op=None, desc=None):
+                   mask=None, accum=None, mult_op=None, desc=descriptor.oooo):
         if mask is None:
             mask = NULL
         if accum is None:
             accum = NULL
         if mult_op is None:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
-        if desc is None:
-            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -235,13 +230,11 @@ class Vector:
             self.vector[0],
             size))
 
-    def reduce_bool(self, accum=None, monoid=None, desc=None):
+    def reduce_bool(self, accum=None, monoid=None, desc=descriptor.oooo):
         if accum is None:
             accum = NULL
         if monoid is None:
             monoid = lib.GxB_LOR_BOOL_MONOID
-        if desc is None:
-            desc = NULL
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
             result,
@@ -251,13 +244,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_int(self, accum=None, monoid=None, desc=None):
+    def reduce_int(self, accum=None, monoid=None, desc=descriptor.oooo):
         if accum is None:
             accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_INT64_MONOID
-        if desc is None:
-            desc = NULL
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
             result,
@@ -267,13 +258,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_float(self, accum=None, monoid=None, desc=None):
+    def reduce_float(self, accum=None, monoid=None, desc=descriptor.oooo):
         if accum is None:
             accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_FP64_MONOID
-        if desc is None:
-            desc = NULL
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
             result,

@@ -6,10 +6,10 @@ from .base import (
     _check,
     _gb_from_type,
     _build_range,
-    _get_descriptor,
 )
 from .vector import Vector
 from .semiring import Semiring
+from . import descriptor
 
 NULL = ffi.NULL
 
@@ -188,7 +188,7 @@ class Matrix:
         if add_op is None:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -213,7 +213,7 @@ class Matrix:
         if mult_op is None:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -247,7 +247,7 @@ class Matrix:
         if monoid is None:
             monoid = lib.GxB_LOR_BOOL_MONOID
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         result = ffi.new('_Bool*')
         _check(lib.GrB_Matrix_reduce_BOOL(
             result,
@@ -263,7 +263,7 @@ class Matrix:
         if monoid is None:
             monoid = lib.GxB_PLUS_INT64_MONOID
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         result = ffi.new('int64_t*')
         _check(lib.GrB_Matrix_reduce_INT64(
             result,
@@ -279,7 +279,7 @@ class Matrix:
         if monoid is None:
             monoid = lib.GxB_PLUS_FP64_MONOID
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
             result,
@@ -297,7 +297,7 @@ class Matrix:
         if monoid is None:
             monoid = self._type_funcs[self.gb_type]['monoid']
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
         _check(lib.GrB_Matrix_reduce_Monoid(
@@ -324,7 +324,7 @@ class Matrix:
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         _check(lib.GrB_mxm(
             out.matrix[0],
             mask,
@@ -352,7 +352,7 @@ class Matrix:
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if desc is None:
-            desc = NULL
+            desc = descriptor.oooo
         _check(lib.GrB_mxv(
             out.vector[0],
             mask,
@@ -384,7 +384,7 @@ class Matrix:
         if op is None:
             op = self._type_funcs[self.gb_type]['mult_op']
         if desc is None:
-            desc = _get_descriptor()
+            desc = descriptor.oooo
         _check(lib.GxB_kron(
             out.matrix[0],
             mask,
@@ -392,11 +392,11 @@ class Matrix:
             op,
             self.matrix[0],
             other.matrix[0],
-            desc[0]))
+            desc))
         return out
 
     def slice_matrix(self, rindex=None, cindex=None, transpose=False):
-        desc = _get_descriptor(transpose)
+        desc = descriptor.tooo if transpose else descriptor.oooo
 
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -419,7 +419,7 @@ class Matrix:
         return result
 
     def slice_vector(self, index, vslice=None, transpose=False):
-        desc = _get_descriptor(transpose)
+        desc = descriptor.tooo if transpose else descriptor.oooo
 
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_new(
@@ -438,7 +438,7 @@ class Matrix:
             I,
             ni,
             index,
-            desc[0]
+            desc
             ))
         return Vector(new_vec)
 
@@ -481,7 +481,7 @@ class Matrix:
             return self.slice_matrix(i0, i1)
 
     def assign_col(self, index, value, vslice=None, transpose=False):
-        desc = _get_descriptor(transpose)
+        desc = descriptor.tooo if transpose else descriptor.oooo
 
         stop_val = self.ncols if transpose else self.nrows
         I, ni, size = _build_range(vslice, stop_val)
@@ -494,11 +494,11 @@ class Matrix:
             I,
             ni,
             index,
-            desc[0]
+            desc
             ))
 
     def assign_row(self, index, value, vslice=None, transpose=False):
-        desc = _get_descriptor(transpose)
+        desc = descriptor.tooo if transpose else descriptor.oooo
 
         stop_val = self.nrows if transpose else self.ncols
         I, ni, size = _build_range(vslice, stop_val)
@@ -511,11 +511,11 @@ class Matrix:
             index,
             I,
             ni,
-            desc[0]
+            desc
             ))
 
     def assign_matrix(self, value, rindex=None, cindex=None, transpose=False):
-        desc = _get_descriptor(transpose)
+        desc = descriptor.tooo if transpose else descriptor.oooo
 
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
