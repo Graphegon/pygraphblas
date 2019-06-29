@@ -16,3 +16,8 @@ otcr = lib.LAGraph_desc_otcr # B' compl mask, replace
 toco = lib.LAGraph_desc_toco # A', compl mask
 toor = lib.LAGraph_desc_toor # A', replace
 ttoo = lib.LAGraph_desc_ttoo # A', B'
+
+T_A = (tocr, ttco, ttor, tooo, ttcr, toco, toor, ttoo)
+T_B = (otoo, ttco, ttor, otco, otor, ttcr, otcr, ttoo)
+C_M = (ooco, tocr, ttco, oocr, otco, ttcr, otcr, toco)
+R_V = (ooor, tocr, ttor, oocr, otor, ttcr, otcr, toor)
