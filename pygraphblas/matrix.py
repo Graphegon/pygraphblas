@@ -1,8 +1,17 @@
 import sys
 from random import randint
-from .base import lib, ffi, _check, _gb_from_type, _build_range
+from .base import (
+    lib,
+    ffi,
+    _check,
+    _gb_from_type,
+    _build_range,
+    _get_descriptor,
+)
 from .vector import Vector
 from .semiring import Semiring
+
+NULL = ffi.NULL
 
 class Matrix:
 
@@ -16,6 +25,7 @@ class Matrix:
             'mult_op': lib.GrB_TIMES_BOOL,
             'monoid': lib.GxB_LOR_BOOL_MONOID,
             'semiring': lib.GxB_LOR_LAND_BOOL,
+            'assignScalar': lib.GrB_Matrix_assign_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -26,6 +36,7 @@ class Matrix:
             'mult_op': lib.GrB_TIMES_INT64,
             'monoid': lib.GxB_PLUS_INT64_MONOID,
             'semiring': lib.GxB_PLUS_TIMES_INT64,
+            'assignScalar': lib.GrB_Matrix_assign_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -36,6 +47,7 @@ class Matrix:
             'mult_op': lib.GrB_TIMES_FP64,
             'monoid': lib.GxB_PLUS_FP64_MONOID,
             'semiring': lib.GxB_PLUS_TIMES_FP64,
+            'assignScalar': lib.GrB_Matrix_assign_FP64,
         },
     }
     def __init__(self, matrix):
@@ -50,7 +62,7 @@ class Matrix:
             result,
             self.matrix[0],
             other.matrix[0],
-            ffi.NULL))
+            NULL))
         return result[0]
 
     @classmethod
@@ -170,13 +182,13 @@ class Matrix:
     def ewise_add(self, other, out=None,
                   mask=None, accum=None, add_op=None, desc=None):
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if add_op is None:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -195,13 +207,13 @@ class Matrix:
     def ewise_mult(self, other, out=None,
                   mask=None, accum=None, mult_op=None, desc=None):
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if mult_op is None:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -231,11 +243,11 @@ class Matrix:
 
     def reduce_bool(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_LOR_BOOL_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('_Bool*')
         _check(lib.GrB_Matrix_reduce_BOOL(
             result,
@@ -247,11 +259,11 @@ class Matrix:
 
     def reduce_int(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_INT64_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('int64_t*')
         _check(lib.GrB_Matrix_reduce_INT64(
             result,
@@ -263,11 +275,11 @@ class Matrix:
 
     def reduce_float(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_FP64_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
             result,
@@ -279,13 +291,13 @@ class Matrix:
 
     def reduce_vector(self, out=None, mask=None, accum=None, monoid=None, desc=None):
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = self._type_funcs[self.gb_type]['monoid']
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
         _check(lib.GrB_Matrix_reduce_Monoid(
@@ -302,17 +314,17 @@ class Matrix:
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         elif isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if semiring is None:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         _check(lib.GrB_mxm(
             out.matrix[0],
             mask,
@@ -330,17 +342,17 @@ class Matrix:
         elif not isinstance(out, Vector):
             raise TypeError('Output hand argument must be Vector.')
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         elif isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if semiring is None:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         _check(lib.GrB_mxv(
             out.vector[0],
             mask,
@@ -361,16 +373,7 @@ class Matrix:
         return self.mxm(other, out=self)
 
     def slice_matrix(self, rindex=None, cindex=None, transpose=False):
-        desc = ffi.new('GrB_Descriptor*')
-        if transpose:
-            # transpose input to get row
-            _check(lib.GrB_Descriptor_new(desc))
-            _check(lib.GrB_Descriptor_set(
-                desc[0],
-                lib.GrB_INP0,
-                lib.GrB_TRAN))
-        else:
-            desc[0] = ffi.NULL
+        desc = _get_descriptor(transpose)
 
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -382,27 +385,18 @@ class Matrix:
         result = Matrix.from_type(self.gb_type, isize, jsize)
         _check(lib.GrB_Matrix_extract(
             result.matrix[0],
-            ffi.NULL,
-            ffi.NULL,
+            NULL,
+            NULL,
             self.matrix[0],
             I,
             ni,
             J,
             nj,
-            ffi.NULL))
+            NULL))
         return result
 
     def slice_vector(self, index, vslice=None, transpose=False):
-        desc = ffi.new('GrB_Descriptor*')
-        if transpose:
-            # transpose input to get row
-            _check(lib.GrB_Descriptor_new(desc))
-            _check(lib.GrB_Descriptor_set(
-                desc[0],
-                lib.GrB_INP0,
-                lib.GrB_TRAN))
-        else:
-            desc[0] = ffi.NULL
+        desc = _get_descriptor(transpose)
 
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_new(
@@ -415,8 +409,8 @@ class Matrix:
 
         _check(lib.GrB_Col_extract(
             new_vec[0],
-            ffi.NULL,
-            ffi.NULL,
+            NULL,
+            NULL,
             self.matrix[0],
             I,
             ni,
@@ -427,8 +421,10 @@ class Matrix:
 
     def __getitem__(self, index):
         if isinstance(index, int):
+            # a[3] extract single row
             return self.slice_vector(index, None, True)
         if isinstance(index, slice):
+            # a[3:] extract submatrix of rows
             return self.slice_matrix(index, None)
 
         if not isinstance(index, (tuple, list)):
@@ -461,19 +457,105 @@ class Matrix:
             # a[:,:] extract submatrix
             return self.slice_matrix(i0, i1)
 
+    def col_assign(self, index, value, vslice=None, transpose=False):
+        desc = _get_descriptor(transpose)
+
+        stop_val = self.ncols if transpose else self.nrows
+        I, ni, size = _build_range(vslice, stop_val)
+
+        _check(lib.GrB_Col_assign(
+            self.matrix[0],
+            NULL,
+            NULL,
+            value.vector[0],
+            I,
+            ni,
+            index,
+            desc[0]
+            ))
+
+    def row_assign(self, index, value, vslice=None, transpose=False):
+        desc = _get_descriptor(transpose)
+
+        stop_val = self.nrows if transpose else self.ncols
+        I, ni, size = _build_range(vslice, stop_val)
+
+        _check(lib.GrB_Row_assign(
+            self.matrix[0],
+            NULL,
+            NULL,
+            value.vector[0],
+            I,
+            ni,
+            index,
+            desc[0]
+            ))
+
+    def matrix_assign(self, value, rindex=None, cindex=None, transpose=False):
+        desc = _get_descriptor(transpose)
+
+        I, ni, isize = _build_range(rindex, self.nrows - 1)
+        J, nj, jsize = _build_range(cindex, self.ncols - 1)
+        if isize is None:
+            isize = self.nrows
+        if jsize is None:
+            jsize = self.ncols
+
+        _check(lib.GrB_Matrix_assign(
+            self.matrix[0],
+            NULL,
+            NULL,
+            value.matrix[0],
+            I,
+            ni,
+            J,
+            nj,
+            NULL))
+
     def __setitem__(self, index, value):
-        if isinstance(index, (int, slice)):
-            return # TODO set row vector
-        if isinstance(index, tuple):
-            if isinstance(index[0], int) and isinstance(index[1], int):
-                tf = self._type_funcs[self.gb_type]
-                C = tf['C']
-                func = tf['setElement']
-                _check(func(
-                    self.matrix[0],
-                    ffi.cast(C, value),
-                    index[0],
-                    index[1]))
+        if isinstance(index, int):
+            # a[3] = assign single row scalar or vector
+            if isinstance(value, Vector):
+                return self.row_assign(index, value)
+
+            if isinstance(value, (bool, int, float)):
+                return
+
+        if isinstance(index, slice):
+            # a[3:] = assign rows scalar or submatrix
+            if isinstance(value, Matrix):
+                return
+            if isinstance(value, (bool, int, float)):
+                return
+
+        if not isinstance(index, (tuple, list)):
+            raise TypeError
+
+        i0 = index[0]
+        i1 = index[1]
+        if isinstance(i0, int) and isinstance(i1, int):
+            tf = self._type_funcs[self.gb_type]
+            C = tf['C']
+            func = tf['setElement']
+            _check(func(
+                self.matrix[0],
+                ffi.cast(C, value),
+                i0,
+                i1))
+            return
+
+        if isinstance(i0, int) and isinstance(i1, slice):
+            # a[3,:] assign slice of row vector or scalar
+            return
+
+        if isinstance(i0, slice) and isinstance(i1, int):
+            # a[:,3] extract slice of col vector or scalar
+            return
+
+        if isinstance(i0, slice) and isinstance(i1, slice):
+            # a[:,:] assign submatrix
+            return
+        raise TypeError('Unknown index or value for matrix assignment.')
 
     def __repr__(self):
         return '<Matrix (%sx%s: %s)>' % (

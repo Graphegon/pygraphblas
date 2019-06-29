@@ -1,6 +1,8 @@
 from _pygraphblas import lib, ffi
 lib.LAGraph_init()
 
+NULL = ffi.NULL
+
 class GraphBLASException(Exception):
     pass
 
@@ -125,3 +127,15 @@ def _build_range(rslice, stop_val):
         ni = lib.GxB_STRIDE
     return I, ni, size
 
+def _get_descriptor(inp0_trans=False):
+    desc = ffi.new('GrB_Descriptor*')
+    if inp0_trans:
+        # transpose input to get row
+        _check(lib.GrB_Descriptor_new(desc))
+        _check(lib.GrB_Descriptor_set(
+            desc[0],
+            lib.GrB_INP0,
+            lib.GrB_TRAN))
+    else:
+        desc[0] = NULL
+    return desc

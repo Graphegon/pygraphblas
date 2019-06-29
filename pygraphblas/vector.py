@@ -8,7 +8,9 @@ from .base import (
     _default_add_op,
     _default_mul_op,
     _build_range,
-    )
+)
+
+NULL = ffi.NULL
 
 class Vector:
 
@@ -21,6 +23,7 @@ class Vector:
             'add_op': lib.GrB_PLUS_BOOL,
             'mult_op': lib.GrB_TIMES_BOOL,
             'semiring': lib.GxB_LOR_LAND_BOOL,
+            'assignScalar': lib.GrB_Vector_assign_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -30,6 +33,7 @@ class Vector:
             'add_op': lib.GrB_PLUS_INT64,
             'mult_op': lib.GrB_TIMES_INT64,
             'semiring': lib.GxB_PLUS_TIMES_INT64,
+            'assignScalar': lib.GrB_Vector_assign_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -39,6 +43,7 @@ class Vector:
             'add_op': lib.GrB_PLUS_FP64,
             'mult_op': lib.GrB_TIMES_FP64,
             'semiring': lib.GxB_PLUS_TIMES_FP64,
+            'assignScalar': lib.GrB_Vector_assign_FP64,
         },
     }
 
@@ -54,7 +59,7 @@ class Vector:
             result,
             self.vector[0],
             other.vector[0],
-            ffi.NULL))
+            NULL))
         return result[0]
 
     @classmethod
@@ -131,13 +136,13 @@ class Vector:
     def ewise_add(self, other, out=None,
                   mask=None, accum=None, add_op=None, desc=None):
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if add_op is None:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -159,17 +164,17 @@ class Vector:
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         elif isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if semiring is None:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
@@ -201,13 +206,13 @@ class Vector:
     def ewise_mult(self, other, out=None,
                   mask=None, accum=None, mult_op=None, desc=None):
         if mask is None:
-            mask = ffi.NULL
+            mask = NULL
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if mult_op is None:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -232,11 +237,11 @@ class Vector:
 
     def reduce_bool(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_LOR_BOOL_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
             result,
@@ -248,11 +253,11 @@ class Vector:
 
     def reduce_int(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_INT64_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
             result,
@@ -264,11 +269,11 @@ class Vector:
 
     def reduce_float(self, accum=None, monoid=None, desc=None):
         if accum is None:
-            accum = ffi.NULL
+            accum = NULL
         if monoid is None:
             monoid = lib.GxB_PLUS_FP64_MONOID
         if desc is None:
-            desc = ffi.NULL
+            desc = NULL
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
             result,
@@ -288,20 +293,34 @@ class Vector:
                 ffi.cast(C, value),
                 index))
             return
-        if isinstance(index, slice) and isinstance(value, Vector):
-            I, ni, size = _build_range(index, self.size - 1)
-            _check(lib.GrB_Vector_assign(
-                self.vector[0],
-                ffi.NULL,
-                ffi.NULL,
-                value.vector[0],
-                I,
-                ni,
-                ffi.NULL
-                ))
-            return
-        if isinstance(index, slice) and isinstance(value, (bool, int, float)):
-            return
+        if isinstance(index, slice):
+            if isinstance(value, Vector):
+                I, ni, size = _build_range(index, self.size - 1)
+                _check(lib.GrB_Vector_assign(
+                    self.vector[0],
+                    NULL,
+                    NULL,
+                    value.vector[0],
+                    I,
+                    ni,
+                    NULL
+                    ))
+                return
+            if isinstance(value, (bool, int, float)):
+                scalar_type = _gb_from_type(type(value))
+                func = self._type_funcs[scalar_type]['assignScalar']
+                I, ni, size = _build_range(index, self.size - 1)
+                _check(func(
+                    self.vector[0],
+                    NULL,
+                    NULL,
+                    value,
+                    I,
+                    ni,
+                    NULL
+                    ))
+                return
+        raise TypeError('Unknown index or value for vector assignment.')
 
     def __getitem__(self, index):
         if isinstance(index, int):
@@ -321,12 +340,12 @@ class Vector:
             result = Vector.from_type(self.gb_type, size)
             _check(lib.GrB_Vector_extract(
                 result.vector[0],
-                ffi.NULL,
-                ffi.NULL,
+                NULL,
+                NULL,
                 self.vector[0],
                 I,
                 ni,
-                ffi.NULL))
+                NULL))
             return result
 
     def __repr__(self):

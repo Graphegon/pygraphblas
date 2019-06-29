@@ -1,4 +1,6 @@
 import sys
+from itertools import repeat
+
 from pygraphblas import Vector, Matrix, semiring
 from pygraphblas.base import lib
 
@@ -157,6 +159,19 @@ def test_vector_assign():
     assert v == Vector.from_lists(
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         [0, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+
+    w[9:1:-1] = v[9:1:-1]
+    assert w == v
+
+    v[:] = 3
+    assert v == Vector.from_lists(
+        list(range(10)),
+        list(repeat(3, 10)))
+
+    v[1:] = 0
+    assert v == Vector.from_lists(
+        list(range(10)),
+        [3] + list(repeat(0, 9)))
 
 def test_vxm():
     m = Matrix.from_lists(
