@@ -15,6 +15,11 @@ from . import descriptor
 NULL = ffi.NULL
 
 class Matrix:
+    """GraphBLAS Sparse Matrix
+
+    This is a high-level wrapper around the low-level GrB_Matrix type.
+
+    """
 
     _type_funcs = {
         lib.GrB_BOOL: {
@@ -57,17 +62,12 @@ class Matrix:
     def __del__(self):
         _check(lib.GrB_Matrix_free(self.matrix))
 
-    def __eq__(self, other):
-        result = ffi.new('_Bool*')
-        _check(lib.LAGraph_isequal(
-            result,
-            self.matrix[0],
-            other.matrix[0],
-            NULL))
-        return result[0]
-
     @classmethod
     def from_type(cls, py_type, nrows=0, ncols=0):
+        """Create an empty Matrix from the given type, number of rows, and
+        number of columns.
+
+        """
         new_mat = ffi.new('GrB_Matrix*')
         gb_type = _gb_from_type(py_type)
         _check(lib.GrB_Matrix_new(new_mat, gb_type, nrows, ncols))
@@ -75,16 +75,25 @@ class Matrix:
 
     @classmethod
     def dup(cls, mat):
+        """Create an duplicate Matrix from the given argument.
+
+        """
         new_mat = ffi.new('GrB_Matrix*')
         _check(lib.GrB_Matrix_dup(new_mat, mat.matrix[0]))
         return cls(new_mat)
 
     @classmethod
     def from_lists(cls, I, J, V, nrows=None, ncols=None):
+        """Create a new matrix from the given lists of row indices, column
+        indices, and values.  If nrows or ncols are not provided, they
+        are computed from the max values of the provides row and
+        column indices lists.
+
+        """
         if not nrows:
-            nrows = len(I)
+            nrows = max(I)
         if not ncols:
-            ncols = len(J)
+            ncols = max(J)
         # TODO use ffi and GrB_Matrix_build
         m = cls.from_type(int, nrows, ncols)
         for i, j, v in zip(I, J, V):
@@ -93,6 +102,9 @@ class Matrix:
 
     @classmethod
     def from_mm(cls, mm_file):
+        """Create a new matrix by reading a Matrix Market file.
+
+        """
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_mmread(m, mm_file))
         return cls(m)
@@ -102,6 +114,11 @@ class Matrix:
                     make_pattern=False, make_symmetric=False,
                     make_skew_symmetric=False, make_hermitian=False,
                     no_diagonal=False, seed=None):
+        """Create a new random Matrix of the given type, number of rows,
+        columns and values.  Other flags set additional properties the
+        matrix will hold.
+
+        """
         result = ffi.new('GrB_Matrix*')
         fseed = ffi.new('uint64_t*')
         if seed is None:
@@ -123,37 +140,60 @@ class Matrix:
 
     @property
     def gb_type(self):
+        """Return the GraphBLAS low-level type object of the Matrix.
+
+        """
         new_type = ffi.new('GrB_Type*')
         _check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
         return new_type[0]
 
     @property
     def nrows(self):
+        """Return the number of Matrix rows.
+
+        """
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
+        """Return the number of Matrix columns.
+
+        """
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def nvals(self):
+        """Return the number of Matrix values.
+
+        """
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     def pattern(self):
+        """Return the pattern of the matrix, this is a boolean Matrix where
+        every present value in this matrix is set to True.
+
+        """
+
         r = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_pattern(r, self.matrix[0]))
         return Matrix(r)
 
     def to_mm(self, fileobj):
+        """Write this matrix to a file using the Matrix Market format.
+
+        """
         _check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_lists(self):
+        """Extract the rows, columns and values of the Matrix as 3 lists.
+
+        """
         tf = self._type_funcs[self.gb_type]
         C = tf['C']
         I = ffi.new('GrB_Index[]', self.nvals)
@@ -172,9 +212,17 @@ class Matrix:
         return [list(I), list(J), list(V)]
 
     def clear(self):
+        """Clear the matrix.  This does not change the size but removes all
+        values.
+
+        """
         _check(lib.GrB_Matrix_clear(self.matrix[0]))
 
     def resize(self, nrows, ncols):
+        """Resize the matrix.  If the dimensions decrease, entries that fall
+        outside the resized matrix are deleted.
+
+        """
         _check(lib.GxB_Matrix_resize(
             self.matrix[0],
             nrows,
@@ -182,6 +230,28 @@ class Matrix:
 
     def ewise_add(self, other, out=None,
                   mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+        """Element-wise addition with other matrix.
+
+        Element-wise addition applies a binary operator element-wise
+        on two matrices A and B, for all entries that appear in the
+        set intersection of the patterns of A and B.  Other operators
+        other than addition can be used.
+
+        The pattern of the result of the element-wise addition is
+        the set union of the pattern of A and B. Entries in neither in
+        A nor in B do not appear in the result.
+
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
+        """
         if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if out is None:
@@ -201,6 +271,18 @@ class Matrix:
 
     def ewise_mult(self, other, out=None,
                    mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+        """Element-wise multiplication with other matrix.
+
+        Element-wise multiplication applies a binary operator
+        element-wise on two matrices A and B, for all entries that
+        appear in the set intersection of the patterns of A and B.
+        Other operators other than addition can be used.
+
+        The pattern of the result of the element-wise multiplication
+        is exactly this set intersection. Entries in A but not B, or
+        visa versa, do not appear in the result.
+
+        """
         if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
         if out is None:
@@ -218,6 +300,18 @@ class Matrix:
             desc))
         return out
 
+    def __eq__(self, other):
+        """Compare two matrices for equality.
+
+        """
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            NULL))
+        return result[0]
+
     def __add__(self, other):
         return self.ewise_add(other)
 
@@ -231,6 +325,9 @@ class Matrix:
         return self.ewise_mult(other, out=self)
 
     def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce matrix to a boolean.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
         result = ffi.new('_Bool*')
@@ -243,6 +340,9 @@ class Matrix:
         return result[0]
 
     def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce matrix to an integer.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
         result = ffi.new('int64_t*')
@@ -255,6 +355,9 @@ class Matrix:
         return result[0]
 
     def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce matrix to an float.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
         result = ffi.new('double*')
@@ -268,6 +371,9 @@ class Matrix:
 
     def reduce_vector(self, out=None,
                       mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce matrix to a vector.
+
+        """
         if monoid is NULL:
             monoid = self._type_funcs[self.gb_type]['monoid']
         if out is None:
@@ -282,6 +388,9 @@ class Matrix:
         return out
 
     def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        """Apply Unary op to matrix elements.
+
+        """
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
@@ -298,6 +407,9 @@ class Matrix:
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+        """Matrix-matrix multiply.
+
+        """
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
         if isinstance(mask, Matrix):
@@ -318,6 +430,9 @@ class Matrix:
 
     def mxv(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+        """Matrix-vector multiply.
+
+        """
         if out is None:
             out = Vector.from_type(self.gb_type, self.ncols)
         elif not isinstance(out, Vector):
@@ -349,6 +464,9 @@ class Matrix:
 
     def kron(self, other, out=None,
              mask=NULL, accum=NULL, op=NULL, desc=descriptor.oooo):
+        """Kronecker product.
+
+        """
         if out is None:
             out = Matrix.from_type(self.gb_type,
                                    self.nrows*other.nrows,
@@ -366,7 +484,9 @@ class Matrix:
         return out
 
     def slice_matrix(self, rindex=None, cindex=None, desc=descriptor.oooo):
+        """Slice a submatrix.
 
+        """
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
         if isize is None:
@@ -388,7 +508,9 @@ class Matrix:
         return result
 
     def slice_vector(self, index, vslice=None, desc=descriptor.oooo):
+        """Slice a subvector.
 
+        """
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_new(
             new_vec,
@@ -449,6 +571,9 @@ class Matrix:
             return self.slice_matrix(i0, i1)
 
     def assign_col(self, index, value, vslice=None, desc=descriptor.oooo):
+        """Assign a vector to a column.
+
+        """
         stop_val = self.ncols if desc in descriptor.T_A else self.nrows
         I, ni, size = _build_range(vslice, stop_val)
 
@@ -464,6 +589,9 @@ class Matrix:
             ))
 
     def assign_row(self, index, value, vslice=None, desc=descriptor.oooo):
+        """Assign a vector to a row.
+
+        """
         stop_val = self.nrows if desc in descriptor.T_A else self.ncols
         I, ni, size = _build_range(vslice, stop_val)
 
@@ -479,6 +607,9 @@ class Matrix:
             ))
 
     def assign_matrix(self, value, rindex=None, cindex=None, desc=descriptor.oooo):
+        """Assign a submatrix.
+
+        """
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
         if isize is None:
