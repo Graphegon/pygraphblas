@@ -9,6 +9,7 @@ from .base import (
 )
 from .vector import Vector
 from .semiring import Semiring
+from .unaryop import UnaryOp
 from . import descriptor
 
 NULL = ffi.NULL
@@ -278,6 +279,21 @@ class Matrix:
             monoid,
             self.matrix[0],
             desc))
+        return out
+
+    def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        if out is None:
+            out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
+        if isinstance(op, UnaryOp):
+            op = op.unaryop
+        _check(lib.GrB_Matrix_apply(
+            out.matrix[0],
+            mask,
+            accum,
+            op,
+            self.matrix[0],
+            desc
+            ))
         return out
 
     def mxm(self, other, out=None,

@@ -1,7 +1,7 @@
 import sys
 from itertools import product, repeat
 
-from pygraphblas import Matrix, Vector, semiring
+from pygraphblas import Matrix, Vector, semiring, unaryop
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
@@ -379,3 +379,14 @@ def test_kron():
         [0, 1, 2, 3, 4, 5, 6, 7, 8],
         [0, 1, 2, 3, 4, 5, 6, 7, 8],
         [0, 0, 0, 0, 1, 2, 0, 2, 4])
+
+def test_apply():
+    v = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [2, 3, 4])
+    w = v.apply(unaryop.ainv_int64)
+    assert w == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [-2, -3, -4])
