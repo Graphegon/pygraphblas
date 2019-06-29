@@ -372,6 +372,29 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
+    def kron(self, other, out=None, mask=None, accum=None, op=None, desc=None):
+        if out is None:
+            out = Matrix.from_type(self.gb_type,
+                                   self.nrows*other.nrows,
+                                   self.ncols*other.ncols)
+        if mask is None:
+            mask = NULL
+        if accum is None:
+            accum = NULL
+        if op is None:
+            op = self._type_funcs[self.gb_type]['mult_op']
+        if desc is None:
+            desc = _get_descriptor()
+        _check(lib.GxB_kron(
+            out.matrix[0],
+            mask,
+            accum,
+            op,
+            self.matrix[0],
+            other.matrix[0],
+            desc[0]))
+        return out
+
     def slice_matrix(self, rindex=None, cindex=None, transpose=False):
         desc = _get_descriptor(transpose)
 

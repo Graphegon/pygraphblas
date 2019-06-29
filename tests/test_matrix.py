@@ -363,3 +363,19 @@ def test_matrix_assign():
         [0, 1, 2])
     m[:,:] = n
     assert m == n
+
+def test_kron():
+    n = Matrix.from_lists(
+        list(range(3)),
+        list(range(3)),
+        list(range(3)))
+    m = Matrix.from_lists(
+        list(range(3)),
+        list(range(3)),
+        list(range(3)))
+
+    o = n.kron(m)
+    assert o == Matrix.from_lists(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [0, 0, 0, 0, 1, 2, 0, 2, 4])
