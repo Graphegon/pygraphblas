@@ -514,18 +514,16 @@ class Matrix:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            # a[3] = assign single row scalar or vector
+            # a[3] = assign single row  vector
             if isinstance(value, Vector):
-                return self.row_assign(index, value)
-
-            if isinstance(value, (bool, int, float)):
-                return
+                return self.assign_row(index, value)
 
         if isinstance(index, slice):
-            # a[3:] = assign rows scalar or submatrix
+            # a[3:] = assign submatrix to rows
             if isinstance(value, Matrix):
-                return
+                self.assign_matrix(value, index, None)
             if isinstance(value, (bool, int, float)):
+                # scalar assignment TODO
                 return
 
         if not isinstance(index, (tuple, list)):

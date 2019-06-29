@@ -321,12 +321,39 @@ def test_matrix_assign():
         list(range(3)),
         list(range(3)))
     assert m.nvals == 3
-    m[2,:] = Vector.from_list(list(repeat(0, 3)))
+
+    m[2] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
     assert m == Matrix.from_lists(
         [0, 1, 2, 2, 2],
         [0, 1, 0, 1, 2],
-        [0, 1, 0, 0, 0], 3, 3)
+        [0, 1, 6, 6, 6], 3, 3)
+
+    m = Matrix.from_lists(
+        list(range(3)),
+        list(range(3)),
+        list(range(3)))
+    assert m.nvals == 3
+
+    m[2,:] = Vector.from_list(list(repeat(6, 3)))
+    assert m.nvals == 5
+    assert m == Matrix.from_lists(
+        [0, 1, 2, 2, 2],
+        [0, 1, 0, 1, 2],
+        [0, 1, 6, 6, 6], 3, 3)
+
+    m = Matrix.from_lists(
+        list(range(3)),
+        list(range(3)),
+        list(range(3)))
+
+    assert m.nvals == 3
+    m[:,2] = Vector.from_list(list(repeat(6, 3)))
+    assert m.nvals == 5
+    assert m == Matrix.from_lists(
+        [0, 1, 0, 1, 2],
+        [0, 1, 2, 2, 2],
+        [0, 1, 6, 6, 6], 3, 3)
 
     m = Matrix.from_type(int, 3, 3)
     assert m.nvals == 0
