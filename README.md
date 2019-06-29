@@ -11,8 +11,11 @@ programming language.
 GraphBLAS is a sparse linear algebra API optimized for processing
 graphs encoded as sparse matrices and vectors.  In addition to common
 real/integer matrix algebra operations, GraphBLAS supports up to 960
-different "semiring" algebra operations, that can be used as basic
-building blocks to implement a wide variety of graph algorithms.
+different [Semiring](https://en.wikipedia.org/wiki/Semiring) algebra
+operations, that can be used as basic building blocks to implement a
+wide variety of graph algorithms. See
+[Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
+from Wikipedia for some specific examples.
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
