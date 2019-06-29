@@ -15,6 +15,8 @@ class Semiring:
     def __exit__(self, *errors):
         return False
 
+__all__ = ['Semiring']
+
 non_boolean_re = re.compile('^GxB_(MIN|MAX|PLUS|TIMES)_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR)_(INT64|FP64)$')
 
 boolean_re = re.compile('^GxB_(LOR|LAND|LXOR|EQ)_(EQ|NE|GT|LT|GE|LE)_(INT64|FP64)$')
@@ -29,3 +31,4 @@ def build_semirings():
     this = sys.modules[__name__]
     for r in chain(ring_group(non_boolean_re), ring_group(boolean_re), ring_group(pure_bool_re)):
         setattr(this, r.name, r)
+        __all__.append(r.name)

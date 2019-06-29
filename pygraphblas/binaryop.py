@@ -15,6 +15,8 @@ class BinaryOp:
     def __exit__(self, *errors):
         return False
 
+__all__ = ['BinaryOp']
+
 grb_binop_re = re.compile('^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_(BOOL|INT64|FP64)$')
 
 gxb_binop_re = re.compile('^GxB_(RMINUS|RDIV|ISEQ|ISNE|ISGT|ISLT|ISLE|ISGE)_(BOOL|INT64|FP64)$')
@@ -29,3 +31,4 @@ def build_binaryops():
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(gxb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
+        __all__.append(r.name)
