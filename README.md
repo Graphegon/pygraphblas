@@ -102,17 +102,17 @@ a "MATLAB-like" interface.
 
 The pygraphblas package contains the following sub-modules:
 
-    - `pygrablas.matrix` contains the Matrix type
+- `pygrablas.matrix` contains the Matrix type
 
-    - `pygrablas.vector` contains the Vector type
+- `pygrablas.vector` contains the Vector type
 
-    - `pygrablas.descriptor` contains descriptor types
+- `pygrablas.descriptor` contains descriptor types
 
-    - `pygrablas.semiring` contains Semiring types
+- `pygrablas.semiring` contains Semiring types
 
-    - `pygrablas.binaryop` contains BinaryOp types
+- `pygrablas.binaryop` contains BinaryOp types
 
-    - `pygrablas.base` contains low-level API and FFI wrappers.
+- `pygrablas.base` contains low-level API and FFI wrappers.
 
 Full API documentation coming soon, for now, check out the complete
 tests for usage.
