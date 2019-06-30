@@ -174,6 +174,36 @@ class Matrix:
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
+    def options_set(self, hyper=None, format=None):
+        if hyper:
+            hyper = ffi.cast('double', hyper)
+            _check(lib.GxB_Matrix_Option_set(
+                self.matrix[0],
+                lib.GxB_HYPER,
+                hyper))
+        if format:
+            format = ffi.cast('GxB_Format_Value', format)
+            _check(lib.GxB_Matrix_Option_set(
+                self.matrix[0],
+                lib.GxB_FORMAT,
+                format))
+
+    def options_get(self):
+        hyper = ffi.new('double*')
+        _check(lib.GxB_Matrix_Option_get(
+            self.matrix[0],
+            lib.GxB_HYPER,
+            hyper
+            ))
+
+        format = ffi.new('GxB_Format_Value*')
+        _check(lib.GxB_Matrix_Option_get(
+            self.matrix[0],
+            lib.GxB_FORMAT,
+            format
+            ))
+        return (hyper[0], format[0])
+
     def pattern(self):
         """Return the pattern of the matrix, this is a boolean Matrix where
         every present value in this matrix is set to True.
