@@ -89,7 +89,7 @@ class Vector:
         assert len(I) == len(V)
         assert len(I) > 0 # must be non empty
         if not size:
-            size = max(I)
+            size = max(I) + 1
         # TODO option to use ffi and GrB_Vector_build
         m = cls.from_type(type(V[0]), size)
         for i, v in zip(I, V):

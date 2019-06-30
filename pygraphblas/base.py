@@ -1,5 +1,4 @@
 from _pygraphblas import lib, ffi
-lib.LAGraph_init()
 
 NULL = ffi.NULL
 

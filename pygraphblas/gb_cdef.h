@@ -2650,8 +2650,8 @@ typedef enum
     GrB_INP0 = 2,   // descriptor for the first input of a method
     GrB_INP1 = 3,   // descriptor for the second input of a method
 
-    /* GxB_DESCRIPTOR_NTHREADS = GxB_NTHREADS,   // number of threads to use. */
-    GxB_DESCRIPTOR_NTHREADS = 5,   // number of threads to use.
+    GxB_DESCRIPTOR_NTHREADS = ...,   // number of threads to use.
+    //    GxB_DESCRIPTOR_NTHREADS = 5,   // number of threads to use.
                         // If <= GxB_DEFAULT, then GraphBLAS selects the number
                         // of threads automatically.
 
@@ -2806,8 +2806,8 @@ typedef enum            // for global options or matrix options
     GxB_THREADING = 4,  // thread library used for internal GraphBLAS threads
 
     // GxB_Matrix_Option_get/set only:
-    /* GxB_GLOBAL_NTHREADS = GxB_NTHREADS,  // max number of threads to use */
-    GxB_GLOBAL_NTHREADS = 5,  // max number of threads to use
+    GxB_GLOBAL_NTHREADS = ...,  // max number of threads to use
+    //    GxB_GLOBAL_NTHREADS = 5,  // max number of threads to use
                         // If <= GxB_DEFAULT, then GraphBLAS selects the number
                         // of threads automatically.
 

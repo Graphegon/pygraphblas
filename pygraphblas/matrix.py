@@ -91,9 +91,9 @@ class Matrix:
 
         """
         if not nrows:
-            nrows = max(I)
+            nrows = max(I) + 1
         if not ncols:
-            ncols = max(J)
+            ncols = max(J) + 1
         # TODO use ffi and GrB_Matrix_build
         m = cls.from_type(int, nrows, ncols)
         for i, j, v in zip(I, J, V):
