@@ -139,10 +139,6 @@ matrices to be used interchangeably with pygraphblas.
 
 - GxB_select()
 
-- GxB_get/set()
-
-- All the docstrings.
-
 - ReadTheDocs site.
 
 - Jupyter Notebook tutorial.
