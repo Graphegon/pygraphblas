@@ -123,28 +123,28 @@ tests for usage.
 from pygraphblas.  Future work on pygraphblas will allow scipy.sparse
 matrices to be used interchangeably with pygraphblas.
 
-    - pygraphblas wraps GraphBLAS, all concepts are derived from
-      GraphBLAS.
+- pygraphblas wraps GraphBLAS, all concepts are derived from
+  GraphBLAS.
 
-    - GraphBLAS abstracts different backends such as threaded, OpenMP,
-      and CUDA.
+- GraphBLAS abstracts different backends such as threaded, OpenMP,
+  and CUDA.
 
-    - scipy.sparse does not provide semiring algebras, Graph
-      algorithms using matrices without semirings is more tedious.
+- scipy.sparse does not provide semiring algebras, Graph
+  algorithms using matrices without semirings is more tedious.
 
-    - scipy.sparse has no sparse Vector type.  You can of course
-      simulate them with 1xN matricies.
+- scipy.sparse has no sparse Vector type.  You can of course
+  simulate them with 1xN matricies.
 
 # TODO
 
-    - GxB_select()
+- GxB_select()
 
-    - GxB_get/set()
+- GxB_get/set()
 
-    - All the docstrings.
+- All the docstrings.
 
-    - ReadTheDocs site.
+- ReadTheDocs site.
 
-    - Jupyter Notebook tutorial.
+- Jupyter Notebook tutorial.
 
-    - Construction from numpy.array and scipy.sparse
+- Construction from numpy.array and scipy.sparse
