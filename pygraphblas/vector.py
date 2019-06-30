@@ -1,7 +1,4 @@
 
-from .semiring import Semiring
-from .unaryop import UnaryOp
-
 from .base import (
     lib,
     ffi,
@@ -11,11 +8,18 @@ from .base import (
     _default_mul_op,
     _build_range,
 )
+from .semiring import Semiring
+from .unaryop import UnaryOp
 from . import descriptor
 
 NULL = ffi.NULL
 
 class Vector:
+    """GraphBLAS Sparse Vector
+
+    This is a high-level wrapper around the low-level GrB_Vector type.
+
+    """
 
     _type_funcs = {
         lib.GrB_BOOL: {
@@ -67,6 +71,9 @@ class Vector:
 
     @classmethod
     def from_type(cls, py_type, size=0):
+        """Create an empty Vector from the given type and size.
+
+        """
         new_vec = ffi.new('GrB_Vector*')
         gb_type = _gb_from_type(py_type)
         _check(lib.GrB_Vector_new(new_vec, gb_type, size))
@@ -74,11 +81,16 @@ class Vector:
 
     @classmethod
     def from_lists(cls, I, V, size=None):
+        """Create a new vector from the given lists of indices and values.  If
+        size is not provided, it is computed from the max values of
+        the provides size indices.
+
+        """
         assert len(I) == len(V)
         assert len(I) > 0 # must be non empty
         if not size:
-            size = len(I)
-        # TODO use ffi and GrB_Vector_build
+            size = max(I)
+        # TODO option to use ffi and GrB_Vector_build
         m = cls.from_type(type(V[0]), size)
         for i, v in zip(I, V):
             m[i] = v
@@ -86,6 +98,9 @@ class Vector:
 
     @classmethod
     def from_list(cls, I):
+        """Create a new dense vector from the given lists of values.
+
+        """
         size = len(I)
         assert size > 0
         # TODO use ffi and GrB_Vector_build
@@ -96,11 +111,17 @@ class Vector:
 
     @classmethod
     def dup(cls, vec):
+        """Create an duplicate Vector from the given argument.
+
+        """
         new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
         return cls(new_vec)
 
     def to_lists(self):
+        """Extract the indices and values of the Vector as 2 lists.
+
+        """
         tf = self._type_funcs[self.gb_type]
         C = tf['C']
         I = ffi.new('GrB_Index[]', self.nvals)
@@ -118,18 +139,27 @@ class Vector:
 
     @property
     def size(self):
+        """Return the size of the vector.
+
+        """
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Vector_size(n, self.vector[0]))
         return n[0]
 
     @property
     def nvals(self):
+        """Return the number of values in the vector.
+
+        """
         n = ffi.new('GrB_Index*')
         _check(lib.GrB_Vector_nvals(n, self.vector[0]))
         return n[0]
 
     @property
     def gb_type(self):
+        """Return the GraphBLAS low-level type object of the Vector.
+
+        """
         typ = ffi.new('GrB_Type*')
         _check(lib.GxB_Vector_type(
             typ,
@@ -138,6 +168,18 @@ class Vector:
 
     def ewise_add(self, other, out=None,
                   mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+        """Element-wise addition with other vector.
+
+        Element-wise addition applies a binary operator element-wise
+        on two vectors A and B, for all entries that appear in the set
+        intersection of the patterns of A and B.  Other operators
+        other than addition can be used.
+
+        The pattern of the result of the element-wise addition is
+        the set union of the pattern of A and B. Entries in neither in
+        A nor in B do not appear in the result.
+
+        """
         if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
         if out is None:
@@ -154,8 +196,40 @@ class Vector:
             desc))
         return out
 
+    def ewise_mult(self, other, out=None,
+                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+        """Element-wise multiplication with other vector.
+
+        Element-wise multiplication applies a binary operator
+        element-wise on two vectors A and B, for all entries that
+        appear in the set intersection of the patterns of A and B.
+        Other operators other than addition can be used.
+
+        The pattern of the result of the element-wise multiplication
+        is exactly this set intersection. Entries in A but not B, or
+        visa versa, do not appear in the result.
+
+        """
+        if mult_op is NULL:
+            mult_op = self._type_funcs[self.gb_type]['mult_op']
+        if out is None:
+            _out = ffi.new('GrB_Vector*')
+            _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
+            out = Vector(_out)
+        _check(lib.GrB_eWiseMult_Vector_BinaryOp(
+            out.vector[0],
+            mask,
+            accum,
+            mult_op,
+            self.vector[0],
+            other.vector[0],
+            desc))
+        return out
+
     def vxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+        """Vector-Matrix multiply.
+        """
         from .matrix import Matrix
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
@@ -195,24 +269,6 @@ class Vector:
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
 
-    def ewise_mult(self, other, out=None,
-                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
-        if mult_op is NULL:
-            mult_op = self._type_funcs[self.gb_type]['mult_op']
-        if out is None:
-            _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
-            out = Vector(_out)
-        _check(lib.GrB_eWiseMult_Vector_BinaryOp(
-            out.vector[0],
-            mask,
-            accum,
-            mult_op,
-            self.vector[0],
-            other.vector[0],
-            desc))
-        return out
-
     def clear(self):
         _check(lib.GrB_Vector_clear(self.vector[0]))
 
@@ -222,6 +278,9 @@ class Vector:
             size))
 
     def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce vector to a boolean.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
         result = ffi.new('_Bool*')
@@ -234,6 +293,9 @@ class Vector:
         return result[0]
 
     def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce vector to a integer.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
         result = ffi.new('int64_t*')
@@ -246,6 +308,9 @@ class Vector:
         return result[0]
 
     def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+        """Reduce vector to a float.
+
+        """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
         result = ffi.new('double*')
@@ -258,6 +323,9 @@ class Vector:
         return result[0]
 
     def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        """Apply Unary op to vector elements.
+
+        """
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
         if isinstance(op, UnaryOp):
