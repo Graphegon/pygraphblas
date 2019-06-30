@@ -202,7 +202,15 @@ class Matrix:
             lib.GxB_FORMAT,
             format
             ))
-        return (hyper[0], format[0])
+
+        is_hyper = ffi.new('bool*')
+        _check(lib.GxB_Matrix_Option_get(
+            self.matrix[0],
+            lib.GxB_IS_HYPER,
+            is_hyper
+            ))
+
+        return (hyper[0], format[0], is_hyper[0])
 
     def pattern(self):
         """Return the pattern of the matrix, this is a boolean Matrix where

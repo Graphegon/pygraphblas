@@ -393,5 +393,5 @@ def test_apply():
 
 def test_get_set_options():
     v = Matrix.from_random(int, 10, 10, 10)
-    v.options_set(hyper=0.1, format=lib.GxB_BY_COL)
-    assert v.options_get() == (0.1, lib.GxB_BY_COL)
+    v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
+    assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
