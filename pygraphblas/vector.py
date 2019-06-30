@@ -340,6 +340,22 @@ class Vector:
             ))
         return out
 
+    def select(self, op, out=None, mask=NULL, accum=NULL, thunk=NULL, desc=descriptor.oooo):
+        if out is None:
+            out = Vector.from_type(self.gb_type, self.size)
+        if isinstance(op, UnaryOp):
+            op = op.unaryop
+        _check(lib.GxB_Vector_select(
+            out.vector[0],
+            mask,
+            accum,
+            op,
+            self.vector[0],
+            thunk,
+            desc
+            ))
+        return out
+
     def __setitem__(self, index, value):
         tf = self._type_funcs[self.gb_type]
         if isinstance(index, int):

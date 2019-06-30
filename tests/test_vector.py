@@ -198,3 +198,11 @@ def test_apply():
     assert w == Vector.from_lists(
         [0, 1, 2],
         [-2, -3, -4])
+
+def test_select():
+    v = Vector.from_lists(
+        [0, 1, 2],
+        [0, 0, 3])
+    w = v.select(lib.GxB_NONZERO)
+    assert w.to_lists() == [[2], [3]]
+    

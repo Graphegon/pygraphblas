@@ -395,3 +395,11 @@ def test_get_set_options():
     v = Matrix.from_random(int, 10, 10, 10)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
+
+def test_select():
+    v = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 0, 3])
+    w = v.select(lib.GxB_NONZERO)
+    assert w.to_lists() == [[2], [2], [3]]

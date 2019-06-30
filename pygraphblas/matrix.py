@@ -443,6 +443,22 @@ class Matrix:
             ))
         return out
 
+    def select(self, op, out=None, mask=NULL, accum=NULL, thunk=NULL, desc=descriptor.oooo):
+        if out is None:
+            out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
+        if isinstance(op, UnaryOp):
+            op = op.unaryop
+        _check(lib.GxB_Matrix_select(
+            out.matrix[0],
+            mask,
+            accum,
+            op,
+            self.matrix[0],
+            thunk,
+            desc
+            ))
+        return out
+
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
         """Matrix-matrix multiply.
