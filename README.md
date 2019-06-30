@@ -137,8 +137,6 @@ matrices to be used interchangeably with pygraphblas.
 
 # TODO
 
-- GxB_select()
-
 - ReadTheDocs site.
 
 - Jupyter Notebook tutorial.
