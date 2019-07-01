@@ -6,8 +6,8 @@ ffibuilder.set_source(
     r"""#include "LAGraph.h" """,
     libraries=['graphblas', 'lagraph'])
 
-gb_cdef = open('pygraphblas/gb_cdef.h')
-la_cdef = open('pygraphblas/la_cdef.h')
+gb_cdef = open('pygraphblas/cdef/gb_2.3.3_cdef.h')
+la_cdef = open('pygraphblas/cdef/la_cdef.h')
 
 ffibuilder.cdef(gb_cdef.read())
 ffibuilder.cdef(la_cdef.read())
