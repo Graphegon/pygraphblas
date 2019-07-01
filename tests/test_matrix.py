@@ -403,3 +403,33 @@ def test_select():
         [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [2], [3]]
+
+def test_select_ops():
+    I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
+    V = list(range(9))
+    m = Matrix.from_lists(I, J, V, 3, 3)
+
+    assert m.tril() == Matrix.from_lists(
+        [0, 1, 1, 2, 2, 2],
+        [0, 0, 1, 0, 1, 2],
+        [0, 3, 4, 6, 7, 8])
+
+    assert m.triu() == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 2],
+        [0, 1, 2, 1, 2, 2],
+        [0, 1, 2, 4, 5, 8])
+
+    assert m.diag() == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 4, 8])
+
+    assert m.offdiag() == Matrix.from_lists(
+        [0, 0, 1, 1, 2, 2],
+        [1, 2, 0, 2, 0, 1],
+        [1, 2, 3, 5, 6, 7])
+
+    assert m.nonzero() == Matrix.from_lists(
+        [0, 0, 1, 1, 1, 2, 2, 2],
+        [1, 2, 0, 1, 2, 0, 1, 2],
+        [1, 2, 3, 4, 5, 6, 7, 8])

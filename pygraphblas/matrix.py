@@ -459,6 +459,21 @@ class Matrix:
             ))
         return out
 
+    def tril(self, diag=0):
+        return self.select(lib.GxB_TRIL, thunk=ffi.new('uint64_t*', diag))
+
+    def triu(self, diag=0):
+        return self.select(lib.GxB_TRIU, thunk=ffi.new('uint64_t*', diag))
+
+    def diag(self, diag=0):
+        return self.select(lib.GxB_DIAG, thunk=ffi.new('uint64_t*', diag))
+
+    def offdiag(self, diag=0):
+        return self.select(lib.GxB_OFFDIAG, thunk=ffi.new('uint64_t*', diag))
+
+    def nonzero(self, diag=0):
+        return self.select(lib.GxB_NONZERO)
+
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
         """Matrix-matrix multiply.
