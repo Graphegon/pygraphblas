@@ -356,6 +356,17 @@ class Vector:
             ))
         return out
 
+    def to_dense(self, _id=None):
+        out = ffi.new('GrB_Vector*')
+        if _id is None:
+            C = self._type_funcs[self.gb_type]['C']
+            _id = ffi.new(C + '*', 0)
+        _check(lib.LAGraph_Vector_to_dense(
+            out,
+            self.vector[0],
+            _id))
+        return Vector(out)
+
     def __setitem__(self, index, value):
         tf = self._type_funcs[self.gb_type]
         if isinstance(index, int):

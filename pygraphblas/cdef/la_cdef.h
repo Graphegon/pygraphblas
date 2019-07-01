@@ -401,3 +401,10 @@ GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful
     int nlayers,        // # of layers
     GrB_Matrix Y0       // input features: nfeatures-by-nneurons
 ) ;
+
+GrB_Info LAGraph_Vector_to_dense
+(
+    GrB_Vector *vdense,     // output vector
+    GrB_Vector v,           // input vector
+    void *id                // pointer to value to fill vdense with
+ ) ;

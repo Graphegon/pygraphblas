@@ -205,4 +205,13 @@ def test_select():
         [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [3]]
-    
+
+def test_to_dense():
+    v = Vector.from_lists(list(range(0, 6, 2)), list(range(3)))
+    assert v.size == 5
+    assert v.nvals == 3
+    w = v.to_dense()
+    assert w.nvals == 5
+    assert w == Vector.from_lists(
+        [0, 1, 2, 3, 4],
+        [0, 0, 1, 0, 2])
