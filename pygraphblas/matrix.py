@@ -90,12 +90,15 @@ class Matrix:
         column indices lists.
 
         """
+        assert len(V)
+        assert len(I) == len(J) == len(V)
         if not nrows:
             nrows = max(I) + 1
         if not ncols:
             ncols = max(J) + 1
         # TODO use ffi and GrB_Matrix_build
-        m = cls.from_type(int, nrows, ncols)
+        typ = type(V[0])
+        m = cls.from_type(typ, nrows, ncols)
         for i, j, v in zip(I, J, V):
             m[i, j] = v
         return m
