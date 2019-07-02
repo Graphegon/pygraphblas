@@ -93,8 +93,7 @@ pygraphblas is a python module that provides access to two new
 high-level types: `Matrix` and `Vector`, as well as the low-level
 GraphBLAS api to manipulate these types.  pygraphblas uses the amazing
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level C-api while the high level types are normal Python classes with
-a "MATLAB-like" interface.
+level C-api while the high level types are normal Python classes.
 
 # Solving Graph Problems with Semirings
 
@@ -118,6 +117,9 @@ from city A to city C, how can we compute the shortest path to take?
 The process is fairly simple, add the weights along each path, and
 then use the minimum function to find the shortest distance.
 
+In pygraphblas, the semiring that solves this problem is called
+`pygraphblas.semiring.min_plus_int`.
+
 For the next example, lets take a problem that at first seems quite
 different, but can be solved in a similarly with a different semiring.
 In this case, we have a network of computer nodes, and the edge
@@ -132,6 +134,9 @@ distances, probablity theory tells us that consecutive events must be
 multiplied.  And instead of finding the minimum distance, we use the
 max() function to find the path with maximum reliability.
 
+In pygraphblas, the semiring that solves this problem is called
+`pygraphblas.semiring.max_times_float`.
+
 As a final example, let's look at a problem that again looks
 completely different, but can be solved using yet another semiring.
 In this graph, the nodes define a language structure, and the edges
@@ -145,11 +150,30 @@ or multiplying, the path operator we use is concatenation.  An instead
 of min() or max(), the final function is to take the union of all path
 words.
 
+In pygraphblas, this particular example does not yet have a semiring.
+GraphBLAS does allow for the create of User Defined Types (UDTs).  So
+it can solve these kinds of problems, but pygraphblas does not yet
+implement UDTs.  But it is still a valid example of a graph problem
+that can be solve with a semiring.  You can imagine the semring would
+be called something like `union_concat_str`.
+
 So what is the same, and what is different in these three examples?
 The structure of the graph is the same, as is the *pattern* of
 operation applied to get the solution.  The differences are that each
 graph's edges are of different types, and the operations that are
-applied are different.
+applied are different.  These differences are encapsulated by the
+semirings used, and the names of the semrings are clues as to what
+they abstract:
+
+- min_plus_int: The type is `int`, the inner operation is addition,
+  the outer operation is min()
+
+- max_times_float: The type is `float`, the inner operation is
+  multiplication, the outer operation is max()
+
+- union_concat_str (hypothetical): The type is `str`, the inner
+  operation is concatenation, the outer operation is set union.
+
 
 # API
 
