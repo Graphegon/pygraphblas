@@ -223,6 +223,18 @@ def test_matrix_pattern():
     assert p.ncols == 10
     assert p.nvals == 10
 
+def test_matrix_transpose():
+    v = Matrix.from_lists(
+        list(range(2, -1, -1)),
+        list(range(3)),
+        list(range(3)))
+    w = v.transpose()
+    assert w == Matrix.from_lists(
+        [0, 1, 2],
+        [2, 1, 0],
+        [0, 1, 2]
+        )
+
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
     mmf.touch()

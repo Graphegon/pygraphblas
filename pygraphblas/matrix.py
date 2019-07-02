@@ -269,6 +269,22 @@ class Matrix:
             nrows,
             ncols))
 
+    def transpose(self, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        """ Transpose matrix. """
+        if out is None:
+            _out = ffi.new('GrB_Matrix*')
+            _check(lib.GrB_Matrix_new(
+                _out, self.gb_type, self.nrows, self.ncols))
+            out = Matrix(_out)
+        _check(lib.GrB_transpose(
+            out.matrix[0],
+            mask,
+            accum,
+            self.matrix[0],
+            desc
+            ))
+        return out
+
     def ewise_add(self, other, out=None,
                   mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
         """Element-wise addition with other matrix.
