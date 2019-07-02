@@ -35,35 +35,33 @@ with CPython 3.5+.  CPython 2 will not be supported.
 
 # Intro
 
-For a long time, mathematicians have known that matrices are powerful
-representations of graphs, as described [in this mathmatical
-introduction to
+Matrices can be used as powerful representations of graphs, as
+described [in this mathmatical introduction to
 GraphBLAS](http://www.mit.edu/~kepner/GraphBLAS/GraphBLAS-Math-release.pdf)
 by [Dr. Jermey Kepner](http://www.mit.edu/~kepner/) head and founder
 of [MIT Lincoln Laboratory Supercomputing
 Center](http://news.mit.edu/2016/lincoln-laboratory-establishes-supercomputing-center-0511).
 
-As Kepner's paper describes, there are two useful matrix
-representations of graphs: [Adjacency
+As show in Kepner's paper, there are two useful matrix representations
+of graphs: [Adjacency
 Matrices](https://en.wikipedia.org/wiki/Adjacency_matrix) and
 [Incidence Matrices](https://en.wikipedia.org/wiki/Incidence_matrix).
 For this introduction we will focus on the adjacency type as they are
 simpler, but the same ideas apply to both, both are suported by
 GraphBLAS, and it is easy to switch back and forth between them.
 
-![Alt text](./docs/AdjacencyMatrix.svg)
+![An example graph and its adjacency matrix](./docs/AdjacencyMatrix.svg)
 
 (Image Credit: [Dr. Jermey Kepner](http://www.mit.edu/~kepner/))
 
-On the left is a *directed* graph, and on the right, the adjacency
-matrix that represents it. The matrix has a row and column for every
-vertex.  If there is an going from node A to B, then there will be a
-value present in the intersection of As row with Bs column.  For
-example, vertex 1 connects to 4, so there is a value (dot) at the
-intersction of the first row and the fourth column.  4 also connects
-*back* to 1 so there are two values in the matrix to represent these
-two edges, the one at the (1, 4) position and the other at the (4,1)
-position.
+On the left is a graph, and on the right, the adjacency matrix that
+represents it. The matrix has a row and column for every vertex.  If
+there is an edge going from node A to B, then there will be a value
+present in the intersection of As row with Bs column.  For example,
+vertex 1 connects to 4, so there is a value (dot) at the intersction
+of the first row and the fourth column.  4 also connects *back* to 1
+so there are two values in the matrix to represent these two edges,
+the one at the (1, 4) position and the other at the (4,1) position.
 
 One practical problem with matrix-encoding graphs is that most
 real-world graphs tend to be sparse, as above, only 12 of 49 possible
@@ -97,6 +95,43 @@ GraphBLAS api to manipulate these types.  pygraphblas uses the amazing
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
 level C-api while the high level types are normal Python classes with
 a "MATLAB-like" interface.
+
+# Solving Graph Problems with Semirings
+
+Once encoded as matrices, graph problems can be solved be using matrix
+multiplication over a variety of semrings.  For numerical problems,
+matrix multiplication with libraries and languages like BLAS, MATLAB
+and numpy is done with real numbers using the arithmetic plus and
+times semiring.  GraphBLAS can do this as well, of course, but it also
+abstracts out the numerical type and operators that can be used for
+"matrix multiplication".
+
+For example, let's consider three different graph problems and the
+semrings that can solve them.  The first is finding the shortest path
+between nodes in a graph.
+
+![Finding the Shortest Path](./docs/ShortestPath.svg)
+
+In this example, the nodes can be cites, the the edge weights
+distances between the cities in units like kilometers.  If travelling
+from city A to city C, how can we compute the shortest path to take?
+The process is fairly simple, add the weights along each path, and
+then use the minimum function to find the shortest distance.
+
+For the next example, lets that a problem that at first seems quite
+different, but can be solved in a similarly with a different semiring.
+In this case, we have a network of computer nodes, and the edge
+weights are the reliablity of the links between them as a percentage
+of success.
+
+![Finding the Most Reliable Path](./docs/ReliablePath.svg)
+
+How to we solve which path is the most reliable from A to C?  Like the
+previous example, we operate along each path, but instead of adding
+distances, probablity theory tells us that consecutive events must be
+multiplied.  And instead of finding the minimum distance, we use the
+max() function to find the path with maximum reliability.
+
 
 # API
 
