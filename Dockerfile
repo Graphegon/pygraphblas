@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     m4 \
     && rm -rf /var/lib/apt/lists/*
 
-# get GraphBLAS, compile with debug symbols    
+# get GraphBLAS, compile with debug symbols
 RUN curl -s -L http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-2.3.3.tar.gz | \
     tar zxvf - && cd GraphBLAS && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
@@ -48,20 +48,21 @@ RUN curl -s -L http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-2.3.3.tar.g
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
-    
+
 RUN git clone https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
     make library \
-    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
+#    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
-    
+
 RUN ldconfig
-    
+
+RUN conda install -yq datashader pytest
+
 ADD . /pygraphblas
 WORKDIR /pygraphblas
 RUN python setup.py clean
 RUN python setup.py install
-RUN conda install -yq datashader
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID

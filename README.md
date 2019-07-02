@@ -117,24 +117,6 @@ The pygraphblas package contains the following sub-modules:
 Full API documentation coming soon, for now, check out the complete
 tests for usage.
 
-# Differences from scipy.sparse
-
-`scipy.sparse` is an excellent module but has a number of differences
-from pygraphblas.  Future work on pygraphblas will allow scipy.sparse
-matrices to be used interchangeably with pygraphblas.
-
-- pygraphblas wraps GraphBLAS, all concepts are derived from
-  GraphBLAS.
-
-- GraphBLAS abstracts different backends such as threaded, OpenMP,
-  and CUDA.
-
-- scipy.sparse does not provide semiring algebras, Graph
-  algorithms using matrices without semirings is more tedious.
-
-- scipy.sparse has no sparse Vector type.  You can of course
-  simulate them with 1xN matricies.
-
 # TODO
 
 - ReadTheDocs site.
