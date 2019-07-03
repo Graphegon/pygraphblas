@@ -55,14 +55,10 @@ GraphBLAS, and it is easy to switch back and forth between them.
 On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every vertex.  If
 there is an edge going from node A to B, then there will be a value
-present in the intersection of As row with Bs column.  For example,
-vertex 1 connects to 4, so there is a value (dot) at the intersction
-of the first row and the fourth column.  4 also connects *back* to 1
-so there are two values in the matrix to represent these two edges,
-the one at the (1, 4) position and the other at the (4,1) position.
+present in the intersection of As row with Bs column.
 
 One practical problem with matrix-encoding graphs is that most
-real-world graphs tend to be sparse, as above, only 12 of 49 possible
+real-world graphs tend to be sparse, as above, only 7 of 36 possible
 elements have a value. Those that have values tend to be scattered
 uniformally across the matrix (for "typical" graphs), so dense linear
 algebra libraries like BLAS or numpy do not encode or operate on them
@@ -80,12 +76,13 @@ matrix being utilized.
 
 By using a sparse matrix instead of dense, only the elements used are
 actually stored in the matrix. The parts of the matrix with no value
-are interpreted as an "algebraic zero" value, which might not be the
-actual number zero, but other values like positive or negative
-infinity depending on the particular semiring operations applied to
-the matrix.  The math used with sparse matrices is exactly the same as
-dense, the sparsity of the data doesn't matter to the math, but it
-does matter to how efficiently the matrix is implemented internally.
+are *interpreted*, but not necessarily stored, as an "algebraic zero"
+value, which may or may not be the actual number zero, but possibly
+other values like positive or negative infinity depending on the
+particular semiring operations applied to the matrix.  The math used
+with sparse matrices is exactly the same as dense, the sparsity of the
+data doesn't matter to the math, but it does matter to how efficiently
+the matrix is implemented internally.
 
 pygraphblas is a python module that provides access to two new
 high-level types: `Matrix` and `Vector`, as well as the low-level
