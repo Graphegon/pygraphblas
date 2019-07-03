@@ -1,4 +1,7 @@
 import sys
+import types
+import weakref
+
 from random import randint
 from .base import (
     lib,
@@ -58,6 +61,7 @@ class Matrix:
     }
     def __init__(self, matrix):
         self.matrix = matrix
+        self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
         _check(lib.GrB_Matrix_free(self.matrix))
@@ -451,12 +455,30 @@ class Matrix:
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
-            op = op.unaryop
+            nop = op.unaryop
+        elif isinstance(op, types.FunctionType):
+            uop = ffi.new('GrB_UnaryOp*')
+            def op_func(z, x):
+                C = self._type_funcs[self.gb_type]['C']
+                z = ffi.cast(C + '*', z)
+                x = ffi.cast(C + '*', x)
+                z[0] = op(x[0])
+            func = ffi.callback('void(void*, const void*)', op_func)
+            self._keep_alives[self.matrix] = (op, uop, func)
+            _check(lib.GrB_UnaryOp_new(
+                uop,
+                func,
+                self.gb_type,
+                self.gb_type
+                ))
+            nop = uop[0]
+        else:
+            nop = op
         _check(lib.GrB_Matrix_apply(
             out.matrix[0],
             mask,
             accum,
-            op,
+            nop,
             self.matrix[0],
             desc
             ))
