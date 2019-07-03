@@ -50,9 +50,7 @@ For this introduction we will focus on the adjacency type as they are
 simpler, but the same ideas apply to both, both are suported by
 GraphBLAS, and it is easy to switch back and forth between them.
 
-![An example graph and its adjacency matrix](./docs/AdjacencyMatrix.svg)
-
-(Image Credit: [Dr. Jermey Kepner](http://www.mit.edu/~kepner/))
+![An example graph and its adjacency matrix](./docs/GraphMatrix.svg)
 
 On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every vertex.  If
