@@ -1,4 +1,5 @@
 import sys
+from operator import mod
 from itertools import product, repeat
 
 from pygraphblas import Matrix, Vector, semiring, unaryop
@@ -402,6 +403,24 @@ def test_apply():
         [0, 1, 2],
         [0, 1, 2],
         [-2, -3, -4])
+
+def test_apply_lambda():
+    v = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [22, 33, 44])
+
+    w = v.apply(lambda x: mod(x, 10))
+    assert w == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [2, 3, 4])
+
+    w = v.apply(lambda x: mod(x, 7))
+    assert w == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 5, 2])
 
 def test_get_set_options():
     v = Matrix.from_random(int, 10, 10, 10)

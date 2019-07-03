@@ -545,6 +545,8 @@ GrB_Info GrB_UnaryOp_new            // create a new user-defined unary operator
     const GrB_Type xtype            // type of input x
 ) ;
 
+extern "Python" void unary_function_callback(void *, const void *);
+
 /* #ifndef NMACRO */
 /* #define GrB_UnaryOp_new(op,f,z,x) GB_UnaryOp_new (op,f,z,x, GB_STR(f)) */
 /* #endif */
