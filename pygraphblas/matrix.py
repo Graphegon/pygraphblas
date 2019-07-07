@@ -3,8 +3,6 @@ import types
 import weakref
 from random import randint
 
-from numba import cfunc, carray, types as nbtypes
-
 from .base import (
     lib,
     ffi,
@@ -14,6 +12,7 @@ from .base import (
 )
 from .vector import Vector
 from .semiring import Semiring
+from .binaryop import BinaryOp
 from .unaryop import UnaryOp
 from . import descriptor
 
@@ -175,6 +174,13 @@ class Matrix:
         return n[0]
 
     @property
+    def shape(self):
+        """Numpy-like description of matrix shape.
+
+        """
+        return (self.nrows, self.ncols)
+
+    @property
     def nvals(self):
         """Return the number of Matrix values.
 
@@ -282,6 +288,8 @@ class Matrix:
             _check(lib.GrB_Matrix_new(
                 _out, self.gb_type, self.nrows, self.ncols))
             out = Matrix(_out)
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GrB_transpose(
             out.matrix[0],
             mask,
@@ -317,6 +325,8 @@ class Matrix:
         """
         if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -348,6 +358,8 @@ class Matrix:
         """
         if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -393,6 +405,8 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('_Bool*')
         _check(lib.GrB_Matrix_reduce_BOOL(
             result,
@@ -408,6 +422,8 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('int64_t*')
         _check(lib.GrB_Matrix_reduce_INT64(
             result,
@@ -423,6 +439,8 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
             result,
@@ -439,6 +457,8 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = self._type_funcs[self.gb_type]['monoid']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
         _check(lib.GrB_Matrix_reduce_Monoid(
@@ -456,6 +476,8 @@ class Matrix:
         """
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if isinstance(op, UnaryOp):
             nop = op.unaryop
         elif isinstance(op, types.FunctionType):
@@ -492,6 +514,8 @@ class Matrix:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.unaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
             mask,
@@ -531,6 +555,8 @@ class Matrix:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GrB_mxm(
             out.matrix[0],
             mask,
@@ -556,6 +582,8 @@ class Matrix:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GrB_mxv(
             out.vector[0],
             mask,
@@ -586,6 +614,8 @@ class Matrix:
                                    self.ncols*other.ncols)
         if op is NULL:
             op = self._type_funcs[self.gb_type]['mult_op']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GxB_kron(
             out.matrix[0],
             mask,

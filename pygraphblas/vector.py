@@ -9,6 +9,7 @@ from .base import (
     _build_range,
 )
 from .semiring import Semiring
+from .binaryop import BinaryOp
 from .unaryop import UnaryOp
 from . import descriptor
 
@@ -147,6 +148,13 @@ class Vector:
         return n[0]
 
     @property
+    def shape(self):
+        """Numpy-like description of vector shape.
+
+        """
+        return (self.size,)
+
+    @property
     def nvals(self):
         """Return the number of values in the vector.
 
@@ -182,6 +190,8 @@ class Vector:
         """
         if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -212,6 +222,8 @@ class Vector:
         """
         if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -241,6 +253,8 @@ class Vector:
             semiring = self._type_funcs[self.gb_type]['semiring']
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
@@ -283,6 +297,8 @@ class Vector:
         """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
             result,
@@ -298,6 +314,8 @@ class Vector:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
             result,
@@ -313,6 +331,8 @@ class Vector:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
             result,
@@ -330,6 +350,8 @@ class Vector:
             out = Vector.from_type(self.gb_type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GrB_Vector_apply(
             out.vector[0],
             mask,
@@ -345,6 +367,8 @@ class Vector:
             out = Vector.from_type(self.gb_type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.binaryop
         _check(lib.GxB_Vector_select(
             out.vector[0],
             mask,
