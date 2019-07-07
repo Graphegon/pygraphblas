@@ -2,6 +2,8 @@ import sys
 from operator import mod
 from itertools import product, repeat
 
+import pytest
+
 from pygraphblas import Matrix, Vector, semiring, unaryop
 from pygraphblas.base import lib
 
