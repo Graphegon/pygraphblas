@@ -1,7 +1,12 @@
-import re, sys
+import sys
+import re
+import contextvars
 from itertools import chain
 
 from .base import lib
+
+current_accum = contextvars.ContextVar('current_accum')
+current_binop = contextvars.ContextVar('current_binop')
 
 class BinaryOp:
 
@@ -10,12 +15,28 @@ class BinaryOp:
         self.binaryop = binaryop
 
     def __enter__(self):
+        self.token = current_binop.set(self.binaryop)
         return self
 
     def __exit__(self, *errors):
+        current_binop.reset(self.token)
         return False
 
-__all__ = ['BinaryOp']
+class Accum:
+
+    def __init__(self, binaryop):
+        self.binaryop = binaryop.binaryop if isinstance(binaryop, BinaryOp) \
+                        else binaryop
+
+    def __enter__(self):
+        self.token = current_accum.set(self.binaryop)
+        return self
+
+    def __exit__(self, *errors):
+        current_accum.reset(self.token)
+        return False
+
+__all__ = ['BinaryOp', 'Accum', 'current_binop', 'current_accum']
 
 grb_binop_re = re.compile('^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 

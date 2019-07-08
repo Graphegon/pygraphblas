@@ -11,8 +11,8 @@ from .base import (
     _build_range,
 )
 from .vector import Vector
-from .semiring import Semiring
-from .binaryop import BinaryOp
+from .semiring import Semiring, current_semiring
+from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from . import descriptor
 
@@ -288,7 +288,9 @@ class Matrix:
             _check(lib.GrB_Matrix_new(
                 _out, self.gb_type, self.nrows, self.ncols))
             out = Matrix(_out)
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         _check(lib.GrB_transpose(
             out.matrix[0],
@@ -325,7 +327,9 @@ class Matrix:
         """
         if add_op is NULL:
             add_op = self._type_funcs[self.gb_type]['add_op']
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
@@ -358,7 +362,9 @@ class Matrix:
         """
         if mult_op is NULL:
             mult_op = self._type_funcs[self.gb_type]['mult_op']
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
@@ -405,7 +411,9 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         result = ffi.new('_Bool*')
         _check(lib.GrB_Matrix_reduce_BOOL(
@@ -422,7 +430,9 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         result = ffi.new('int64_t*')
         _check(lib.GrB_Matrix_reduce_INT64(
@@ -439,7 +449,9 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
@@ -457,7 +469,9 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = self._type_funcs[self.gb_type]['monoid']
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
@@ -476,7 +490,9 @@ class Matrix:
         """
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         if isinstance(op, UnaryOp):
             nop = op.unaryop
@@ -514,7 +530,9 @@ class Matrix:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.unaryop
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
@@ -552,10 +570,12 @@ class Matrix:
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
-            semiring = self._type_funcs[self.gb_type]['semiring']
+            semiring = current_semiring.get(current_semiring.get(self._type_funcs[self.gb_type]['semiring']))
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         _check(lib.GrB_mxm(
             out.matrix[0],
@@ -579,10 +599,12 @@ class Matrix:
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
-            semiring = self._type_funcs[self.gb_type]['semiring']
+            semiring = current_semiring.get(current_semiring.get(self._type_funcs[self.gb_type]['semiring']))
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         _check(lib.GrB_mxv(
             out.vector[0],
@@ -614,7 +636,9 @@ class Matrix:
                                    self.ncols*other.ncols)
         if op is NULL:
             op = self._type_funcs[self.gb_type]['mult_op']
-        if isinstance(accum, BinaryOp):
+        if accum is NULL:
+            accum = current_accum.get(NULL)
+        elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
         _check(lib.GxB_kron(
             out.matrix[0],
