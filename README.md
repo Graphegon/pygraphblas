@@ -2,6 +2,51 @@
 
 SuitSparse:GraphBLAS for Python
 
+# Install
+
+pygraphblas for now involves building a packages from source.  For
+simple setup, a Dockerfile is provided that builds a complete
+pygraphblas environment based on the [Jupyer Base Notebook
+image](https://hub.docker.com/r/jupyter/base-notebook/).  To build a
+new container, run:
+
+	docker build . -t pygraphblas
+
+This will tag the new container as `pygraphblas`.  Change that if you
+want.  Next run the tests:
+
+	$ docker run -it pygraphblas pytest
+	============================= test session starts ==============================
+	platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
+	rootdir: /pygraphblas, inifile: setup.cfg
+	collected 47 items
+
+	tests/test_matrix.py .............................                       [ 61%]
+	tests/test_vector.py ..................                                  [100%]
+
+	========================== 47 passed in 0.36 seconds ===========================
+
+This means pyhgraphblas is ready to go.  An interactive ipython
+session can be run to play with it:
+
+	$ docker run -it pygraphblas ipython
+	Python 3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+	Type 'copyright', 'credits' or 'license' for more information
+	IPython 7.6.1 -- An enhanced Interactive Python. Type '?' for help.
+
+
+	In [1]: from pygraphblas import Matrix
+
+	In [2]: from operator import mod
+
+	In [5]: m = Matrix.from_random(int, 10, 10, 10).apply(lambda x: mod(x, 10))
+
+	In [6]: m.to_lists()
+	Out[6]:
+	[[1, 4, 4, 5, 5, 5, 6, 7, 7, 8],
+	 [4, 5, 7, 2, 5, 6, 3, 2, 6, 3],
+	 [8, 9, 0, 5, 0, 5, 3, 8, 2, 5]]
+
 # Summary
 
 pygraphblas is a python extension that bridges [The GraphBLAS
@@ -131,44 +176,6 @@ max() function to find the path with maximum reliability.
 
 In pygraphblas, the semiring that solves this problem is called
 `pygraphblas.semiring.max_times_float`.
-
-As a final example, let's look at a problem that again looks
-completely different, but can be solved using yet another semiring.
-In this graph, the nodes define a language structure, and the edges
-are letters that can be used to build words.  How can we find every
-possible word in this language?
-
-![Finding All Words in a Language](./docs/AllWords.svg)
-
-I'm sure you're starting to see the pattern here.  Instead of adding,
-or multiplying, the path operator we use is concatenation.  An instead
-of min() or max(), the final function is to take the union of all path
-words.
-
-In pygraphblas, this particular example does not yet have a semiring.
-GraphBLAS does allow for the create of User Defined Types (UDTs).  So
-it can solve these kinds of problems, but pygraphblas does not yet
-implement UDTs.  But it is still a valid example of a graph problem
-that can be solve with a semiring.  You can imagine the semring would
-be called something like `union_concat_str`.
-
-So what is the same, and what is different in these three examples?
-The structure of the graph is the same, as is the *pattern* of
-operation applied to get the solution.  The differences are that each
-graph's edges are of different types, and the operations that are
-applied are different.  These differences are encapsulated by the
-semirings used, and the names of the semrings are clues as to what
-they abstract:
-
-- min_plus_int: The type is `int`, the inner operation is addition,
-  the outer operation is min()
-
-- max_times_float: The type is `float`, the inner operation is
-  multiplication, the outer operation is max()
-
-- union_concat_str (hypothetical): The type is `str`, the inner
-  operation is concatenation, the outer operation is set union.
-
 
 # API
 

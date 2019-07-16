@@ -63,6 +63,7 @@ ADD . /pygraphblas
 WORKDIR /pygraphblas
 RUN python setup.py clean
 RUN python setup.py install
+RUN chown -R jovyan:users .
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID
