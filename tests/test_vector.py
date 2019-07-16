@@ -186,9 +186,13 @@ def test_vxm():
         [0, 1, 2],
         [12, 2, 6])
 
+    w = Vector.dup(v)
+    
     assert v @ m == o
     v @= m
     assert v == o
+
+    
 
 def test_apply():
     v = Vector.from_lists(
