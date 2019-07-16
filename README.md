@@ -4,9 +4,10 @@ SuitSparse:GraphBLAS for Python
 
 # Install
 
-pygraphblas for now involves building a packages from source.  For
-simple setup, a Dockerfile is provided that builds a complete
-pygraphblas environment based on the [Jupyer Base Notebook
+pygraphblas for now involves building packages from source and
+requires Python 3.7 or higher.  For simple setup, a Dockerfile is
+provided that builds a complete pygraphblas environment based on the
+[Jupyer Base Notebook
 image](https://hub.docker.com/r/jupyter/base-notebook/).  To build a
 new container, run:
 
@@ -36,22 +37,29 @@ session can be run to play with it:
 
 
 	In [1]: from pygraphblas import Matrix
+	
+	# two random 3x3 matrices with 3 random values mod(10)
 
-	In [2]: from operator import mod
+	In [3]: m = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
 
-	In [5]: m = Matrix.from_random(int, 10, 10, 10).apply(lambda x: mod(x, 10))
+	In [4]: n = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
 
-	In [6]: m.to_lists()
-	Out[6]:
-	[[1, 4, 4, 5, 5, 5, 6, 7, 7, 8],
-	 [4, 5, 7, 2, 5, 6, 3, 2, 6, 3],
-	 [8, 9, 0, 5, 0, 5, 3, 8, 2, 5]]
+	In [5]: n @= m  # multiply accumulate
+
+	In [8]: n
+	Out[8]: <Matrix (3x3: 2)>
+
+	In [6]: n.to_lists()
+	Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in sparse 3x3
 
 # Summary
 
 pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
-programming language.
+programming language using the
+[CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
+level GraphBLAS API and provide high level Matrix and Vector types are
+normal Python classes.
 
 GraphBLAS is a sparse linear algebra API optimized for processing
 graphs encoded as sparse matrices and vectors.  In addition to common
@@ -87,53 +95,66 @@ by [Dr. Jermey Kepner](http://www.mit.edu/~kepner/) head and founder
 of [MIT Lincoln Laboratory Supercomputing
 Center](http://news.mit.edu/2016/lincoln-laboratory-establishes-supercomputing-center-0511).
 
-As show in Kepner's paper, there are two useful matrix representations
-of graphs: [Adjacency
+There are two useful matrix representations of graphs: [Adjacency
 Matrices](https://en.wikipedia.org/wiki/Adjacency_matrix) and
 [Incidence Matrices](https://en.wikipedia.org/wiki/Incidence_matrix).
 For this introduction we will focus on the adjacency type as they are
 simpler, but the same ideas apply to both, both are suported by
-GraphBLAS, and it is easy to switch back and forth between them.
+GraphBLAS and pygraphblas, and it is easy to switch back and forth
+between them.
 
 ![An example graph and its adjacency matrix](./docs/GraphMatrix.svg)
 
 On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every vertex.  If
 there is an edge going from node A to B, then there will be a value
-present in the intersection of As row with Bs column.
+present in the intersection of As row with Bs column.  How it differs
+from many other matrix representations is that the matrix is sparse,
+nothing is stored in computer memory where there are "empty" spaces.
 
-One practical problem with matrix-encoding graphs is that most
-real-world graphs tend to be sparse, as above, only 7 of 36 possible
-elements have a value. Those that have values tend to be scattered
-uniformally across the matrix (for "typical" graphs), so dense linear
-algebra libraries like BLAS or numpy do not encode or operate on them
-efficiently, as the relevant data is mostly empty memory with actual
-data elements spaced far apart.  This wastes memory and cpu resources,
-and defeats CPU caching mechanisms.
+This is because one practical problem with matrix-encoding graphs is
+that most real-world graphs tend to be sparse, as above, only 7 of 36
+possible elements have a value. Those that have values tend to be
+scattered uniformally across the matrix (for "typical" graphs), so
+dense linear algebra libraries like BLAS or numpy do not encode or
+operate on them efficiently, as the relevant data is mostly empty
+memory with actual data elements spaced far apart.  This wastes memory
+and cpu resources, and defeats CPU caching mechanisms.
 
 For example, suppose a fictional social network has 1 billion users,
 and each user has about 100 friends, which means there are about 100
 billion (1e+11) connections in the graph.  A dense matrix large enough
 to hold this graph would need (1 billion)^2 or
 (1,000,000,000,000,000,000), a "quintillion" elements, but only 1e+11
-of them would have meaningful values, leaving only 0.0000001 of the
+of them would have meaningful values, leaving only 0.0000001th of the
 matrix being utilized.
 
 By using a sparse matrix instead of dense, only the elements used are
-actually stored in the matrix. The parts of the matrix with no value
-are *interpreted*, but not necessarily stored, as an "algebraic zero"
+actually stored in memory. The parts of the matrix with no value are
+*interpreted*, but not necessarily stored, as an "algebraic zero"
 value, which may or may not be the actual number zero, but possibly
 other values like positive or negative infinity depending on the
-particular semiring operations applied to the matrix.  The math used
-with sparse matrices is exactly the same as dense, the sparsity of the
-data doesn't matter to the math, but it does matter to how efficiently
-the matrix is implemented internally.
+particular semiring operations applied to the matrix.
 
-pygraphblas is a python module that provides access to two new
-high-level types: `Matrix` and `Vector`, as well as the low-level
-GraphBLAS api to manipulate these types.  pygraphblas uses the amazing
-[CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level C-api while the high level types are normal Python classes.
+Semirings ecapsulate different algebraic operations and identities
+that can be used to multiply matrices and vectors.  Anyone who has
+multiplied matrices has used at least one Semiring before, typically
+referred to as "plus_times".  This is the common operation of
+multiplying two matrices containing real numbers, the coresponding row
+and column entries are multipled and the results are summed for the
+final value.
+
+When using matrices to solve graph problems, it's useful to have a
+wide variety of semirings that replace the multplication and addition
+operators with other operations.  For example, finding a shorest path
+between nodes involves substituting the `min()` function for the add
+operation, and the plus function for the times.  pygraphblas wraps all
+960 distinct built-in semirings that come with the SuiteSparse
+GraphBLAS implementation.
+
+Semirings can also work over different domains than just numbers,
+however pygraphblas does not support the GraphBLAS user defined types
+(UDT) integration yet.  This is being actively worked on.
 
 # Solving Graph Problems with Semirings
 
