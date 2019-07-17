@@ -84,7 +84,7 @@ references below.
 
 pygraphblas uses the excellent
 [CFFI](https://cffi.readthedocs.io/en/latest/) library and is tested
-with CPython 3.5+.  CPython 2 will not be supported.
+with CPython 3.7+.  CPython 2 will not be supported.
 
 # Intro
 
@@ -106,11 +106,12 @@ between them.
 ![An example graph and its adjacency matrix](./docs/GraphMatrix.svg)
 
 On the left is a graph, and on the right, the adjacency matrix that
-represents it. The matrix has a row and column for every vertex.  If
-there is an edge going from node A to B, then there will be a value
-present in the intersection of As row with Bs column.  How it differs
-from many other matrix representations is that the matrix is sparse,
-nothing is stored in computer memory where there are "empty" spaces.
+represents it. The matrix has a row and column for every node in the
+graph.  If there is an edge going from node A to B, then there will be
+a value present in the intersection of As row with Bs column.  How it
+differs from many other matrix representations is that the matrix is
+sparse, nothing is stored in computer memory where there are "empty"
+spaces.
 
 This is because one practical problem with matrix-encoding graphs is
 that most real-world graphs tend to be sparse, as above, only 7 of 36
@@ -179,7 +180,52 @@ The process is fairly simple, add the weights along each path, and
 then use the minimum function to find the shortest distance.
 
 In pygraphblas, the semiring that solves this problem is called
-`pygraphblas.semiring.min_plus_int`.
+`pygraphblas.semiring.min_plus_int`.  There are two different styles
+for writing this with pygraphblas, one is to use `with` blocks to
+specify the operations to be used, and then use standard Python matrix
+multiplication syntax:
+
+	from pygraphblas import Matrix, Vector
+	from pygraphblas.semiring import min_plus_int64
+	from pygraphblas.binaryop import min_int64, Accum
+	
+	def sssp(matrix, start):
+		v = Vector.from_type(            # create a vector 
+			matrix.gb_type,              # same type as m
+			matrix.nrows                 # same size as rows of m
+		)
+		v[start] = 0                     # set the starting vertext distance
+
+		with min_plus_int64, Accum(min_int64): # set Semiring, Accumulator
+			for _ in range(matrix.nrows):      # for every row in m
+				w = Vector.dup(v)              # dup the vector
+				v @= matrix                    # multiply accumulate
+				if w == v:                     # if nothing changed
+					break                      # exit early
+			return v
+			
+An identical but slightly more verbose approach is to call the
+multiplication method directly `Vector.vxm' in this case, with
+explicit semiring and accumulator operations:
+
+	def sssp_direct(matrix, start):
+		v = Vector.from_type(            # create a vector 
+			matrix.gb_type,              # same type as m
+			matrix.nrows                 # same size as rows of m
+		)
+		v[start] = 0                     # set the starting vertext distance
+
+		for _ in range(matrix.nrows):    # for every row in m:
+			w = Vector.dup(v)            # dup the vector
+			v.vxm(                       # multiply vector by matrix 
+				matrix, out=v,
+				semiring=min_plus_int64, # with min_plus, 
+				accum=min_int64          # acccumulate the minimum
+			)
+			if w == v:                   # if nothing changed
+				break                    # exit early
+		return v
+
 
 For the next example, lets take a problem that at first seems quite
 different, but can be solved in a similarly with a different semiring.
