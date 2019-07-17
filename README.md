@@ -11,46 +11,46 @@ provided that builds a complete pygraphblas environment based on the
 image](https://hub.docker.com/r/jupyter/base-notebook/).  To build a
 new container, run:
 
-	docker build . -t pygraphblas
+    docker build . -t pygraphblas
 
 This will tag the new container as `pygraphblas`.  Change that if you
 want.  Next run the tests:
 
-	$ docker run -it pygraphblas pytest
-	============================= test session starts ==============================
-	platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
-	rootdir: /pygraphblas, inifile: setup.cfg
-	collected 47 items
+    $ docker run -it pygraphblas pytest
+    ============================= test session starts ==============================
+    platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
+    rootdir: /pygraphblas, inifile: setup.cfg
+    collected 47 items
 
-	tests/test_matrix.py .............................                       [ 61%]
-	tests/test_vector.py ..................                                  [100%]
+    tests/test_matrix.py .............................                       [ 61%]
+    tests/test_vector.py ..................                                  [100%]
 
-	========================== 47 passed in 0.36 seconds ===========================
+    ========================== 47 passed in 0.36 seconds ===========================
 
 This means pyhgraphblas is ready to go.  An interactive ipython
 session can be run to play with it:
 
-	$ docker run -it pygraphblas ipython
-	Python 3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
-	Type 'copyright', 'credits' or 'license' for more information
-	IPython 7.6.1 -- An enhanced Interactive Python. Type '?' for help.
+    $ docker run -it pygraphblas ipython
+    Python 3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    Type 'copyright', 'credits' or 'license' for more information
+    IPython 7.6.1 -- An enhanced Interactive Python. Type '?' for help.
 
 
-	In [1]: from pygraphblas import Matrix
-	
-	# two random 3x3 matrices with 3 random values mod(10)
+    In [1]: from pygraphblas import Matrix
+    
+    # two random 3x3 matrices with 3 random values mod(10)
 
-	In [3]: m = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
+    In [3]: m = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
 
-	In [4]: n = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
+    In [4]: n = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
 
-	In [5]: n @= m  # multiply accumulate
+    In [5]: n @= m  # multiply accumulate
 
-	In [8]: n
-	Out[8]: <Matrix (3x3: 2)>
+    In [8]: n
+    Out[8]: <Matrix (3x3: 2)>
 
-	In [6]: n.to_lists()
-	Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in sparse 3x3
+    In [6]: n.to_lists()
+    Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in sparse 3x3
 
 # Summary
 
