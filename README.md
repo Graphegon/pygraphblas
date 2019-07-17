@@ -190,11 +190,11 @@ multiplication syntax:
     from pygraphblas.binaryop import min_int64, Accum
     
     def sssp(matrix, start):
-        v = Vector.from_type(            # create a vector 
-            matrix.gb_type,              # same type as m
-            matrix.nrows                 # same size as rows of m
+        v = Vector.from_type(                  # create a vector 
+            matrix.gb_type,                    # same type as m
+            matrix.nrows                       # same size as rows of m
         )
-        v[start] = 0                     # set the starting vertext distance
+        v[start] = 0                           # set the starting vertext distance
 
         with min_plus_int64, Accum(min_int64): # set Semiring, Accumulator
             for _ in range(matrix.nrows):      # for every row in m
