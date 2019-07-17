@@ -51,6 +51,7 @@ RUN curl -s -L http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-2.3.3.tar.g
 
 RUN git clone https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
+    git checkout 7a21aa5 && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install

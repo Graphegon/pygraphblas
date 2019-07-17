@@ -238,12 +238,16 @@ The pygraphblas package contains the following sub-modules:
 
 - `pygrablas.binaryop` contains BinaryOp types
 
+- `pygrablas.unaryop` contains UnaryOp types
+
 - `pygrablas.base` contains low-level API and FFI wrappers.
 
 Full API documentation coming soon, for now, check out the complete
 tests for usage.
 
 # TODO
+
+- User Defined Types
 
 - Push for 100% coverage.
 
