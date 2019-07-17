@@ -1,3 +1,20 @@
+For the next example, lets take a problem that at first seems quite
+different, but can be solved in a similarly with a different semiring.
+In this case, we have a network of computer nodes, and the edge
+weights are the reliablity of the links between them as a percentage
+of success.
+
+![Finding the Most Reliable Path](../docs/ReliablePath.svg)
+
+How to we solve which path is the most reliable from A to C?  Like the
+previous example, we operate along each path, but instead of adding
+distances, probablity theory tells us that consecutive events must be
+multiplied.  And instead of finding the minimum distance, we use the
+max() function to find the path with maximum reliability.
+
+In pygraphblas, the semiring that solves this problem is called
+`pygraphblas.semiring.max_times_float`.
+
 
 XXX Figure out UDTs for this
 
@@ -7,7 +24,7 @@ In this graph, the nodes define a language structure, and the edges
 are letters that can be used to build words.  How can we find every
 possible word in this language?
 
-![Finding All Words in a Language](./docs/AllWords.svg)
+![Finding All Words in a Language](../docs/AllWords.svg)
 
 I'm sure you're starting to see the pattern here.  Instead of adding,
 or multiplying, the path operator we use is concatenation.  An instead

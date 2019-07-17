@@ -58,8 +58,8 @@ pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language using the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provide high level Matrix and Vector types are
-normal Python classes.
+level GraphBLAS API and provide high level Matrix and Vector Python
+types.
 
 GraphBLAS is a sparse linear algebra API optimized for processing
 graphs encoded as sparse matrices and vectors.  In addition to common
@@ -81,10 +81,6 @@ Texas A&M University.  [News and
 information](http://faculty.cse.tamu.edu/davis/news.html) can provide
 you with a lot more background information, in addition to the
 references below.
-
-pygraphblas uses the excellent
-[CFFI](https://cffi.readthedocs.io/en/latest/) library and is tested
-with CPython 3.7+.  CPython 2 will not be supported.
 
 # Intro
 
@@ -110,17 +106,18 @@ represents it. The matrix has a row and column for every node in the
 graph.  If there is an edge going from node A to B, then there will be
 a value present in the intersection of As row with Bs column.  How it
 differs from many other matrix representations is that the matrix is
-sparse, nothing is stored in computer memory where there are "empty"
-spaces.
+sparse, nothing is stored in computer memory where there are unused
+elements.
 
-This is because one practical problem with matrix-encoding graphs is
-that most real-world graphs tend to be sparse, as above, only 7 of 36
-possible elements have a value. Those that have values tend to be
-scattered uniformally across the matrix (for "typical" graphs), so
-dense linear algebra libraries like BLAS or numpy do not encode or
-operate on them efficiently, as the relevant data is mostly empty
-memory with actual data elements spaced far apart.  This wastes memory
-and cpu resources, and defeats CPU caching mechanisms.
+Sparsity is important because one practical problem with
+matrix-encoding graphs is that most real-world graphs tend to be
+sparse, as above, only 7 of 36 possible elements have a value. Those
+that have values tend to be scattered uniformally across the matrix
+(for "typical" graphs), so dense linear algebra libraries like BLAS or
+numpy do not encode or operate on them efficiently, as the relevant
+data is mostly empty memory with actual data elements spaced far
+apart.  This wastes memory and cpu resources, and defeats CPU caching
+mechanisms.
 
 For example, suppose a fictional social network has 1 billion users,
 and each user has about 100 friends, which means there are about 100
@@ -132,10 +129,10 @@ matrix being utilized.
 
 By using a sparse matrix instead of dense, only the elements used are
 actually stored in memory. The parts of the matrix with no value are
-*interpreted*, but not necessarily stored, as an "algebraic zero"
-value, which may or may not be the actual number zero, but possibly
-other values like positive or negative infinity depending on the
-particular semiring operations applied to the matrix.
+*interpreted*, but not necessarily stored, as an "identity" value,
+which may or may not be the actual number zero, but possibly other
+values like positive or negative infinity depending on the particular
+semiring operations applied to the matrix.
 
 Semirings ecapsulate different algebraic operations and identities
 that can be used to multiply matrices and vectors.  Anyone who has
@@ -147,11 +144,11 @@ final value.
 
 When using matrices to solve graph problems, it's useful to have a
 wide variety of semirings that replace the multplication and addition
-operators with other operations.  For example, finding a shorest path
-between nodes involves substituting the `min()` function for the add
-operation, and the plus function for the times.  pygraphblas wraps all
-960 distinct built-in semirings that come with the SuiteSparse
-GraphBLAS implementation.
+operators and identities with other operations and values.  For
+example, finding a shorest path between nodes involves substituting
+the `min()` function for the add operation, and the plus function for
+the times.  pygraphblas wraps all 960 distinct built-in semirings that
+come with the SuiteSparse GraphBLAS implementation.
 
 Semirings can also work over different domains than just numbers,
 however pygraphblas does not support the GraphBLAS user defined types
@@ -227,23 +224,6 @@ explicit semiring and accumulator operations:
         return v
 
 
-For the next example, lets take a problem that at first seems quite
-different, but can be solved in a similarly with a different semiring.
-In this case, we have a network of computer nodes, and the edge
-weights are the reliablity of the links between them as a percentage
-of success.
-
-![Finding the Most Reliable Path](./docs/ReliablePath.svg)
-
-How to we solve which path is the most reliable from A to C?  Like the
-previous example, we operate along each path, but instead of adding
-distances, probablity theory tells us that consecutive events must be
-multiplied.  And instead of finding the minimum distance, we use the
-max() function to find the path with maximum reliability.
-
-In pygraphblas, the semiring that solves this problem is called
-`pygraphblas.semiring.max_times_float`.
-
 # API
 
 The pygraphblas package contains the following sub-modules:
@@ -265,8 +245,14 @@ tests for usage.
 
 # TODO
 
+- Push for 100% coverage.
+
+- A lot more documentation.
+
 - ReadTheDocs site.
+
+- User defined types.
 
 - Jupyter Notebook tutorial.
 
-- Construction from numpy.array and scipy.sparse
+- optimize construction from numpy.array and scipy.sparse
