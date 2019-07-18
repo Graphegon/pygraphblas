@@ -27,7 +27,7 @@ want.  Next run the tests:
 
     ========================== 47 passed in 0.36 seconds ===========================
 
-This means pyhgraphblas is ready to go.  An interactive ipython
+This means pygraphblas is ready to go.  An interactive ipython
 session can be run to play with it:
 
     $ docker run -it pygraphblas ipython
