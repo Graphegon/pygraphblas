@@ -260,6 +260,23 @@ def test_matrix_mm_read_write(tmp_path):
         n = Matrix.from_mm(f)
     assert n == m
 
+def test_matrix_tsv_read(tmp_path):
+    mmf = tmp_path / 'tsv_test.mm'
+    mmf.touch()
+    with mmf.open('w') as f:
+        f.writelines([
+            '3\t3\t3\n',
+            '1\t1\t2\n',
+            '2\t2\t3\n',
+            '3\t3\t4\n'])
+
+    with mmf.open() as f:
+        n = Matrix.from_tsv(f, int, 3, 3)
+    assert n.to_lists() == [
+        [0, 1, 2],
+        [0, 1, 2],
+        [2, 3, 4]]
+
 def test_matrix_random():
     m = Matrix.from_random(int, 10, 10, 5)
     assert m.nrows == 10

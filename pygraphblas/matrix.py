@@ -59,6 +59,17 @@ class Matrix:
             'semiring': lib.GxB_PLUS_TIMES_FP64,
             'assignScalar': lib.GrB_Matrix_assign_FP64,
         },
+        lib.GrB_FP32: {
+            'C': 'float',
+            'setElement': lib.GrB_Matrix_setElement_FP32,
+            'extractElement': lib.GrB_Matrix_extractElement_FP32,
+            'extractTuples': lib.GrB_Matrix_extractTuples_FP32,
+            'add_op': lib.GrB_PLUS_FP32,
+            'mult_op': lib.GrB_TIMES_FP32,
+            'monoid': lib.GxB_PLUS_FP32_MONOID,
+            'semiring': lib.GxB_PLUS_TIMES_FP32,
+            'assignScalar': lib.GrB_Matrix_assign_FP32,
+        },
     }
     def __init__(self, matrix):
         self.matrix = matrix
@@ -115,6 +126,16 @@ class Matrix:
         """
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_mmread(m, mm_file))
+        return cls(m)
+
+    @classmethod
+    def from_tsv(cls, tsv_file, typ, nrows, ncols):
+        """Create a new matrix by reading a Matrix Market file.
+
+        """
+        m = ffi.new('GrB_Matrix*')
+        gb_type = _gb_from_type(typ)
+        _check(lib.LAGraph_tsvread(m, tsv_file, gb_type, nrows, ncols))
         return cls(m)
 
     @classmethod
