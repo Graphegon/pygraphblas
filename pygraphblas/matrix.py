@@ -36,6 +36,7 @@ class Matrix:
             'monoid': lib.GxB_LOR_BOOL_MONOID,
             'semiring': lib.GxB_LOR_LAND_BOOL,
             'assignScalar': lib.GrB_Matrix_assign_BOOL,
+            'invert': lib.GrB_AINV_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -47,6 +48,7 @@ class Matrix:
             'monoid': lib.GxB_PLUS_INT64_MONOID,
             'semiring': lib.GxB_PLUS_TIMES_INT64,
             'assignScalar': lib.GrB_Matrix_assign_INT64,
+            'invert': lib.GrB_AINV_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -58,6 +60,7 @@ class Matrix:
             'monoid': lib.GxB_PLUS_FP64_MONOID,
             'semiring': lib.GxB_PLUS_TIMES_FP64,
             'assignScalar': lib.GrB_Matrix_assign_FP64,
+            'invert': lib.GrB_AINV_FP64,
         },
         lib.GrB_FP32: {
             'C': 'float',
@@ -69,6 +72,7 @@ class Matrix:
             'monoid': lib.GxB_PLUS_FP32_MONOID,
             'semiring': lib.GxB_PLUS_TIMES_FP32,
             'assignScalar': lib.GrB_Matrix_assign_FP32,
+            'invert': lib.GrB_AINV_FP32,
         },
     }
     def __init__(self, matrix):
@@ -578,8 +582,11 @@ class Matrix:
     def offdiag(self, diag=0):
         return self.select(lib.GxB_OFFDIAG, thunk=ffi.new('int64_t*', diag))
 
-    def nonzero(self, diag=0):
+    def nonzero(self):
         return self.select(lib.GxB_NONZERO)
+
+    def __invert__(self):
+        return self.apply(self._type_funcs[self.gb_type]['invert'])
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
