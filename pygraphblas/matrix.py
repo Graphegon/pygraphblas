@@ -37,6 +37,7 @@ class Matrix:
             'semiring': lib.GxB_LOR_LAND_BOOL,
             'assignScalar': lib.GrB_Matrix_assign_BOOL,
             'invert': lib.GrB_AINV_BOOL,
+            'abs': lib.GxB_ABS_BOOL,
         },
         lib.GrB_INT64: {
             'C': 'int64_t',
@@ -49,6 +50,7 @@ class Matrix:
             'semiring': lib.GxB_PLUS_TIMES_INT64,
             'assignScalar': lib.GrB_Matrix_assign_INT64,
             'invert': lib.GrB_AINV_INT64,
+            'abs': lib.GxB_ABS_INT64,
         },
         lib.GrB_FP64: {
             'C': 'double',
@@ -61,6 +63,7 @@ class Matrix:
             'semiring': lib.GxB_PLUS_TIMES_FP64,
             'assignScalar': lib.GrB_Matrix_assign_FP64,
             'invert': lib.GrB_AINV_FP64,
+            'abs': lib.GxB_ABS_FP64,
         },
         lib.GrB_FP32: {
             'C': 'float',
@@ -73,6 +76,7 @@ class Matrix:
             'semiring': lib.GxB_PLUS_TIMES_FP32,
             'assignScalar': lib.GrB_Matrix_assign_FP32,
             'invert': lib.GrB_AINV_FP32,
+            'abs': lib.GxB_ABS_FP32,
         },
     }
     def __init__(self, matrix):
@@ -587,6 +591,9 @@ class Matrix:
 
     def __invert__(self):
         return self.apply(self._type_funcs[self.gb_type]['invert'])
+
+    def __abs__(self):
+        return self.apply(self._type_funcs[self.gb_type]['abs'])
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
