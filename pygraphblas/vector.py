@@ -23,6 +23,8 @@ class Vector:
 
     """
 
+    __slots__ = ('vector', '_funcs')
+
     def __init__(self, vec):
         self.vector = vec
         self._funcs = build_vector_type_funcs(self.gb_type)
