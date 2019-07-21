@@ -11,6 +11,7 @@ from .base import (
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
+from .type_funcs import build_vector_type_funcs
 from . import descriptor
 
 NULL = ffi.NULL
@@ -22,39 +23,8 @@ class Vector:
 
     """
 
-    _type_funcs = {
-        lib.GrB_BOOL: {
-            'C': '_Bool',
-            'setElement': lib.GrB_Vector_setElement_BOOL,
-            'extractElement': lib.GrB_Vector_extractElement_BOOL,
-            'extractTuples': lib.GrB_Vector_extractTuples_BOOL,
-            'add_op': lib.GrB_PLUS_BOOL,
-            'mult_op': lib.GrB_TIMES_BOOL,
-            'semiring': lib.GxB_LOR_LAND_BOOL,
-            'assignScalar': lib.GrB_Vector_assign_BOOL,
-        },
-        lib.GrB_INT64: {
-            'C': 'int64_t',
-            'setElement': lib.GrB_Vector_setElement_INT64,
-            'extractElement': lib.GrB_Vector_extractElement_INT64,
-            'extractTuples': lib.GrB_Vector_extractTuples_INT64,
-            'add_op': lib.GrB_PLUS_INT64,
-            'mult_op': lib.GrB_TIMES_INT64,
-            'semiring': lib.GxB_PLUS_TIMES_INT64,
-            'assignScalar': lib.GrB_Vector_assign_INT64,
-        },
-        lib.GrB_FP64: {
-            'C': 'double',
-            'setElement': lib.GrB_Vector_setElement_FP64,
-            'extractElement': lib.GrB_Vector_extractElement_FP64,
-            'extractTuples': lib.GrB_Vector_extractTuples_FP64,
-            'add_op': lib.GrB_PLUS_FP64,
-            'mult_op': lib.GrB_TIMES_FP64,
-            'semiring': lib.GxB_PLUS_TIMES_FP64,
-            'assignScalar': lib.GrB_Vector_assign_FP64,
-        },
-    }
-
+    _type_funcs = build_vector_type_funcs()
+    
     def __init__(self, vec):
         self.vector = vec
 
