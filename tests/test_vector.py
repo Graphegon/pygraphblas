@@ -187,21 +187,28 @@ def test_vxm():
         [12, 2, 6])
 
     w = Vector.dup(v)
-    
+
     assert v @ m == o
     v @= m
     assert v == o
-
-    
 
 def test_apply():
     v = Vector.from_lists(
         [0, 1, 2],
         [2, 3, 4])
+
     w = v.apply(unaryop.ainv_int64)
     assert w == Vector.from_lists(
         [0, 1, 2],
         [-2, -3, -4])
+
+    w = ~v
+    assert w == Vector.from_lists(
+        [0, 1, 2],
+        [-2, -3, -4])
+
+    w = abs(w)
+    assert w == v
 
 def test_select():
     v = Vector.from_lists(

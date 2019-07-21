@@ -259,6 +259,12 @@ class Vector:
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
 
+    def __invert__(self):
+        return self.apply(self._type_funcs[self.gb_type]['invert'])
+
+    def __abs__(self):
+        return self.apply(self._type_funcs[self.gb_type]['abs'])
+
     def clear(self):
         _check(lib.GrB_Vector_clear(self.vector[0]))
 
