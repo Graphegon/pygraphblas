@@ -28,18 +28,18 @@ def load_images():
         Y0 = Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
     return Y0
 
-def generate_layers():
+def generate_layers(layers=120):
     neurons = Path('./neuron1024')
-    for i in range(nneurons):
+    for i in range(layers):
         l = Path('./neuron1024/n1024-l{}.tsv'.format(str(i+1)))
         with l.open() as f:
             print('loading layer: ', i+1)
             yield Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
 
-def generate_bias():
+def generate_bias(layers=120):
     for i in range(nneurons):
         bias = Matrix.from_type(lib.GrB_FP32, nneurons, nneurons)
-        for i in range(nneurons):
+        for i in range(layers):
             bias[i,i] = 0.3
         bias.nvals # causes async completion
         yield bias
