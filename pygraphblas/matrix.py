@@ -19,6 +19,8 @@ from . import descriptor
 
 NULL = ffi.NULL
 
+__all__ = ['Matrix']
+
 class Matrix:
     """GraphBLAS Sparse Matrix
 

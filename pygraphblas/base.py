@@ -79,6 +79,12 @@ def _check(res):
     if res != lib.GrB_SUCCESS:
         raise _error_codes[res](ffi.string(lib.GrB_error()))
 
+def _check_no_val_key_error(res):
+    if res != lib.GrB_SUCCESS:
+        if res == lib.GrB_NO_VALUE:
+            raise KeyError
+        raise _error_codes[res](ffi.string(lib.GrB_error()))
+    
 def _gb_from_type(typ):
     if typ is int:
         return lib.GrB_INT64

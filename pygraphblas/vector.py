@@ -16,6 +16,8 @@ from . import descriptor
 
 NULL = ffi.NULL
 
+__all__ = ['Vector']
+
 class Vector:
     """GraphBLAS Sparse Vector
 

@@ -81,3 +81,24 @@ def build_vector_type_funcs(typ):
     f.invert = getattr(lib, 'GrB_AINV_{}'.format(s))
     f.abs_ = getattr(lib, 'GxB_ABS_{}'.format(s))
     return f
+
+class ScalarFuncs:
+    __slots__ = (
+        'C',
+        'setElement',
+        'extractElement',
+        )
+def build_scalar_type_funcs(typ):
+    f = ScalarFuncs()
+    if typ == lib.GrB_BOOL:
+        c, s  = ('_Bool', 'BOOL')
+    elif typ == lib.GrB_INT64:
+        c, s  = ('int64_t', 'INT64')
+    elif typ == lib.GrB_FP64:
+        c, s  = ('double', 'FP64')
+    elif typ == lib.GrB_FP32:
+        c, s  = ('float', 'FP32')
+    f.C = c
+    f.setElement = getattr(lib, 'GxB_Scalar_setElement_{}'.format(s))
+    f.extractElement = getattr(lib, 'GxB_Scalar_extractElement_{}'.format(s))
+    return f
