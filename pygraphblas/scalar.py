@@ -28,6 +28,9 @@ class Scalar:
     def __del__(self):
         _check(lib.GxB_Scalar_free(self.scalar))
 
+    def __len__(self):
+        return self.nvals
+
     @classmethod
     def dup(cls, sca):
         """Create an duplicate Scalar from the given argument.
@@ -77,7 +80,6 @@ class Scalar:
         _check(lib.GxB_Scalar_clear(self.scalar[0]))
 
     def __getitem__(self, index):
-        assert index == 0
         result = ffi.new(self._funcs.C + '*')
         _check_no_val_key_error(self._funcs.extractElement(
             result,
@@ -86,8 +88,7 @@ class Scalar:
         return result[0]
 
     def __setitem__(self, index, value):
-        assert index == 0
-        _check_no_val_key_error(self._funcs.setElement(
+        _check(self._funcs.setElement(
             self.scalar[0],
             ffi.cast(self._funcs.C, value)
         ))

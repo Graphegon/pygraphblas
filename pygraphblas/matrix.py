@@ -11,6 +11,7 @@ from .base import (
     _build_range,
 )
 from .vector import Vector
+from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
@@ -361,6 +362,9 @@ class Matrix:
             desc))
         return out
 
+    def __len__(self):
+        return self.nvals
+
     def __eq__(self, other):
         """Compare two matrices for equality.
 
@@ -526,6 +530,11 @@ class Matrix:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
+        if isinstance(thunk, (bool, int, float)):
+            thunk = Scalar.from_value(thunk)
+        if isinstance(thunk, Scalar):
+            self._keep_alives[self.matrix] = thunk
+            thunk = thunk.scalar[0]
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
             mask,
@@ -537,20 +546,32 @@ class Matrix:
             ))
         return out
 
-    def tril(self, diag=0):
-        return self.select(lib.GxB_TRIL, thunk=ffi.new('int64_t*', diag))
+    def tril(self, thunk=NULL):
+        return self.select(lib.GxB_TRIL, thunk=thunk)
 
-    def triu(self, diag=0):
-        return self.select(lib.GxB_TRIU, thunk=ffi.new('int64_t*', diag))
+    def triu(self, thunk=NULL):
+        return self.select(lib.GxB_TRIU, thunk=thunk)
 
-    def diag(self, diag=0):
-        return self.select(lib.GxB_DIAG, thunk=ffi.new('int64_t*', diag))
+    def diag(self, thunk=NULL):
+        return self.select(lib.GxB_DIAG, thunk=thunk)
 
-    def offdiag(self, diag=0):
-        return self.select(lib.GxB_OFFDIAG, thunk=ffi.new('int64_t*', diag))
+    def offdiag(self, thunk=NULL):
+        return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
+
+    def __gt__(self, thunk):
+        return self.select(lib.GxB_GT_THUNK, thunk=thunk)
+
+    def __lt__(self, thunk):
+        return self.select(lib.GxB_LT_THUNK, thunk=thunk)
+
+    def __ge__(self, thunk):
+        return self.select(lib.GxB_GE_THUNK, thunk=thunk)
+
+    def __le__(self, thunk):
+        return self.select(lib.GxB_LE_THUNK, thunk=thunk)
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):

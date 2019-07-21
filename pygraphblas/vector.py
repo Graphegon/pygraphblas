@@ -43,6 +43,9 @@ class Vector:
             NULL))
         return result[0]
 
+    def __len__(self):
+        return self.nvals
+
     @classmethod
     def from_type(cls, py_type, size=0):
         """Create an empty Vector from the given type and size.
