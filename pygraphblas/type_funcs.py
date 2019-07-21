@@ -17,8 +17,10 @@ def build_matrix_type_funcs():
             'monoid': getattr(lib, 'GxB_{}_{}_MONOID'.format(a, s)),
             'semiring': getattr(lib, 'GxB_{}_{}_{}'.format(a, m, s)),
             'assignScalar': getattr(lib, 'GrB_Matrix_assign_{}'.format(s)),
-            'invert': getattr(lib, 'GrB_AINV_{}'.format(s)),
+            'invert': getattr(lib, 'GrB_MINV_{}'.format(s)),
+            'neg': getattr(lib, 'GrB_AINV_{}'.format(s)),
             'abs': getattr(lib, 'GxB_ABS_{}'.format(s)),
+            'not': getattr(lib, 'GxB_LNOT_{}'.format(s)),
         }
     return _type_funcs
 

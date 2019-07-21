@@ -484,15 +484,25 @@ def test_select_ops():
         [1, 2, 0, 1, 2, 0, 1, 2],
         [1, 2, 3, 4, 5, 6, 7, 8])
 
-    assert ~m == Matrix.from_lists(
+    assert -m == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [0, -1, -2, -3, -4, -5, -6, -7, -8])
 
-    n = ~m
+    n = -m
 
     assert abs(m) == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [0, 1, 2, 3, 4, 5, 6, 7, 8])
 
+    m = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0.0, 1.0, 2.0], 3, 3)
+
+    n = ~m
+    assert n == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [float('inf'), 1.0, 0.5])

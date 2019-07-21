@@ -383,6 +383,18 @@ class Matrix:
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
 
+    def __not__(self):
+        return self.apply(self._type_funcs[self.gb_type]['not'])
+
+    def __invert__(self):
+        return self.apply(self._type_funcs[self.gb_type]['invert'])
+
+    def __neg__(self):
+        return self.apply(self._type_funcs[self.gb_type]['neg'])
+
+    def __abs__(self):
+        return self.apply(self._type_funcs[self.gb_type]['abs'])
+
     def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
         """Reduce matrix to a boolean.
 
@@ -537,12 +549,6 @@ class Matrix:
 
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
-
-    def __invert__(self):
-        return self.apply(self._type_funcs[self.gb_type]['invert'])
-
-    def __abs__(self):
-        return self.apply(self._type_funcs[self.gb_type]['abs'])
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
