@@ -26,10 +26,11 @@ class Matrix:
 
     """
 
-    _type_funcs = build_matrix_type_funcs()
+    __slots__ = ('matrix', '_funcs', '_keep_alives')
 
     def __init__(self, matrix):
         self.matrix = matrix
+        self._funcs = build_matrix_type_funcs(self.gb_type)
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -225,14 +226,13 @@ class Matrix:
         """Extract the rows, columns and values of the Matrix as 3 lists.
 
         """
-        tf = self._type_funcs[self.gb_type]
-        C = tf['C']
+        C = self._funcs.C
         I = ffi.new('GrB_Index[]', self.nvals)
         J = ffi.new('GrB_Index[]', self.nvals)
         V = ffi.new(C + '[]', self.nvals)
         n = ffi.new('GrB_Index*')
         n[0] = self.nvals
-        func = tf['extractTuples']
+        func = self._funcs.extractTuples
         _check(func(
             I,
             J,
@@ -304,7 +304,7 @@ class Matrix:
 
         """
         if add_op is NULL:
-            add_op = self._type_funcs[self.gb_type]['add_op']
+            add_op = self._funcs.add_op
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -339,7 +339,7 @@ class Matrix:
 
         """
         if mult_op is NULL:
-            mult_op = self._type_funcs[self.gb_type]['mult_op']
+            mult_op = self._funcs.mult_op
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -384,16 +384,16 @@ class Matrix:
         return self.ewise_mult(other, out=self)
 
     def __not__(self):
-        return self.apply(self._type_funcs[self.gb_type]['not'])
+        return self.apply(self._funcs.not_)
 
     def __invert__(self):
-        return self.apply(self._type_funcs[self.gb_type]['invert'])
+        return self.apply(self._funcs.invert)
 
     def __neg__(self):
-        return self.apply(self._type_funcs[self.gb_type]['neg'])
+        return self.apply(self._funcs.neg)
 
     def __abs__(self):
-        return self.apply(self._type_funcs[self.gb_type]['abs'])
+        return self.apply(self._funcs.abs_)
 
     def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
         """Reduce matrix to a boolean.
@@ -458,7 +458,7 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = self._type_funcs[self.gb_type]['monoid']
+            monoid = self._funcs.monoid
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -489,7 +489,7 @@ class Matrix:
         elif isinstance(op, types.FunctionType):
             uop = ffi.new('GrB_UnaryOp*')
             def op_func(z, x):
-                C = self._type_funcs[self.gb_type]['C']
+                C = self._funcs.C
                 z = ffi.cast(C + '*', z)
                 x = ffi.cast(C + '*', x)
                 z[0] = op(x[0])
@@ -560,7 +560,7 @@ class Matrix:
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
-            semiring = current_semiring.get(current_semiring.get(self._type_funcs[self.gb_type]['semiring']))
+            semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
@@ -589,7 +589,7 @@ class Matrix:
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
-            semiring = current_semiring.get(current_semiring.get(self._type_funcs[self.gb_type]['semiring']))
+            semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
@@ -625,7 +625,7 @@ class Matrix:
                                    self.nrows*other.nrows,
                                    self.ncols*other.ncols)
         if op is NULL:
-            op = self._type_funcs[self.gb_type]['mult_op']
+            op = self._funcs.mult_op
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -704,9 +704,9 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
-            tf = self._type_funcs[self.gb_type]
-            C = tf['C']
-            func = tf['extractElement']
+            tf = self._funcs
+            C = tf.C
+            func = tf.extractElement
             result = ffi.new(C + '*')
             _check(func(
                 result,
@@ -805,9 +805,9 @@ class Matrix:
         i0 = index[0]
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
-            tf = self._type_funcs[self.gb_type]
-            C = tf['C']
-            func = tf['setElement']
+            tf = self._funcs
+            C = tf.C
+            func = tf.setElement
             _check(func(
                 self.matrix[0],
                 ffi.cast(C, value),
