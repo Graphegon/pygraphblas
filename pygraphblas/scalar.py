@@ -26,7 +26,16 @@ class Scalar:
         self._funcs = build_scalar_type_funcs(self.gb_type)
 
     def __del__(self):
-        _check(lib.GrB_Scalar_free(self.scalar))
+        _check(lib.GxB_Scalar_free(self.scalar))
+
+    @classmethod
+    def dup(cls, sca):
+        """Create an duplicate Scalar from the given argument.
+
+        """
+        new_sca = ffi.new('GxB_Scalar*')
+        _check(lib.GxB_Scalar_dup(new_sca, sca.scalar[0]))
+        return cls(new_sca)
 
     @classmethod
     def from_type(cls, py_type):
@@ -38,6 +47,18 @@ class Scalar:
         _check(lib.GxB_Scalar_new(new_sca, gb_type))
         return cls(new_sca)
 
+    @classmethod
+    def from_value(cls, value):
+        """Create an empty Scalar from the given type and size.
+
+        """
+        new_sca = ffi.new('GxB_Scalar*')
+        gb_type = _gb_from_type(type(value))
+        _check(lib.GxB_Scalar_new(new_sca, gb_type))
+        s = cls(new_sca)
+        s[0] = value
+        return s
+
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Scalar.
@@ -48,6 +69,12 @@ class Scalar:
             typ,
             self.scalar[0]))
         return typ[0]
+
+    def clear(self):
+        """Clear the scalar.
+
+        """
+        _check(lib.GxB_Scalar_clear(self.scalar[0]))
 
     def __getitem__(self, index):
         assert index == 0
