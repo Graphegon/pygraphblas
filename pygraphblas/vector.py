@@ -23,10 +23,9 @@ class Vector:
 
     """
 
-    _type_funcs = build_vector_type_funcs()
-    
     def __init__(self, vec):
         self.vector = vec
+        self._funcs = build_vector_type_funcs(self.gb_type)
 
     def __del__(self):
         _check(lib.GrB_Vector_free(self.vector))
@@ -93,13 +92,13 @@ class Vector:
         """Extract the indices and values of the Vector as 2 lists.
 
         """
-        tf = self._type_funcs[self.gb_type]
-        C = tf['C']
+        tf = self._funcs
+        C = tf.C
         I = ffi.new('GrB_Index[]', self.nvals)
         V = ffi.new(C + '[]', self.nvals)
         n = ffi.new('GrB_Index*')
         n[0] = self.nvals
-        func = tf['extractTuples']
+        func = tf.extractTuples
         _check(func(
             I,
             V,
@@ -159,7 +158,7 @@ class Vector:
 
         """
         if add_op is NULL:
-            add_op = current_binop.get(self._type_funcs[self.gb_type]['add_op'])
+            add_op = current_binop.get(self._funcs.add_op)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -193,7 +192,7 @@ class Vector:
 
         """
         if mult_op is NULL:
-            mult_op = current_binop.get(self._type_funcs[self.gb_type]['mult_op'])
+            mult_op = current_binop.get(self._funcs.mult_op)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -224,7 +223,7 @@ class Vector:
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
-            semiring = current_semiring.get(self._type_funcs[self.gb_type]['semiring'])
+            semiring = current_semiring.get(self._funcs.semiring)
         elif isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
@@ -260,10 +259,10 @@ class Vector:
         return self.ewise_mult(other, out=self)
 
     def __invert__(self):
-        return self.apply(self._type_funcs[self.gb_type]['invert'])
+        return self.apply(self._funcs.invert)
 
     def __abs__(self):
-        return self.apply(self._type_funcs[self.gb_type]['abs'])
+        return self.apply(self._funcs.abs_)
 
     def clear(self):
         _check(lib.GrB_Vector_clear(self.vector[0]))
@@ -375,7 +374,7 @@ class Vector:
     def to_dense(self, _id=None):
         out = ffi.new('GrB_Vector*')
         if _id is None:
-            C = self._type_funcs[self.gb_type]['C']
+            C = self._funcs.C
             _id = ffi.new(C + '*', 0)
         _check(lib.LAGraph_Vector_to_dense(
             out,
@@ -384,10 +383,10 @@ class Vector:
         return Vector(out)
 
     def __setitem__(self, index, value):
-        tf = self._type_funcs[self.gb_type]
+        tf = self._funcs
         if isinstance(index, int):
-            C = tf['C']
-            func = tf['setElement']
+            C = tf.C
+            func = tf.setElement
             _check(func(
                 self.vector[0],
                 ffi.cast(C, value),
@@ -408,9 +407,9 @@ class Vector:
                 return
             if isinstance(value, (bool, int, float)):
                 scalar_type = _gb_from_type(type(value))
-                func = self._type_funcs[scalar_type]['assignScalar']
+                tf = build_vector_type_funcs(scalar_type)
                 I, ni, size = _build_range(index, self.size - 1)
-                _check(func(
+                _check(tf.assignScalar(
                     self.vector[0],
                     NULL,
                     NULL,
@@ -424,9 +423,9 @@ class Vector:
 
     def __getitem__(self, index):
         if isinstance(index, int):
-            tf = self._type_funcs[self.gb_type]
-            C = tf['C']
-            func = tf['extractElement']
+            tf = self._funcs
+            C = tf.C
+            func = tf.extractElement
             result = ffi.new(C + '*')
             _check(func(
                 result,
