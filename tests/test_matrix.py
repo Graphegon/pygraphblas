@@ -539,3 +539,19 @@ def test_select_cmp():
         [0, 1, 2, 3, 4, 5],
         3, 3
         )
+
+    n = m == 5
+    assert n == Matrix.from_lists(
+        [1],
+        [2],
+        [5],
+        3, 3
+        )
+
+    n = m != 5
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1],
+        [0, 1, 2, 0, 1],
+        [0, 1, 2, 3, 4],
+        3, 3
+        )

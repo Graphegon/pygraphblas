@@ -143,7 +143,7 @@ class Matrix:
 
         """
         n = ffi.new('GrB_Index*')
-        _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
+        _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
@@ -152,7 +152,7 @@ class Matrix:
 
         """
         n = ffi.new('GrB_Index*')
-        _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
+        _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
@@ -369,6 +369,9 @@ class Matrix:
         """Compare two matrices for equality.
 
         """
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_EQ_THUNK, thunk=other)
+
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_isequal(
             result,
@@ -376,6 +379,18 @@ class Matrix:
             other.matrix[0],
             NULL))
         return result[0]
+
+    def __neq__(self, other):
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_NE_THUNK, thunk=other)
+
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            NULL))
+        return not result[0]
 
     def __add__(self, other):
         return self.ewise_add(other)

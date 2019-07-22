@@ -8,16 +8,16 @@ nneurons = 1024
 
 def dnn(W, Bias, Y0):
     Y = Matrix.from_type(Y0.gb_type, nfeatures, nneurons)
-    
     for layer, (w, b) in enumerate(zip(W, Bias)):
         with plus_times_fp32:
             print('Y @= w')
             (Y0 if layer == 0 else Y).mxm(w, out=Y)
         with plus_plus_fp32:
             print('Y @= b')
-            Y @= b
+            Y.mxm(b, out=Y)
         Y.select(lib.GxB_GT_ZERO, out=Y)
         Y.apply(lib.LAGraph_YMAX_FP32, out=Y)
+        print(repr(Y))
     return Y
 
 def load_images():
@@ -37,14 +37,15 @@ def generate_layers(layers=120):
             yield Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
 
 def generate_bias(layers=120):
-    for i in range(nneurons):
+    for i in range(layers):
         bias = Matrix.from_type(lib.GrB_FP32, nneurons, nneurons)
-        for i in range(layers):
+        for i in range(nneurons):
             bias[i,i] = 0.3
         bias.nvals # causes async completion
         yield bias
 
 Y0 = load_images()
 result = dnn(generate_layers(), generate_bias(), Y0)
-
+with open('dnn_output.mm', 'w') as f:
+    result.to_mm(f)
 
