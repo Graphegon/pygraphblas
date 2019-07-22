@@ -140,7 +140,7 @@ class Matrix:
 
         """
         n = ffi.new('GrB_Index*')
-        _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
+        _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
@@ -149,7 +149,7 @@ class Matrix:
 
         """
         n = ffi.new('GrB_Index*')
-        _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
+        _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
