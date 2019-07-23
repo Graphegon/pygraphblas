@@ -15,7 +15,7 @@ from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
-from .type_funcs import build_matrix_type_funcs
+from .type_funcs import build_matrix_type_funcs, type_name
 from . import descriptor
 
 NULL = ffi.NULL
@@ -870,7 +870,8 @@ class Matrix:
         raise TypeError('Unknown index or value for matrix assignment.')
 
     def __repr__(self):
-        return '<Matrix (%sx%s: %s)>' % (
+        return '<Matrix (%sx%s : %s:%s)>' % (
             self.nrows,
             self.ncols,
-            self.nvals)
+            self.nvals,
+            type_name(self.gb_type))
