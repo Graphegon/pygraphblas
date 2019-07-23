@@ -1,6 +1,7 @@
 
 from .base import lib
 
+
 class MatrixFuncs:
     __slots__ = (
         'C',
@@ -18,22 +19,21 @@ class MatrixFuncs:
         'not_',
         )
 
+
+_type_maps = {
+    lib.GrB_BOOL:  ('_Bool', 'BOOL', 'LOR', 'LAND'),
+    lib.GrB_INT8:  ('int8_t', 'INT8', 'PLUS', 'TIMES'),
+    lib.GrB_INT16: ('int16_t', 'INT16', 'PLUS', 'TIMES'),
+    lib.GrB_INT32: ('int32_t', 'INT32', 'PLUS', 'TIMES'),
+    lib.GrB_INT64: ('int64_t', 'INT64', 'PLUS', 'TIMES'),
+    lib.GrB_FP32:  ('float', 'FP32', 'PLUS', 'TIMES'),
+    lib.GrB_FP64:  ('double', 'FP64', 'PLUS', 'TIMES'),
+    }
+
+
 def build_matrix_type_funcs(typ):
     f = MatrixFuncs()
-    if typ == lib.GrB_BOOL:
-        c, s, a, m  = ('_Bool', 'BOOL', 'LOR', 'LAND')
-    elif typ == lib.GrB_INT8:
-        c, s, a, m  = ('int8_t', 'INT8', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT16:
-        c, s, a, m  = ('int16_t', 'INT16', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT32:
-        c, s, a, m  = ('int32_t', 'INT32', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT64:
-        c, s, a, m  = ('int64_t', 'INT64', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_FP64:
-        c, s, a, m  = ('double', 'FP64', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_FP32:
-        c, s, a, m  = ('float', 'FP32', 'PLUS', 'TIMES')
+    c, s, a, m  = _type_maps[typ]
     f.C = c
     f.setElement = getattr(lib, 'GrB_Matrix_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GrB_Matrix_extractElement_{}'.format(s))
@@ -68,20 +68,7 @@ class VectorFuncs:
 
 def build_vector_type_funcs(typ):
     f = VectorFuncs()
-    if typ == lib.GrB_BOOL:
-        c, s, a, m  = ('_Bool', 'BOOL', 'LOR', 'LAND')
-    elif typ == lib.GrB_INT8:
-        c, s, a, m  = ('int8_t', 'INT8', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT16:
-        c, s, a, m  = ('int16_t', 'INT16', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT32:
-        c, s, a, m  = ('int32_t', 'INT32', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_INT64:
-        c, s, a, m  = ('int64_t', 'INT64', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_FP64:
-        c, s, a, m  = ('double', 'FP64', 'PLUS', 'TIMES')
-    elif typ == lib.GrB_FP32:
-        c, s, a, m  = ('float', 'FP32', 'PLUS', 'TIMES')
+    c, s, a, m  = _type_maps[typ]
     f.C = c
     f.setElement = getattr(lib, 'GrB_Vector_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GrB_Vector_extractElement_{}'.format(s))
@@ -94,28 +81,17 @@ def build_vector_type_funcs(typ):
     f.abs_ = getattr(lib, 'GxB_ABS_{}'.format(s))
     return f
 
+
 class ScalarFuncs:
     __slots__ = (
         'C',
         'setElement',
         'extractElement',
         )
+
 def build_scalar_type_funcs(typ):
     f = ScalarFuncs()
-    if typ == lib.GrB_BOOL:
-        c, s  = ('_Bool', 'BOOL')
-    elif typ == lib.GrB_INT8:
-        c, s  = ('int8_t', 'INT64')
-    elif typ == lib.GrB_INT16:
-        c, s  = ('int16_t', 'INT64')
-    elif typ == lib.GrB_INT32:
-        c, s  = ('int32_t', 'INT64')
-    elif typ == lib.GrB_INT64:
-        c, s  = ('int64_t', 'INT64')
-    elif typ == lib.GrB_FP64:
-        c, s  = ('double', 'FP64')
-    elif typ == lib.GrB_FP32:
-        c, s  = ('float', 'FP32')
+    c, s, a, m  = _type_maps[typ]
     f.C = c
     f.setElement = getattr(lib, 'GxB_Scalar_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GxB_Scalar_extractElement_{}'.format(s))
