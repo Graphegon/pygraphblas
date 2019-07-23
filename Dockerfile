@@ -41,26 +41,24 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # get GraphBLAS, compile with debug symbols
-# RUN curl -s -L http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-2.3.3.tar.gz | \
 
-ADD  /sources/GraphBLAS-20July2019_v3.0.1.tar.gz /
-RUN  cd /GraphBLAS-20July2019_v3.0.1 && \
+RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.0.1-beta1.tar.gz | tar -xz && \
+     cd GraphBLAS-3.0.1-beta1 && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
 
-RUN git clone https://github.com/GraphBLAS/LAGraph.git && \
+RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
-#    git checkout cf5ef931e95c7be84bc1129ab3c51c4a54a2bc3d && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
 
 RUN ldconfig
 
-RUN conda install -yq datashader pytest
+RUN conda install -yq datashader pytest ipdb
 
 ADD . /pygraphblas
 WORKDIR /pygraphblas

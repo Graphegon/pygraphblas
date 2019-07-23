@@ -22,7 +22,6 @@ def dnn(W, Bias, Y0):
 
 def load_images():
     images = Path('sparse-images-1024.tsv')
-
     with images.open() as i:
         print('loading images.')
         Y0 = Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)

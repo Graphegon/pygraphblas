@@ -9,6 +9,8 @@ current_semiring = contextvars.ContextVar('current_semiring')
 
 class Semiring:
 
+    __slots__ = ('name', 'semiring', 'token')
+
     def __init__(self, name, semiring):
         self.name = name
         self.semiring = semiring
