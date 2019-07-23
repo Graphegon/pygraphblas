@@ -404,9 +404,6 @@ class Matrix:
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
 
-    def __not__(self):
-        return self.apply(self._funcs.not_)
-
     def __invert__(self):
         return self.apply(self._funcs.invert)
 
