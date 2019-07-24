@@ -49,12 +49,14 @@ RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.0.1-beta
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
+RUN cd .. && /bin/rm -Rf GraphBLAS-3.0.1-beta1
 
 RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
+RUN cd .. && /bin/rm -Rf LAGraph
 
 RUN ldconfig
 
@@ -63,7 +65,8 @@ RUN conda install -yq datashader pytest ipdb
 ADD . /pygraphblas
 WORKDIR /pygraphblas
 # RUN python setup.py clean
-RUN python setup.py install
+RUN python setup.py develop
+RUN pip install pytest-cov
 RUN chown -R jovyan:users .
 
 # Switch back to jovyan to avoid accidental container runs as root
