@@ -16,7 +16,7 @@ class Semiring:
         self.semiring = semiring
 
     def __enter__(self):
-        self.token = current_semiring.set(self.semiring)
+        self.token = current_semiring.set(self)
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):

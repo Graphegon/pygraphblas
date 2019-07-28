@@ -199,6 +199,18 @@ def test_mxm():
         [0, 1, 2],
         [0, 1, 2],
         [1, 1, 1])
+    with semiring.lor_land_bool:
+        o = m @ n
+    assert o == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 1, 1])
+    with semiring.lor_land_bool:
+        o = m @ n
+    assert o == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 1, 1])
 
 def test_mxv():
     m = Matrix.from_lists(

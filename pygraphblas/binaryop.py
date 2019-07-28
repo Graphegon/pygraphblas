@@ -17,7 +17,7 @@ class BinaryOp:
         self.binaryop = binaryop
 
     def __enter__(self):
-        self.token = current_binop.set(self.binaryop)
+        self.token = current_binop.set(self)
         return self
 
     def __exit__(self, *errors):
@@ -27,7 +27,6 @@ class BinaryOp:
 class Accum:
 
     __slots__ = ('binaryop', 'token')
-
 
     def __init__(self, binaryop):
         self.binaryop = binaryop.binaryop if isinstance(binaryop, BinaryOp) \
