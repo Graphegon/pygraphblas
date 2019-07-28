@@ -16,6 +16,8 @@ from . import descriptor
 
 NULL = ffi.NULL
 
+__all__ = ['Vector']
+
 class Vector:
     """GraphBLAS Sparse Vector
 
@@ -40,6 +42,9 @@ class Vector:
             other.vector[0],
             NULL))
         return result[0]
+
+    def __len__(self):
+        return self.nvals
 
     @classmethod
     def from_type(cls, py_type, size=0):
@@ -226,7 +231,7 @@ class Vector:
             mask = mask.matrix[0]
         if semiring is NULL:
             semiring = current_semiring.get(self._funcs.semiring)
-        elif isinstance(semiring, Semiring):
+        if isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
             accum = current_accum.get(NULL)

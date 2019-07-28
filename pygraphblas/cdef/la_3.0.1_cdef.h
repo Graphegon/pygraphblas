@@ -1,4 +1,118 @@
 //------------------------------------------------------------------------------
+// LAGraph.h:  include file for user applications that use LAGraph
+//------------------------------------------------------------------------------
+
+/*
+    LAGraph:  graph algorithms based on GraphBLAS
+
+    Copyright 2019 LAGraph Contributors.
+
+    (see Contributors.txt for a full list of Contributors; see
+    ContributionInstructions.txt for information on how you can Contribute to
+    this project).
+
+    All Rights Reserved.
+
+    NO WARRANTY. THIS MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. THE LAGRAPH
+    CONTRIBUTORS MAKE NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+    AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR
+    PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF
+    THE MATERIAL. THE CONTRIBUTORS DO NOT MAKE ANY WARRANTY OF ANY KIND WITH
+    RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+
+    Released under a BSD license, please see the LICENSE file distributed with
+    this Software or contact permission@sei.cmu.edu for full terms.
+
+    Created, in part, with funding and support from the United States
+    Government.  (see Acknowledgments.txt file).
+
+    This program includes and/or can make use of certain third party source
+    code, object code, documentation and other files ("Third Party Software").
+    See LICENSE file for more details.
+
+*/
+
+//------------------------------------------------------------------------------
+
+// TODO: add more comments to this file.
+
+//------------------------------------------------------------------------------
+// include files and global #defines
+//------------------------------------------------------------------------------
+
+/* #ifndef LAGRAPH_INCLUDE */
+/* #define LAGRAPH_INCLUDE */
+
+/* #include "GraphBLAS.h" */
+/* #include <complex.h> */
+/* #include <ctype.h> */
+
+/* // "I" is defined by <complex.h>, but is used in LAGraph and GraphBLAS to */
+/* // denote a list of row indices; remove it here. */
+/* #undef I */
+
+/* #include <time.h> */
+
+/* #if defined ( __linux__ ) */
+/* #include <sys/time.h> */
+/* #endif */
+
+/* #if defined ( _OPENMP ) */
+/* #include <omp.h> */
+/* #endif */
+
+/* #if defined ( __MACH__ ) */
+/* #include <mach/clock.h> */
+/* #include <mach/mach.h> */
+/* #endif */
+
+/* #if defined __INTEL_COMPILER */
+/* // disable icc warnings */
+/* //  161:  unrecognized pragma */
+/* #pragma warning (disable: 161) */
+/* #endif */
+
+/* #define LAGRAPH_RAND_MAX 32767 */
+
+/* // suitable for integers, and non-NaN floating point: */
+/* #define LAGRAPH_MAX(x,y) (((x) > (y)) ? (x) : (y)) */
+/* #define LAGRAPH_MIN(x,y) (((x) < (y)) ? (x) : (y)) */
+
+/* // free a block of memory and set the pointer to NULL */
+/* #define LAGRAPH_FREE(p)     \ */
+/* {                           \ */
+/*     LAGraph_free (p) ;      \ */
+/*     p = NULL ;              \ */
+/* } */
+
+//------------------------------------------------------------------------------
+// LAGRAPH_OK: call LAGraph or GraphBLAS and check the result
+//------------------------------------------------------------------------------
+
+// To use LAGRAPH_OK, the #include'ing file must declare a scalar GrB_Info
+// info, and must define LAGRAPH_FREE_ALL as a macro that frees all workspace
+// if an error occurs.  The method can be a GrB_Info scalar as well, so that
+// LAGRAPH_OK(info) works.  The function that uses this macro must return
+// GrB_Info, or int.
+
+/* #define LAGRAPH_ERROR(message,info)                                         \ */
+/* {                                                                           \ */
+/*     fprintf (stderr, "LAGraph error: %s\n[%d]\n%s\nFile: %s Line: %d\n",    \ */
+/*         message, info, GrB_error ( ), __FILE__, __LINE__) ;                 \ */
+/*     LAGRAPH_FREE_ALL ;                                                      \ */
+/*     return (info) ;                                                         \ */
+/* } */
+
+/* #define LAGRAPH_OK(method)                                                  \ */
+/* {                                                                           \ */
+/*     info = method ;                                                         \ */
+/*     if (! (info == GrB_SUCCESS || info == GrB_NO_VALUE))                    \ */
+/*     {                                                                       \ */
+/*         LAGRAPH_ERROR ("", info) ;                                          \ */
+/*     }                                                                       \ */
+/* } */
+
+//------------------------------------------------------------------------------
 // LAGraph_Context:
 //------------------------------------------------------------------------------
 
@@ -133,7 +247,11 @@ extern GrB_Descriptor
     LAGraph_desc_ttco ,   // A', B', compl mask
     LAGraph_desc_ttcr ;   // A', B', compl mask, replace
 
-extern GxB_SelectOp LAGraph_support ;
+/* #if defined ( GxB_SUITESPARSE_GRAPHBLAS ) \ */
+/*     && GxB_IMPLEMENTATION >= GxB_VERSION (3,0,1) */
+/* // requires SuiteSparse:GraphBLAS v3.0.1 or later */
+/* extern GxB_SelectOp LAGraph_support ; */
+/* #endif */
 
 //------------------------------------------------------------------------------
 // memory management functions
@@ -296,6 +414,31 @@ GrB_Info LAGraph_prune_diag // remove all entries from the diagonal
     GrB_Matrix A
 ) ;
 
+GrB_Info LAGraph_Vector_to_dense
+(
+    GrB_Vector *vdense,     // output vector
+    GrB_Vector v,           // input vector
+    void *id                // pointer to value to fill vdense with
+) ;
+
+int LAGraph_set_nthreads        // returns # threads set, 0 if nothing done
+(
+    int nthreads
+) ;
+
+int LAGraph_get_nthreads        // returns # threads to use, 0 if unknown
+(
+    void
+) ;
+
+GrB_Info LAGraph_grread     // read a matrix from a binary file
+(
+    GrB_Matrix *G,          // handle of matrix to create
+    uint64_t *G_version,    // the version in the file
+    const char *filename,   // name of file to open
+    GrB_Type gtype          // type of matrix to read
+) ;
+
 //------------------------------------------------------------------------------
 // user-callable algorithms
 //------------------------------------------------------------------------------
@@ -319,7 +462,7 @@ GrB_Info LAGraph_bfs_simple     // push-only BFS
     GrB_Index s             // starting node of the BFS
 ) ;
 
-/* GrB_Info LAGraph_lacc (GrB_Matrix A) ; */
+GrB_Info LAGraph_lacc (GrB_Matrix A, GrB_Vector *result) ;
 
 // LAGraph_pagrank computes an array of structs for its result
 typedef struct
@@ -384,12 +527,14 @@ GrB_Info LAGraph_BF_basic
     const GrB_Index s           //given index of the source
 ) ;
 
-/* GrB_Info LAGraph_lcc            // compute lcc for all nodes in A */
-/* ( */
-/*     GrB_Vector *LCC_handle,     // output vector */
-/*     const GrB_Matrix A,         // input matrix */
-/*     bool sanitize               // if true, ensure A is binary */
-/* ) ; */
+GrB_Info LAGraph_lcc            // compute lcc for all nodes in A
+(
+    GrB_Vector *LCC_handle,     // output vector
+    const GrB_Matrix A,         // input matrix
+    bool sanitize,              // if true, ensure A is binary
+    double t [2]                // t [0] = sanitize time, t [1] = lcc time,
+                                // in seconds
+) ;
 
 GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful
 (
@@ -402,9 +547,4 @@ GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful
     GrB_Matrix Y0       // input features: nfeatures-by-nneurons
 ) ;
 
-GrB_Info LAGraph_Vector_to_dense
-(
-    GrB_Vector *vdense,     // output vector
-    GrB_Vector v,           // input vector
-    void *id                // pointer to value to fill vdense with
- ) ;
+/* #endif */

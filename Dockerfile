@@ -41,29 +41,32 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # get GraphBLAS, compile with debug symbols
-RUN curl -s -L http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-2.3.3.tar.gz | \
-    tar zxvf - && cd GraphBLAS && \
+
+RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.0.1-beta1.tar.gz | tar -xz && \
+     cd GraphBLAS-3.0.1-beta1 && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
+RUN cd .. && /bin/rm -Rf GraphBLAS-3.0.1-beta1
 
-RUN git clone https://github.com/GraphBLAS/LAGraph.git && \
+RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
-    git checkout 7a21aa5 && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
+RUN cd .. && /bin/rm -Rf LAGraph
 
 RUN ldconfig
 
-RUN conda install -yq datashader pytest
+RUN conda install -yq datashader pytest ipdb
 
 ADD . /pygraphblas
 WORKDIR /pygraphblas
-RUN python setup.py clean
-RUN python setup.py install
+# RUN python setup.py clean
+RUN python setup.py develop
+RUN pip install pytest-cov
 RUN chown -R jovyan:users .
 
 # Switch back to jovyan to avoid accidental container runs as root

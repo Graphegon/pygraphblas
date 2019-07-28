@@ -11,13 +11,16 @@ from .base import (
     _build_range,
 )
 from .vector import Vector
+from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
-from .type_funcs import build_matrix_type_funcs
+from .type_funcs import build_matrix_type_funcs, type_name
 from . import descriptor
 
 NULL = ffi.NULL
+
+__all__ = ['Matrix']
 
 class Matrix:
     """GraphBLAS Sparse Matrix
@@ -359,10 +362,16 @@ class Matrix:
             desc))
         return out
 
+    def __len__(self):
+        return self.nvals
+
     def __eq__(self, other):
         """Compare two matrices for equality.
 
         """
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_EQ_THUNK, thunk=other)
+
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_isequal(
             result,
@@ -370,6 +379,18 @@ class Matrix:
             other.matrix[0],
             NULL))
         return result[0]
+
+    def __neq__(self, other):
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_NE_THUNK, thunk=other)
+
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            NULL))
+        return not result[0]
 
     def __add__(self, other):
         return self.ewise_add(other)
@@ -382,9 +403,6 @@ class Matrix:
 
     def __imul__(self, other):
         return self.ewise_mult(other, out=self)
-
-    def __not__(self):
-        return self.apply(self._funcs.not_)
 
     def __invert__(self):
         return self.apply(self._funcs.invert)
@@ -524,6 +542,11 @@ class Matrix:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
+        if isinstance(thunk, (bool, int, float)):
+            thunk = Scalar.from_value(thunk)
+        if isinstance(thunk, Scalar):
+            self._keep_alives[self.matrix] = thunk
+            thunk = thunk.scalar[0]
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
             mask,
@@ -535,20 +558,32 @@ class Matrix:
             ))
         return out
 
-    def tril(self, diag=0):
-        return self.select(lib.GxB_TRIL, thunk=ffi.new('int64_t*', diag))
+    def tril(self, thunk=NULL):
+        return self.select(lib.GxB_TRIL, thunk=thunk)
 
-    def triu(self, diag=0):
-        return self.select(lib.GxB_TRIU, thunk=ffi.new('int64_t*', diag))
+    def triu(self, thunk=NULL):
+        return self.select(lib.GxB_TRIU, thunk=thunk)
 
-    def diag(self, diag=0):
-        return self.select(lib.GxB_DIAG, thunk=ffi.new('int64_t*', diag))
+    def diag(self, thunk=NULL):
+        return self.select(lib.GxB_DIAG, thunk=thunk)
 
-    def offdiag(self, diag=0):
-        return self.select(lib.GxB_OFFDIAG, thunk=ffi.new('int64_t*', diag))
+    def offdiag(self, thunk=NULL):
+        return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
+
+    def __gt__(self, thunk):
+        return self.select(lib.GxB_GT_THUNK, thunk=thunk)
+
+    def __lt__(self, thunk):
+        return self.select(lib.GxB_LT_THUNK, thunk=thunk)
+
+    def __ge__(self, thunk):
+        return self.select(lib.GxB_GE_THUNK, thunk=thunk)
+
+    def __le__(self, thunk):
+        return self.select(lib.GxB_LE_THUNK, thunk=thunk)
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
@@ -561,7 +596,7 @@ class Matrix:
             mask = mask.matrix[0]
         if semiring is NULL:
             semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
-        elif isinstance(semiring, Semiring):
+        if isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
             accum = current_accum.get(NULL)
@@ -590,7 +625,7 @@ class Matrix:
             mask = mask.matrix[0]
         if semiring is NULL:
             semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
-        elif isinstance(semiring, Semiring):
+        if isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
             accum = current_accum.get(NULL)
@@ -832,7 +867,8 @@ class Matrix:
         raise TypeError('Unknown index or value for matrix assignment.')
 
     def __repr__(self):
-        return '<Matrix (%sx%s: %s)>' % (
+        return '<Matrix (%sx%s : %s:%s)>' % (
             self.nrows,
             self.ncols,
-            self.nvals)
+            self.nvals,
+            type_name(self.gb_type))

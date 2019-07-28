@@ -199,6 +199,18 @@ def test_mxm():
         [0, 1, 2],
         [0, 1, 2],
         [1, 1, 1])
+    with semiring.lor_land_bool:
+        o = m @ n
+    assert o == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 1, 1])
+    with semiring.lor_land_bool:
+        o = m @ n
+    assert o == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [1, 1, 1])
 
 def test_mxv():
     m = Matrix.from_lists(
@@ -506,3 +518,52 @@ def test_select_ops():
         [0, 1, 2],
         [0, 1, 2],
         [float('inf'), 1.0, 0.5])
+
+def test_select_cmp():
+    I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
+    V = list(range(9))
+    m = Matrix.from_lists(I, J, V, 3, 3)
+
+    n = m > 5
+    assert n == Matrix.from_lists(
+        [2, 2, 2], [0, 1, 2], [6, 7, 8]
+        )
+
+    n = m >= 5
+    assert n == Matrix.from_lists(
+        [1, 2, 2, 2],
+        [2, 0, 1, 2],
+        [5, 6, 7, 8]
+        )
+
+    n = m < 5
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1],
+        [0, 1, 2, 0, 1],
+        [0, 1, 2, 3, 4],
+        3, 3
+        )
+
+    n = m <= 5
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [0, 1, 2, 3, 4, 5],
+        3, 3
+        )
+
+    n = m == 5
+    assert n == Matrix.from_lists(
+        [1],
+        [2],
+        [5],
+        3, 3
+        )
+
+    n = m != 5
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1],
+        [0, 1, 2, 0, 1],
+        [0, 1, 2, 3, 4],
+        3, 3
+        )

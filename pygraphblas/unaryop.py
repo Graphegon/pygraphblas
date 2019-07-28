@@ -5,6 +5,8 @@ from .base import lib
 
 class UnaryOp:
 
+    __slots__ = ('name', 'unaryop')
+
     def __init__(self, name, unaryop):
         self.name = name
         self.unaryop = unaryop

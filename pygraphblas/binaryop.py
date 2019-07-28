@@ -10,12 +10,14 @@ current_binop = contextvars.ContextVar('current_binop')
 
 class BinaryOp:
 
+    __slots__ = ('name', 'binaryop', 'token')
+
     def __init__(self, name, binaryop):
         self.name = name
         self.binaryop = binaryop
 
     def __enter__(self):
-        self.token = current_binop.set(self.binaryop)
+        self.token = current_binop.set(self)
         return self
 
     def __exit__(self, *errors):
@@ -23,6 +25,8 @@ class BinaryOp:
         return False
 
 class Accum:
+
+    __slots__ = ('binaryop', 'token')
 
     def __init__(self, binaryop):
         self.binaryop = binaryop.binaryop if isinstance(binaryop, BinaryOp) \
