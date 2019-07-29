@@ -4,40 +4,17 @@ SuitSparse:GraphBLAS for Python
 
 # Install
 
-pygraphblas for now involves building packages from source and
-requires Python 3.7 or higher.  For simple setup, a Dockerfile is
-provided that builds a complete pygraphblas environment based on the
-[Jupyer Base Notebook
-image](https://hub.docker.com/r/jupyter/base-notebook/).  To build a
-new container, run:
+pygraphblas is distributed as a docker image on [Docker
+Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
+and can be run with a single command:
 
-    docker build . -t pygraphblas
-
-This will tag the new container as `pygraphblas`.  Change that if you
-want.  Next run the tests:
-
-    $ docker run -it pygraphblas pytest
-    ============================= test session starts ==============================
-    platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
-    rootdir: /pygraphblas, inifile: setup.cfg
-    collected 47 items
-
-    tests/test_matrix.py .............................                       [ 61%]
-    tests/test_vector.py ..................                                  [100%]
-
-    ========================== 47 passed in 0.36 seconds ===========================
-
-This means pygraphblas is ready to go.  An interactive ipython
-session can be run to play with it:
-
-    $ docker run -it pygraphblas ipython
+    docker run -it pygraphblas/pygraphblas ipython
     Python 3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     Type 'copyright', 'credits' or 'license' for more information
     IPython 7.6.1 -- An enhanced Interactive Python. Type '?' for help.
 
-
     In [1]: from pygraphblas import Matrix
-    
+
     # two random 3x3 matrices with 3 random values mod(10)
 
     In [3]: m = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
@@ -51,6 +28,22 @@ session can be run to play with it:
 
     In [6]: n.to_lists()
     Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in sparse 3x3
+
+Next run the tests:
+
+    $ docker run -it pygraphblas/pygraphblas pytest
+    ========================================== test session starts ==========================================
+    platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
+    rootdir: /pygraphblas, inifile: setup.cfg
+    plugins: cov-2.7.1
+    collected 54 items
+
+    tests/test_demo.py .                                                                              [  1%]
+    tests/test_matrix.py ...............................                                              [ 59%]
+    tests/test_scalar.py ....                                                                         [ 66%]
+    tests/test_vector.py ..................                                                           [100%]
+
+    ======================================= 54 passed in 1.04 seconds =======================================
 
 # Summary
 
@@ -185,9 +178,9 @@ multiplication syntax:
     from pygraphblas import Matrix, Vector
     from pygraphblas.semiring import min_plus_int64
     from pygraphblas.binaryop import min_int64, Accum
-    
+
     def sssp(matrix, start):
-        v = Vector.from_type(                  # create a vector 
+        v = Vector.from_type(                  # create a vector
             matrix.gb_type,                    # same type as m
             matrix.nrows                       # same size as rows of m
         )
@@ -200,13 +193,13 @@ multiplication syntax:
                 if w == v:                     # if nothing changed
                     break                      # exit early
             return v
-            
+
 An identical but slightly more verbose approach is to call the
 multiplication method directly `Vector.vxm' in this case, with
 explicit semiring and accumulator operations:
 
     def sssp_direct(matrix, start):
-        v = Vector.from_type(            # create a vector 
+        v = Vector.from_type(            # create a vector
             matrix.gb_type,              # same type as m
             matrix.nrows                 # same size as rows of m
         )
@@ -214,9 +207,9 @@ explicit semiring and accumulator operations:
 
         for _ in range(matrix.nrows):    # for every row in m:
             w = Vector.dup(v)            # dup the vector
-            v.vxm(                       # multiply vector by matrix 
+            v.vxm(                       # multiply vector by matrix
                 matrix, out=v,
-                semiring=min_plus_int64, # with min_plus, 
+                semiring=min_plus_int64, # with min_plus,
                 accum=min_int64          # acccumulate the minimum
             )
             if w == v:                   # if nothing changed

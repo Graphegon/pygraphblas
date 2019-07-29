@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=jupyter/base-notebook
+ARG BASE_CONTAINER=python:3.7
 FROM $BASE_CONTAINER
 
 USER root
@@ -6,26 +6,11 @@ USER root
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
-    emacs \
     git \
-    inkscape \
-    jed \
-    libsm6 \
-    libxext-dev \
-    libxrender1 \
-    lmodern \
     netcat \
-    pandoc \
     python-dev \
-    texlive-fonts-extra \
-    texlive-fonts-recommended \
-    texlive-generic-recommended \
-    texlive-latex-base \
-    texlive-latex-extra \
-    texlive-xetex \
     tzdata \
     unzip \
-    nano \
     make \
     cmake \
     curl \
@@ -60,14 +45,8 @@ RUN cd .. && /bin/rm -Rf LAGraph
 
 RUN ldconfig
 
-RUN conda install -yq datashader pytest ipdb
-
 ADD . /pygraphblas
 WORKDIR /pygraphblas
 # RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install pytest-cov
-RUN chown -R jovyan:users .
-
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_UID
+RUN pip install ipython pytest ipdb pytest-cov
