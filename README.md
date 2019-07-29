@@ -9,9 +9,6 @@ Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
 and can be run with a single command:
 
     docker run -it pygraphblas/pygraphblas ipython
-    Python 3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
-    Type 'copyright', 'credits' or 'license' for more information
-    IPython 7.6.1 -- An enhanced Interactive Python. Type '?' for help.
 
     In [1]: from pygraphblas import Matrix
 
@@ -74,6 +71,13 @@ Texas A&M University.  [News and
 information](http://faculty.cse.tamu.edu/davis/news.html) can provide
 you with a lot more background information, in addition to the
 references below.
+
+While it is my goal to make it so that pygraphblas works with any
+GraphBLAS implementation, it currently only works with SuiteSparse
+v3.0.1.  SuiteSparse provides several "extension" features
+pre-packaged objects that are very useful for pygraphblas.  If there
+is a GraphBLAS implementation you would like to see support for in
+pygraphblas, please consider sending me a pull request.
 
 # Intro
 
