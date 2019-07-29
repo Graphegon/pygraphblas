@@ -1,6 +1,6 @@
 # pygraphblas
 
-SuitSparse:GraphBLAS for Python
+GraphBLAS for Python
 
 # Install
 
