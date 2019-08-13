@@ -231,7 +231,7 @@ class Vector:
             mask = mask.matrix[0]
         if semiring is NULL:
             semiring = current_semiring.get(self._funcs.semiring)
-        elif isinstance(semiring, Semiring):
+        if isinstance(semiring, Semiring):
             semiring = semiring.semiring
         if accum is NULL:
             accum = current_accum.get(NULL)
