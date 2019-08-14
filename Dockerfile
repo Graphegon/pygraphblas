@@ -27,14 +27,14 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 
 # get GraphBLAS, compile with debug symbols
 
-RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.0.1-beta1.tar.gz | tar -xz && \
-     cd GraphBLAS-3.0.1-beta1 && \
+RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.0.1.tar.gz | tar -xz && \
+     cd GraphBLAS && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
-RUN cd .. && /bin/rm -Rf GraphBLAS-3.0.1-beta1
+RUN cd .. && /bin/rm -Rf GraphBLAS
 
 RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     cd LAGraph && \
@@ -45,8 +45,13 @@ RUN cd .. && /bin/rm -Rf LAGraph
 
 RUN ldconfig
 
+RUN conda install -yq pytest ipdb
 ADD . /pygraphblas
 WORKDIR /pygraphblas
 # RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install ipython pytest ipdb pytest-cov
+RUN pip install pytest-cov
+RUN chown -R jovyan:users .
+
+# Switch back to jovyan to avoid accidental container runs as root
+USER $NB_UID
