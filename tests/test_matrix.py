@@ -572,4 +572,3 @@ def test_shape():
     assert Matrix.from_lists(
         [2, 2, 2], [0, 1, 2], [6, 7, 8]
     ).shape == (3, 3)
-
