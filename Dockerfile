@@ -45,13 +45,8 @@ RUN cd .. && /bin/rm -Rf LAGraph
 
 RUN ldconfig
 
-RUN conda install -yq pytest ipdb
 ADD . /pygraphblas
 WORKDIR /pygraphblas
-# RUN python setup.py clean
+RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install pytest-cov
-RUN chown -R jovyan:users .
-
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_UID
+RUN pip install pytest pytest-cov ipdb
