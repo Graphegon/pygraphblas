@@ -24,7 +24,7 @@ and can be run with a single command:
     Out[8]: <Matrix (3x3: 2)>
 
     In [6]: n.to_lists()
-    Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in sparse 3x3
+    Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in this particular sparse 3x3
 
 Next run the tests:
 
@@ -74,7 +74,7 @@ references below.
 
 While it is my goal to make it so that pygraphblas works with any
 GraphBLAS implementation, it currently only works with SuiteSparse
-v3.0.1.  SuiteSparse provides several "extension" features
+v3.0.1.  SuiteSparse provides several "extension" features and
 pre-packaged objects that are very useful for pygraphblas.  If there
 is a GraphBLAS implementation you would like to see support for in
 pygraphblas, please consider sending me a pull request.

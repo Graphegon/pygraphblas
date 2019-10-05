@@ -36,7 +36,7 @@ def sssp(m, start):
 # semring and accumulator so that the `@` matmul syntax is used
 # instead of explict vxm.
 
-def sssp2(matrix, start):
+def sssp(matrix, start):
     v = Vector.from_type(matrix.gb_type, matrix.nrows)
     v[start] = 0
 

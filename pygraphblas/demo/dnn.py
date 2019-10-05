@@ -10,15 +10,13 @@ def dnn(W, Bias, Y0):
     Y = Matrix.from_type(Y0.gb_type, nfeatures, nneurons)
     for layer, (w, b) in enumerate(zip(W, Bias)):
         with plus_times_fp32:
-            print('Y @= w')
             (Y0 if layer == 0 else Y).mxm(w, out=Y)
         with plus_plus_fp32:
-            print('Y @= b')
             Y.mxm(b, out=Y)
         Y.select(lib.GxB_GT_ZERO, out=Y)
         Y.apply(lib.LAGraph_YMAX_FP32, out=Y)
-        print(repr(Y))
     return Y
+
 
 def load_images():
     images = Path('sparse-images-1024.tsv')
