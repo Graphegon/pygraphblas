@@ -6,6 +6,7 @@ from random import randint
 from .base import (
     lib,
     ffi,
+    NULL,
     _check,
     _gb_from_type,
     _build_range,
@@ -17,8 +18,6 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .type_funcs import build_matrix_type_funcs, type_name
 from . import descriptor
-
-NULL = ffi.NULL
 
 __all__ = ['Matrix']
 

@@ -2,6 +2,7 @@
 from .base import (
     lib,
     ffi,
+    NULL,
     _check,
     _gb_from_type,
     _default_add_op,
@@ -13,8 +14,6 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .type_funcs import build_vector_type_funcs
 from . import descriptor
-
-NULL = ffi.NULL
 
 __all__ = ['Vector']
 

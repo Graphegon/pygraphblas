@@ -1,14 +1,13 @@
 from .base import (
     lib,
     ffi,
+    NULL,
     _check,
     _check_no_val_key_error,
     _gb_from_type
 )
 
 from .type_funcs import build_scalar_type_funcs
-
-NULL = ffi.NULL
 
 __all__ = ['Scalar']
 
