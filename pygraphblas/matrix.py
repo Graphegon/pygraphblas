@@ -380,7 +380,7 @@ class Matrix:
             NULL))
         return result[0]
 
-    def __neq__(self, other):
+    def __ne__(self, other):
         if isinstance(other, (Scalar, bool, int, float)):
             return self.select(lib.GxB_NE_THUNK, thunk=other)
 

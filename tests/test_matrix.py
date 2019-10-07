@@ -4,7 +4,7 @@ from itertools import product, repeat
 
 import pytest
 
-from pygraphblas import Matrix, Vector, semiring, unaryop
+from pygraphblas import Matrix, Vector, semiring, unaryop, binaryop
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
@@ -16,6 +16,7 @@ def test_matrix_create_from_type():
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 0
+    assert len(m) == 0
 
 def test_matrix_get_set_element():
     m = Matrix.from_type(int, 10, 10)
@@ -23,6 +24,7 @@ def test_matrix_get_set_element():
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 1
+    assert len(m) == 1
     assert m[3,3] == 3
 
 def test_matrix_slice_vector():
@@ -38,8 +40,10 @@ def test_clear():
         list(range(10)),
         list(range(10)))
     assert v.nvals == 10
+    assert len(v) == 10
     v.clear()
     assert v.nvals == 0
+    assert len(v) == 0
 
 def test_resize():
     v = Matrix.from_lists(
@@ -562,9 +566,9 @@ def test_select_cmp():
 
     n = m != 5
     assert n == Matrix.from_lists(
-        [0, 0, 0, 1, 1],
-        [0, 1, 2, 0, 1],
-        [0, 1, 2, 3, 4],
+        [0, 0, 0, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 0, 1, 2],
+        [0, 1, 2, 3, 4, 6, 7, 8],
         3, 3
         )
 
