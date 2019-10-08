@@ -821,17 +821,41 @@ class Matrix:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            # a[3] = assign single row  vector
+            # A[3] = assign single row  vector
             if isinstance(value, Vector):
                 return self.assign_row(index, value)
 
         if isinstance(index, slice):
-            # a[3:] = assign submatrix to rows
+            # A[3:] = assign submatrix to rows
             if isinstance(value, Matrix):
                 self.assign_matrix(value, index, None)
+                return
             if isinstance(value, (bool, int, float)):
                 # scalar assignment TODO
-                return
+                scalar = Scalar.from_value(value)
+                raise NotImplementedError
+
+        if isinstance(index, Matrix):
+            if isinstance(value, Matrix):
+                # A[M] = B masked matrix assignment
+                raise NotImplementedError
+            if not isinstance(value, (bool, int, float)):
+                raise TypeError
+            # A[M] = s masked scalar assignment
+            scalar_type = _gb_from_type(type(value))
+            tf = build_matrix_type_funcs(scalar_type)
+            _check(tf.assignScalar(
+                self.matrix[0],
+                index.matrix[0],
+                NULL,
+                value,
+                lib.GrB_ALL,
+                0,
+                lib.GrB_ALL,
+                0,
+                NULL
+                ))
+            return
 
         if not isinstance(index, (tuple, list)):
             raise TypeError

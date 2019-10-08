@@ -412,6 +412,18 @@ def test_matrix_assign():
     m[:,:] = n
     assert m == n
 
+    n = Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 1, 2])
+
+    mask = m > 0
+    m[mask] = 9
+    assert m == Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 9, 9])
+
 def test_kron():
     n = Matrix.from_lists(
         list(range(3)),
