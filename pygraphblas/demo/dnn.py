@@ -4,10 +4,12 @@ from time import time
 from pathlib import Path
 from pygraphblas import Matrix, lib
 from pygraphblas.semiring import plus_times_fp32, plus_plus_fp32
+from multiprocessing.pool import ThreadPool
+from multiprocessing import cpu_count
+
 
 nfeatures = 60000
 nneurons = 1024
-
 
 def timing(f):
     @wraps(f)
@@ -57,15 +59,17 @@ def load_categories():
     with cats.open() as i:
         return Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
 
+def load_layer(id):
+    l = Path('./dnn_demo/neuron1024/n1024-l{}.tsv'.format(str(i+1)))
+    with l.open() as f:
+        return Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
+
 @timing
 def generate_layers(layers=120):
     result = []
     neurons = Path('./dnn_demo/neuron1024')
-    for i in range(layers):
-        l = Path('./dnn_demo/neuron1024/n1024-l{}.tsv'.format(str(i+1)))
-        with l.open() as f:
-            result.append(Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons))
-    return result
+    with ThreadPool(cpu_count()) as pool:
+        return pool.map(load_layer, range(layers))
 
 @timing
 def generate_bias(layers=120):
