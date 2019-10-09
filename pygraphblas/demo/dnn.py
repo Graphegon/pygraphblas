@@ -9,7 +9,8 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 
 
-nfeatures = 60000
+NFEATURES = 60000
+BIAS = {1024: -0.3, 4096: -0.35, 16384: -0.4, 65536: -0.45} 
 
 def timing(f):
     @wraps(f)
@@ -38,13 +39,13 @@ def dnn(W, Bias, Y0):
 @timing
 def load_images(nneurons):
     images = Path('./dnn_demo/sparse-images-{}.tsv'.format(nneurons))
-    with images.open() as i:
-        return Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
+    with gzip.open(images) as i:
+        return Matrix.from_tsv(i, lib.GrB_FP32, NFEATURES, nneurons)
 
 @timing
 def load_categories(nneurons, nlayers):
     cats = Path('./dnn_demo/neuron{}-l{}-categories.tsv'.format(nneurons, nlayers))
-    result = Vector.from_type(bool, nfeatures)
+    result = Vector.from_type(bool, NFEATURES)
     with cats.open() as i:
         for line in i.readlines():
             result[int(line.strip())-1] = True
@@ -68,7 +69,7 @@ def generate_bias(nneurons, nlayers):
     for i in range(nlayers):
         bias = Matrix.from_type(lib.GrB_FP32, nneurons, nneurons)
         for i in range(nneurons):
-            bias[i,i] = -0.3
+            bias[i,i] = BIAS[nneurons]
         bias.nvals # causes async completion
         result.append(bias)
     return result
