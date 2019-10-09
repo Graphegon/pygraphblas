@@ -6,6 +6,10 @@ if [ ! -f "sparse-images-1024.tsv" ]; then
     rm sparse-images-1024.tsv.gz
 fi
 
+if [ ! -f "neuron1024-l120-categories.tsv" ]; then
+    wget https://graphchallenge.s3.amazonaws.com/synthetic/sparsechallenge_2019/dnn/neuron1024-l120-categories.tsv
+fi
+
 if [ ! -d "neuron1024" ]; then
     wget https://graphchallenge.s3.amazonaws.com/synthetic/sparsechallenge_2019/dnn/neuron1024.tar.gz
     zcat neuron1024.tar.gz | tar xvf -
@@ -14,4 +18,5 @@ fi
 
 cd ..
 
-docker run -v `pwd`/dnn_demo:/pygraphblas/dnn_demo -v `pwd`/pygraphblas:/pygraphblas/pygraphblas -it pygraphblas/pygraphblas ipython
+docker run -v `pwd`/dnn_demo:/pygraphblas/dnn_demo -v `pwd`/pygraphblas:/pygraphblas/pygraphblas -it pygraphblas/pygraphblas ipython -i -m pygraphblas.demo.dnn
+

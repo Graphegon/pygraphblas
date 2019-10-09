@@ -1,4 +1,6 @@
 import gzip
+from functools import wraps
+from time import time
 from pathlib import Path
 from pygraphblas import Matrix, lib
 from pygraphblas.semiring import plus_times_fp32, plus_plus_fp32
@@ -6,6 +8,19 @@ from pygraphblas.semiring import plus_times_fp32, plus_plus_fp32
 nfeatures = 60000
 nneurons = 1024
 
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        print('timing %r ...' % f.__name__)
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print('func:%r took: %2.4f sec' % (f.__name__, te-ts))
+        return result
+    return wrap
+
+@timing
 def dnn(W, Bias, Y0):
     Y = Matrix.from_type(Y0.gb_type, nfeatures, nneurons)
     for layer, (w, b) in enumerate(zip(W, Bias)):
@@ -19,6 +34,7 @@ def dnn(W, Bias, Y0):
             Y[M] = 32
     return Y
 
+@timing
 def dnn2(W, Bias, Y):
     Y = Matrix.from_type(Y0.gb_type, nfeatures, nneurons)
     for layer, (w, b) in enumerate(zip(W, Bias)):
@@ -29,32 +45,40 @@ def dnn2(W, Bias, Y):
             Y[M] = 32
     return Y
 
+@timing
 def load_images():
-    images = Path('./dnn_demo/sparse-images-1024.tsv.gz')
-    with gzip.open(images) as i:
-        print('loading images.')
-        Y0 = Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
-    return Y0
+    images = Path('./dnn_demo/sparse-images-1024.tsv')
+    with images.open() as i:
+        return Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
 
+@timing
+def load_categories():
+    cats = Path('./dnn_demo/neuron1024-l120-categories.tsv')
+    with cats.open() as i:
+        return Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
+
+@timing
 def generate_layers(layers=120):
+    result = []
     neurons = Path('./dnn_demo/neuron1024')
     for i in range(layers):
         l = Path('./dnn_demo/neuron1024/n1024-l{}.tsv'.format(str(i+1)))
         with l.open() as f:
-            print('loading layer: ', i+1)
-            yield Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
+            result.append(Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons))
+    return result
 
+@timing
 def generate_bias(layers=120):
+    result = []
     for i in range(layers):
         bias = Matrix.from_type(lib.GrB_FP32, nneurons, nneurons)
         for i in range(nneurons):
             bias[i,i] = 0.3
         bias.nvals # causes async completion
-        yield bias
+        result.append(bias)
+    return result
 
-def main():
-    Y0 = load_images()
-    result = dnn(generate_layers(), generate_bias(), Y0)
-    with open('./dnn_demo/dnn_output.mm', 'w') as f:
-        result.to_mm(f)
 
+if __name__ == '__main__':
+    result = dnn(generate_layers(), generate_bias(), load_images())
+    cat = load_categories()

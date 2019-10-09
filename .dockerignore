@@ -1,1 +1,5 @@
 demo
+docs
+dnn_demo
+demo/__pycache__
+tests/__pycache__
