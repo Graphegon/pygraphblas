@@ -1,6 +1,5 @@
 import os
-import gzip
-from functools import wraps
+from functools import wraps, partial
 from time import time
 from pathlib import Path
 from pygraphblas import Matrix, Vector, lib
@@ -37,31 +36,31 @@ def dnn(W, Bias, Y0):
     return Y
 
 @timing
-def load_images(nneurons):
-    images = Path('./dnn_demo/sparse-images-{}.tsv'.format(nneurons))
-    with gzip.open(images) as i:
+def load_images(nneurons, dest):
+    images = Path('{}/sparse-images-{}.tsv'.format(dest, nneurons))
+    with images.open() as i:
         return Matrix.from_tsv(i, lib.GrB_FP32, NFEATURES, nneurons)
 
 @timing
-def load_categories(nneurons, nlayers):
-    cats = Path('./dnn_demo/neuron{}-l{}-categories.tsv'.format(nneurons, nlayers))
+def load_categories(nneurons, nlayers, dest):
+    cats = Path('{}/neuron{}-l{}-categories.tsv'.format(dest, nneurons, nlayers))
     result = Vector.from_type(bool, NFEATURES)
     with cats.open() as i:
         for line in i.readlines():
             result[int(line.strip())-1] = True
     return result
 
-def load_layer(i):
-    l = Path('./dnn_demo/neuron{}/n{}-l{}.tsv'.format(nneurons, nneurons, str(i+1)))
+def load_layer(i, dest):
+    l = Path('{}/neuron{}/n{}-l{}.tsv'.format(dest, nneurons, nneurons, str(i+1)))
     with l.open() as f:
         return Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
 
 @timing
-def generate_layers(nneurons, nlayers):
+def generate_layers(nneurons, nlayers, dest):
     result = []
-    neurons = Path('./dnn_demo/neuron{}'.format(nneurons))
+    neurons = Path('{}/neuron{}'.format(dest, nneurons))
     with ThreadPool(cpu_count()) as pool:
-        return pool.map(load_layer, range(nlayers))
+        return pool.map(partial(load_layer, dest=dest), range(nlayers))
 
 @timing
 def generate_bias(nneurons, nlayers):
@@ -78,10 +77,11 @@ def generate_bias(nneurons, nlayers):
 if __name__ == '__main__':
     nneurons = int(os.getenv('NNEURONS'))
     nlayers = int(os.getenv('NLAYERS'))
+    dest = os.getenv('DEST')
 
-    result = dnn(generate_layers(nneurons, nlayers),
+    result = dnn(generate_layers(nneurons, nlayers, dest),
                  generate_bias(nneurons, nlayers),
-                 load_images(nneurons))
+                 load_images(nneurons, dest))
     r = result.reduce_vector()
     cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(bool, r.size))
-    truecats = load_categories(nneurons, nlayers)
+    truecats = load_categories(nneurons, nlayers, dest)
