@@ -62,7 +62,7 @@ def load_categories():
             result[int(line.strip())] = True
     return result
 
-def load_layer(id):
+def load_layer(i):
     l = Path('./dnn_demo/neuron1024/n1024-l{}.tsv'.format(str(i+1)))
     with l.open() as f:
         return Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
