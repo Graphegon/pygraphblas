@@ -56,8 +56,11 @@ def load_images():
 @timing
 def load_categories():
     cats = Path('./dnn_demo/neuron1024-l120-categories.tsv')
+    result = Vector.from_type(bool, nfeatures)
     with cats.open() as i:
-        return Matrix.from_tsv(i, lib.GrB_FP32, nfeatures, nneurons)
+        for line in i.readlines():
+            result[int(line.strip())] = True
+    return result
 
 def load_layer(id):
     l = Path('./dnn_demo/neuron1024/n1024-l{}.tsv'.format(str(i+1)))
