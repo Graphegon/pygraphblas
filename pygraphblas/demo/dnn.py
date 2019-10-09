@@ -57,10 +57,9 @@ def load_layer(i, dest):
 
 @timing
 def generate_layers(nneurons, nlayers, dest):
-    result = []
     neurons = Path('{}/neuron{}'.format(dest, nneurons))
     with ThreadPool(cpu_count()) as pool:
-        return pool.map(partial(load_layer, dest=dest), range(nlayers))
+        return pool.map(partial(load_layer, dest=dest), range(nlayers), (cpu_count()/2))
 
 @timing
 def generate_bias(nneurons, nlayers):
@@ -79,9 +78,10 @@ if __name__ == '__main__':
     nlayers = int(os.getenv('NLAYERS'))
     dest = os.getenv('DEST')
 
+    images = load_images(nneurons, dest)
     result = dnn(generate_layers(nneurons, nlayers, dest),
                  generate_bias(nneurons, nlayers),
-                 load_images(nneurons, dest))
+                 images)
     r = result.reduce_vector()
     cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(bool, r.size))
     truecats = load_categories(nneurons, nlayers, dest)
