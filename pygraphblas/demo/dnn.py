@@ -51,6 +51,7 @@ def load_categories(nneurons, nlayers, dest):
     return result
 
 def load_layer(i, dest):
+    print(i,)
     l = Path('{}/neuron{}/n{}-l{}.tsv'.format(dest, nneurons, nneurons, str(i+1)))
     with l.open() as f:
         return Matrix.from_tsv(f, lib.GrB_FP32, nneurons, nneurons)
