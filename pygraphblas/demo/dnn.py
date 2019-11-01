@@ -18,18 +18,18 @@ def timing(f):
         ts = time()
         result = f(*args, **kw)
         te = time()
-        print('func:%r ran %sx took: %2.4f avg' % (f.__name__, te-ts))
+        print('func:%r took: %2.4f' % (f.__name__, te-ts))
         return result
     return wrap
 
 @timing
-def dnn(W, Bias, Y):
-    for w, b in zip(W, Bias):
+def dnn(W, B, Y):
+    for w, b in zip(W, B):
         Y = Y @ w
         with plus_plus_fp32:
             Y = Y @ b
-        Y = Y > 0
-        M = Y > 32
+        Y = Y.select('>0')
+        M = Y.select('>', 32)
         if M:
             Y[M] = 32
     return Y

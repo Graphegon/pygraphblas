@@ -10,6 +10,7 @@ from .base import (
     _check,
     _gb_from_type,
     _build_range,
+    _get_op,
 )
 from .vector import Vector
 from .scalar import Scalar
@@ -361,6 +362,12 @@ class Matrix:
             desc))
         return out
 
+    def __getstate__(self):
+        pass
+
+    def __setstate__(self, data):
+        pass
+
     def __len__(self):
         return self.nvals
 
@@ -532,11 +539,13 @@ class Matrix:
             ))
         return out
 
-    def select(self, op, out=None, mask=NULL, accum=NULL, thunk=NULL, desc=descriptor.oooo):
-        if out is None:
+    def select(self, op, thunk=NULL, out=NULL, mask=NULL, accum=NULL, desc=descriptor.oooo):
+        if out is NULL:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.unaryop
+        elif isinstance(op, str):
+            op = _get_op(op)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):

@@ -481,7 +481,25 @@ def test_select():
         [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [2], [3]]
+    
+    w = v.select('!=0')
+    assert w.to_lists() == [[2], [2], [3]]
 
+    w = v.select('!=', 0)
+    assert w.to_lists() == [[2], [2], [3]]
+
+    w = v.select('>', 0)
+    assert w.to_lists() == [[2], [2], [3]]
+
+    w = v.select('<', 3)
+    assert w.to_lists() == [[0, 1], [0, 1], [0, 0]]
+
+    w = v.select('>=', 0)
+    assert w == v
+
+    w = v.select('>=0')
+    assert w == v
+    
 def test_select_ops():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))

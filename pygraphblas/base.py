@@ -144,3 +144,21 @@ def _get_descriptor(inp0_trans=False):
     else:
         desc[0] = NULL
     return desc
+
+def _get_op(op):
+    return {
+        '>': lib.GxB_GT_THUNK,
+        '<': lib.GxB_LT_THUNK,
+        '>=': lib.GxB_GE_THUNK,
+        '<=': lib.GxB_LE_THUNK,
+        '!=': lib.GxB_NE_THUNK,
+        '==': lib.GxB_EQ_THUNK,
+        '>0': lib.GxB_GT_ZERO,
+        '<0': lib.GxB_LT_ZERO,
+        '>=0': lib.GxB_GE_ZERO,
+        '<=0': lib.GxB_LE_ZERO,
+        '!=0': lib.GxB_NONZERO,
+        '==0': lib.GxB_EQ_ZERO,
+    }[op]
+
+
