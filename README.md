@@ -11,6 +11,7 @@ and can be run with a single command:
     docker run -it pygraphblas/pygraphblas ipython
 
     In [1]: from pygraphblas import Matrix
+    In [2]: from operator import mod
 
     # two random 3x3 matrices with 3 random values mod(10)
 

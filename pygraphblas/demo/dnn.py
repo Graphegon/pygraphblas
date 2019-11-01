@@ -23,8 +23,7 @@ def timing(f):
     return wrap
 
 @timing
-def dnn(W, Bias, Y0):
-    Y = Y0
+def dnn(W, Bias, Y):
     for w, b in zip(W, Bias):
         Y = Y @ w
         with plus_plus_fp32:

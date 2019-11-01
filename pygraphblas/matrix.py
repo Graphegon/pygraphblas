@@ -24,7 +24,7 @@ __all__ = ['Matrix']
 class Matrix:
     """GraphBLAS Sparse Matrix
 
-    This is a high-level wrapper around the low-level GrB_Matrix type.
+    This is a high-level wrapper around the GrB_Matrix type.
 
     """
 
