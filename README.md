@@ -75,7 +75,7 @@ references below.
 
 While it is my goal to make it so that pygraphblas works with any
 GraphBLAS implementation, it currently only works with SuiteSparse
-v3.0.1.  SuiteSparse provides several "extension" features and
+v3.1.0.  SuiteSparse provides several "extension" features and
 pre-packaged objects that are very useful for pygraphblas.  If there
 is a GraphBLAS implementation you would like to see support for in
 pygraphblas, please consider sending me a pull request.
@@ -110,11 +110,11 @@ elements.
 Sparsity is important because one practical problem with
 matrix-encoding graphs is that most real-world graphs tend to be
 sparse, as above, only 7 of 36 possible elements have a value. Those
-that have values tend to be scattered uniformally across the matrix
+that have values tend to be scattered randomly across the matrix
 (for "typical" graphs), so dense linear algebra libraries like BLAS or
 numpy do not encode or operate on them efficiently, as the relevant
 data is mostly empty memory with actual data elements spaced far
-apart.  This wastes memory and cpu resources, and defeats CPU caching
+apart.  This wastes memory and CPU resources, and defeats CPU caching
 mechanisms.
 
 For example, suppose a fictional social network has 1 billion users,
@@ -132,18 +132,18 @@ which may or may not be the actual number zero, but possibly other
 values like positive or negative infinity depending on the particular
 semiring operations applied to the matrix.
 
-Semirings ecapsulate different algebraic operations and identities
+Semirings encapsulate different algebraic operations and identities
 that can be used to multiply matrices and vectors.  Anyone who has
 multiplied matrices has used at least one Semiring before, typically
 referred to as "plus_times".  This is the common operation of
-multiplying two matrices containing real numbers, the coresponding row
+multiplying two matrices containing real numbers, the corresponding row
 and column entries are multipled and the results are summed for the
 final value.
 
 When using matrices to solve graph problems, it's useful to have a
 wide variety of semirings that replace the multplication and addition
 operators and identities with other operations and values.  For
-example, finding a shorest path between nodes involves substituting
+example, finding a shortest path between nodes involves substituting
 the `min()` function for the add operation, and the plus function for
 the times.  pygraphblas wraps all 960 distinct built-in semirings that
 come with the SuiteSparse GraphBLAS implementation.
@@ -168,7 +168,7 @@ between nodes in a graph.
 
 ![Finding the Shortest Path](./docs/ShortestPath.svg)
 
-In this example, the nodes can be cites, the the edge weights
+In this example, the nodes can be cites, the edge weights
 distances between the cities in units like kilometers.  If travelling
 from city A to city C, how can we compute the shortest path to take?
 The process is fairly simple, add the weights along each path, and
@@ -200,7 +200,7 @@ multiplication syntax:
             return v
 
 An identical but slightly more verbose approach is to call the
-multiplication method directly `Vector.vxm' in this case, with
+multiplication method directly `Vector.vxm` in this case, with
 explicit semiring and accumulator operations:
 
     def sssp_direct(matrix, start):
