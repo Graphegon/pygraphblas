@@ -4,7 +4,7 @@ from itertools import product, repeat
 
 import pytest
 
-from pygraphblas import Matrix, Vector, semiring, unaryop, binaryop
+from pygraphblas import Matrix, Vector, Scalar, semiring, unaryop, binaryop
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
@@ -105,7 +105,7 @@ def test_matrix_gb_type():
     v = Matrix.from_type(float, 10)
     assert v.gb_type == lib.GrB_FP64
 
-def test_matrix_ewise_add():
+def test_matrix_eadd():
     v = Matrix.from_lists(
         list(range(10)),
         list(range(10)),
@@ -115,7 +115,7 @@ def test_matrix_ewise_add():
         list(range(10)),
         list(range(10)))
 
-    x = v.ewise_add(w)
+    x = v.eadd(w)
     assert x == Matrix.from_lists(
         list(range(10)),
         list(range(10)),
@@ -125,7 +125,7 @@ def test_matrix_ewise_add():
     v += w
     assert v == z
 
-def test_vector_ewise_mult():
+def test_vector_emult():
     v = Matrix.from_lists(
         list(range(10)),
         list(range(10)),
@@ -135,7 +135,7 @@ def test_vector_ewise_mult():
         list(range(10)),
         list(range(10)))
 
-    x = v.ewise_mult(w)
+    x = v.emult(w)
     assert x == Matrix.from_lists(
         list(range(10)),
         list(range(10)),
@@ -215,6 +215,10 @@ def test_mxm():
         [0, 1, 2],
         [0, 1, 2],
         [1, 1, 1])
+    with pytest.raises(TypeError):
+        m @ 3
+    with pytest.raises(TypeError):
+        m @ Scalar.from_value(3)
 
 def test_mxv():
     m = Matrix.from_lists(
@@ -553,28 +557,30 @@ def test_select_ops():
         [0, 1, 2],
         [float('inf'), 1.0, 0.5])
 
-def test_select_cmp():
+def test_cmp():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
 
     n = m > 5
     assert n == Matrix.from_lists(
-        [2, 2, 2], [0, 1, 2], [6, 7, 8]
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [False, False, False, False, False, False, True, True, True],
         )
 
     n = m >= 5
     assert n == Matrix.from_lists(
-        [1, 2, 2, 2],
-        [2, 0, 1, 2],
-        [5, 6, 7, 8]
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [False, False, False, False, False, True, True, True, True],
         )
 
     n = m < 5
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1],
         [0, 1, 2, 0, 1],
-        [0, 1, 2, 3, 4],
+        [True, True, True, True, True],
         3, 3
         )
 
@@ -582,11 +588,58 @@ def test_select_cmp():
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
+        [True, True, True, True, True, True],
+        3, 3
+        )
+    
+    n = m == 5
+    assert n == Matrix.from_lists(
+        [1], [2], [5],
+        3, 3
+        )
+    
+    n = m != 5
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 0, 1, 2],
+        [0, 1, 2, 3, 4, 6, 7, 8],
+        3, 3
+        )
+    
+def test_select_cmp():
+    I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
+    V = list(range(9))
+    m = Matrix.from_lists(I, J, V, 3, 3)
+
+    n = m.select('>', 5)
+    assert n == Matrix.from_lists(
+        [2, 2, 2], [0, 1, 2], [6, 7, 8]
+        )
+
+    n = m.select('>=', 5)
+    assert n == Matrix.from_lists(
+        [1, 2, 2, 2],
+        [2, 0, 1, 2],
+        [5, 6, 7, 8]
+        )
+
+    n = m.select('<', 5)
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1],
+        [0, 1, 2, 0, 1],
+        [0, 1, 2, 3, 4],
+        3, 3
+        )
+
+    n = m.select('<=', 5)
+    assert n == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
         [0, 1, 2, 3, 4, 5],
         3, 3
         )
 
-    n = m == 5
+    n = m.select('==', 5)
     assert n == Matrix.from_lists(
         [1],
         [2],
@@ -594,7 +647,7 @@ def test_select_cmp():
         3, 3
         )
 
-    n = m != 5
+    n = m.select('!=', 5)
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 0, 1, 2],

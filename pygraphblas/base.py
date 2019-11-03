@@ -145,7 +145,7 @@ def _get_descriptor(inp0_trans=False):
         desc[0] = NULL
     return desc
 
-def _get_op(op):
+def _get_select_op(op):
     return {
         '>': lib.GxB_GT_THUNK,
         '<': lib.GxB_LT_THUNK,
@@ -161,4 +161,13 @@ def _get_op(op):
         '==0': lib.GxB_EQ_ZERO,
     }[op]
 
+def _get_bin_op(op, funcs):
+    return {
+        '>':  funcs.gt,
+        '<':  funcs.lt,
+        '>=': funcs.ge,
+        '<=': funcs.le,
+        '!=': funcs.ne,
+        '==': funcs.eq,
+    }[op]
 

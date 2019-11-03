@@ -27,8 +27,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 
 # get GraphBLAS, compile with debug symbols
 
-RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.1.0.tar.gz | tar -xz && \
-     cd GraphBLAS && \
+RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.1.1.tar.gz | tar -xz && \
+     cd GraphBLAS-3.1.1 && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
     make library \

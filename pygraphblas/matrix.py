@@ -1,6 +1,7 @@
 import sys
 import types
 import weakref
+import operator
 from random import randint
 
 from .base import (
@@ -10,7 +11,8 @@ from .base import (
     _check,
     _gb_from_type,
     _build_range,
-    _get_op,
+    _get_select_op,
+    _get_bin_op,
 )
 from .vector import Vector
 from .scalar import Scalar
@@ -282,8 +284,8 @@ class Matrix:
             ))
         return out
 
-    def ewise_add(self, other, out=None,
-                  mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+    def eadd(self, other, add_op=NULL, out=None,
+                  mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Element-wise addition with other matrix.
 
         Element-wise addition applies a binary operator element-wise
@@ -308,6 +310,8 @@ class Matrix:
         """
         if add_op is NULL:
             add_op = self._funcs.add_op
+        elif isinstance(add_op, str):
+            add_op = _get_bin_op(add_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -327,8 +331,8 @@ class Matrix:
             desc))
         return out
 
-    def ewise_mult(self, other, out=None,
-                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+    def emult(self, other, mult_op=NULL, out=None,
+                   mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Element-wise multiplication with other matrix.
 
         Element-wise multiplication applies a binary operator
@@ -343,6 +347,8 @@ class Matrix:
         """
         if mult_op is NULL:
             mult_op = self._funcs.mult_op
+        elif isinstance(mult_op, str):
+            mult_op = _get_bin_op(mult_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -370,6 +376,9 @@ class Matrix:
 
     def __len__(self):
         return self.nvals
+
+    def __nonzero__(self):
+        return self.reduce_bool()
 
     def __eq__(self, other):
         """Compare two matrices for equality.
@@ -399,16 +408,16 @@ class Matrix:
         return not result[0]
 
     def __add__(self, other):
-        return self.ewise_add(other)
+        return self.eadd(other)
 
     def __iadd__(self, other):
-        return self.ewise_add(other, out=self)
+        return self.eadd(other, out=self)
 
     def __mul__(self, other):
-        return self.ewise_mult(other)
+        return self.emult(other)
 
     def __imul__(self, other):
-        return self.ewise_mult(other, out=self)
+        return self.emult(other, out=self)
 
     def __invert__(self):
         return self.apply(self._funcs.invert)
@@ -545,7 +554,7 @@ class Matrix:
         if isinstance(op, UnaryOp):
             op = op.unaryop
         elif isinstance(op, str):
-            op = _get_op(op)
+            op = _get_select_op(op)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -581,17 +590,53 @@ class Matrix:
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
 
-    def __gt__(self, thunk):
-        return self.select(lib.GxB_GT_THUNK, thunk=thunk)
+    def _full(self, identity=None):
+        B = self.__class__.from_type(self.gb_type, self.nrows, self.ncols)
+        if identity is None:
+            identity = self._funcs.identity
+            
+        _check(self._funcs.assignScalar(
+            B.matrix[0],
+            NULL,
+            NULL,
+            identity,
+            lib.GrB_ALL,
+            0,
+            lib.GrB_ALL,
+            0,
+            NULL))
+        return self.eadd(B, self._funcs.first)
 
-    def __lt__(self, thunk):
-        return self.select(lib.GxB_LT_THUNK, thunk=thunk)
+    def _compare(self, other, op, strop):
+        C = self.__class__.from_type(bool, self.nrows, self.ncols)
+        if isinstance(other, (bool, int, float)):
+            if op(other, 0):
+                B = self.__class__.dup(self)
+                B[:,:] = other
+                self.emult(B, strop, out=C)
+                return C
+            else:
+                self.select(strop, other).apply(lib.GxB_ONE_BOOL, out=C)
+                return C
+        elif isinstance(other, Matrix):
+            A = self._full()
+            B = self._full()
+            A.emult(B, strop, out=C)
+            return C
+        else:
+            raise NotImplementedError
 
-    def __ge__(self, thunk):
-        return self.select(lib.GxB_GE_THUNK, thunk=thunk)
+    def __gt__(self, other):
+        return self._compare(other, operator.gt, '>')
 
-    def __le__(self, thunk):
-        return self.select(lib.GxB_LE_THUNK, thunk=thunk)
+    def __lt__(self, other):
+        return self._compare(other, operator.lt, '<')
+
+    def __ge__(self, other):
+        return self._compare(other, operator.ge, '>=')
+
+    def __le__(self, other):
+        return self._compare(other, operator.le, '<=')
 
     def mxm(self, other, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
@@ -654,12 +699,14 @@ class Matrix:
             return self.mxm(other)
         elif isinstance(other, Vector):
             return self.mxv(other)
+        else:
+            raise TypeError('Right argument to @ must be Matrix or Vector.')
 
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kron(self, other, out=None,
-             mask=NULL, accum=NULL, op=NULL, desc=descriptor.oooo):
+    def kron(self, other, op=NULL, out=None,
+             mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Kronecker product.
 
         """
@@ -683,7 +730,8 @@ class Matrix:
             desc))
         return out
 
-    def slice_matrix(self, rindex=None, cindex=None, desc=descriptor.oooo):
+    def slice_matrix(self, rindex=None, cindex=None,
+                     mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Slice a submatrix.
 
         """
@@ -694,11 +742,17 @@ class Matrix:
         if jsize is None:
             jsize = self.ncols
 
+        if isinstance(mask, Matrix):
+            mask = mask.matrix[0]
+            
+        elif isinstance(accum, BinaryOp):
+            accum = accum.binaryop
+
         result = Matrix.from_type(self.gb_type, isize, jsize)
         _check(lib.GrB_Matrix_extract(
             result.matrix[0],
-            NULL,
-            NULL,
+            mask,
+            accum,
             self.matrix[0],
             I,
             ni,
@@ -739,6 +793,9 @@ class Matrix:
         if isinstance(index, slice):
             # a[3:] extract submatrix of rows
             return self.slice_matrix(index, None)
+
+        if isinstance(index, Matrix):
+            return self.slice_matrix(mask=index)
 
         if not isinstance(index, (tuple, list)):
             raise TypeError
@@ -841,7 +898,6 @@ class Matrix:
                 return
             if isinstance(value, (bool, int, float)):
                 # scalar assignment TODO
-                scalar = Scalar.from_value(value)
                 raise NotImplementedError
 
         if isinstance(index, Matrix):
@@ -893,6 +949,25 @@ class Matrix:
             return
 
         if isinstance(i0, slice) and isinstance(i1, slice):
+            if isinstance(value, (bool, int, float)):
+                I, ni, isize = _build_range(i0, self.nrows - 1)
+                J, nj, jsize = _build_range(i1, self.ncols - 1)
+                scalar_type = _gb_from_type(type(value))
+                tf = build_matrix_type_funcs(scalar_type)
+                _check(tf.assignScalar(
+                    self.matrix[0],
+                    NULL,
+                    NULL,
+                    value,
+                    I,
+                    ni,
+                    J,
+                    nj,
+                    NULL
+                    ))
+                return
+
+
             # a[:,:] assign submatrix
             self.assign_matrix(value, i0, i1)
             return

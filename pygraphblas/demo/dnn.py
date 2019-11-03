@@ -30,7 +30,7 @@ def dnn(W, B, Y):
             Y = Y @ b
         Y = Y.select('>0')
         M = Y.select('>', 32)
-        if M:
+        if len(M):
             Y[M] = 32
     return Y
 
