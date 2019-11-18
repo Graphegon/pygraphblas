@@ -594,7 +594,7 @@ class Matrix:
         B = self.__class__.from_type(self.gb_type, self.nrows, self.ncols)
         if identity is None:
             identity = self._funcs.identity
-            
+
         _check(self._funcs.assignScalar(
             B.matrix[0],
             NULL,
@@ -638,13 +638,8 @@ class Matrix:
     def __le__(self, other):
         return self._compare(other, operator.le, '<=')
 
-    def mxm(self, other, out=None,
+    def _get_args(self,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
-        """Matrix-matrix multiply.
-
-        """
-        if out is None:
-            out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if semiring is NULL:
@@ -655,6 +650,16 @@ class Matrix:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
+        return mask, semiring, accum, desc
+
+    def mxm(self, other, out=None, **kwargs):
+        """Matrix-matrix multiply.
+
+        """
+        if out is None:
+            out = Matrix.from_type(self.gb_type, self.nrows, other.ncols)
+
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_mxm(
             out.matrix[0],
             mask,
@@ -665,25 +670,13 @@ class Matrix:
             desc))
         return out
 
-    def mxv(self, other, out=None,
-            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+    def mxv(self, other, out=None, **kwargs):
         """Matrix-vector multiply.
 
         """
         if out is None:
             out = Vector.from_type(self.gb_type, self.ncols)
-        elif not isinstance(out, Vector):
-            raise TypeError('Output hand argument must be Vector.')
-        if isinstance(mask, Matrix):
-            mask = mask.matrix[0]
-        if semiring is NULL:
-            semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
-        if isinstance(semiring, Semiring):
-            semiring = semiring.semiring
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_mxv(
             out.vector[0],
             mask,
@@ -705,8 +698,7 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kron(self, other, op=NULL, out=None,
-             mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def kron(self, other, op=NULL, out=None, **kwargs):
         """Kronecker product.
 
         """
@@ -716,10 +708,8 @@ class Matrix:
                                    self.ncols*other.ncols)
         if op is NULL:
             op = self._funcs.mult_op
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+
         _check(lib.GxB_kron(
             out.matrix[0],
             mask,
@@ -730,8 +720,7 @@ class Matrix:
             desc))
         return out
 
-    def slice_matrix(self, rindex=None, cindex=None,
-                     mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def slice_matrix(self, rindex=None, cindex=None, **kwargs):
         """Slice a submatrix.
 
         """
@@ -742,12 +731,7 @@ class Matrix:
         if jsize is None:
             jsize = self.ncols
 
-        if isinstance(mask, Matrix):
-            mask = mask.matrix[0]
-            
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
-
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         result = Matrix.from_type(self.gb_type, isize, jsize)
         _check(lib.GrB_Matrix_extract(
             result.matrix[0],
@@ -761,7 +745,7 @@ class Matrix:
             NULL))
         return result
 
-    def slice_vector(self, index, vslice=None, desc=descriptor.oooo):
+    def slice_vector(self, index, vslice=None, **kwargs):
         """Slice a subvector.
 
         """
@@ -771,13 +755,14 @@ class Matrix:
             self.gb_type,
             self.ncols))
 
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         stop_val = self.nrows if desc in descriptor.T_A else self.ncols
         I, ni, size = _build_range(vslice, stop_val)
 
         _check(lib.GrB_Col_extract(
             new_vec[0],
-            NULL,
-            NULL,
+            mask,
+            accum,
             self.matrix[0],
             I,
             ni,
@@ -789,7 +774,7 @@ class Matrix:
     def __getitem__(self, index):
         if isinstance(index, int):
             # a[3] extract single row
-            return self.slice_vector(index, None, descriptor.tooo)
+            return self.slice_vector(index, None, desc=descriptor.tooo)
         if isinstance(index, slice):
             # a[3:] extract submatrix of rows
             return self.slice_matrix(index, None)
@@ -817,7 +802,7 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
-            return self.slice_vector(i0, i1, descriptor.tooo)
+            return self.slice_vector(i0, i1, desc=descriptor.tooo)
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector

@@ -15,6 +15,7 @@ class BinaryOp:
     def __init__(self, name, binaryop):
         self.name = name
         self.binaryop = binaryop
+        self.token = None
 
     def __enter__(self):
         self.token = current_binop.set(self)
@@ -42,9 +43,13 @@ class Accum:
 
 __all__ = ['BinaryOp', 'Accum', 'current_binop', 'current_accum']
 
-grb_binop_re = re.compile('^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+grb_binop_re = re.compile(
+    '^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_'
+    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
-gxb_binop_re = re.compile('^GxB_(RMINUS|RDIV|ISEQ|ISNE|ISGT|ISLT|ISLE|ISGE)_(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+gxb_binop_re = re.compile(
+    '^GxB_(RMINUS|RDIV|ISEQ|ISNE|ISGT|ISLT|ISLE|ISGE)_'
+    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 pure_bool_re = re.compile('^GrB_(LOR|LAND|LXOR)$')
 

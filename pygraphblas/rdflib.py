@@ -5,10 +5,13 @@ from operator import attrgetter
 from pygraphblas import Matrix
 from pygraphblas.base import NoValue
 
+from rdflib.store import Store
 
-class Graph:
-    """A graph composed of RDF style triples.  Each unique predicate is
-    an adjacency matrix from subjects to objects.
+class GraphBLASStore(Store):
+    """A graph composed of RDF style triples.  
+
+    Each unique predicate is an adjacency matrix from subjects to
+    objects.
 
     - add(subj, pred, obj)
 
@@ -17,7 +20,10 @@ class Graph:
     - query(subj=None, pred=None, obj=None)
 
     """
-    def __init__(self, weight_type=bool):
+    def __init__(self, configuration=None, identifier=None, weight_type=bool):
+        super(Memory, self).__init__(configuration)
+        self.identifier = identifier
+
         self._weight_type = weight_type
         self._max_index = 16
         self._node_count = 0
@@ -31,7 +37,7 @@ class Graph:
                 self._max_index)
         )
 
-    def _check_and_resize_graphs(self, node_id):
+    def _resize(self, node_id):
         for edge, graph in self._edge_graph.items():
             nrows = graph.nrows
             newrows = nrows
@@ -64,7 +70,7 @@ class Graph:
         """
         sid = self._get_or_add_node_id(subj)
         oid = self._get_or_add_node_id(obj)
-        self._check_and_resize_graphs(max(sid, oid))
+        self._resize(max(sid, oid))
         self._edge_graph[pred][sid, oid] = weight
 
     def read_csv(self, fname, **kw):

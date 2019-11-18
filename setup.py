@@ -10,4 +10,9 @@ setup(
     cffi_modules=["pygraphblas/build.py:ffibuilder"],
     install_requires=["cffi>=1.0.0"],
     tests_require=["pytest"],
+    # entry_points = {
+    #     'rdf.plugins.store': [
+    #         'graphblas = pygraphblas.rdflib:GraphBLASStore',
+    #         ],
+    #     }    
 )

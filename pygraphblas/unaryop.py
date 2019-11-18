@@ -19,7 +19,9 @@ class UnaryOp:
 
 __all__ = ['UnaryOp']
 
-grb_uop_re = re.compile('^GrB_(IDENTITY|AINV|MINV|LNOT|ONE|ABS)_(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+grb_uop_re = re.compile(
+    '^GrB_(IDENTITY|AINV|MINV|LNOT|ONE|ABS)_'
+    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 bool_uop_re = re.compile('^GrB_LNOT$')
 
