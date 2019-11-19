@@ -380,33 +380,6 @@ class Matrix:
     def __nonzero__(self):
         return self.reduce_bool()
 
-    def __eq__(self, other):
-        """Compare two matrices for equality.
-
-        """
-        if isinstance(other, (Scalar, bool, int, float)):
-            return self.select(lib.GxB_EQ_THUNK, thunk=other)
-
-        result = ffi.new('_Bool*')
-        _check(lib.LAGraph_isequal(
-            result,
-            self.matrix[0],
-            other.matrix[0],
-            NULL))
-        return result[0]
-
-    def __ne__(self, other):
-        if isinstance(other, (Scalar, bool, int, float)):
-            return self.select(lib.GxB_NE_THUNK, thunk=other)
-
-        result = ffi.new('_Bool*')
-        _check(lib.LAGraph_isequal(
-            result,
-            self.matrix[0],
-            other.matrix[0],
-            NULL))
-        return not result[0]
-
     def __add__(self, other):
         return self.eadd(other)
 
@@ -620,7 +593,7 @@ class Matrix:
                 return C
         elif isinstance(other, Matrix):
             A = self._full()
-            B = self._full()
+            B = other._full()
             A.emult(B, strop, out=C)
             return C
         else:
@@ -637,6 +610,12 @@ class Matrix:
 
     def __le__(self, other):
         return self._compare(other, operator.le, '<=')
+
+    def __eq__(self, other):
+        return self._compare(other, operator.eq, '==')
+
+    def __ne__(self, other):
+        return self._compare(other, operator.ne, '!=')
 
     def _get_args(self,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):

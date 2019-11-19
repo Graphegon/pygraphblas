@@ -81,22 +81,6 @@ def test_matrix_to_from_lists():
         list(range(10)),
         ]
 
-def test_matrix_eq():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
-    w = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
-    x = Matrix.from_lists(
-        list(range(1,11)),
-        list(range(1,11)),
-        list(range(1,11)), ncols=11, nrows=11)
-    assert v == w
-    assert v != x
-
 def test_matrix_gb_type():
     v = Matrix.from_type(bool, 10)
     assert v.gb_type == lib.GrB_BOOL
@@ -485,7 +469,7 @@ def test_select():
         [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [2], [3]]
-    
+
     w = v.select('!=0')
     assert w.to_lists() == [[2], [2], [3]]
 
@@ -503,7 +487,7 @@ def test_select():
 
     w = v.select('>=0')
     assert w == v
-    
+
 def test_select_ops():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
@@ -557,7 +541,7 @@ def test_select_ops():
         [0, 1, 2],
         [float('inf'), 1.0, 0.5])
 
-def test_cmp():
+def test_cmp_scalar():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
@@ -591,13 +575,13 @@ def test_cmp():
         [True, True, True, True, True, True],
         3, 3
         )
-    
+
     n = m == 5
     assert n == Matrix.from_lists(
         [1], [2], [5],
         3, 3
         )
-    
+
     n = m != 5
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 2, 2, 2],
@@ -605,7 +589,60 @@ def test_cmp():
         [0, 1, 2, 3, 4, 6, 7, 8],
         3, 3
         )
-    
+
+def test_cmp():
+    I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
+    V = list(range(9))
+    W = [0, 1, 2, 4, 5, 6, 7, 8, 9]
+    m = Matrix.from_lists(I, J, V, 3, 3)
+    n = Matrix.from_lists(I, J, W, 3, 3)
+
+    o = m > n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [False, False, False, False, False, False, False, False, False],
+        )
+
+    o = m >= n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [True, True, True, False, False, False, False, False, False],
+        )
+
+    o = m < n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [False, False, False, True, True, True, True, True, True],
+        3, 3
+        )
+
+    o = m <= n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [True, True, True, True, True, True, True, True, True],
+        3, 3
+        )
+
+    o = m == n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [False, False, False, False, False, False, False, False, False],
+        3, 3
+        )
+
+    o = m != n
+    assert o == Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1, 2, 2, 2],
+        [0, 1, 2, 0, 1, 2, 0, 1, 2],
+        [True, True, True, True, True, True, True, True, True],
+        3, 3
+        )
+
 def test_select_cmp():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
