@@ -82,6 +82,7 @@ class VectorFuncs:
         'extractTuples',
         'add_op',
         'mult_op',
+        'monoid',
         'semiring',
         'assignScalar',
         'invert',
@@ -100,6 +101,7 @@ def build_vector_type_funcs(typ):
     f.extractTuples =  getattr(lib, 'GrB_Vector_extractTuples_{}'.format(s))
     f.add_op = getattr(lib, 'GrB_PLUS_{}'.format(s))
     f.mult_op = getattr(lib, 'GrB_TIMES_{}'.format(s))
+    f.monoid = getattr(lib, 'GxB_{}_{}_MONOID'.format(a, s))
     f.semiring = getattr(lib, 'GxB_{}_{}_{}'.format(a, m, s))
     f.assignScalar = getattr(lib, 'GrB_Vector_assign_{}'.format(s))
     f.invert = getattr(lib, 'GrB_AINV_{}'.format(s))

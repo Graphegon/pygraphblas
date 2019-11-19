@@ -1,4 +1,3 @@
-
 from .base import (
     lib,
     ffi,
@@ -278,16 +277,21 @@ class Vector:
             self.vector[0],
             size))
 
-    def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
-        """Reduce vector to a boolean.
-
-        """
+    def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
         if monoid is NULL:
-            monoid = lib.GxB_LOR_BOOL_MONOID
+            monoid = self._funcs.monoid
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
+        return mask, monoid, accum, desc
+
+
+    def reduce_bool(self, **kwargs):
+        """Reduce vector to a boolean.
+
+        """
+        mask, monoid, accum, desc = self._get_args(**kwargs)
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
             result,
@@ -297,16 +301,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_int(self, **kwargs):
         """Reduce vector to a integer.
 
         """
-        if monoid is NULL:
-            monoid = lib.GxB_PLUS_INT64_MONOID
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, monoid, accum, desc = self._get_args(**kwargs)
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
             result,
@@ -316,16 +315,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_float(self, **kwargs):
         """Reduce vector to a float.
 
         """
-        if monoid is NULL:
-            monoid = lib.GxB_PLUS_FP64_MONOID
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, monoid, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
             result,
@@ -335,7 +329,7 @@ class Vector:
             desc))
         return result[0]
 
-    def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def apply(self, op, out=None, **kwargs):
         """Apply Unary op to vector elements.
 
         """
@@ -343,10 +337,8 @@ class Vector:
             out = Vector.from_type(self.gb_type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+
+        mask, monoid, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Vector_apply(
             out.vector[0],
             mask,
@@ -357,15 +349,13 @@ class Vector:
             ))
         return out
 
-    def select(self, op, out=None, mask=NULL, accum=NULL, thunk=NULL, desc=descriptor.oooo):
+    def select(self, op, out=None, thunk=NULL, **kwargs):
         if out is None:
             out = Vector.from_type(self.gb_type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+
+        mask, monoid, accum, desc =self._get_args(**kwargs)
         _check(lib.GxB_Vector_select(
             out.vector[0],
             mask,
