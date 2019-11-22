@@ -264,17 +264,14 @@ class Matrix:
             nrows,
             ncols))
 
-    def transpose(self, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def transpose(self, out=None, **kwargs):
         """ Transpose matrix. """
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
                 _out, self.gb_type, self.nrows, self.ncols))
             out = Matrix(_out)
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_transpose(
             out.matrix[0],
             mask,
@@ -284,8 +281,7 @@ class Matrix:
             ))
         return out
 
-    def eadd(self, other, add_op=NULL, out=None,
-                  mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def eadd(self, other, add_op=NULL, out=None, **kwargs):
         """Element-wise addition with other matrix.
 
         Element-wise addition applies a binary operator element-wise
@@ -312,15 +308,13 @@ class Matrix:
             add_op = self._funcs.add_op
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self._funcs)
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
                 _out, self.gb_type, self.nrows, self.ncols))
             out = Matrix(_out)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+
         _check(lib.GrB_eWiseAdd_Matrix_BinaryOp(
             out.matrix[0],
             mask,
@@ -331,8 +325,7 @@ class Matrix:
             desc))
         return out
 
-    def emult(self, other, mult_op=NULL, out=None,
-                   mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def emult(self, other, mult_op=NULL, out=None, **kwargs):
         """Element-wise multiplication with other matrix.
 
         Element-wise multiplication applies a binary operator
@@ -349,15 +342,13 @@ class Matrix:
             mult_op = self._funcs.mult_op
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self._funcs)
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
                 _out, self.gb_type, self.nrows, self.ncols))
             out = Matrix(_out)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+
         _check(lib.GrB_eWiseMult_Matrix_BinaryOp(
             out.matrix[0],
             mask,
@@ -421,17 +412,14 @@ class Matrix:
     def __abs__(self):
         return self.apply(self._funcs.abs_)
 
-    def reduce_bool(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_bool(self, monoid=NULL, **kwargs):
         """Reduce matrix to a boolean.
 
         """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         result = ffi.new('_Bool*')
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_BOOL(
             result,
             accum,
@@ -440,17 +428,14 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_int(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_int(self, monoid=NULL, **kwargs):
         """Reduce matrix to an integer.
 
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_INT64_MONOID
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         result = ffi.new('int64_t*')
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_INT64(
             result,
             accum,
@@ -459,16 +444,13 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_float(self, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_float(self, monoid=NULL, **kwargs):
         """Reduce matrix to an float.
 
         """
         if monoid is NULL:
             monoid = lib.GxB_PLUS_FP64_MONOID
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
             result,
@@ -478,19 +460,15 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_vector(self, out=None,
-                      mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def reduce_vector(self, out=None, monoid=NULL, **kwargs):
         """Reduce matrix to a vector.
 
         """
         if monoid is NULL:
             monoid = self._funcs.monoid
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         if out is None:
             out = Vector.from_type(self.gb_type, self.nrows)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_Monoid(
             out.vector[0],
             mask,
@@ -500,16 +478,12 @@ class Matrix:
             desc))
         return out
 
-    def apply(self, op, out=None, mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def apply(self, op, out=None, **kwargs):
         """Apply Unary op to matrix elements.
 
         """
         if out is None:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
         if isinstance(op, UnaryOp):
             nop = op.unaryop
         elif isinstance(op, types.FunctionType):
@@ -531,6 +505,8 @@ class Matrix:
             nop = uop[0]
         else:
             nop = op
+
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_apply(
             out.matrix[0],
             mask,
@@ -554,9 +530,9 @@ class Matrix:
         if isinstance(thunk, Scalar):
             self._keep_alives[self.matrix] = thunk
             thunk = thunk.scalar[0]
-            
+
         mask, semiring, accum, desc = self._get_args(**kwargs)
-            
+
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
             mask,
