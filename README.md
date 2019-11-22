@@ -8,7 +8,7 @@ pygraphblas is distributed as a docker image on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
 and can be run with a single command:
 
-    docker run -it pygraphblas/pygraphblas ipython
+    docker run -it graphblas/pygraphblas ipython
 
     In [1]: from pygraphblas import Matrix
     In [2]: from operator import mod

@@ -371,9 +371,6 @@ class Matrix:
     def iseq(self, other):
         """Compare two matrices for equality.
         """
-        if isinstance(other, (Scalar, bool, int, float)):
-            return self.select(lib.GxB_EQ_THUNK, thunk=other)
-
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_isequal(
             result,
@@ -383,9 +380,6 @@ class Matrix:
         return result[0]
 
     def isne(self, other):
-        if isinstance(other, (Scalar, bool, int, float)):
-            return self.select(lib.GxB_NE_THUNK, thunk=other)
-
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_isequal(
             result,
@@ -547,22 +541,22 @@ class Matrix:
             ))
         return out
 
-    def select(self, op, thunk=NULL, out=NULL, mask=NULL, accum=NULL, desc=descriptor.oooo):
+    def select(self, op, thunk=NULL, out=NULL, **kwargs):
         if out is NULL:
             out = Matrix.from_type(self.gb_type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.unaryop
         elif isinstance(op, str):
             op = _get_select_op(op)
-        if accum is NULL:
-            accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+
         if isinstance(thunk, (bool, int, float)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self.matrix] = thunk
             thunk = thunk.scalar[0]
+            
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+            
         _check(lib.GxB_Matrix_select(
             out.matrix[0],
             mask,
@@ -589,7 +583,7 @@ class Matrix:
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
 
-    def _full(self, identity=None):
+    def full(self, identity=None):
         B = self.__class__.from_type(self.gb_type, self.nrows, self.ncols)
         if identity is None:
             identity = self._funcs.identity
@@ -606,7 +600,7 @@ class Matrix:
             NULL))
         return self.eadd(B, self._funcs.first)
 
-    def _compare(self, other, op, strop):
+    def compare(self, other, op, strop):
         C = self.__class__.from_type(bool, self.nrows, self.ncols)
         if isinstance(other, (bool, int, float)):
             if op(other, 0):
@@ -618,30 +612,30 @@ class Matrix:
                 self.select(strop, other).apply(lib.GxB_ONE_BOOL, out=C)
                 return C
         elif isinstance(other, Matrix):
-            A = self._full()
-            B = other._full()
+            A = self.full()
+            B = other.full()
             A.emult(B, strop, out=C)
             return C
         else:
             raise NotImplementedError
 
     def __gt__(self, other):
-        return self._compare(other, operator.gt, '>')
+        return self.compare(other, operator.gt, '>')
 
     def __lt__(self, other):
-        return self._compare(other, operator.lt, '<')
+        return self.compare(other, operator.lt, '<')
 
     def __ge__(self, other):
-        return self._compare(other, operator.ge, '>=')
+        return self.compare(other, operator.ge, '>=')
 
     def __le__(self, other):
-        return self._compare(other, operator.le, '<=')
+        return self.compare(other, operator.le, '<=')
 
     def __eq__(self, other):
-        return self._compare(other, operator.eq, '==')
+        return self.compare(other, operator.eq, '==')
 
     def __ne__(self, other):
-        return self._compare(other, operator.ne, '!=')
+        return self.compare(other, operator.ne, '!=')
 
     def _get_args(self,
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
