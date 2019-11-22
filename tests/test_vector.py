@@ -62,32 +62,32 @@ def test_vector_eq():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
     x = Vector.from_list(list(range(1,11)))
-    assert v == w
-    assert v != x
+    assert v.iseq(w)
+    assert v.isne(x)
 
 def test_vector_eadd():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
     x = v.eadd(w)
-    assert x == Vector.from_lists(
+    assert x.iseq(Vector.from_lists(
         list(range(10)),
-        list(range(0, 20, 2)))
+        list(range(0, 20, 2))))
     z = v + w
-    assert x == z
+    assert x.iseq(z)
     v += w
-    assert v == z
+    assert v.iseq(z)
 
 def test_vector_emult():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
     x = v.emult(w)
-    assert x == Vector.from_lists(
+    assert x.iseq(Vector.from_lists(
         list(range(10)),
-        list(map(lambda x: x*x, list(range(10)))))
+        list(map(lambda x: x*x, list(range(10))))))
     z = v * w
-    assert x == z
+    assert x.iseq(z)
     v *= w
-    assert v == z
+    assert v.iseq(z)
 
 def test_vector_reduce_bool():
     v = Vector.from_type(bool, 10)
@@ -153,7 +153,7 @@ def test_vector_assign():
         list(range(10)),
         list(range(10)))
     v[:] = w
-    assert v == w
+    assert v.iseq(w)
 
     v[1:] = w[9:1:-1]
     assert v == Vector.from_lists(
@@ -161,17 +161,17 @@ def test_vector_assign():
         [0, 9, 8, 7, 6, 5, 4, 3, 2, 1])
 
     w[9:1:-1] = v[9:1:-1]
-    assert w == v
+    assert w.iseq(v)
 
     v[:] = 3
-    assert v == Vector.from_lists(
+    assert v.iseq(Vector.from_lists(
         list(range(10)),
-        list(repeat(3, 10)))
+        list(repeat(3, 10))))
 
     v[1:] = 0
-    assert v == Vector.from_lists(
+    assert v.iseq(Vector.from_lists(
         list(range(10)),
-        [3] + list(repeat(0, 9)))
+        [3] + list(repeat(0, 9))))
 
 def test_vxm():
     m = Matrix.from_lists(
@@ -182,15 +182,15 @@ def test_vxm():
         [0, 1, 2],
         [2, 3, 4])
     o = v.vxm(m)
-    assert o == Vector.from_lists(
+    assert o.iseq(Vector.from_lists(
         [0, 1, 2],
-        [12, 2, 6])
+        [12, 2, 6]))
 
     w = Vector.dup(v)
 
-    assert v @ m == o
+    assert (v @ m).iseq(o)
     v @= m
-    assert v == o
+    assert v.iseq(o)
 
 def test_apply():
     v = Vector.from_lists(
@@ -198,17 +198,17 @@ def test_apply():
         [2, 3, 4])
 
     w = v.apply(unaryop.ainv_int64)
-    assert w == Vector.from_lists(
+    assert w.iseq(Vector.from_lists(
         [0, 1, 2],
-        [-2, -3, -4])
+        [-2, -3, -4]))
 
     w = ~v
-    assert w == Vector.from_lists(
+    assert w.iseq(Vector.from_lists(
         [0, 1, 2],
-        [-2, -3, -4])
+        [-2, -3, -4]))
 
     w = abs(w)
-    assert w == v
+    assert w.iseq(v)
 
 def test_select():
     v = Vector.from_lists(
@@ -223,6 +223,6 @@ def test_to_dense():
     assert v.nvals == 3
     w = v.to_dense()
     assert w.nvals == 5
-    assert w == Vector.from_lists(
+    assert w.iseq(Vector.from_lists(
         [0, 1, 2, 3, 4],
-        [0, 0, 1, 0, 2])
+        [0, 0, 1, 0, 2]))
