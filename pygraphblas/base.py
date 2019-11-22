@@ -94,6 +94,31 @@ def _gb_from_type(typ):
         return lib.GrB_BOOL
     return typ
 
+def _gb_from_name(name):
+    name = name.lower()
+    if name == 'bool':
+        return lib.GrB_BOOL
+    if name == 'uint8':
+        return lib.GrB_UINT8
+    if name == 'int8':
+        return lib.GrB_INT8
+    if name == 'uint16':
+        return lib.GrB_UINT16
+    if name == 'int16':
+        return lib.GrB_INT16
+    if name == 'uint32':
+        return lib.GrB_UINT32
+    if name == 'int32':
+        return lib.GrB_INT32
+    if name == 'uint64':
+        return lib.GrB_UINT64
+    if name == 'int64':
+        return lib.GrB_INT64
+    if name == 'fp32':
+        return lib.GrB_FP32
+    if name == 'fp64':
+        return lib.GrB_FP64
+
 def _build_range(rslice, stop_val):
     if rslice is None or \
        (rslice.start is None and

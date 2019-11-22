@@ -100,10 +100,10 @@ def test_matrix_eadd():
         list(range(10)))
 
     x = v.eadd(w)
-    assert x == Matrix.from_lists(
+    assert x.iseq(Matrix.from_lists(
         list(range(10)),
         list(range(10)),
-        list(range(0, 20, 2)))
+        list(range(0, 20, 2))))
     z = v + w
     assert x == z
     v += w
@@ -120,14 +120,14 @@ def test_vector_emult():
         list(range(10)))
 
     x = v.emult(w)
-    assert x == Matrix.from_lists(
+    assert x.iseq(Matrix.from_lists(
         list(range(10)),
         list(range(10)),
-        list(map(lambda x: x*x, list(range(10)))))
+        list(map(lambda x: x*x, list(range(10))))))
     z = v * w
-    assert x == z
+    assert x.iseq(z)
     v *= w
-    assert v == z
+    assert v.iseq(z)
 
 def test_matrix_reduce_bool():
     v = Matrix.from_type(bool, 10, 10)
@@ -178,27 +178,36 @@ def test_mxm():
         [0,1,2],
         [2,0,1],
         [3,8,6])
-    assert o == r
-    assert r == m @ n
+    assert o.iseq(r)
+    assert r.iseq(m @ n)
     m @= n
-    assert r == m
+    assert r.iseq(m)
     o = m.mxm(n, semiring=semiring.lor_land_bool)
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1])
+        [1, 1, 1]))
+
+    with semiring.plus_plus:
+        o = m @ n
+
+    assert o.iseq(Matrix.from_lists(
+        [0, 1, 2],
+        [0, 1, 2],
+        [7, 10, 9]))
+    
     with semiring.lor_land_bool:
         o = m @ n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1])
+        [1, 1, 1]))
     with semiring.lor_land_bool:
         o = m @ n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1])
+        [1, 1, 1]))
     with pytest.raises(TypeError):
         m @ 3
     with pytest.raises(TypeError):
@@ -236,11 +245,11 @@ def test_matrix_transpose():
         list(range(3)),
         list(range(3)))
     w = v.transpose()
-    assert w == Matrix.from_lists(
+    assert w.iseq(Matrix.from_lists(
         [0, 1, 2],
         [2, 1, 0],
         [0, 1, 2]
-        )
+        ))
 
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
@@ -262,7 +271,7 @@ def test_matrix_mm_read_write(tmp_path):
 
     with mmf.open() as f:
         n = Matrix.from_mm(f)
-    assert n == m
+    assert n.iseq(m)
 
 def test_matrix_tsv_read(tmp_path):
     mmf = tmp_path / 'tsv_test.mm'
@@ -310,48 +319,47 @@ def test_matrix_slicing():
 
     # slice copy
     n = m[:]
-    assert n == m
+    assert n.iseq(m)
     # also slice copy
     n = m[:,:]
-    assert n == m
+    assert n.iseq(m)
 
     # submatrix slice out rows
     sm = m[0:1]
-    assert sm == Matrix.from_lists(
+    assert sm.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5], 2, 3)
+        [0, 1, 2, 3, 4, 5], 2, 3))
 
     # submatrix slice out columns
     n = m[:,1:]
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 0, 1, 1, 2, 2],
         [0, 1, 0, 1, 0, 1],
-        [1, 2, 4, 5, 7, 8], 3, 2)
+        [1, 2, 4, 5, 7, 8], 3, 2))
 
     # submatrix slice out column range
     sm = m[:,1:2]
-    assert sm == Matrix.from_lists(
+    assert sm.iseq(Matrix.from_lists(
         [0, 0, 1, 1, 2, 2],
         [0, 1, 0, 1, 0, 1],
-        [1, 2, 4, 5, 7, 8], 3, 2)
+        [1, 2, 4, 5, 7, 8], 3, 2))
 
     # submatrix slice out rows
     n = m[1:,:]
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
-        [3, 4, 5, 6, 7, 8], 2, 3)
+        [3, 4, 5, 6, 7, 8], 2, 3))
 
     # submatrix slice out row range
     sm = m[1:2,:]
-    assert sm == Matrix.from_lists(
+    assert sm.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
-        [3, 4, 5, 6, 7, 8], 2, 3)
+        [3, 4, 5, 6, 7, 8], 2, 3))
 
 def test_matrix_assign():
-
     m = Matrix.from_lists(
         list(range(3)),
         list(range(3)),
@@ -360,10 +368,10 @@ def test_matrix_assign():
 
     m[2] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m == Matrix.from_lists(
+    assert m.iseq(Matrix.from_lists(
         [0, 1, 2, 2, 2],
         [0, 1, 0, 1, 2],
-        [0, 1, 6, 6, 6], 3, 3)
+        [0, 1, 6, 6, 6], 3, 3))
 
     m = Matrix.from_lists(
         list(range(3)),
@@ -373,10 +381,10 @@ def test_matrix_assign():
 
     m[2,:] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m == Matrix.from_lists(
+    assert m.iseq(Matrix.from_lists(
         [0, 1, 2, 2, 2],
         [0, 1, 0, 1, 2],
-        [0, 1, 6, 6, 6], 3, 3)
+        [0, 1, 6, 6, 6], 3, 3))
 
     m = Matrix.from_lists(
         list(range(3)),
@@ -386,10 +394,10 @@ def test_matrix_assign():
     assert m.nvals == 3
     m[:,2] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m == Matrix.from_lists(
+    assert m.iseq(Matrix.from_lists(
         [0, 1, 0, 1, 2],
         [0, 1, 2, 2, 2],
-        [0, 1, 6, 6, 6], 3, 3)
+        [0, 1, 6, 6, 6], 3, 3))
 
     m = Matrix.from_type(int, 3, 3)
     assert m.nvals == 0
@@ -398,7 +406,7 @@ def test_matrix_assign():
         [0, 1, 2],
         [0, 1, 2])
     m[:,:] = n
-    assert m == n
+    assert m.iseq(n)
 
     n = Matrix.from_lists(
         [0, 1, 2],
@@ -407,10 +415,10 @@ def test_matrix_assign():
 
     mask = m > 0
     m[mask] = 9
-    assert m == Matrix.from_lists(
+    assert m.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [0, 9, 9])
+        [0, 9, 9]))
 
 def test_kron():
     n = Matrix.from_lists(
@@ -423,10 +431,10 @@ def test_kron():
         list(range(3)))
 
     o = n.kron(m)
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 1, 2, 3, 4, 5, 6, 7, 8],
         [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [0, 0, 0, 0, 1, 2, 0, 2, 4])
+        [0, 0, 0, 0, 1, 2, 0, 2, 4]))
 
 def test_apply():
     v = Matrix.from_lists(
@@ -434,10 +442,10 @@ def test_apply():
         [0, 1, 2],
         [2, 3, 4])
     w = v.apply(unaryop.ainv_int64)
-    assert w == Matrix.from_lists(
+    assert w.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [-2, -3, -4])
+        [-2, -3, -4]))
 
 def test_apply_lambda():
     v = Matrix.from_lists(
@@ -446,16 +454,16 @@ def test_apply_lambda():
         [22, 33, 44])
 
     w = v.apply(lambda x: mod(x, 10))
-    assert w == Matrix.from_lists(
+    assert w.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [2, 3, 4])
+        [2, 3, 4]))
 
     w = v.apply(lambda x: mod(x, 7))
-    assert w == Matrix.from_lists(
+    assert w.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 5, 2])
+        [1, 5, 2]))
 
 def test_get_set_options():
     v = Matrix.from_random(int, 10, 10, 10)
@@ -483,52 +491,52 @@ def test_select():
     assert w.to_lists() == [[0, 1], [0, 1], [0, 0]]
 
     w = v.select('>=', 0)
-    assert w == v
+    assert w.iseq(v)
 
     w = v.select('>=0')
-    assert w == v
+    assert w.iseq(v)
 
 def test_select_ops():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
 
-    assert m.tril() == Matrix.from_lists(
+    assert m.tril().iseq(Matrix.from_lists(
         [0, 1, 1, 2, 2, 2],
         [0, 0, 1, 0, 1, 2],
-        [0, 3, 4, 6, 7, 8])
+        [0, 3, 4, 6, 7, 8]))
 
-    assert m.triu() == Matrix.from_lists(
+    assert m.triu().iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 2],
         [0, 1, 2, 1, 2, 2],
-        [0, 1, 2, 4, 5, 8])
+        [0, 1, 2, 4, 5, 8]))
 
-    assert m.diag() == Matrix.from_lists(
+    assert m.diag().iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [0, 4, 8])
+        [0, 4, 8]))
 
-    assert m.offdiag() == Matrix.from_lists(
+    assert m.offdiag().iseq(Matrix.from_lists(
         [0, 0, 1, 1, 2, 2],
         [1, 2, 0, 2, 0, 1],
-        [1, 2, 3, 5, 6, 7])
+        [1, 2, 3, 5, 6, 7]))
 
-    assert m.nonzero() == Matrix.from_lists(
+    assert m.nonzero().iseq(Matrix.from_lists(
         [0, 0, 1, 1, 1, 2, 2, 2],
         [1, 2, 0, 1, 2, 0, 1, 2],
-        [1, 2, 3, 4, 5, 6, 7, 8])
+        [1, 2, 3, 4, 5, 6, 7, 8]))
 
-    assert -m == Matrix.from_lists(
+    assert (-m).iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [0, -1, -2, -3, -4, -5, -6, -7, -8])
+        [0, -1, -2, -3, -4, -5, -6, -7, -8]))
 
     n = -m
 
-    assert abs(m) == Matrix.from_lists(
+    assert abs(m).iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8])
+        [0, 1, 2, 3, 4, 5, 6, 7, 8]))
 
     m = Matrix.from_lists(
         [0, 1, 2],
@@ -536,10 +544,10 @@ def test_select_ops():
         [0.0, 1.0, 2.0], 3, 3)
 
     n = ~m
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [float('inf'), 1.0, 0.5])
+        [float('inf'), 1.0, 0.5]))
 
 def test_cmp_scalar():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -598,50 +606,50 @@ def test_cmp():
     n = Matrix.from_lists(I, J, W, 3, 3)
 
     o = m > n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [False, False, False, False, False, False, False, False, False],
-        )
+        ))
 
     o = m >= n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [True, True, True, False, False, False, False, False, False],
-        )
+        ))
 
     o = m < n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [False, False, False, True, True, True, True, True, True],
         3, 3
-        )
+        ))
 
     o = m <= n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [True, True, True, True, True, True, True, True, True],
         3, 3
-        )
+        ))
 
     o = m == n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [False, False, False, False, False, False, False, False, False],
+        [True, True, True, False, False, False, False, False, False],
         3, 3
-        )
+        ))
 
     o = m != n
-    assert o == Matrix.from_lists(
+    assert o.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [True, True, True, True, True, True, True, True, True],
+        [False, False, False, True, True, True, True, True, True],
         3, 3
-        )
+        ))
 
 def test_select_cmp():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -649,50 +657,51 @@ def test_select_cmp():
     m = Matrix.from_lists(I, J, V, 3, 3)
 
     n = m.select('>', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [2, 2, 2], [0, 1, 2], [6, 7, 8]
-        )
+        ))
 
     n = m.select('>=', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [1, 2, 2, 2],
         [2, 0, 1, 2],
         [5, 6, 7, 8]
-        )
+        ))
 
     n = m.select('<', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1],
         [0, 1, 2, 0, 1],
         [0, 1, 2, 3, 4],
         3, 3
-        )
+        ))
 
     n = m.select('<=', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
         [0, 1, 2, 3, 4, 5],
         3, 3
-        )
+        ))
 
     n = m.select('==', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [1],
         [2],
         [5],
         3, 3
-        )
+        ))
 
     n = m.select('!=', 5)
-    assert n == Matrix.from_lists(
+    assert n.iseq(Matrix.from_lists(
         [0, 0, 0, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 0, 1, 2],
         [0, 1, 2, 3, 4, 6, 7, 8],
         3, 3
-        )
+        ))
 
 def test_shape():
     assert Matrix.from_lists(
         [2, 2, 2], [0, 1, 2], [6, 7, 8]
     ).shape == (3, 3)
+

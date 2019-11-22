@@ -368,6 +368,32 @@ class Matrix:
             desc))
         return out
 
+    def iseq(self, other):
+        """Compare two matrices for equality.
+        """
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_EQ_THUNK, thunk=other)
+
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            NULL))
+        return result[0]
+
+    def isne(self, other):
+        if isinstance(other, (Scalar, bool, int, float)):
+            return self.select(lib.GxB_NE_THUNK, thunk=other)
+
+        result = ffi.new('_Bool*')
+        _check(lib.LAGraph_isequal(
+            result,
+            self.matrix[0],
+            other.matrix[0],
+            NULL))
+        return not result[0]
+
     def __getstate__(self):
         pass
 
@@ -624,7 +650,7 @@ class Matrix:
         if semiring is NULL:
             semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
         if isinstance(semiring, Semiring):
-            semiring = semiring.semiring
+            semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
