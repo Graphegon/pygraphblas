@@ -89,6 +89,13 @@ class VectorFuncs:
         'neg',
         'abs_',
         'not_',
+        'first',
+        'gt',
+        'lt',
+        'ge',
+        'le',
+        'ne',
+        'eq',
         )
 
 def build_vector_type_funcs(typ):
@@ -106,6 +113,13 @@ def build_vector_type_funcs(typ):
     f.assignScalar = getattr(lib, 'GrB_Vector_assign_{}'.format(s))
     f.invert = getattr(lib, 'GrB_AINV_{}'.format(s))
     f.abs_ = getattr(lib, 'GxB_ABS_{}'.format(s))
+    f.first = getattr(lib, 'GrB_FIRST_{}'.format(s))
+    f.gt = getattr(lib, 'GrB_GT_{}'.format(s))
+    f.lt = getattr(lib, 'GrB_LT_{}'.format(s))
+    f.ge = getattr(lib, 'GrB_GE_{}'.format(s))
+    f.le = getattr(lib, 'GrB_LE_{}'.format(s))
+    f.ne = getattr(lib, 'GrB_NE_{}'.format(s))
+    f.eq = getattr(lib, 'GrB_EQ_{}'.format(s))
     return f
 
 

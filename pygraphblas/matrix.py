@@ -371,13 +371,7 @@ class Matrix:
         return result[0]
 
     def isne(self, other):
-        result = ffi.new('_Bool*')
-        _check(lib.LAGraph_isequal(
-            result,
-            self.matrix[0],
-            other.matrix[0],
-            NULL))
-        return not result[0]
+        return not self.iseq(other)
 
     def __getstate__(self):
         pass

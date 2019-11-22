@@ -1,8 +1,11 @@
+import operator
+
 from .base import (
     lib,
     ffi,
     NULL,
     _check,
+    _get_bin_op,
     _gb_from_type,
     _default_add_op,
     _default_mul_op,
@@ -32,7 +35,10 @@ class Vector:
     def __del__(self):
         _check(lib.GrB_Vector_free(self.vector))
 
-    def __eq__(self, other):
+    def __len__(self):
+        return self.nvals
+
+    def iseq(self, other):
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(
             result,
@@ -41,8 +47,8 @@ class Vector:
             NULL))
         return result[0]
 
-    def __len__(self):
-        return self.nvals
+    def isne(self, other):
+        return not self.iseq(other)
 
     @classmethod
     def from_type(cls, py_type, size=0):
@@ -148,8 +154,60 @@ class Vector:
             self.vector[0]))
         return typ[0]
 
-    def ewise_add(self, other, out=None,
-                  mask=NULL, accum=NULL, add_op=NULL, desc=descriptor.oooo):
+    def full(self, identity=None):
+        B = self.__class__.from_type(self.gb_type, self.size)
+        if identity is None:
+            identity = self._funcs.identity
+
+        _check(self._funcs.assignScalar(
+            B.vector[0],
+            NULL,
+            NULL,
+            identity,
+            lib.GrB_ALL,
+            0,
+            NULL))
+        return self.eadd(B, self._funcs.first)
+
+    def compare(self, other, op, strop):
+        C = self.__class__.from_type(bool, self.size)
+        if isinstance(other, (bool, int, float)):
+            if op(other, 0):
+                B = self.__class__.dup(self)
+                B[:] = other
+                self.emult(B, strop, out=C)
+                return C
+            else:
+                self.select(strop, other).apply(lib.GxB_ONE_BOOL, out=C)
+                return C
+        elif isinstance(other, Vector):
+            A = self.full()
+            B = other.full()
+            A.emult(B, strop, out=C)
+            return C
+        else:
+            raise NotImplementedError
+
+    def __gt__(self, other):
+        return self.compare(other, operator.gt, '>')
+
+    def __lt__(self, other):
+        return self.compare(other, operator.lt, '<')
+
+    def __ge__(self, other):
+        return self.compare(other, operator.ge, '>=')
+
+    def __le__(self, other):
+        return self.compare(other, operator.le, '<=')
+
+    def __eq__(self, other):
+        return self.compare(other, operator.eq, '==')
+
+    def __ne__(self, other):
+        return self.compare(other, operator.ne, '!=')
+
+    def eadd(self, other, add_op=NULL, out=None,
+                  mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Element-wise addition with other vector.
 
         Element-wise addition applies a binary operator element-wise
@@ -164,6 +222,8 @@ class Vector:
         """
         if add_op is NULL:
             add_op = current_binop.get(self._funcs.add_op)
+        elif isinstance(add_op, str):
+            add_op = _get_bin_op(add_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -182,8 +242,8 @@ class Vector:
             desc))
         return out
 
-    def ewise_mult(self, other, out=None,
-                   mask=NULL, accum=NULL, mult_op=NULL, desc=descriptor.oooo):
+    def emult(self, other, mult_op=NULL, out=None,
+                   mask=NULL, accum=NULL, desc=descriptor.oooo):
         """Element-wise multiplication with other vector.
 
         Element-wise multiplication applies a binary operator
@@ -198,6 +258,8 @@ class Vector:
         """
         if mult_op is NULL:
             mult_op = current_binop.get(self._funcs.mult_op)
+        elif isinstance(mult_op, str):
+            mult_op = _get_bin_op(mult_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
@@ -252,16 +314,16 @@ class Vector:
         return self.vxm(other, out=self)
 
     def __add__(self, other):
-        return self.ewise_add(other)
+        return self.eadd(other)
 
     def __iadd__(self, other):
-        return self.ewise_add(other, out=self)
+        return self.eadd(other, out=self)
 
     def __mul__(self, other):
-        return self.ewise_mult(other)
+        return self.emult(other)
 
     def __imul__(self, other):
-        return self.ewise_mult(other, out=self)
+        return self.emult(other, out=self)
 
     def __invert__(self):
         return self.apply(self._funcs.invert)

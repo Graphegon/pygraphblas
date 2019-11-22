@@ -65,10 +65,10 @@ def test_vector_eq():
     assert v == w
     assert v != x
 
-def test_vector_ewise_add():
+def test_vector_eadd():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
-    x = v.ewise_add(w)
+    x = v.eadd(w)
     assert x == Vector.from_lists(
         list(range(10)),
         list(range(0, 20, 2)))
@@ -77,10 +77,10 @@ def test_vector_ewise_add():
     v += w
     assert v == z
 
-def test_vector_ewise_mult():
+def test_vector_emult():
     v = Vector.from_list(list(range(10)))
     w = Vector.from_list(list(range(10)))
-    x = v.ewise_mult(w)
+    x = v.emult(w)
     assert x == Vector.from_lists(
         list(range(10)),
         list(map(lambda x: x*x, list(range(10)))))
