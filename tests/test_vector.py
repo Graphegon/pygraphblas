@@ -24,6 +24,7 @@ def test_vector_set_element():
     m[3] = 3
     assert m.size == 10
     assert m.nvals == 1
+    assert len(list(m)) == 1
     assert m[3] == 3
     m = Vector.from_type(bool, 10)
     m[3] = True

@@ -38,6 +38,19 @@ class Vector:
     def __len__(self):
         return self.nvals
 
+    def __iter__(self):
+        nvals = self.nvals
+        _nvals = ffi.new('GrB_Index[1]', [nvals])
+        I = ffi.new('GrB_Index[%s]' % nvals)
+        X = ffi.new('%s[%s]' % (self._funcs.C, nvals))
+        _check(self._funcs.extractTuples(
+            I,
+            X,
+            _nvals,
+            self.vector[0]
+            ))
+        return zip(I, X)
+
     def iseq(self, other):
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(

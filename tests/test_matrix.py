@@ -294,7 +294,7 @@ def test_matrix_random():
     m = Matrix.from_random(int, 10, 10, 5)
     assert m.nrows == 10
     assert m.ncols == 10
-    # assert m.nvals == 5 # sometimes this fails?
+    assert len(list(m)) == 5
 
 def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))

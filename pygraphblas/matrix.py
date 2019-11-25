@@ -379,6 +379,21 @@ class Matrix:
     def __setstate__(self, data):
         pass
 
+    def __iter__(self):
+        nvals = self.nvals
+        _nvals = ffi.new('GrB_Index[1]', [nvals])
+        I = ffi.new('GrB_Index[%s]' % nvals)
+        J = ffi.new('GrB_Index[%s]' % nvals)
+        X = ffi.new('%s[%s]' % (self._funcs.C, nvals))
+        _check(self._funcs.extractTuples(
+            I,
+            J,
+            X,
+            _nvals,
+            self.matrix[0]
+            ))
+        return zip(I, J, X)
+
     def __len__(self):
         return self.nvals
 
