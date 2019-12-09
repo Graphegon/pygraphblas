@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=python:3.7
+ARG BASE_CONTAINER=jupyter/minimal-notebook
 FROM $BASE_CONTAINER
 
 USER root
@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     gawk \
     wget \
     m4 \
+    libxml2-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # get GraphBLAS, compile with debug symbols
@@ -43,10 +45,16 @@ RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     && make install
 RUN cd .. && /bin/rm -Rf LAGraph
 
-RUN ldconfig
-
-ADD . /pygraphblas
-WORKDIR /pygraphblas
+ADD . /home/jovyan
+WORKDIR /home/jovyan
+    
 RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install pytest pytest-cov ipdb
+RUN pip install pytest pytest-cov ipdb pyvis RISE ipywidgets networkx py2cytoscape matplotlib visJS2jupyter
+RUN jupyter nbextension install rise --py --sys-prefix
+RUN jupyter nbextension enable rise --py --sys-prefix
+RUN chown -R jovyan /home/jovyan
+
+RUN ldconfig
+
+USER jovyan

@@ -104,7 +104,7 @@ class Matrix:
     @classmethod
     def from_random(cls, gb_type, nrows, ncols, nvals,
                     make_pattern=False, make_symmetric=False,
-                    make_skew_symmetric=False, make_hermitian=False,
+                    make_skew_symmetric=False, no_diagonal=True,
                     no_diagonal=False, seed=None):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
@@ -393,6 +393,18 @@ class Matrix:
             self.matrix[0]
             ))
         return zip(I, J, X)
+
+    def rows(self):
+        for i, j, v in self:
+            yield i
+
+    def cols(self):
+        for i, j, v in self:
+            yield j
+
+    def vals(self):
+        for i, j, v in self:
+            yield v
 
     def __len__(self):
         return self.nvals
