@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=python:3.7
+ARG BASE_CONTAINER=jupyter/minimal-notebook
 FROM $BASE_CONTAINER
 
 USER root
@@ -47,6 +47,11 @@ RUN ldconfig
 
 ADD . /pygraphblas
 WORKDIR /pygraphblas
+    
 RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install pytest pytest-cov ipdb
+RUN pip install pytest pytest-cov ipdb pyvis
+
+RUN chown -R $NB_UID /pygraphblas
+
+USER $NB_UID

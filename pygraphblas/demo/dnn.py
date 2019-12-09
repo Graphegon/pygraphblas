@@ -4,7 +4,7 @@ from time import time
 from statistics import mean
 from pathlib import Path
 from pygraphblas import Matrix, Vector, lib
-from pygraphblas.semiring import plus_times_fp32, plus_plus_fp32
+from pygraphblas import plus_plus
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 
@@ -26,7 +26,7 @@ def timing(f):
 def dnn(W, B, Y):
     for w, b in zip(W, B):
         Y = Y @ w
-        with plus_plus_fp32:
+        with plus_plus:
             Y = Y @ b
         Y = Y.select('>0')
         M = Y.select('>', 32)

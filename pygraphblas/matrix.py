@@ -371,6 +371,8 @@ class Matrix:
         return result[0]
 
     def isne(self, other):
+        """Compare two matrices for inequality.
+        """
         return not self.iseq(other)
 
     def __getstate__(self):
@@ -393,6 +395,27 @@ class Matrix:
             self.matrix[0]
             ))
         return zip(I, J, X)
+
+    @property
+    def rows(self):
+        """ An iterator of row indexes present in the matrix.
+        """
+        for i, j, v in self:
+            yield i
+
+    @property
+    def cols(self):
+        """ An iterator of column indexes present in the matrix.
+        """
+        for i, j, v in self:
+            yield j
+
+    @property
+    def vals(self):
+        """ An iterator of values present in the matrix.
+        """
+        for i, j, v in self:
+            yield v
 
     def __len__(self):
         return self.nvals

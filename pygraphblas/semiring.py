@@ -4,7 +4,7 @@ import contextvars
 from itertools import chain
 from collections import defaultdict
 
-from .base import lib, _gb_from_name
+from .base import lib, ffi, _gb_from_name, _check
 
 current_semiring = contextvars.ContextVar('current_semiring')
 
@@ -32,6 +32,12 @@ class Semiring:
     def get_semiring(self, operand1=None, operand2=None):
         return self.semiring
 
+    def get_monoid(self, operand1=None, operand2=None):
+        monoid = ffi.new('GrB_Monoid*')
+        _check(lib.GxB_Semiring_add(
+            monoid,
+            self.semiring))
+        return monoid
 
 class AutoSemiring(Semiring):
 
