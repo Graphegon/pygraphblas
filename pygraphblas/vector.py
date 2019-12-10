@@ -305,7 +305,7 @@ class Vector:
         if semiring is NULL:
             semiring = current_semiring.get(self._funcs.semiring)
         if isinstance(semiring, Semiring):
-            semiring = semiring.semiring
+            semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):

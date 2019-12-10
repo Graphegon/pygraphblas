@@ -1,6 +1,6 @@
 
 from pygraphblas import Matrix, Vector
-from pygraphblas.semiring import min_plus_int64
+from pygraphblas.semiring import min_plus
 from pygraphblas.binaryop import min_int64, Accum
 
 # The graph as a list of row and column indices and values
@@ -40,7 +40,7 @@ def sssp(matrix, start):
     v = Vector.from_type(matrix.gb_type, matrix.nrows)
     v[start] = 0
 
-    with min_plus_int64, Accum(min_int64):
+    with min_plus, Accum(min_int64):
         for _ in range(matrix.nrows):
             w = Vector.dup(v)
             v @= matrix

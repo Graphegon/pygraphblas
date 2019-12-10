@@ -5,6 +5,7 @@ from .base import lib
 class MatrixFuncs:
     __slots__ = (
         'C',
+        'aidentity',
         'identity',
         'setElement',
         'extractElement',
@@ -29,17 +30,17 @@ class MatrixFuncs:
 
 
 _type_maps = {
-    lib.GrB_BOOL:   ('_Bool', 'BOOL', 'LOR', 'LAND', False),
-    lib.GrB_INT8:   ('int8_t', 'INT8', 'PLUS', 'TIMES', 0),
-    lib.GrB_UINT8:  ('uint8_t', 'UINT8', 'PLUS', 'TIMES', 0),
-    lib.GrB_INT16:  ('int16_t', 'INT16', 'PLUS', 'TIMES', 0),
-    lib.GrB_UINT16: ('uint16_t', 'INT16', 'PLUS', 'TIMES', 0),
-    lib.GrB_INT32:  ('int32_t', 'INT32', 'PLUS', 'TIMES', 0),
-    lib.GrB_UINT32: ('uint32_t', 'INT32', 'PLUS', 'TIMES', 0),
-    lib.GrB_INT64:  ('int64_t', 'INT64', 'PLUS', 'TIMES', 0),
-    lib.GrB_UINT64:  ('uint64_t', 'INT64', 'PLUS', 'TIMES', 0),
-    lib.GrB_FP32:   ('float', 'FP32', 'PLUS', 'TIMES', 0.0),
-    lib.GrB_FP64:   ('double', 'FP64', 'PLUS', 'TIMES', 0.0),
+    lib.GrB_BOOL:   ('_Bool', 'BOOL', 'LOR', 'LAND', True, False),
+    lib.GrB_INT8:   ('int8_t', 'INT8', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_UINT8:  ('uint8_t', 'UINT8', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_INT16:  ('int16_t', 'INT16', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_UINT16: ('uint16_t', 'INT16', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_INT32:  ('int32_t', 'INT32', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_UINT32: ('uint32_t', 'INT32', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_INT64:  ('int64_t', 'INT64', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_UINT64:  ('uint64_t', 'INT64', 'PLUS', 'TIMES', 1, 0),
+    lib.GrB_FP32:   ('float', 'FP32', 'PLUS', 'TIMES', 1.0, 0.0),
+    lib.GrB_FP64:   ('double', 'FP64', 'PLUS', 'TIMES', 1.0, 0.0),
     }
 
 
@@ -48,8 +49,9 @@ def type_name(typ):
 
 def build_matrix_type_funcs(typ):
     f = MatrixFuncs()
-    c, s, a, m, i  = _type_maps[typ]
+    c, s, a, m, ai, i  = _type_maps[typ]
     f.C = c
+    f.aidentity = ai
     f.identity = i
     f.setElement = getattr(lib, 'GrB_Matrix_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GrB_Matrix_extractElement_{}'.format(s))
@@ -76,6 +78,7 @@ def build_matrix_type_funcs(typ):
 class VectorFuncs:
     __slots__ = (
         'C',
+        'aidentity',
         'identity',
         'setElement',
         'extractElement',
@@ -100,8 +103,9 @@ class VectorFuncs:
 
 def build_vector_type_funcs(typ):
     f = VectorFuncs()
-    c, s, a, m, i  = _type_maps[typ]
+    c, s, a, m, ai, i  = _type_maps[typ]
     f.C = c
+    f.aidentity = ai
     f.identity = i
     f.setElement = getattr(lib, 'GrB_Vector_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GrB_Vector_extractElement_{}'.format(s))
@@ -126,6 +130,7 @@ def build_vector_type_funcs(typ):
 class ScalarFuncs:
     __slots__ = (
         'C',
+        'aidentity',
         'identity',
         'setElement',
         'extractElement',
@@ -133,8 +138,9 @@ class ScalarFuncs:
 
 def build_scalar_type_funcs(typ):
     f = ScalarFuncs()
-    c, s, a, m, i  = _type_maps[typ]
+    c, s, a, m, ai, i  = _type_maps[typ]
     f.C = c
+    f.aidentity = ai
     f.identity = i
     f.setElement = getattr(lib, 'GxB_Scalar_setElement_{}'.format(s))
     f.extractElement = getattr(lib, 'GxB_Scalar_extractElement_{}'.format(s))

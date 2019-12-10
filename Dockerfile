@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     gawk \
     wget \
     m4 \
+    libxml2-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # get GraphBLAS, compile with debug symbols
@@ -43,15 +45,18 @@ RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
     && make install
 RUN cd .. && /bin/rm -Rf LAGraph
 
-RUN ldconfig
+RUN conda install -y graphviz
 
-ADD . /pygraphblas
-WORKDIR /pygraphblas
+ADD . /home/jovyan
+WORKDIR /home/jovyan
     
 RUN python setup.py clean
 RUN python setup.py develop
-RUN pip install pytest pytest-cov ipdb pyvis
+RUN pip install pytest pytest-cov ipdb RISE graphviz
+RUN jupyter nbextension install rise --py --sys-prefix
+RUN jupyter nbextension enable rise --py --sys-prefix
+RUN chown -R jovyan /home/jovyan
 
-RUN chown -R $NB_UID /pygraphblas
+RUN ldconfig
 
-USER $NB_UID
+USER jovyan

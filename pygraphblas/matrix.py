@@ -104,7 +104,7 @@ class Matrix:
     @classmethod
     def from_random(cls, gb_type, nrows, ncols, nvals,
                     make_pattern=False, make_symmetric=False,
-                    make_skew_symmetric=False, make_hermitian=False,
+                    make_skew_symmetric=False, make_hermitian=True,
                     no_diagonal=False, seed=None):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
@@ -129,6 +129,13 @@ class Matrix:
             no_diagonal,
             fseed))
         return cls(result)
+
+    @classmethod
+    def identity(cls, typ, nrows, ncols):
+        result = cls.from_type(typ, nrows, ncols)
+        for i in range(nrows):
+            result[i,i] = result._funcs.aidentity
+        return result
 
     @property
     def gb_type(self):
@@ -443,6 +450,16 @@ class Matrix:
 
     def __abs__(self):
         return self.apply(self._funcs.abs_)
+
+    def __pow__(self, exponent):
+        if exponent == 0:
+            return self.__class__.identity(self.gb_type, self.nrows, self.ncols)
+        if exponent == 1:
+            return self
+        result = self
+        for i in range(exponent):
+            result = result @ self
+        return result
 
     def reduce_bool(self, monoid=NULL, **kwargs):
         """Reduce matrix to a boolean.
