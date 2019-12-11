@@ -1,10 +1,11 @@
 from graphviz import Digraph, Source
 
-def draw_graph(M, name='', rankdir='LR', show_weight=True):
+def draw_graph(M, name='', rankdir='LR', show_weight=True, label_vector=None):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep='1')
     for i, j, v in M:
-        g.node(str(i))
+        g.node(str(i), label=str(label_vector[i]) if label_vector else str(i))
+        g.node(str(j), label=str(label_vector[j]) if label_vector else str(j))
         g.edge(str(i), str(j),
                label=str(v) if show_weight else None)
     return g

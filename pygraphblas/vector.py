@@ -300,8 +300,8 @@ class Vector:
             out = Vector.from_type(self.gb_type, self.size)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
-        if isinstance(mask, Matrix):
-            mask = mask.matrix[0]
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if semiring is NULL:
             semiring = current_semiring.get(self._funcs.semiring)
         if isinstance(semiring, Semiring):
@@ -359,6 +359,8 @@ class Vector:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.binaryop
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         return mask, monoid, accum, desc
 
 
@@ -454,6 +456,8 @@ class Vector:
         return Vector(out)
 
     def __setitem__(self, index, value):
+        mask = NULL
+        desc = NULL
         tf = self._funcs
         if isinstance(index, int):
             C = tf.C
@@ -463,17 +467,25 @@ class Vector:
                 ffi.cast(C, value),
                 index))
             return
+        if isinstance(index, tuple):
+            if len(index) == 2:
+                index, mask = index
+            elif len(index) == 3:
+                index, mask, desc = index
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
+            
         if isinstance(index, slice):
             if isinstance(value, Vector):
                 I, ni, size = _build_range(index, self.size - 1)
                 _check(lib.GrB_Vector_assign(
                     self.vector[0],
-                    NULL,
+                    mask,
                     NULL,
                     value.vector[0],
                     I,
                     ni,
-                    NULL
+                    desc
                     ))
                 return
             if isinstance(value, (bool, int, float)):
@@ -482,12 +494,12 @@ class Vector:
                 I, ni, size = _build_range(index, self.size - 1)
                 _check(tf.assignScalar(
                     self.vector[0],
-                    NULL,
+                    mask,
                     NULL,
                     value,
                     I,
                     ni,
-                    NULL
+                    desc
                     ))
                 return
         raise TypeError('Unknown index or value for vector assignment.')

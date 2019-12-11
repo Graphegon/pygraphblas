@@ -666,6 +666,8 @@ class Matrix:
             mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if semiring is NULL:
             semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
         if isinstance(semiring, Semiring):
