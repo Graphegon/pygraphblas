@@ -20,8 +20,8 @@ Notebooks:
 Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
 the following Notebooks:
 
-(Introduction to GraphBLAS with Python)[pygraphblas/demo/Introduction to GraphBLAS with Python.ipynb]
-(RadiX-Net with pygraphblas)[pygraphblas/demo/RadiX-Net with pygraphblas.ipynb]
+[Introduction to GraphBLAS with Python](pygraphblas/demo/Introduction to GraphBLAS with Python.ipynb)
+[RadiX-Net with pygraphblas](pygraphblas/demo/RadiX-Net with pygraphblas.ipynb)
 
 # Tests
 
