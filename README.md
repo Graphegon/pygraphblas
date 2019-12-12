@@ -8,24 +8,22 @@ pygraphblas is distributed as a docker image on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
 and can be run with a single command:
 
-    docker run -it graphblas/pygraphblas ipython
+    docker run -it graphblas/pygraphblas-notebook ipython
 
-    In [1]: from pygraphblas import Matrix
-    In [2]: from operator import mod
+# Tutorial
 
-    # two random 3x3 matrices with 3 random values mod(10)
+You can run a Jupyter notebook server with docker and try the example
+Notebooks:
 
-    In [3]: m = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
+    ./notebook
 
-    In [4]: n = Matrix.from_random(int, 3, 3, 3).apply(lambda x: mod(x, 10))
+Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
+the following Notebooks:
 
-    In [5]: n @= m  # multiply accumulate
+(Introduction to GraphBLAS with Python)[pygraphblas/demo/Introduction to GraphBLAS with Python.ipynb]
+(RadiX-Net with pygraphblas)[pygraphblas/demo/RadiX-Net with pygraphblas.ipynb]
 
-    In [8]: n
-    Out[8]: <Matrix (3x3: 2)>
-
-    In [6]: n.to_lists()
-    Out[6]: [[0, 1], [0, 0], [0, 35]] # only two values in this particular sparse 3x3
+# Tests
 
 Next run the tests:
 
@@ -162,67 +160,10 @@ times semiring.  GraphBLAS can do this as well, of course, but it also
 abstracts out the numerical type and operators that can be used for
 "matrix multiplication".
 
-For example, let's consider three different graph problems and the
-semrings that can solve them.  The first is finding the shortest path
-between nodes in a graph.
-
-![Finding the Shortest Path](./docs/ShortestPath.svg)
-
-In this example, the nodes can be cites, the edge weights
-distances between the cities in units like kilometers.  If travelling
-from city A to city C, how can we compute the shortest path to take?
-The process is fairly simple, add the weights along each path, and
-then use the minimum function to find the shortest distance.
-
-In pygraphblas, the semiring that solves this problem is called
-`pygraphblas.semiring.min_plus_int`.  There are two different styles
-for writing this with pygraphblas, one is to use `with` blocks to
-specify the operations to be used, and then use standard Python matrix
-multiplication syntax:
-
-    from pygraphblas import Matrix, Vector
-    from pygraphblas.semiring import min_plus_int64
-    from pygraphblas.binaryop import min_int64, Accum
-
-    def sssp(matrix, start):
-        v = Vector.from_type(                  # create a vector
-            matrix.gb_type,                    # same type as m
-            matrix.nrows                       # same size as rows of m
-        )
-        v[start] = 0                           # set the starting vertext distance
-
-        with min_plus_int64, Accum(min_int64): # set Semiring, Accumulator
-            for _ in range(matrix.nrows):      # for every row in m
-                w = Vector.dup(v)              # dup the vector
-                v @= matrix                    # multiply accumulate
-                if w == v:                     # if nothing changed
-                    break                      # exit early
-            return v
-
-An identical but slightly more verbose approach is to call the
-multiplication method directly `Vector.vxm` in this case, with
-explicit semiring and accumulator operations:
-
-    def sssp_direct(matrix, start):
-        v = Vector.from_type(            # create a vector
-            matrix.gb_type,              # same type as m
-            matrix.nrows                 # same size as rows of m
-        )
-        v[start] = 0                     # set the starting vertext distance
-
-        for _ in range(matrix.nrows):    # for every row in m:
-            w = Vector.dup(v)            # dup the vector
-            v.vxm(                       # multiply vector by matrix
-                matrix, out=v,
-                semiring=min_plus_int64, # with min_plus,
-                accum=min_int64          # acccumulate the minimum
-            )
-            if w == v:                   # if nothing changed
-                break                    # exit early
-        return v
-
 
 # API
+
+Coming soon, real API docs.
 
 The pygraphblas package contains the following sub-modules:
 
@@ -254,7 +195,5 @@ tests for usage.
 - ReadTheDocs site.
 
 - User defined types.
-
-- Jupyter Notebook tutorial.
 
 - optimize construction from numpy.array and scipy.sparse

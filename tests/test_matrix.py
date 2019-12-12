@@ -291,7 +291,7 @@ def test_matrix_tsv_read(tmp_path):
         [2, 3, 4]]
 
 def test_matrix_random():
-    m = Matrix.from_random(int, 10, 10, 5)
+    m = Matrix.from_random(int, 10, 10, 5, seed=42)
     assert m.nrows == 10
     assert m.ncols == 10
     assert len(list(m)) == 5
@@ -466,7 +466,7 @@ def test_apply_lambda():
         [1, 5, 2]))
 
 def test_get_set_options():
-    v = Matrix.from_random(int, 10, 10, 10)
+    v = Matrix.from_random(int, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
 

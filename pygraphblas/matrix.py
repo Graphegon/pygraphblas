@@ -312,9 +312,11 @@ class Matrix:
 
         """
         if add_op is NULL:
-            add_op = self._funcs.add_op
+            add_op = current_binop.get(self._funcs.add_op)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self._funcs)
+        if isinstance(add_op, BinaryOp):
+            add_op = add_op.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -346,9 +348,11 @@ class Matrix:
 
         """
         if mult_op is NULL:
-            mult_op = self._funcs.mult_op
+            mult_op = current_binop.get(self._funcs.mult_op)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self._funcs)
+        if isinstance(mult_op, BinaryOp):
+            mult_op = mult_op.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -457,7 +461,7 @@ class Matrix:
         if exponent == 1:
             return self
         result = self
-        for i in range(exponent):
+        for i in range(1, exponent):
             result = result @ self
         return result
 
@@ -669,13 +673,13 @@ class Matrix:
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
-            semiring = current_semiring.get(current_semiring.get(self._funcs.semiring))
+            semiring = current_semiring.get(self._funcs.semiring)
         if isinstance(semiring, Semiring):
             semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+            accum = accum.get_binaryop(self)
         return mask, semiring, accum, desc
 
     def mxm(self, other, out=None, **kwargs):

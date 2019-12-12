@@ -239,8 +239,8 @@ class Vector:
             add_op = _get_bin_op(add_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -275,8 +275,8 @@ class Vector:
             mult_op = _get_bin_op(mult_op, self._funcs)
         if accum is NULL:
             accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
@@ -308,8 +308,8 @@ class Vector:
             semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.get_binaryop(self, other)
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
@@ -357,8 +357,8 @@ class Vector:
             monoid = self._funcs.monoid
         if accum is NULL:
             accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
-            accum = accum.binaryop
+        if isinstance(accum, BinaryOp):
+            accum = accum.get_binaryop(self)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         return mask, monoid, accum, desc
