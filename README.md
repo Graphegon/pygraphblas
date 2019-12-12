@@ -6,7 +6,7 @@ GraphBLAS for Python
 
 pygraphblas is distributed as a docker image on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
-and can be run with a single command:
+and can be run with the command:
 
     docker run -it graphblas/pygraphblas-notebook ipython
 
