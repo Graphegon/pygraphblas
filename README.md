@@ -15,7 +15,7 @@ and can be run with the command:
 You can run a Jupyter notebook server with docker and try the example
 Notebooks:
 
-    ./notebook
+    ./notebook.sh
 
 Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
 the following Notebooks:
