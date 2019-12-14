@@ -11,6 +11,7 @@ from .base import (
     _default_mul_op,
     _build_range,
 )
+from . import binaryop
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
@@ -336,11 +337,23 @@ class Vector:
     def __iadd__(self, other):
         return self.eadd(other, out=self)
 
+    def __sub__(self, other):
+        return self.eadd(other, add_op=binaryop.sub)
+
+    def __isub__(self, other):
+        return self.eadd(other, add_op=binaryop.sub, out=self)
+
     def __mul__(self, other):
         return self.emult(other)
 
     def __imul__(self, other):
         return self.emult(other, out=self)
+
+    def __truediv__(self, other):
+        return self.emult(other, mult_op=binaryop.div)
+
+    def __itruediv__(self, other):
+        return self.emult(other, mult_op=binaryop.div, out=self)
 
     def __invert__(self):
         return self.apply(self._funcs.invert)

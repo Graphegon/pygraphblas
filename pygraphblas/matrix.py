@@ -14,6 +14,8 @@ from .base import (
     _get_select_op,
     _get_bin_op,
 )
+
+from pygraphblas import binaryop
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import Semiring, current_semiring
@@ -440,11 +442,23 @@ class Matrix:
     def __iadd__(self, other):
         return self.eadd(other, out=self)
 
+    def __sub__(self, other):
+        return self.eadd(other, add_op=binaryop.sub)
+
+    def __isub__(self, other):
+        return self.eadd(other, add_op=binaryop.sub, out=self)
+
     def __mul__(self, other):
         return self.emult(other)
 
     def __imul__(self, other):
         return self.emult(other, out=self)
+
+    def __truediv__(self, other):
+        return self.emult(other, mult_op=binaryop.div)
+
+    def __itruediv__(self, other):
+        return self.emult(other, mult_op=binaryop.div, out=self)
 
     def __invert__(self):
         return self.apply(self._funcs.invert)

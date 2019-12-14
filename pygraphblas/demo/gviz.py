@@ -1,7 +1,7 @@
 from graphviz import Digraph, Source
 from pygraphblas import Matrix, Vector
 
-def _str(s, label_width=5):
+def _str(s, label_width=3):
     return str(s)[:label_width]
 
 def draw_vector(V, name='', rankdir='LR', ioff=0, joff=0):
@@ -11,7 +11,8 @@ def draw_vector(V, name='', rankdir='LR', ioff=0, joff=0):
         g.node(str(i+ioff), label='%s:%s' % (str(i), str(v)))
     return g
 
-def draw_graph(M, name='', rankdir='LR', show_weight=True, label_vector=None, size_vector=None, ioff=0, joff=0):
+def draw_graph(M, name='', rankdir='LR', show_weight=True,
+               label_vector=None, size_vector=None, ioff=0, joff=0):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep='1')
     for i, j, v in M:
@@ -21,7 +22,7 @@ def draw_graph(M, name='', rankdir='LR', show_weight=True, label_vector=None, si
         vlabel = _str(v) if show_weight else None
         
         g.node(str(i+ioff), width=size, height=size, label=ilabel)
-        g.node(str(j+joff), width=size, height=jlabel)
+        g.node(str(j+joff), width=size, height=size, label=jlabel)
         g.edge(str(i+ioff), str(j+joff), label=vlabel)
     return g
 
