@@ -235,6 +235,8 @@ class Vector:
         """
         if add_op is NULL:
             add_op = current_binop.get(self._funcs.add_op)
+        if isinstance(add_op, BinaryOp):
+            mult_op = mult_op.get_binaryop(self, other)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self._funcs)
         if accum is NULL:
@@ -271,6 +273,8 @@ class Vector:
         """
         if mult_op is NULL:
             mult_op = current_binop.get(self._funcs.mult_op)
+        if isinstance(mult_op, BinaryOp):
+            mult_op = mult_op.get_binaryop(self, other)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self._funcs)
         if accum is NULL:
@@ -505,6 +509,7 @@ class Vector:
         raise TypeError('Unknown index or value for vector assignment.')
 
     def __getitem__(self, index):
+        mask = NULL
         if isinstance(index, int):
             tf = self._funcs
             C = tf.C
@@ -515,6 +520,9 @@ class Vector:
                 self.vector[0],
                 ffi.cast('GrB_Index', index)))
             return result[0]
+        if isinstance(index, Vector):
+            mask = index.vector[0]
+            index = slice(None, None, None)
         if isinstance(index, slice):
             I, ni, size = _build_range(index, self.size - 1)
             if size is None:
@@ -522,7 +530,7 @@ class Vector:
             result = Vector.from_type(self.gb_type, size)
             _check(lib.GrB_Vector_extract(
                 result.vector[0],
-                NULL,
+                mask,
                 NULL,
                 self.vector[0],
                 I,
