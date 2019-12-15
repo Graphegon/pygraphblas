@@ -23,8 +23,9 @@ the following Notebooks:
  - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction%20to%20GraphBLAS%20with%20Python.ipynb)
  - [PageRank](./pygraphblas/demo/PageRank.ipynb)
  - [Betweeness Centrality](./pygraphblas/demo/BetweenessCentrality.ipynb)
- - [K-Truss](./pygraphblas/demo/K-Truss.ipynb)
- - [RadiX-Net](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
+ - [K-Truss Subgraphs](./pygraphblas/demo/K-Truss.ipynb)
+ - [Triangle Counting](./pygraphblas/demo/Triangle_Counting.ipynb)
+ - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
 
 # Tests
 
