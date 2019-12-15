@@ -21,9 +21,10 @@ Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
 the following Notebooks:
 
  - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction%20to%20GraphBLAS%20with%20Python.ipynb)
- - [RadiX-Net with pygraphblas](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
  - [PageRank](./pygraphblas/demo/PageRank.ipynb)
  - [Betweeness Centrality](./pygraphblas/demo/BetweenessCentrality.ipynb)
+ - [K-Truss](./pygraphblas/demo/K-Truss.ipynb)
+ - [RadiX-Net](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
 
 # Tests
 
