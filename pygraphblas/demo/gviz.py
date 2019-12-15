@@ -16,7 +16,7 @@ def draw_graph(M, name='', rankdir='LR', show_weight=True,
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep='1')
     for i, j, v in M:
-        size = _str(size_vector[i]) if size_vector else '1.0'
+        size = _str(size_vector[i]) if size_vector else '0.5'
         ilabel = _str(label_vector[i]) if label_vector else str(i)
         jlabel = _str(label_vector[j]) if label_vector else str(j)
         vlabel = _str(v) if show_weight else None
