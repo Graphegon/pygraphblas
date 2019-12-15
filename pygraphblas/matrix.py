@@ -64,6 +64,14 @@ class Matrix:
         return cls(new_mat)
 
     @classmethod
+    def dense(cls, typ, nrows, ncols, fill=None):
+        m = cls.from_type(typ, nrows, ncols)
+        if fill is None:
+            fill = m._funcs.aidentity
+        m[:,:] = fill
+        return m
+
+    @classmethod
     def from_lists(cls, I, J, V, nrows=None, ncols=None):
         """Create a new matrix from the given lists of row indices, column
         indices, and values.  If nrows or ncols are not provided, they

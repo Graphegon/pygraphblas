@@ -113,6 +113,14 @@ class Vector:
         _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
         return cls(new_vec)
 
+    @classmethod
+    def dense(cls, typ, size, fill=None):
+        v = cls.from_type(typ, size)
+        if fill is None:
+            fill = v._funcs.aidentity
+        v[:] = fill
+        return v
+
     def to_lists(self):
         """Extract the indices and values of the Vector as 2 lists.
 

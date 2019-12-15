@@ -1,7 +1,7 @@
 from graphviz import Digraph, Source
 from pygraphblas import Matrix, Vector
 
-def _str(s, label_width=3):
+def _str(s, label_width=5):
     return str(s)[:label_width]
 
 def draw_vector(V, name='', rankdir='LR', ioff=0, joff=0):
