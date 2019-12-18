@@ -14,7 +14,7 @@ def draw_vector(V, name='', rankdir='LR', ioff=0, joff=0):
 def draw_graph(M, name='', rankdir='LR', show_weight=True,
                label_vector=None, size_vector=None, ioff=0, joff=0):
     g = Digraph(name)
-    g.attr(rankdir=rankdir, ranksep='1')
+    g.attr(rankdir=rankdir, ranksep='1', overlap='false')
     for i, j, v in M:
         size = _str(size_vector[i]) if size_vector else '0.5'
         ilabel = _str(label_vector[i]) if label_vector else str(i)
