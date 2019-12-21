@@ -1,5 +1,5 @@
 
-from .base import lib
+from .base import lib, ffi
 
 
 class MatrixFuncs:
@@ -49,7 +49,17 @@ def type_name(typ):
 
 def build_matrix_type_funcs(typ):
     f = MatrixFuncs()
-    c, s, a, m, ai, i  = _type_maps[typ]
+    if typ not in _type_maps:
+        f.C = 'void*'
+        f.setElement = getattr(lib, 'GrB_Matrix_setElement_UDT')
+        f.extractElement = getattr(lib, 'GrB_Matrix_extractElement_UDT')
+        f.extractTuples = getattr(lib, 'GrB_Matrix_extractTuples_UDT')
+        f.semiring = ffi.NULL
+        f.add_op = ffi.NULL
+        f.mult_op = ffi.NULL
+        return f
+
+    c, s, a, m, ai, i  = _type_maps.get(typ)
     f.C = c
     f.aidentity = ai
     f.identity = i

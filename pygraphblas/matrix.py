@@ -68,7 +68,7 @@ class Matrix:
         m = cls.from_type(typ, nrows, ncols)
         if fill is None:
             fill = m._funcs.aidentity
-        m[:,:] = fill
+            m[:,:] = fill
         return m
 
     @classmethod
