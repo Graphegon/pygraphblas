@@ -1,44 +1,43 @@
 import sys
 from itertools import repeat
 
-from pygraphblas import Vector, Matrix, semiring, unaryop
-from pygraphblas.base import lib
+from pygraphblas import *
 
 def test_vector_create_from_type():
-    m = Vector.from_type(int)
+    m = Vector.from_type(INT64)
     assert m.size == 0
     assert m.nvals == 0
-    m = Vector.from_type(int, 10)
+    m = Vector.from_type(INT64, 10)
     assert m.size == 10
 
 def test_vector_gb_type():
-    v = Vector.from_type(bool, 10)
+    v = Vector.from_type(BOOL, 10)
     assert v.gb_type == lib.GrB_BOOL
-    v = Vector.from_type(int, 10)
+    v = Vector.from_type(INT64, 10)
     assert v.gb_type == lib.GrB_INT64
-    v = Vector.from_type(float, 10)
+    v = Vector.from_type(FP64, 10)
     assert v.gb_type == lib.GrB_FP64
 
 def test_vector_set_element():
-    m = Vector.from_type(int, 10)
+    m = Vector.from_type(INT64, 10)
     m[3] = 3
     assert m.size == 10
     assert m.nvals == 1
     assert len(list(m)) == 1
     assert m[3] == 3
-    m = Vector.from_type(bool, 10)
+    m = Vector.from_type(BOOL, 10)
     m[3] = True
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == True
-    m = Vector.from_type(float, 10)
+    m = Vector.from_type(FP64, 10)
     m[3] = 3.3
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == 3.3
 
 def test_vector_create_dup():
-    m = Vector.from_type(int, 10)
+    m = Vector.from_type(INT64, 10)
     m[3] = 3
     n = Vector.dup(m)
     assert n.size == 10
@@ -91,13 +90,13 @@ def test_vector_emult():
     assert v.iseq(z)
 
 def test_vector_reduce_bool():
-    v = Vector.from_type(bool, 10)
+    v = Vector.from_type(BOOL, 10)
     assert not v.reduce_bool()
     v[3] = True
     assert v.reduce_bool()
 
 def test_vector_reduce_int():
-    v = Vector.from_type(int, 10)
+    v = Vector.from_type(INT64, 10)
     r = v.reduce_int()
     assert type(r) is int
     assert r == 0
@@ -106,7 +105,7 @@ def test_vector_reduce_int():
     assert v.reduce_int() == 7
 
 def test_vector_reduce_float():
-    v = Vector.from_type(float, 10)
+    v = Vector.from_type(FP64, 10)
     r = v.reduce_float()
     assert type(r) is float
     assert r == 0.0
@@ -148,7 +147,7 @@ def test_vector_slice():
         [7, 5, 3, 1]]
 
 def test_vector_assign():
-    v = Vector.from_type(int, 10)
+    v = Vector.from_type(INT64, 10)
     assert v.nvals == 0
     w = Vector.from_lists(
         list(range(10)),
@@ -196,20 +195,17 @@ def test_vxm():
 def test_apply():
     v = Vector.from_lists(
         [0, 1, 2],
-        [2, 3, 4])
+        [2.0, 4.0, 8.0])
 
     w = v.apply(unaryop.ainv_int64)
     assert w.iseq(Vector.from_lists(
         [0, 1, 2],
-        [-2, -3, -4]))
+        [-2.0, -4.0, -8.0]))
 
     w = ~v
     assert w.iseq(Vector.from_lists(
         [0, 1, 2],
-        [-2, -3, -4]))
-
-    w = abs(w)
-    assert w.iseq(v)
+        [0.5, 0.25, 0.125]))
 
 def test_select():
     v = Vector.from_lists(

@@ -1,11 +1,11 @@
 
 import pytest
-from pygraphblas import Scalar
+from pygraphblas import *
 from pygraphblas.base import lib
 
 def test_scalar_create_from_type():
 
-    m = Scalar.from_type(int)
+    m = Scalar.from_type(INT64)
     assert m.nvals == 0
     assert not m
     with pytest.raises(KeyError) as e:

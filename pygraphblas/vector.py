@@ -6,16 +6,14 @@ from .base import (
     NULL,
     _check,
     _get_bin_op,
-    _gb_from_type,
     _default_add_op,
     _default_mul_op,
     _build_range,
 )
-from . import binaryop
+from . import binaryop, types
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
-from .type_funcs import build_vector_type_funcs
 from . import descriptor
 
 __all__ = ['Vector']
@@ -27,11 +25,11 @@ class Vector:
 
     """
 
-    __slots__ = ('vector', '_funcs')
+    __slots__ = ('vector', '_type')
 
-    def __init__(self, vec):
+    def __init__(self, vec, typ):
         self.vector = vec
-        self._funcs = build_vector_type_funcs(self.gb_type)
+        self._type = typ
 
     def __del__(self):
         _check(lib.GrB_Vector_free(self.vector))
@@ -43,8 +41,8 @@ class Vector:
         nvals = self.nvals
         _nvals = ffi.new('GrB_Index[1]', [nvals])
         I = ffi.new('GrB_Index[%s]' % nvals)
-        X = ffi.new('%s[%s]' % (self._funcs.C, nvals))
-        _check(self._funcs.extractTuples(
+        X = ffi.new('%s[%s]' % (self._type.C, nvals))
+        _check(self._type.Vector_extractTuples(
             I,
             X,
             _nvals,
@@ -65,14 +63,13 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def from_type(cls, py_type, size=0):
+    def from_type(cls, typ, size=0):
         """Create an empty Vector from the given type and size.
 
         """
         new_vec = ffi.new('GrB_Vector*')
-        gb_type = _gb_from_type(py_type)
-        _check(lib.GrB_Vector_new(new_vec, gb_type, size))
-        return cls(new_vec)
+        _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
+        return cls(new_vec, typ)
 
     @classmethod
     def from_lists(cls, I, V, size=None):
@@ -86,7 +83,7 @@ class Vector:
         if not size:
             size = max(I) + 1
         # TODO option to use ffi and GrB_Vector_build
-        m = cls.from_type(type(V[0]), size)
+        m = cls.from_type(types._gb_from_type(type(V[0])), size)
         for i, v in zip(I, V):
             m[i] = v
         return m
@@ -99,25 +96,24 @@ class Vector:
         size = len(I)
         assert size > 0
         # TODO use ffi and GrB_Vector_build
-        m = cls.from_type(type(I[0]), size)
+        m = cls.from_type(types._gb_from_type(type(I[0])), size)
         for i, v in enumerate(I):
             m[i] = v
         return m
 
-    @classmethod
-    def dup(cls, vec):
+    def dup(self):
         """Create an duplicate Vector from the given argument.
 
         """
         new_vec = ffi.new('GrB_Vector*')
-        _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
-        return cls(new_vec)
+        _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
+        return self.__class__(new_vec, self._type)
 
     @classmethod
     def dense(cls, typ, size, fill=None):
         v = cls.from_type(typ, size)
         if fill is None:
-            fill = v._funcs.aidentity
+            fill = v._type.aidentity
         v[:] = fill
         return v
 
@@ -125,14 +121,11 @@ class Vector:
         """Extract the indices and values of the Vector as 2 lists.
 
         """
-        tf = self._funcs
-        C = tf.C
         I = ffi.new('GrB_Index[]', self.nvals)
-        V = ffi.new(C + '[]', self.nvals)
+        V = ffi.new(self._type.C + '[]', self.nvals)
         n = ffi.new('GrB_Index*')
         n[0] = self.nvals
-        func = tf.extractTuples
-        _check(func(
+        _check(self._type.Vector_extractTuples(
             I,
             V,
             n,
@@ -177,11 +170,11 @@ class Vector:
         return typ[0]
 
     def full(self, identity=None):
-        B = self.__class__.from_type(self.gb_type, self.size)
+        B = self.__class__.from_type(self._type, self.size)
         if identity is None:
-            identity = self._funcs.identity
+            identity = self._type.identity
 
-        _check(self._funcs.assignScalar(
+        _check(self._type.Vector_assignScalar(
             B.vector[0],
             NULL,
             NULL,
@@ -189,10 +182,10 @@ class Vector:
             lib.GrB_ALL,
             0,
             NULL))
-        return self.eadd(B, self._funcs.first)
+        return self.eadd(B, self._type.first)
 
     def compare(self, other, op, strop):
-        C = self.__class__.from_type(bool, self.size)
+        C = self.__class__.from_type(types.BOOL, self.size)
         if isinstance(other, (bool, int, float)):
             if op(other, 0):
                 B = self.__class__.dup(self)
@@ -243,19 +236,19 @@ class Vector:
 
         """
         if add_op is NULL:
-            add_op = current_binop.get(self._funcs.add_op)
+            add_op = current_binop.get(self._type.add_op)
         if isinstance(add_op, BinaryOp):
             mult_op = mult_op.get_binaryop(self, other)
         elif isinstance(add_op, str):
-            add_op = _get_bin_op(add_op, self._funcs)
+            add_op = _get_bin_op(add_op, self._type)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
-            out = Vector(_out)
+            _check(lib.GrB_Vector_new(_out, self._type.gb_type, self.size))
+            out = self.__class__(_out, self._type)
         _check(lib.GrB_eWiseAdd_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -281,19 +274,19 @@ class Vector:
 
         """
         if mult_op is NULL:
-            mult_op = current_binop.get(self._funcs.mult_op)
+            mult_op = current_binop.get(self._type.mult_op)
         if isinstance(mult_op, BinaryOp):
             mult_op = mult_op.get_binaryop(self, other)
         elif isinstance(mult_op, str):
-            mult_op = _get_bin_op(mult_op, self._funcs)
+            mult_op = _get_bin_op(mult_op, self._type)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.gb_type, self.size))
-            out = Vector(_out)
+            _check(lib.GrB_Vector_new(_out, self._type.gb_type, self.size))
+            out = self.__class__(_out, self._type)
         _check(lib.GrB_eWiseMult_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -310,13 +303,13 @@ class Vector:
         """
         from .matrix import Matrix
         if out is None:
-            out = Vector.from_type(self.gb_type, self.size)
+            out = Vector.from_type(self._type, self.size)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
-            semiring = current_semiring.get(self._funcs.semiring)
+            semiring = current_semiring.get(self._type.semiring)
         if isinstance(semiring, Semiring):
             semiring = semiring.get_semiring(self)
         if accum is NULL:
@@ -364,10 +357,10 @@ class Vector:
         return self.emult(other, mult_op=binaryop.div, out=self)
 
     def __invert__(self):
-        return self.apply(self._funcs.invert)
+        return self.apply(self._type.invert)
 
     def __abs__(self):
-        return self.apply(self._funcs.abs_)
+        return self.apply(self._type.abs_)
 
     def clear(self):
         _check(lib.GrB_Vector_clear(self.vector[0]))
@@ -379,7 +372,7 @@ class Vector:
 
     def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
         if monoid is NULL:
-            monoid = self._funcs.monoid
+            monoid = self._type.monoid
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -436,7 +429,7 @@ class Vector:
 
         """
         if out is None:
-            out = Vector.from_type(self.gb_type, self.size)
+            out = Vector.from_type(self._type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
 
@@ -453,7 +446,7 @@ class Vector:
 
     def select(self, op, out=None, thunk=NULL, **kwargs):
         if out is None:
-            out = Vector.from_type(self.gb_type, self.size)
+            out = Vector.from_type(self._type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
 
@@ -472,24 +465,21 @@ class Vector:
     def to_dense(self, _id=None):
         out = ffi.new('GrB_Vector*')
         if _id is None:
-            C = self._funcs.C
+            C = self._type.C
             _id = ffi.new(C + '*', 0)
         _check(lib.LAGraph_Vector_to_dense(
             out,
             self.vector[0],
             _id))
-        return Vector(out)
+        return Vector(out, self._type)
 
     def __setitem__(self, index, value):
         mask = NULL
         desc = NULL
-        tf = self._funcs
         if isinstance(index, int):
-            C = tf.C
-            func = tf.setElement
-            _check(func(
+            _check(self._type.Vector_setElement(
                 self.vector[0],
-                ffi.cast(C, value),
+                ffi.cast(self._type.C, value),
                 index))
             return
         if isinstance(index, tuple):
@@ -514,10 +504,9 @@ class Vector:
                     ))
                 return
             if isinstance(value, (bool, int, float)):
-                scalar_type = _gb_from_type(type(value))
-                tf = build_vector_type_funcs(scalar_type)
+                scalar_type = types._gb_from_type(type(value))
                 I, ni, size = _build_range(index, self.size - 1)
-                _check(tf.assignScalar(
+                _check(scalar_type.Vector_assignScalar(
                     self.vector[0],
                     mask,
                     NULL,
@@ -532,11 +521,8 @@ class Vector:
     def __getitem__(self, index):
         mask = NULL
         if isinstance(index, int):
-            tf = self._funcs
-            C = tf.C
-            func = tf.extractElement
-            result = ffi.new(C + '*')
-            _check(func(
+            result = ffi.new(self._type.C + '*')
+            _check(self._type.Vector_extractElement(
                 result,
                 self.vector[0],
                 ffi.cast('GrB_Index', index)))
@@ -548,7 +534,7 @@ class Vector:
             I, ni, size = _build_range(index, self.size - 1)
             if size is None:
                 size = self.size
-            result = Vector.from_type(self.gb_type, size)
+            result = Vector.from_type(self._type, size)
             _check(lib.GrB_Vector_extract(
                 result.vector[0],
                 mask,

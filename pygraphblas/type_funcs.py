@@ -50,7 +50,6 @@ def type_name(typ):
 def build_matrix_type_funcs(typ):
     f = MatrixFuncs()
     if typ not in _type_maps:
-        f.C = 'void*'
         f.setElement = getattr(lib, 'GrB_Matrix_setElement_UDT')
         f.extractElement = getattr(lib, 'GrB_Matrix_extractElement_UDT')
         f.extractTuples = getattr(lib, 'GrB_Matrix_extractTuples_UDT')

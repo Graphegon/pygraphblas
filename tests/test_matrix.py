@@ -4,22 +4,22 @@ from itertools import product, repeat
 
 import pytest
 
-from pygraphblas import Matrix, Vector, Scalar, semiring, unaryop, binaryop
+from pygraphblas import *
 from pygraphblas.base import lib
 
 def test_matrix_create_from_type():
-    m = Matrix.from_type(int)
+    m = Matrix.from_type(INT8)
     assert m.nrows == 0
     assert m.ncols == 0
     assert m.nvals == 0
-    m = Matrix.from_type(int, 10, 10)
+    m = Matrix.from_type(INT8, 10, 10)
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 0
     assert len(m) == 0
 
 def test_matrix_get_set_element():
-    m = Matrix.from_type(int, 10, 10)
+    m = Matrix.from_type(INT8, 10, 10)
     m[3,3] = 3
     assert m.nrows == 10
     assert m.ncols == 10
@@ -59,7 +59,7 @@ def test_resize():
     assert v.nvals == 10
 
 def test_matrix_create_dup():
-    m = Matrix.from_type(int, 10, 10)
+    m = Matrix.from_type(INT8, 10, 10)
     m[3,3] = 3
     n = Matrix.dup(m)
     assert n.nrows == 10
@@ -82,11 +82,11 @@ def test_matrix_to_from_lists():
         ]
 
 def test_matrix_gb_type():
-    v = Matrix.from_type(bool, 10)
+    v = Matrix.from_type(BOOL, 10)
     assert v.gb_type == lib.GrB_BOOL
-    v = Matrix.from_type(int, 10)
-    assert v.gb_type == lib.GrB_INT64
-    v = Matrix.from_type(float, 10)
+    v = Matrix.from_type(INT8, 10)
+    assert v.gb_type == lib.GrB_INT8
+    v = Matrix.from_type(FP64, 10)
     assert v.gb_type == lib.GrB_FP64
 
 def test_matrix_eadd():
@@ -130,13 +130,13 @@ def test_vector_emult():
     assert v.iseq(z)
 
 def test_matrix_reduce_bool():
-    v = Matrix.from_type(bool, 10, 10)
+    v = Matrix.from_type(BOOL, 10, 10)
     assert not v.reduce_bool()
     v[3,3] = True
     assert v.reduce_bool()
 
 def test_matrix_reduce_int():
-    v = Matrix.from_type(int, 10, 10)
+    v = Matrix.from_type(INT8, 10, 10)
     r = v.reduce_int()
     assert type(r) is int
     assert r == 0
@@ -145,7 +145,7 @@ def test_matrix_reduce_int():
     assert v.reduce_int() == 7
 
 def test_matrix_reduce_float():
-    v = Matrix.from_type(float, 10, 10)
+    v = Matrix.from_type(FP64, 10, 10)
     r = v.reduce_float()
     assert type(r) is float
     assert r == 0.0
@@ -251,6 +251,7 @@ def test_matrix_transpose():
         [0, 1, 2]
         ))
 
+@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
     mmf.touch()
@@ -273,6 +274,7 @@ def test_matrix_mm_read_write(tmp_path):
         n = Matrix.from_mm(f)
     assert n.iseq(m)
 
+pytest.mark.skip()
 def test_matrix_tsv_read(tmp_path):
     mmf = tmp_path / 'tsv_test.mm'
     mmf.touch()
@@ -284,14 +286,14 @@ def test_matrix_tsv_read(tmp_path):
             '3\t3\t4\n'])
 
     with mmf.open() as f:
-        n = Matrix.from_tsv(f, int, 3, 3)
+        n = Matrix.from_tsv(f, INT8, 3, 3)
     assert n.to_lists() == [
         [0, 1, 2],
         [0, 1, 2],
         [2, 3, 4]]
 
 def test_matrix_random():
-    m = Matrix.from_random(int, 10, 10, 5, seed=42)
+    m = Matrix.from_random(INT8, 10, 10, 5, seed=42)
     assert m.nrows == 10
     assert m.ncols == 10
     assert len(list(m)) == 5
@@ -399,7 +401,7 @@ def test_matrix_assign():
         [0, 1, 2, 2, 2],
         [0, 1, 6, 6, 6], 3, 3))
 
-    m = Matrix.from_type(int, 3, 3)
+    m = Matrix.from_type(INT64, 3, 3)
     assert m.nvals == 0
     n = Matrix.from_lists(
         [0, 1, 2],
@@ -466,7 +468,7 @@ def test_apply_lambda():
         [1, 5, 2]))
 
 def test_get_set_options():
-    v = Matrix.from_random(int, 10, 10, 10, seed=42)
+    v = Matrix.from_random(INT8, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
 

@@ -4,10 +4,9 @@ from .base import (
     NULL,
     _check,
     _check_no_val_key_error,
-    _gb_from_type
 )
 
-from .type_funcs import build_scalar_type_funcs
+from .types import _gb_from_type
 
 __all__ = ['Scalar']
 
@@ -18,11 +17,11 @@ class Scalar:
 
     """
 
-    __slots__ = ('scalar', '_funcs')
+    __slots__ = ('scalar', '_type')
 
-    def __init__(self, s):
+    def __init__(self, s, typ):
         self.scalar = s
-        self._funcs = build_scalar_type_funcs(self.gb_type)
+        self._type = typ
 
     def __del__(self):
         _check(lib.GxB_Scalar_free(self.scalar))
@@ -30,24 +29,22 @@ class Scalar:
     def __len__(self):
         return self.nvals
 
-    @classmethod
-    def dup(cls, sca):
+    def dup(self):
         """Create an duplicate Scalar from the given argument.
 
         """
         new_sca = ffi.new('GxB_Scalar*')
-        _check(lib.GxB_Scalar_dup(new_sca, sca.scalar[0]))
-        return cls(new_sca)
+        _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
+        return self.__class__(new_sca, self._type)
 
     @classmethod
-    def from_type(cls, py_type):
+    def from_type(cls, typ):
         """Create an empty Scalar from the given type and size.
 
         """
         new_sca = ffi.new('GxB_Scalar*')
-        gb_type = _gb_from_type(py_type)
-        _check(lib.GxB_Scalar_new(new_sca, gb_type))
-        return cls(new_sca)
+        _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
+        return cls(new_sca, typ)
 
     @classmethod
     def from_value(cls, value):
@@ -55,9 +52,9 @@ class Scalar:
 
         """
         new_sca = ffi.new('GxB_Scalar*')
-        gb_type = _gb_from_type(type(value))
-        _check(lib.GxB_Scalar_new(new_sca, gb_type))
-        s = cls(new_sca)
+        typ = _gb_from_type(type(value))
+        _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
+        s = cls(new_sca, typ)
         s[0] = value
         return s
 
@@ -79,17 +76,17 @@ class Scalar:
         _check(lib.GxB_Scalar_clear(self.scalar[0]))
 
     def __getitem__(self, index):
-        result = ffi.new(self._funcs.C + '*')
-        _check_no_val_key_error(self._funcs.extractElement(
+        result = ffi.new(self._type.C + '*')
+        _check_no_val_key_error(self._type.Scalar_extractElement(
             result,
             self.scalar[0]
         ))
         return result[0]
 
     def __setitem__(self, index, value):
-        _check(self._funcs.setElement(
+        _check(self._type.Scalar_setElement(
             self.scalar[0],
-            ffi.cast(self._funcs.C, value)
+            ffi.cast(self._type.C, value)
         ))
     
     @property

@@ -85,15 +85,6 @@ def _check_no_val_key_error(res):
             raise KeyError
         raise _error_codes[res](ffi.string(lib.GrB_error()))
     
-def _gb_from_type(typ):
-    if typ is int:
-        return lib.GrB_INT64
-    if typ is float:
-        return lib.GrB_FP64
-    if typ is bool:
-        return lib.GrB_BOOL
-    return typ
-
 def _gb_from_name(name):
     name = name.lower()
     if name == 'bool':

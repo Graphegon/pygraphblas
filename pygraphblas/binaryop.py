@@ -15,9 +15,18 @@ class BinaryOp:
 
     __slots__ = ('name', 'binaryop', 'token')
 
-    def __init__(self, op, typ, binaryop):
+    def __init__(self, op, typ, binaryop, udt=None):
+        if udt is not None:
+            o = ffi.new('GrB_BinaryOp*')
+            udt = udt.udt[0]
+            lib.GrB_BinaryOp_new(
+                o,
+                ffi.cast('GxB_binary_function', binaryop.address),
+                udt, udt, udt)
+            self.binaryop = o[0]
+        else:
+            self.binaryop = binaryop
         self.name = '_'.join((op, typ))
-        self.binaryop = binaryop
         self.token = None
         self.__class__._auto_binaryops[op][_gb_from_name(typ)] = binaryop
 
