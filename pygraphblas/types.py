@@ -163,3 +163,11 @@ class UDT(Type):
         cdata = cdata[0]
         return tuple(getattr(cdata, name) for (_, name) in self.members)
     
+
+def udt(cls):
+    name = cls.__name__
+    members = cls.members
+    aidentity = getattr(cls, 'aidentity', None)
+    identity = getattr(cls, 'identity', None)
+    new_udt = UDT(name, members, aidentity, identity)
+    return new_udt
