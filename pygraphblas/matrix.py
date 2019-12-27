@@ -245,10 +245,9 @@ class Matrix:
         """Extract the rows, columns and values of the Matrix as 3 lists.
 
         """
-        C = self._type.C
         I = ffi.new('GrB_Index[]', self.nvals)
         J = ffi.new('GrB_Index[]', self.nvals)
-        V = ffi.new(C + '[]', self.nvals)
+        V = self._type.ffi.new(self._type.C + '[]', self.nvals)
         n = ffi.new('GrB_Index*')
         n[0] = self.nvals
         _check(self._type.Matrix_extractTuples(
@@ -258,7 +257,7 @@ class Matrix:
             n,
             self.matrix[0]
             ))
-        return [list(I), list(J), list(V)]
+        return [list(I), list(J), list(map(self._type.data_to_value, V))]
 
     def clear(self):
         """Clear the matrix.  This does not change the size but removes all
@@ -838,13 +837,13 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
-            result = ffi.new(self._type.C + '*')
+            result = self._type.ffi.new(self._type.ptr)
             _check(self._type.Matrix_extractElement(
                 result,
                 self.matrix[0],
                 index[0],
                 index[1]))
-            return result[0]
+            return self._type.ptr_to_value(result)
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
@@ -958,10 +957,12 @@ class Matrix:
         i0 = index[0]
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
-            C = self._type.C
+            val = self._type.from_value(value)
             _check(self._type.Matrix_setElement(
                 self.matrix[0],
-                ffi.cast(self._type.C, value),
+                self._type.ffi.cast(
+                    self._type.ptr,
+                    val),
                 i0,
                 i1))
             return
@@ -1005,4 +1006,4 @@ class Matrix:
             self.nrows,
             self.ncols,
             self.nvals,
-            type_name(self._type.type_name))
+            self._type.type_name)

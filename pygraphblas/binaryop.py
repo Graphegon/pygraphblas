@@ -18,7 +18,7 @@ class BinaryOp:
     def __init__(self, op, typ, binaryop, udt=None):
         if udt is not None:
             o = ffi.new('GrB_BinaryOp*')
-            udt = udt.udt[0]
+            udt = udt.gb_type
             lib.GrB_BinaryOp_new(
                 o,
                 ffi.cast('GxB_binary_function', binaryop.address),

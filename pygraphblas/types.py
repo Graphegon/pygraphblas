@@ -7,44 +7,51 @@ from pygraphblas import  lib, ffi
 from cffi import FFI
 
 class Type:
-    def __init__(self, gb_type, c_name, type_suffix, add, mult, aidentity, identity):
+
+    ffi = ffi
+    
+    def __init__(self, gb_type, c_name, type_name, add, mult, aidentity, identity):
         self.gb_type = gb_type
+        self.type_name = type_name
         self.C = c_name
-        self.type_name = type_suffix
+        self.ptr = c_name + '*'
         self.aidentity = aidentity
         self.identity = identity
         get = partial(getattr, lib)
-        self.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_suffix))
-        self.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_suffix))
-        self.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_suffix))
-        self.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_suffix))
-        self.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_suffix))
-        self.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_suffix))
-        self.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_suffix))
-        self.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_suffix))
-        self.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_suffix))
-        self.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_suffix))
-        self.add_op = get('GrB_PLUS_{}'.format(type_suffix))
-        self.mult_op = get('GrB_TIMES_{}'.format(type_suffix))
-        self.monoid = get('GxB_{}_{}_MONOID'.format(add, type_suffix))
-        self.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_suffix))
-        self.invert = get('GrB_MINV_{}'.format(type_suffix))
-        self.neg = get('GrB_AINV_{}'.format(type_suffix))
-        self.abs_ = get('GxB_ABS_{}'.format(type_suffix))
-        self.not_ = get('GxB_LNOT_{}'.format(type_suffix))
-        self.first = get('GrB_FIRST_{}'.format(type_suffix))
-        self.gt = get('GrB_GT_{}'.format(type_suffix))
-        self.lt = get('GrB_LT_{}'.format(type_suffix))
-        self.ge = get('GrB_GE_{}'.format(type_suffix))
-        self.le = get('GrB_LE_{}'.format(type_suffix))
-        self.ne = get('GrB_NE_{}'.format(type_suffix))
-        self.eq = get('GrB_EQ_{}'.format(type_suffix))
+        self.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
+        self.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
+        self.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
+        self.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
+        self.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
+        self.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
+        self.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
+        self.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
+        self.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
+        self.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
+        self.add_op = get('GrB_PLUS_{}'.format(type_name))
+        self.mult_op = get('GrB_TIMES_{}'.format(type_name))
+        self.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
+        self.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
+        self.invert = get('GrB_MINV_{}'.format(type_name))
+        self.neg = get('GrB_AINV_{}'.format(type_name))
+        self.abs_ = get('GxB_ABS_{}'.format(type_name))
+        self.not_ = get('GxB_LNOT_{}'.format(type_name))
+        self.first = get('GrB_FIRST_{}'.format(type_name))
+        self.gt = get('GrB_GT_{}'.format(type_name))
+        self.lt = get('GrB_LT_{}'.format(type_name))
+        self.ge = get('GrB_GE_{}'.format(type_name))
+        self.le = get('GrB_LE_{}'.format(type_name))
+        self.ne = get('GrB_NE_{}'.format(type_name))
+        self.eq = get('GrB_EQ_{}'.format(type_name))
 
     def from_value(self, value):
         return value
 
-    def to_value(self, data):
+    def data_to_value(self, data):
         return data
+
+    def ptr_to_value(self, data):
+        return data[0]
 
 BOOL = Type(lib.GrB_BOOL, '_Bool', 'BOOL', 'LOR', 'LAND', True, False)
 INT8 = Type(lib.GrB_INT8, 'int8_t', 'INT8', 'PLUS', 'TIMES', 1, 0)
@@ -94,15 +101,34 @@ def build_binop_def(typ, name):
     """.format(binop_name(typ, name), typ))
 
 class UDT(Type):
-    def __init__(self, type_name, members, add_func_name, mul_func_name=None):
+    def __init__(self, type_name, members, aidentity=None, identity=None):
         self.ffi = FFI()
         self.type_name = type_name
-        self.members = map(methodcaller('split'), members)
+        self.members = list(map(methodcaller('split'), members))
         self.ffi.cdef(build_udt_def(type_name, members))
         t = ffi.new('GrB_Type*')
         lib.GrB_Type_new(t, self.ffi.sizeof(type_name))
         cffi_support.map_type(self.ffi.typeof(type_name), use_record_dtype=True)
-        self.gb_type = t
+        self.gb_type = t[0]
+        self.C = type_name
+        self.ptr = type_name + '*'
+        self.aidentity = aidentity
+        self.identity = identity
+        get = partial(getattr, lib)
+        self.Matrix_setElement = lib.GrB_Matrix_setElement_UDT
+        self.Matrix_extractElement = lib.GrB_Matrix_extractElement_UDT
+        self.Matrix_extractTuples = lib.GrB_Matrix_extractTuples_UDT
+        self.Matrix_assignScalar = lib.GrB_Matrix_assign_UDT
+        self.Vector_setElement = lib.GrB_Vector_setElement_UDT
+        self.Vector_extractElement = lib.GrB_Vector_extractElement_UDT
+        self.Vector_extractTuples = lib.GrB_Vector_extractTuples_UDT
+        self.Vector_assignScalar = lib.GrB_Vector_assign_UDT
+        self.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
+        self.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
+        self.add_op = self.ffi.NULL
+        self.mult_op = self.ffi.NULL
+        self.monoid = self.ffi.NULL
+        self.semiring = self.ffi.NULL
 
     def binop(self, func_name):
         self.ffi.cdef(build_binop_def(self.type_name, func_name))
@@ -124,11 +150,16 @@ class UDT(Type):
     def semiring(self, add_func_name, mul_func_name):
         pass
 
-    def from_value(self, *args):
+    def from_value(self, value):
         data = self.ffi.new('%s[1]' % self.type_name)
-        for (_, name), val in zip(self.members, args):
+        for (_, name), val in zip(self.members, value):
             setattr(data[0], name, val)
         return data
     
-    def to_value(self, ptr):
-        return self.ffi.cast('%s*' % self.type_name, ptr)
+    def data_to_value(self, cdata):
+        return tuple(getattr(cdata, name) for (_, name) in self.members)
+
+    def ptr_to_value(self, cdata):
+        cdata = cdata[0]
+        return tuple(getattr(cdata, name) for (_, name) in self.members)
+    

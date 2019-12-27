@@ -12,9 +12,9 @@ build_semirings()
 build_binaryops()
 build_unaryops()
 
-from .types import *
 from .semiring import *
 from .binaryop import *
 from .unaryop import *
+from .types import *
 
 
