@@ -57,7 +57,7 @@ class Matrix:
     def dense(cls, typ, nrows, ncols, fill=None):
         m = cls.from_type(typ, nrows, ncols)
         if fill is None:
-            fill = m._funcs.aidentity
+            fill = m.type.aidentity
             m[:,:] = fill
         return m
 
@@ -133,7 +133,7 @@ class Matrix:
     def identity(cls, typ, nrows, ncols):
         result = cls.from_type(typ, nrows, ncols)
         for i in range(nrows):
-            result[i,i] = result._funcs.aidentity
+            result[i,i] = result.type.aidentity
         return result
 
     @property
@@ -379,11 +379,15 @@ class Matrix:
         """Compare two matrices for equality.
         """
         result = ffi.new('_Bool*')
+        if isinstance(self.type.eq_op, BinaryOp):
+            eq_op = self.type.eq_op.get_binaryop(self, other)
+        else:
+            eq_op = self.type.eq_op
         _check(lib.LAGraph_isequal(
             result,
             self.matrix[0],
             other.matrix[0],
-            NULL))
+            eq_op))
         return result[0]
 
     def isne(self, other):
@@ -410,7 +414,7 @@ class Matrix:
             _nvals,
             self.matrix[0]
             ))
-        return zip(I, J, X)
+        return zip(I, J, map(self.type.data_to_value, X))
 
     @property
     def rows(self):

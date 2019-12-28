@@ -51,7 +51,10 @@ class Vector:
         return zip(I, X)
 
     def iseq(self, other):
-        eq_op = self.type.eq_op.get_binaryop(self, other)
+        if isinstance(self.type.eq_op, BinaryOp):
+            eq_op = self.type.eq_op.get_binaryop(self, other)
+        else:
+            eq_op = self.type.eq_op
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(
             result,

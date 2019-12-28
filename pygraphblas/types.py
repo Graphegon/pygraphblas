@@ -96,8 +96,8 @@ def build_udt_def(typ, members):
 def binop_name(typ, name):
     return '{0}_{1}_binop_function'.format(typ, name)
 
-def build_binop_def(typ, name, bool=False):
-    if bool:
+def build_binop_def(typ, name, boolean=False):
+    if boolean:
         return dedent("""
         typedef void (*{0})(bool*, {1}*, {1}*);
         """.format(binop_name(typ, name), typ))
@@ -137,10 +137,10 @@ class UDT(Type):
         self.monoid = self.ffi.NULL
         self.semiring = self.ffi.NULL
 
-    def binop(self, binding, bool=False):
+    def binop(self, binding, boolean=False):
         from .binaryop import BinaryOp
         def inner(func):
-            self.ffi.cdef(build_binop_def(self.type_name, func.__name__, bool))
+            self.ffi.cdef(build_binop_def(self.type_name, func.__name__, boolean))
             sig = cffi_support.map_type(
                 self.ffi.typeof(binop_name(self.type_name, func.__name__)), 
                 use_record_dtype=True)
@@ -151,7 +151,7 @@ class UDT(Type):
                 x = carray(x_, 1)[0]
                 y = carray(y_, 1)[0]
                 jitfunc(z, x, y)
-            op = BinaryOp(func.__name__, self.type_name, wrapper, self)
+            op = BinaryOp(func.__name__, self.type_name, wrapper, self, boolean)
             setattr(self, binding, op.get_binaryop())
             return op
         return inner
