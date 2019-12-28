@@ -1,4 +1,4 @@
-from .base import lib
+from .base import lib, _check
 from textwrap import dedent
 from operator import methodcaller
 from functools import partial
@@ -30,6 +30,7 @@ class Type:
         self.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
         self.add_op = get('GrB_PLUS_{}'.format(type_name))
         self.mult_op = get('GrB_TIMES_{}'.format(type_name))
+        self.eq_op = get('GrB_EQ_{}'.format(type_name))
         self.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
         self.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
         self.invert = get('GrB_MINV_{}'.format(type_name))
@@ -95,19 +96,24 @@ def build_udt_def(typ, members):
 def binop_name(typ, name):
     return '{0}_{1}_binop_function'.format(typ, name)
 
-def build_binop_def(typ, name):
+def build_binop_def(typ, name, bool=False):
+    if bool:
+        return dedent("""
+        typedef void (*{0})(bool*, {1}*, {1}*);
+        """.format(binop_name(typ, name), typ))
     return dedent("""
     typedef void (*{0})({1}*, {1}*, {1}*);
     """.format(binop_name(typ, name), typ))
 
 class UDT(Type):
+
     def __init__(self, type_name, members, aidentity=None, identity=None):
         self.ffi = FFI()
         self.type_name = type_name
         self.members = list(map(methodcaller('split'), members))
         self.ffi.cdef(build_udt_def(type_name, members))
         t = ffi.new('GrB_Type*')
-        lib.GrB_Type_new(t, self.ffi.sizeof(type_name))
+        _check(lib.GrB_Type_new(t, self.ffi.sizeof(type_name)))
         cffi_support.map_type(self.ffi.typeof(type_name), use_record_dtype=True)
         self.gb_type = t[0]
         self.C = type_name
@@ -127,16 +133,17 @@ class UDT(Type):
         self.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
         self.add_op = self.ffi.NULL
         self.mult_op = self.ffi.NULL
+        self.eq_op = self.ffi.NULL
         self.monoid = self.ffi.NULL
         self.semiring = self.ffi.NULL
 
-    def binop(self, func_name):
-        self.ffi.cdef(build_binop_def(self.type_name, func_name))
-        sig = cffi_support.map_type(
-            self.ffi.typeof(binop_name(self.type_name, func_name)), 
-            use_record_dtype=True)    
-
+    def binop(self, binding, bool=False):
+        from .binaryop import BinaryOp
         def inner(func):
+            self.ffi.cdef(build_binop_def(self.type_name, func.__name__, bool))
+            sig = cffi_support.map_type(
+                self.ffi.typeof(binop_name(self.type_name, func.__name__)), 
+                use_record_dtype=True)
             jitfunc = jit(func, nopython=True)
             @cfunc(sig)
             def wrapper(z_, x_, y_):            
@@ -144,11 +151,21 @@ class UDT(Type):
                 x = carray(x_, 1)[0]
                 y = carray(y_, 1)[0]
                 jitfunc(z, x, y)
-            return wrapper
+            op = BinaryOp(func.__name__, self.type_name, wrapper, self)
+            setattr(self, binding, op.get_binaryop())
+            return op
         return inner
 
-    def semiring(self, add_func_name, mul_func_name):
-        pass
+    def new_monoid(self, op, identity):
+        monoid = ffi.new('GrB_Monoid[1]')
+        _check(lib.GrB_Monoid_new_UDT(monoid, op.binaryop, identity))
+        return monoid
+
+    def new_semiring(self, monoid, op):
+        from .semiring import Semiring
+        semiring = ffi.new('GrB_Semiring[1]')
+        _check(lib.GrB_Semiring_new(semiring, monoid[0], op.binaryop))
+        return Semiring('add', 'mult', self.type_name, semiring[0])
 
     def from_value(self, value):
         data = self.ffi.new('%s[1]' % self.type_name)
@@ -162,7 +179,6 @@ class UDT(Type):
     def ptr_to_value(self, cdata):
         cdata = cdata[0]
         return tuple(getattr(cdata, name) for (_, name) in self.members)
-    
 
 def udt(cls):
     name = cls.__name__
