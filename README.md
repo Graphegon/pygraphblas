@@ -26,6 +26,7 @@ the following Notebooks:
  - [K-Truss Subgraphs](./pygraphblas/demo/K-Truss.ipynb)
  - [Triangle Counting](./pygraphblas/demo/Triangle_Counting.ipynb)
  - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
+ - [User Defined Types](./pygraphblas/demo/User_Defined_Types.ipynb)
 
 # Tests
 
