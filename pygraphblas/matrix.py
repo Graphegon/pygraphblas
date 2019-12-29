@@ -563,11 +563,10 @@ class Matrix:
         elif isinstance(op, pytypes.FunctionType):
             uop = ffi.new('GrB_UnaryOp*')
             def op_func(z, x):
-                C = self.type.C
-                z = ffi.cast(C + '*', z)
-                x = ffi.cast(C + '*', x)
+                z = self.type.ffi.cast(self.type.ptr, z)
+                x = self.type.ffi.cast(self.type.ptr, x)
                 z[0] = op(x[0])
-            func = ffi.callback('void(void*, const void*)', op_func)
+            func = self.type.ffi.callback('void(void*, const void*)', op_func)
             self._keep_alives[self.matrix] = (op, uop, func)
             _check(lib.GrB_UnaryOp_new(
                 uop,
