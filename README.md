@@ -20,13 +20,13 @@ Notebooks:
 Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
 the following Notebooks:
 
- - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction%20to%20GraphBLAS%20with%20Python.ipynb)
+ - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction-to-GraphBLAS-with-Python.ipynb)
  - [PageRank](./pygraphblas/demo/PageRank.ipynb)
  - [Betweeness Centrality](./pygraphblas/demo/BetweenessCentrality.ipynb)
  - [K-Truss Subgraphs](./pygraphblas/demo/K-Truss.ipynb)
- - [Triangle Counting](./pygraphblas/demo/Triangle_Counting.ipynb)
- - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net%20with%20pygraphblas.ipynb)
- - [User Defined Types](./pygraphblas/demo/User_Defined_Types.ipynb)
+ - [Triangle Counting](./pygraphblas/demo/Triangle-Counting.ipynb)
+ - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net-with-pygraphblas.ipynb)
+ - [User Defined Types](./pygraphblas/demo/User-Defined-Types.ipynb)
 
 # Tests
 

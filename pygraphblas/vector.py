@@ -469,8 +469,7 @@ class Vector:
     def to_dense(self, _id=None):
         out = ffi.new('GrB_Vector*')
         if _id is None:
-            C = self.type.C
-            _id = ffi.new(C + '*', 0)
+            _id = ffi.new(self.type.ptr, 0)
         _check(lib.LAGraph_Vector_to_dense(
             out,
             self.vector[0],
