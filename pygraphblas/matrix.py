@@ -416,6 +416,22 @@ class Matrix:
             ))
         return zip(I, J, map(self.type.data_to_value, X))
 
+
+    def to_arrays(self):
+        nvals = self.nvals
+        _nvals = ffi.new('GrB_Index[1]', [nvals])
+        I = ffi.new('GrB_Index[%s]' % nvals)
+        J = ffi.new('GrB_Index[%s]' % nvals)
+        X = self.type.ffi.new('%s[%s]' % (self.type.C, nvals))
+        _check(self.type.Matrix_extractTuples(
+            I,
+            J,
+            X,
+            _nvals,
+            self.matrix[0]
+            ))
+        
+
     @property
     def rows(self):
         """ An iterator of row indexes present in the matrix.
