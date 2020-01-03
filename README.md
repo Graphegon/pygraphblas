@@ -1,8 +1,18 @@
 # pygraphblas
 
-GraphBLAS for Python
+pygraphblas is a Python wrapper around the
+[GraphBLAS](http://graphblas.org) API.
 
-# Install
+## Installation
+
+pygraphblas requires
+[SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
+and the [LAGraph](https://github.com/GraphBLAS/LAGraph) library.  Once
+you have these installed, pygraphblas can be installed with:
+
+  python setup.py install
+
+## Docker 
 
 pygraphblas is distributed as a docker image on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
@@ -10,7 +20,7 @@ and can be run with the command:
 
     docker run -it graphblas/pygraphblas-notebook ipython
 
-# Tutorial
+## Tutorial
 
 You can run a Jupyter notebook server with docker and try the example
 Notebooks:
