@@ -1,0 +1,10 @@
+language: python
+script:
+    - pytest
+
+services:
+  - docker
+
+script:
+  - ./build.sh
+  - ./test.sh
