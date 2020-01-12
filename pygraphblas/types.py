@@ -160,36 +160,37 @@ class MetaUDT(type):
 
     def __new__(meta, name, bases, members):
         cls = super().__new__(meta, name, bases, members)
-        type_name = cls.__name__
-        cls.ffi = FFI()
-        cls.members = list(map(methodcaller('split'), cls.members))
-        cls.ffi.cdef(build_udt_def(type_name, members))
-        t = ffi.new('GrB_Type*')
-        _check(lib.GrB_Type_new(t, cls.ffi.sizeof(type_name)))
-        cffi_support.map_type(cls.ffi.typeof(type_name), use_record_dtype=True)
-        cls.gb_type = t[0]
-        cls.C = type_name
-        cls.ptr = type_name + '*'
-        
-        get = partial(getattr, lib)
-        cls.Matrix_setElement = lib.GrB_Matrix_setElement_UDT
-        cls.Matrix_extractElement = lib.GrB_Matrix_extractElement_UDT
-        cls.Matrix_extractTuples = lib.GrB_Matrix_extractTuples_UDT
-        cls.Matrix_assignScalar = lib.GrB_Matrix_assign_UDT
-        cls.Vector_setElement = lib.GrB_Vector_setElement_UDT
-        cls.Vector_extractElement = lib.GrB_Vector_extractElement_UDT
-        cls.Vector_extractTuples = lib.GrB_Vector_extractTuples_UDT
-        cls.Vector_assignScalar = lib.GrB_Vector_assign_UDT
-        cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
-        cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
-        cls.add_op = cls.ffi.NULL
-        cls.mult_op = cls.ffi.NULL
-        cls.eq_op = cls.ffi.NULL
-        cls.monoid = cls.ffi.NULL
-        cls.semiring = cls.ffi.NULL
+        if len(cls.members):
+            type_name = cls.__name__
+            cls.ffi = FFI()
+            cls.members = list(map(methodcaller('split'), cls.members))
+            cls.ffi.cdef(build_udt_def(type_name, members))
+            t = ffi.new('GrB_Type*')
+            _check(lib.GrB_Type_new(t, cls.ffi.sizeof(type_name)))
+            cffi_support.map_type(cls.ffi.typeof(type_name), use_record_dtype=True)
+            cls.gb_type = t[0]
+            cls.C = type_name
+            cls.ptr = type_name + '*'
+
+            get = partial(getattr, lib)
+            cls.Matrix_setElement = lib.GrB_Matrix_setElement_UDT
+            cls.Matrix_extractElement = lib.GrB_Matrix_extractElement_UDT
+            cls.Matrix_extractTuples = lib.GrB_Matrix_extractTuples_UDT
+            cls.Matrix_assignScalar = lib.GrB_Matrix_assign_UDT
+            cls.Vector_setElement = lib.GrB_Vector_setElement_UDT
+            cls.Vector_extractElement = lib.GrB_Vector_extractElement_UDT
+            cls.Vector_extractTuples = lib.GrB_Vector_extractTuples_UDT
+            cls.Vector_assignScalar = lib.GrB_Vector_assign_UDT
+            cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
+            cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
+            cls.add_op = cls.ffi.NULL
+            cls.mult_op = cls.ffi.NULL
+            cls.eq_op = cls.ffi.NULL
+            cls.monoid = cls.ffi.NULL
+            cls.semiring = cls.ffi.NULL
         return cls
 
-class UDT(Type):
+class UDT(Type, metaclass=MetaUDT):
 
     members = ()
 
