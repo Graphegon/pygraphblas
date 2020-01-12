@@ -4,6 +4,7 @@ from operator import methodcaller
 from functools import partial
 from numba import cfunc, jit, carray, cffi_support
 from pygraphblas import  lib, ffi
+from pygraphblas.base import lazy_property
 from cffi import FFI
 
 def make_type(cls):
@@ -217,27 +218,33 @@ class MetaUDT(type):
         cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
         cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
         cls.identity = cls.from_value(cls.identity)
-        for op_name in ['eq_op', 'add_op', 'mult_op', 'semiring', 'monoid']:
+        for op_name in ['eq_op', 'add_op', 'mult_op']:
             if not hasattr(cls, op_name):
                 setattr(cls, op_name, cls.ffi.NULL)
         return cls
 
-class UDT(Type):
-
-    members = ()
-
-    @classmethod
     def new_monoid(cls, op, identity):
         monoid = ffi.new('GrB_Monoid[1]')
         _check(lib.GrB_Monoid_new_UDT(monoid, op.binaryop, identity))
         return monoid
 
-    @classmethod
     def new_semiring(cls, monoid, op):
         from .semiring import Semiring
         semiring = ffi.new('GrB_Semiring[1]')
         _check(lib.GrB_Semiring_new(semiring, monoid[0], op.binaryop))
         return Semiring('add', 'mult', cls.__name__, semiring[0])
+
+    @lazy_property
+    def monoid(cls):
+        return cls.new_monoid(cls.add_op, cls.identity)
+
+    @lazy_property
+    def semiring(cls):
+        return cls.new_semiring(cls.monoid, cls.mult_op)
+
+class UDT(Type):
+
+    members = ()
 
     @classmethod
     def from_value(cls, value):
