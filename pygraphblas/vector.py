@@ -135,7 +135,7 @@ class Vector:
             n,
             self.vector[0]
             ))
-        return [list(I), list(map(self.type.data_to_value, V))]
+        return [list(I), list(map(self.type.to_value, V))]
 
     @property
     def size(self):
@@ -530,7 +530,7 @@ class Vector:
                 result,
                 self.vector[0],
                 ffi.cast('GrB_Index', index)))
-            return self.type.ptr_to_value(result)
+            return self.type.to_value(result[0])
         
         if isinstance(index, Vector):
             mask = index.vector[0]

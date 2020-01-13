@@ -1,6 +1,6 @@
 from .base import lib, _check
 from textwrap import dedent
-from operator import methodcaller
+from operator import methodcaller, itemgetter
 from functools import partial
 from numba import cfunc, jit, carray, cffi_support
 from pygraphblas import  lib, ffi
@@ -58,13 +58,8 @@ class Type:
         return value
 
     @classmethod
-    def data_to_value(cls, data):
+    def to_value(cls, data):
         return data
-
-    @classmethod
-    def ptr_to_value(cls, data):
-        return data[0]
-
 
 @make_type
 class BOOL(Type):
@@ -190,7 +185,6 @@ def binop(boolean=False):
 
     return inner
 
-
 class MetaUDT(type):
 
     def __new__(meta, type_name, bases, members):
@@ -245,7 +239,7 @@ class MetaUDT(type):
 class UDT(Type):
 
     members = ()
-
+    
     @classmethod
     def from_value(cls, value):
         data = cls.ffi.new('%s[1]' % cls.__name__)
@@ -254,10 +248,5 @@ class UDT(Type):
         return data
 
     @classmethod
-    def data_to_value(cls, cdata):
-        return tuple(getattr(cdata, name) for (_, name) in cls.member_def)
-
-    @classmethod
-    def ptr_to_value(cls, cdata):
-        cdata = cdata[0]
+    def to_value(cls, cdata):
         return tuple(getattr(cdata, name) for (_, name) in cls.member_def)

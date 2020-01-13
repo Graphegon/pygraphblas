@@ -257,7 +257,7 @@ class Matrix:
             n,
             self.matrix[0]
             ))
-        return [list(I), list(J), list(map(self.type.data_to_value, V))]
+        return [list(I), list(J), list(map(self.type.to_value, V))]
 
     def clear(self):
         """Clear the matrix.  This does not change the size but removes all
@@ -414,7 +414,7 @@ class Matrix:
             _nvals,
             self.matrix[0]
             ))
-        return zip(I, J, map(self.type.data_to_value, X))
+        return zip(I, J, map(self.type.to_value, X))
 
 
     def to_arrays(self):
@@ -862,7 +862,7 @@ class Matrix:
                 self.matrix[0],
                 index[0],
                 index[1]))
-            return self.type.ptr_to_value(result)
+            return self.type.to_value(result[0])
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
