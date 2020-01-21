@@ -702,8 +702,10 @@ def test_select_cmp():
         3, 3
         ))
 
-def test_shape():
-    assert Matrix.from_lists(
+def test_shape_repr():
+    m = Matrix.from_lists(
         [2, 2, 2], [0, 1, 2], [6, 7, 8]
-    ).shape == (3, 3)
+    )
+    assert m.shape == (3, 3)
+    assert repr(m) == '<Matrix (3x3 : 3:INT64)>'
 

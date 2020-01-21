@@ -21,7 +21,6 @@ from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
-from .type_funcs import build_matrix_type_funcs, type_name
 from . import descriptor
 
 __all__ = ['Matrix']
@@ -1023,4 +1022,4 @@ class Matrix:
             self.nrows,
             self.ncols,
             self.nvals,
-            self.type.type_name)
+            self.type.__name__)
