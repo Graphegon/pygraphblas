@@ -790,14 +790,17 @@ class Matrix:
         """Slice a submatrix.
 
         """
-        I, ni, isize = _build_range(rindex, self.nrows - 1)
-        J, nj, jsize = _build_range(cindex, self.ncols - 1)
-        if isize is None:
-            isize = self.nrows
-        if jsize is None:
-            jsize = self.ncols
-
         mask, semiring, accum, desc = self._get_args(**kwargs)
+        result_nrows = self.ncols if desc in descriptor.T_A else self.nrows
+        result_ncols = self.nrows if desc in descriptor.T_A else self.ncols
+
+        I, ni, isize = _build_range(rindex, result_nrows - 1)
+        J, nj, jsize = _build_range(cindex, result_ncols - 1)
+        if isize is None:
+            isize = result_nrows
+        if jsize is None:
+            jsize = result_ncols
+
         result = self.__class__.from_type(self.type, isize, jsize)
         _check(lib.GrB_Matrix_extract(
             result.matrix[0],
@@ -808,7 +811,7 @@ class Matrix:
             ni,
             J,
             nj,
-            NULL))
+            desc))
         return result
 
     def slice_vector(self, index, vslice=None, **kwargs):
