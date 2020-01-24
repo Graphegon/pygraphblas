@@ -7,51 +7,57 @@ from pygraphblas import  lib, ffi
 from pygraphblas.base import lazy_property
 from cffi import FFI
 
-def make_type(cls):
-    type_name = cls.__name__
-    c_name = cls.c_name
-    add = cls.add
-    mult = cls.mult
-    cls.ffi = ffi
-    cls.gb_type = cls.gb_type
-    cls.C = c_name
-    cls.ptr = c_name + '*'
-    cls.aidentity = cls.aidentity
-    cls.identity = cls.identity
-    get = partial(getattr, lib)
-    cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
-    cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
-    cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
-    cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
-    cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
-    cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
-    cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
-    cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
-    cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
-    cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
-    cls.add_op = get('GrB_PLUS_{}'.format(type_name))
-    cls.mult_op = get('GrB_TIMES_{}'.format(type_name))
-    cls.eq_op = get('GrB_EQ_{}'.format(type_name))
-    cls.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
-    cls.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
-    cls.invert = get('GrB_MINV_{}'.format(type_name))
-    cls.neg = get('GrB_AINV_{}'.format(type_name))
-    cls.abs_ = get('GxB_ABS_{}'.format(type_name))
-    cls.not_ = get('GxB_LNOT_{}'.format(type_name))
-    cls.first = get('GrB_FIRST_{}'.format(type_name))
-    cls.gt = get('GrB_GT_{}'.format(type_name))
-    cls.lt = get('GrB_LT_{}'.format(type_name))
-    cls.ge = get('GrB_GE_{}'.format(type_name))
-    cls.le = get('GrB_LE_{}'.format(type_name))
-    cls.ne = get('GrB_NE_{}'.format(type_name))
-    cls.eq = get('GrB_EQ_{}'.format(type_name))
-    return cls
+class MetaType(type):
 
-class Type:
+    def __new__(meta, type_name, bases, members):
+        if members.get('base', False):
+            cls = super().__new__(meta, type_name, bases, members)
+            return cls
+        cls = super().__new__(meta, type_name, bases, members)
+        type_name = cls.__name__
+        c_name = cls.c_name
+        add = cls.add
+        mult = cls.mult
+        cls.ffi = ffi
+        cls.C = c_name
+        cls.ptr = c_name + '*'
+        cls.aidentity = cls.aidentity
+        cls.identity = cls.identity
+        get = partial(getattr, lib)
+        cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
+        cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
+        cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
+        cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
+        cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
+        cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
+        cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
+        cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
+        cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
+        cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
+        cls.add_op = get('GrB_PLUS_{}'.format(type_name))
+        cls.mult_op = get('GrB_TIMES_{}'.format(type_name))
+        cls.eq_op = get('GrB_EQ_{}'.format(type_name))
+        cls.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
+        cls.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
+        cls.invert = get('GrB_MINV_{}'.format(type_name))
+        cls.neg = get('GrB_AINV_{}'.format(type_name))
+        cls.abs_ = get('GxB_ABS_{}'.format(type_name))
+        cls.not_ = get('GxB_LNOT_{}'.format(type_name))
+        cls.first = get('GrB_FIRST_{}'.format(type_name))
+        cls.gt = get('GrB_GT_{}'.format(type_name))
+        cls.lt = get('GrB_LT_{}'.format(type_name))
+        cls.ge = get('GrB_GE_{}'.format(type_name))
+        cls.le = get('GrB_LE_{}'.format(type_name))
+        cls.ne = get('GrB_NE_{}'.format(type_name))
+        cls.eq = get('GrB_EQ_{}'.format(type_name))
+        return cls
+
+class Type(metaclass=MetaType):
     add = 'PLUS'
     mult = 'TIMES'
     aidentity = 1
     identity = 0
+    base = True
 
     @classmethod
     def from_value(cls, value):
@@ -61,7 +67,6 @@ class Type:
     def to_value(cls, data):
         return data
 
-@make_type
 class BOOL(Type):
     gb_type = lib.GrB_BOOL
     c_name = '_Bool'
@@ -70,52 +75,42 @@ class BOOL(Type):
     aidentity = True
     identity = False
 
-@make_type
 class INT8(Type):
     gb_type = lib.GrB_INT8
     c_name = 'int8_t'
 
-@make_type
 class UINT8(Type):
     gb_type = lib.GrB_UINT8
     c_name =  'uint8_t'
 
-@make_type
 class INT16(Type):
     gb_type = lib.GrB_INT16
     c_name = 'int16_t'
 
-@make_type
 class UINT16(Type):
     gb_type = lib.GrB_UINT16
     c_name = 'uint16_t'
 
-@make_type
 class INT32(Type):
     gb_type = lib.GrB_INT32
     c_name =  'int32_t'
 
-@make_type
 class UINT32(Type):
     gb_type = lib.GrB_UINT32
     c_name =  'uint32_t'
 
-@make_type
 class INT64(Type):
     gb_type = lib.GrB_INT64
     c_name = 'int64_t'
 
-@make_type
 class UINT64(Type):
     gb_type = lib.GrB_UINT64
     c_name = 'uint64_t'
 
-@make_type
 class FP32(Type):
     gb_type = lib.GrB_FP32
     c_name = 'float'
 
-@make_type
 class FP64(Type):
     gb_type = lib.GrB_FP64
     c_name = 'double'
@@ -185,9 +180,12 @@ def binop(boolean=False):
 
     return inner
 
-class MetaUDT(type):
+class MetaStruct(type):
 
     def __new__(meta, type_name, bases, members):
+        if members.get('base'):
+            cls = super().__new__(meta, type_name, bases, members)
+            return cls
         m = members['members']
         cls_ffi = members['ffi'] = FFI()
         cls_ffi.cdef(build_udt_def(type_name, m))
@@ -236,10 +234,11 @@ class MetaUDT(type):
     def semiring(cls):
         return cls.new_semiring(cls.monoid, cls.mult_op)
 
-class UDT(Type):
+class Struct(metaclass=MetaStruct):
 
     members = ()
-    
+    base = True
+
     @classmethod
     def from_value(cls, value):
         data = cls.ffi.new('%s[1]' % cls.__name__)
