@@ -14,6 +14,8 @@ you have these installed, pygraphblas can be installed with:
 
   python setup.py install
 
+An installation script for Ubuntu 18.04 is provided in the `install-ubuntu.sh` file.
+
 ## Docker 
 
 pygraphblas is distributed as a docker image on [Docker
