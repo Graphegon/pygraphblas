@@ -58,6 +58,7 @@ class Type(metaclass=MetaType):
     aidentity = 1
     identity = 0
     base = True
+    typecode = None
 
     @classmethod
     def from_value(cls, value):
@@ -74,46 +75,57 @@ class BOOL(Type):
     mult = 'LAND'
     aidentity = True
     identity = False
+    typecode = 'B'
 
 class INT8(Type):
     gb_type = lib.GrB_INT8
     c_name = 'int8_t'
+    typecode = 'b'
 
 class UINT8(Type):
     gb_type = lib.GrB_UINT8
     c_name =  'uint8_t'
+    typecode = 'B'
 
 class INT16(Type):
     gb_type = lib.GrB_INT16
     c_name = 'int16_t'
+    typecode = 'i'
 
 class UINT16(Type):
     gb_type = lib.GrB_UINT16
     c_name = 'uint16_t'
+    typecode = 'I'
 
 class INT32(Type):
     gb_type = lib.GrB_INT32
     c_name =  'int32_t'
+    typecode = 'l'
 
 class UINT32(Type):
     gb_type = lib.GrB_UINT32
     c_name =  'uint32_t'
+    typecode = 'L'
 
 class INT64(Type):
     gb_type = lib.GrB_INT64
     c_name = 'int64_t'
+    typecode = 'q'
 
 class UINT64(Type):
     gb_type = lib.GrB_UINT64
     c_name = 'uint64_t'
+    typecode = 'Q'
 
 class FP32(Type):
     gb_type = lib.GrB_FP32
     c_name = 'float'
+    typecode = 'f'
 
 class FP64(Type):
     gb_type = lib.GrB_FP64
     c_name = 'double'
+    typecode = 'd'
 
 def _gb_from_type(typ):
     if typ is int:

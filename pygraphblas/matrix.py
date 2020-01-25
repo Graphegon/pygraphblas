@@ -3,6 +3,7 @@ import types as pytypes
 import weakref
 import operator
 from random import randint
+from array import array
 
 from .base import (
     lib,
@@ -57,7 +58,7 @@ class Matrix:
         m = cls.from_type(typ, nrows, ncols)
         if fill is None:
             fill = m.type.aidentity
-            m[:,:] = fill
+        m[:,:] = fill
         return m
 
     @classmethod
@@ -82,13 +83,13 @@ class Matrix:
         return m
 
     @classmethod
-    def from_mm(cls, mm_file):
+    def from_mm(cls, mm_file, typ):
         """Create a new matrix by reading a Matrix Market file.
 
         """
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_mmread(m, mm_file))
-        return cls(m)
+        return cls(m, typ)
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols):
@@ -429,7 +430,7 @@ class Matrix:
             _nvals,
             self.matrix[0]
             ))
-        
+        return array('L', I), array('L', J), array(self.type.typecode, X)
 
     @property
     def rows(self):

@@ -251,7 +251,7 @@ def test_matrix_transpose():
         [0, 1, 2]
         ))
 
-@pytest.mark.skip
+#@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
     mmf.touch()
@@ -271,7 +271,7 @@ def test_matrix_mm_read_write(tmp_path):
             '3 3 4\n']
 
     with mmf.open() as f:
-        n = Matrix.from_mm(f)
+        n = Matrix.from_mm(f, INT8)
     assert n.iseq(m)
 
 pytest.mark.skip()
@@ -294,6 +294,10 @@ def test_matrix_tsv_read(tmp_path):
 
 def test_matrix_random():
     m = Matrix.from_random(INT8, 10, 10, 5, seed=42)
+    assert m.nrows == 10
+    assert m.ncols == 10
+    assert len(list(m)) == 5
+    m = Matrix.from_random(INT8, 10, 10, 5)
     assert m.nrows == 10
     assert m.ncols == 10
     assert len(list(m)) == 5
@@ -709,3 +713,33 @@ def test_shape_repr():
     assert m.shape == (3, 3)
     assert repr(m) == '<Matrix (3x3 : 3:INT64)>'
 
+
+def test_dense():
+    m = Matrix.dense(UINT8, 10, 10)
+    assert len(m) == 100
+    assert all(x[2] == 1 for x in m)
+    m = Matrix.dense(UINT8, 10, 10, 0)
+    assert len(m) == 100
+    assert all(x[2] == 0 for x in m)
+
+def test_identity():
+    m = Matrix.identity(UINT8, 10, 10)
+    assert len(m) == 10
+    for i in range(len(m)):
+        assert m[i,i] == UINT8.aidentity
+
+def test_to_arrays():
+    m = Matrix.dense(UINT8, 10, 10)
+    I, J, X = m.to_arrays()
+    assert len(I) == 100
+    assert len(J) == 100
+    assert len(X) == 100
+    assert all(x == 1 for x in X)
+
+def test_pow():
+    m = Matrix.dense(UINT8, 10, 10)
+    assert m.identity(UINT8, 10, 10) == m ** 0
+    assert m == m ** 1
+    assert (m @ m) == (m ** 2)
+    vals = (m ** 3).to_arrays()[2]
+    assert (x == 100 for x in vals)
