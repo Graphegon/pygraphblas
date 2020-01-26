@@ -1,6 +1,5 @@
-
 from pygraphblas import Matrix, Vector
-from pygraphblas.semiring import min_plus
+from pygraphblas.semiring import min_plus_int64
 from pygraphblas.binaryop import min_int64, Accum
 
 # The graph as a list of row and column indices and values
@@ -15,7 +14,7 @@ m = Matrix.from_lists(*data)
 
 def sssp(m, start):
     v = Vector.from_type(            # create a vector 
-        m.gb_type,                   # same type as m
+        m.type,                      # same type as m
         m.nrows                      # same size as rows of m
     )
     v[start] = 0                     # set the starting vertext distance
@@ -31,13 +30,12 @@ def sssp(m, start):
             break                    # exit early
     return v
 
-
 # this is exact same as above, but using `with` syntax to specify
 # semring and accumulator so that the `@` matmul syntax is used
 # instead of explict vxm.
 
 def sssp(matrix, start):
-    v = Vector.from_type(matrix.gb_type, matrix.nrows)
+    v = Vector.from_type(matrix.type, matrix.nrows)
     v[start] = 0
 
     with min_plus, Accum(min_int64):
@@ -47,4 +45,3 @@ def sssp(matrix, start):
             if w == v:
                 break
         return v
-
