@@ -281,7 +281,7 @@ class Matrix:
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
-                _out, self.type.gb_type, self.nrows, self.ncols))
+                _out, self.type.gb_type, self.ncols, self.nrows))
             out = self.__class__(_out, self.type)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_transpose(
