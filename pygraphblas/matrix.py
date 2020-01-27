@@ -179,6 +179,10 @@ class Matrix:
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
+    @property
+    def T(self):
+        return self.transpose()
+
     def dup(self):
         """Create an duplicate Matrix.
 

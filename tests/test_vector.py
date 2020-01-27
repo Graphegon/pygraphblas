@@ -232,4 +232,11 @@ def test_dense():
     assert len(m) == 10
     assert all(x[1] == 0 for x in m)
 
-
+def test_compare():
+    v = Vector.from_lists(
+        [0, 1, 2],
+        [0, 1, 3])
+    assert (v > 2).iseq(Vector.from_lists(
+        [0, 1, 2], [False, False, True]))
+    assert (v < 2).iseq(Vector.from_lists(
+        [0, 1], [True, True], 3))

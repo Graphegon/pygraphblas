@@ -1,4 +1,5 @@
 import operator
+import weakref
 
 from .base import (
     lib,
@@ -6,11 +7,13 @@ from .base import (
     NULL,
     _check,
     _get_bin_op,
+    _get_select_op,
     _default_add_op,
     _default_mul_op,
     _build_range,
 )
 from . import binaryop, types
+from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
@@ -25,11 +28,12 @@ class Vector:
 
     """
 
-    __slots__ = ('vector', 'type')
+    __slots__ = ('vector', 'type', '_keep_alives')
 
     def __init__(self, vec, typ):
         self.vector = vec
         self.type = typ
+        self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
         _check(lib.GrB_Vector_free(self.vector))
@@ -448,12 +452,20 @@ class Vector:
             ))
         return out
 
-    def select(self, op, out=None, thunk=NULL, **kwargs):
+    def select(self, op, thunk=NULL, out=None, **kwargs):
         if out is None:
             out = Vector.from_type(self.type, self.size)
         if isinstance(op, UnaryOp):
             op = op.unaryop
+        elif isinstance(op, str):
+            op = _get_select_op(op)
 
+        if isinstance(thunk, (bool, int, float)):
+            thunk = Scalar.from_value(thunk)
+        if isinstance(thunk, Scalar):
+            self._keep_alives[self.vector] = thunk
+            thunk = thunk.scalar[0]
+            
         mask, monoid, accum, desc =self._get_args(**kwargs)
         _check(lib.GxB_Vector_select(
             out.vector[0],

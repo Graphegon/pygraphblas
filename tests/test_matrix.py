@@ -57,6 +57,9 @@ def test_resize():
     assert v.nrows == 20
     assert v.ncols == 20
     assert v.nvals == 10
+    assert list(v.rows) == list(range(10))
+    assert list(v.cols) == list(range(10))
+    assert list(v.vals) == list(range(10))
 
 def test_matrix_create_dup():
     m = Matrix.from_type(INT8, 10, 10)
@@ -300,7 +303,7 @@ def test_matrix_random():
     m = Matrix.from_random(INT8, 10, 10, 5)
     assert m.nrows == 10
     assert m.ncols == 10
-    assert len(list(m)) == 5
+    assert 0 < len(list(m)) <= 5
 
 def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -713,7 +716,6 @@ def test_shape_repr():
     assert m.shape == (3, 3)
     assert repr(m) == '<Matrix (3x3 : 3:INT64)>'
 
-
 def test_dense():
     m = Matrix.dense(UINT8, 10, 10)
     assert len(m) == 100
@@ -743,3 +745,8 @@ def test_pow():
     assert (m @ m) == (m ** 2)
     vals = (m ** 3).to_arrays()[2]
     assert (x == 100 for x in vals)
+
+def test_T():
+    m = Matrix.dense(UINT8, 10, 10)
+    assert m.T == m.transpose()
+    
