@@ -749,4 +749,3 @@ def test_pow():
 def test_T():
     m = Matrix.dense(UINT8, 10, 10)
     assert m.T == m.transpose()
-    

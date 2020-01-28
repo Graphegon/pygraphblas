@@ -1,5 +1,6 @@
 import operator
 import weakref
+from array import array
 
 from .base import (
     lib,
@@ -80,7 +81,7 @@ class Vector:
         return cls(new_vec, typ)
 
     @classmethod
-    def from_lists(cls, I, V, size=None):
+    def from_lists(cls, I, V, size=None, typ=None):
         """Create a new vector from the given lists of indices and values.  If
         size is not provided, it is computed from the max values of
         the provides size indices.
@@ -91,7 +92,9 @@ class Vector:
         if not size:
             size = max(I) + 1
         # TODO option to use ffi and GrB_Vector_build
-        m = cls.from_type(types._gb_from_type(type(V[0])), size)
+        if typ is None:
+            typ = types._gb_from_type(type(V[0]))
+        m = cls.from_type(typ, size)
         for i, v in zip(I, V):
             m[i] = v
         return m
@@ -108,6 +111,14 @@ class Vector:
         for i, v in enumerate(I):
             m[i] = v
         return m
+
+    @classmethod
+    def from_1_to_n(cls, n):
+        new_vec = ffi.new('GrB_Vector*')
+        _check(lib.LAGraph_1_to_n(new_vec, n))
+        if n < lib.INT32_MAX:
+            return cls(new_vec, types.INT32)
+        return cls(new_vec, types.INT64)
 
     def dup(self):
         """Create an duplicate Vector from the given argument.
@@ -140,6 +151,19 @@ class Vector:
             self.vector[0]
             ))
         return [list(I), list(map(self.type.to_value, V))]
+
+    def to_arrays(self):
+        nvals = self.nvals
+        _nvals = ffi.new('GrB_Index[1]', [nvals])
+        I = ffi.new('GrB_Index[%s]' % nvals)
+        X = self.type.ffi.new('%s[%s]' % (self.type.C, nvals))
+        _check(self.type.Vector_extractTuples(
+            I,
+            X,
+            _nvals,
+            self.vector[0]
+            ))
+        return array('L', I), array(self.type.typecode, X)
 
     @property
     def size(self):

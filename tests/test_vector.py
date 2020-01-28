@@ -1,5 +1,6 @@
 import sys
 from itertools import repeat
+from array import array
 
 from pygraphblas import *
 
@@ -240,3 +241,20 @@ def test_compare():
         [0, 1, 2], [False, False, True]))
     assert (v < 2).iseq(Vector.from_lists(
         [0, 1], [True, True], 3))
+
+def test_1_to_n():
+    v = Vector.from_1_to_n(10)
+    assert v.iseq(Vector.from_lists(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        typ=types.INT32
+        ))
+    # this takes too much ram
+    # w = Vector.from_1_to_n(lib.INT32_MAX + 1)
+    # assert w.type == lib.INT64
+
+def test_to_arrays():
+    v = Vector.from_1_to_n(10)
+    assert v.to_arrays() == (
+        array('L', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+        array('l', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))

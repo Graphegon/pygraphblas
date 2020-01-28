@@ -7,10 +7,10 @@ pygraphblas is a Python wrapper around the
 
 ## Installation
 
-pygraphblas requires
+pygraphblas requires the
 [SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
-and the [LAGraph](https://github.com/GraphBLAS/LAGraph) library.  Once
-you have these installed, pygraphblas can be installed with:
+library.  Once you have these installed, pygraphblas can be installed
+with:
 
   python setup.py install
 
