@@ -1,28 +1,40 @@
 from cffi import FFI
+from pathlib import Path
 
 def build_ffi():
     ffibuilder = FFI()
 
-    ffibuilder.set_source(
-        "_pygraphblas",
-        r"""
-        #include "LAGraph.h"
+    source = r"""
         #include <math.h>
         #include <stdint.h> 
+        """
+    p = Path('pygraphblas/cdef/LAGraph')
 
-        // missing from LAGraph.h for the moment
-        GrB_Info LAGraph_Vector_to_dense
-        (
-            GrB_Vector *vdense,     // output vector
-            GrB_Vector v,           // input vector
-            void *id                // pointer to value to fill vdense with
-         ) ;
+    with open(p / 'LAGraph.h') as la:
+        source += la.read()
 
-        """,
-        libraries=['graphblas', 'lagraph'])
+    with open(p / 'LAGraph_internal.h') as lai:
+        source += lai.read()
+
+    for fname in p.glob('*.c'):
+        with open(fname) as f:
+            code = f.read()
+            code = code.replace(
+                '#include "LAGraph_internal.h"',
+                '// #include "LAGraph_internal.h"')
+            code += """
+#undef LAGRAPH_FREE_ALL
+#undef ARG
+            """
+            source += code
+
+    ffibuilder.set_source(
+        "_pygraphblas",
+        source,
+        libraries=['graphblas'])
 
     gb_cdef = open('pygraphblas/cdef/gb_3.1.0_cdef.h')
-    la_cdef = open('pygraphblas/cdef/la_3.0.1_cdef.h')
+    la_cdef = open('pygraphblas/cdef/la_a6fcf0_cdef.h')
     ex_cdef = open('pygraphblas/cdef/extra.h')
 
     ffibuilder.cdef(gb_cdef.read())

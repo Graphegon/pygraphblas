@@ -229,15 +229,15 @@ class Matrix:
 
         return (hyper[0], format[0], is_hyper[0])
 
-    def pattern(self):
+    def pattern(self, typ=types.BOOL):
         """Return the pattern of the matrix, this is a boolean Matrix where
         every present value in this matrix is set to True.
 
         """
 
         r = ffi.new('GrB_Matrix*')
-        _check(lib.LAGraph_pattern(r, self.matrix[0]))
-        return Matrix(r, types.BOOL)
+        _check(lib.LAGraph_pattern(r, self.matrix[0], typ.gb_type))
+        return Matrix(r, typ)
 
     def to_mm(self, fileobj):
         """Write this matrix to a file using the Matrix Market format.
