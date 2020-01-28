@@ -38,13 +38,6 @@ RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.1.1.tar.
     && make install
 RUN cd .. && /bin/rm -Rf GraphBLAS
 
-RUN git clone --branch 22July2019 https://github.com/GraphBLAS/LAGraph.git && \
-    cd LAGraph && \
-    make library \
-#    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
-    && make install
-RUN cd .. && /bin/rm -Rf LAGraph
-
 RUN conda install -y graphviz
 
 ADD . /home/jovyan

@@ -39,7 +39,7 @@
 // Include file for LAGraph functions.  This file should not be included in
 // user applications.  See LAGraph.h instead.
 
-#include "LAGraph.h"
+// #include "LAGraph.h"
 
 #ifndef CMPLX
 #define CMPLX(real,imag) \
