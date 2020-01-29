@@ -1,5 +1,25 @@
 from _pygraphblas import lib, ffi
 
+__all__ = [
+    'lib', 'ffi', 'NULL',
+    'GraphBLASException',
+    'NoValue',
+    'UninitializedObject',
+    'InvalidObject',
+    'NullPointer',
+    'InvalidObject',
+    'NullPointer',
+    'InvalidValue',
+    'InvalidIndex',
+    'DomainMismatch',
+    'DimensionMismatch',
+    'OutputNotEmpty',
+    'OutOfMemory',
+    'InsufficientSpace',
+    'IndexOutOfBound',
+    'Panic',
+    ]
+
 NULL = ffi.NULL
 
 class GraphBLASException(Exception):

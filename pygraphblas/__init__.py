@@ -1,4 +1,4 @@
-from .base import lib, ffi
+from .base import *
 lib.LAGraph_init()
 
 from .matrix import Matrix

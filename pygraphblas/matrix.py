@@ -101,6 +101,14 @@ class Matrix:
         return cls(m, typ)
 
     @classmethod
+    def from_binfile(cls, bin_file):
+        """Create a new matrix by reading a SuiteSparse specific binary file.
+        """
+        m = ffi.new('GrB_Matrix*')
+        _check(lib.LAGraph_binread(m, bin_file))
+        return cls(m, typ)
+
+    @classmethod
     def from_random(cls, typ, nrows, ncols, nvals,
                     make_pattern=False, make_symmetric=False,
                     make_skew_symmetric=False, make_hermitian=True,
@@ -130,8 +138,8 @@ class Matrix:
         return cls(result, typ)
 
     @classmethod
-    def identity(cls, typ, nrows, ncols):
-        result = cls.from_type(typ, nrows, ncols)
+    def identity(cls, typ, nrows):
+        result = cls.from_type(typ, nrows, nrows)
         for i in range(nrows):
             result[i,i] = result.type.aidentity
         return result
@@ -169,6 +177,10 @@ class Matrix:
 
         """
         return (self.nrows, self.ncols)
+
+    @property
+    def square(self):
+        return self.nrows == self.ncols
 
     @property
     def nvals(self):
@@ -244,6 +256,12 @@ class Matrix:
 
         """
         _check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
+
+    def to_binfile(self, filename, comments=NULL):
+        """Write this matrix using custom SuiteSparse binary format.
+
+        """
+        _check(lib.LAGraph_binwrite(self.matrix[0], filename, comments))
 
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists.
@@ -498,7 +516,7 @@ class Matrix:
 
     def __pow__(self, exponent):
         if exponent == 0:
-            return self.__class__.identity(self.type, self.nrows, self.ncols)
+            return self.__class__.identity(self.type, self.nrows)
         if exponent == 1:
             return self
         result = self
@@ -512,6 +530,7 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = lib.GxB_LOR_BOOL_MONOID
+
         result = ffi.new('_Bool*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_BOOL(
@@ -554,7 +573,7 @@ class Matrix:
             desc))
         return result[0]
 
-    def reduce_vector(self, out=None, monoid=NULL, **kwargs):
+    def reduce_vector(self, monoid=NULL, out=None, **kwargs):
         """Reduce matrix to a vector.
 
         """

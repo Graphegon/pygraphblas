@@ -725,7 +725,7 @@ def test_dense():
     assert all(x[2] == 0 for x in m)
 
 def test_identity():
-    m = Matrix.identity(UINT8, 10, 10)
+    m = Matrix.identity(UINT8, 10)
     assert len(m) == 10
     for i in range(len(m)):
         assert m[i,i] == UINT8.aidentity
@@ -740,7 +740,7 @@ def test_to_arrays():
 
 def test_pow():
     m = Matrix.dense(UINT8, 10, 10)
-    assert m.identity(UINT8, 10, 10) == m ** 0
+    assert m.identity(UINT8, 10) == m ** 0
     assert m == m ** 1
     assert (m @ m) == (m ** 2)
     vals = (m ** 3).to_arrays()[2]
