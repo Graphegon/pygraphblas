@@ -519,9 +519,9 @@ class Matrix:
             return self.__class__.identity(self.type, self.nrows)
         if exponent == 1:
             return self
-        result = self
+        result = self.dup()
         for i in range(1, exponent):
-            result = result @ self
+            result.mxm(self, out=result)
         return result
 
     def reduce_bool(self, monoid=NULL, **kwargs):
