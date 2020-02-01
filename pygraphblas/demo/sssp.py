@@ -38,7 +38,7 @@ def sssp(matrix, start):
     v = Vector.from_type(matrix.type, matrix.nrows)
     v[start] = 0
 
-    with min_plus, Accum(min_int64):
+    with min_plus_int64, Accum(min_int64):
         for _ in range(matrix.nrows):
             w = Vector.dup(v)
             v @= matrix
