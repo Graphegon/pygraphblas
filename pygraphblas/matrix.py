@@ -1051,7 +1051,6 @@ class Matrix:
                     ))
                 return
 
-
             # a[:,:] assign submatrix
             self.assign_matrix(value, i0, i1)
             return

@@ -414,7 +414,6 @@ class Vector:
             mask = mask.vector[0]
         return mask, monoid, accum, desc
 
-
     def reduce_bool(self, **kwargs):
         """Reduce vector to a boolean.
 
@@ -502,6 +501,9 @@ class Vector:
             desc
             ))
         return out
+
+    def nonzero(self):
+        return self.select(lib.GxB_NONZERO)
 
     def to_dense(self, _id=None):
         out = ffi.new('GrB_Vector*')
