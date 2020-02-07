@@ -6,6 +6,7 @@ from .base import (
     lib,
     ffi,
     NULL,
+    NoValue,
     _check,
     _get_bin_op,
     _get_select_op,
@@ -489,7 +490,7 @@ class Vector:
         if isinstance(thunk, Scalar):
             self._keep_alives[self.vector] = thunk
             thunk = thunk.scalar[0]
-            
+
         mask, monoid, accum, desc =self._get_args(**kwargs)
         _check(lib.GxB_Vector_select(
             out.vector[0],
@@ -529,62 +530,82 @@ class Vector:
                 index, mask, desc = index
         if isinstance(mask, Vector):
             mask = mask.vector[0]
-            
+
         if isinstance(index, slice):
             if isinstance(value, Vector):
-                I, ni, size = _build_range(index, self.size - 1)
-                _check(lib.GrB_Vector_assign(
-                    self.vector[0],
-                    mask,
-                    NULL,
-                    value.vector[0],
-                    I,
-                    ni,
-                    desc
-                    ))
+                self.assign(value, index, mask=mask, desc=desc)
                 return
             if isinstance(value, (bool, int, float)):
-                scalar_type = types._gb_from_type(type(value))
-                I, ni, size = _build_range(index, self.size - 1)
-                _check(scalar_type.Vector_assignScalar(
-                    self.vector[0],
-                    mask,
-                    NULL,
-                    value,
-                    I,
-                    ni,
-                    desc
-                    ))
+                self.assign_scalar(value, index, mask=mask, desc=desc)
                 return
         raise TypeError('Unknown index or value for vector assignment.')
 
+    def assign(self, value, index=None, **kwargs):
+        mask, monoid, accum, desc = self._get_args(**kwargs)
+        I, ni, size = _build_range(index, self.size - 1)
+        _check(lib.GrB_Vector_assign(
+            self.vector[0],
+            mask,
+            accum,
+            value.vector[0],
+            I,
+            ni,
+            desc
+            ))
+
+    def assign_scalar(self, value, index=None, **kwargs):
+        mask, monoid, accum, desc = self._get_args(**kwargs)
+        scalar_type = types._gb_from_type(type(value))
+        I, ni, size = _build_range(index, self.size - 1)
+        _check(scalar_type.Vector_assignScalar(
+            self.vector[0],
+            mask,
+            accum,
+            value,
+            I,
+            ni,
+            desc
+            ))
+
     def __getitem__(self, index):
-        mask = NULL
         if isinstance(index, int):
-            result = self.type.ffi.new(self.type.ptr)
-            _check(self.type.Vector_extractElement(
-                result,
-                self.vector[0],
-                ffi.cast('GrB_Index', index)))
-            return self.type.to_value(result[0])
-        
+            return self.extract_element(index)
+        else:
+            return self.extract(index)
+
+    def extract_element(self, index):
+        result = self.type.ffi.new(self.type.ptr)
+        _check(self.type.Vector_extractElement(
+            result,
+            self.vector[0],
+            ffi.cast('GrB_Index', index)))
+        return self.type.to_value(result[0])
+
+    def extract(self, index, **kwargs):
+        mask, monoid, accum, desc = self._get_args(**kwargs)
         if isinstance(index, Vector):
             mask = index.vector[0]
             index = slice(None, None, None)
-        if isinstance(index, slice):
-            I, ni, size = _build_range(index, self.size - 1)
-            if size is None:
-                size = self.size
-            result = Vector.from_type(self.type, size)
-            _check(lib.GrB_Vector_extract(
-                result.vector[0],
-                mask,
-                NULL,
-                self.vector[0],
-                I,
-                ni,
-                NULL))
-            return result
+        I, ni, size = _build_range(index, self.size - 1)
+        if size is None:
+            size = self.size
+        result = Vector.from_type(self.type, size)
+        _check(lib.GrB_Vector_extract(
+            result.vector[0],
+            mask,
+            accum,
+            self.vector[0],
+            I,
+            ni,
+            desc))
+        return result
+
+    def __contains__(self, index):
+        try:
+            v = self[index]
+            return True
+        except NoValue:
+            return False
 
     def __repr__(self):
         return '<Vector (%s: %s)>' % (self.size, self.nvals)

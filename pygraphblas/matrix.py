@@ -810,7 +810,7 @@ class Matrix:
             desc))
         return out
 
-    def slice_matrix(self, rindex=None, cindex=None, **kwargs):
+    def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
         """Slice a submatrix.
 
         """
@@ -825,9 +825,11 @@ class Matrix:
         if jsize is None:
             jsize = result_ncols
 
-        result = self.__class__.from_type(self.type, isize, jsize)
+        if out is None:
+            out = self.__class__.from_type(self.type, isize, jsize)
+
         _check(lib.GrB_Matrix_extract(
-            result.matrix[0],
+            out.matrix[0],
             mask,
             accum,
             self.matrix[0],
@@ -836,24 +838,21 @@ class Matrix:
             J,
             nj,
             desc))
-        return result
+        return out
 
-    def slice_vector(self, index, vslice=None, **kwargs):
+    def extract_vector(self, index, vslice=None, out=None, **kwargs):
         """Slice a subvector.
 
         """
-        new_vec = ffi.new('GrB_Vector*')
-        _check(lib.GrB_Vector_new(
-            new_vec,
-            self.type.gb_type,
-            self.ncols))
+        if out is None:
+            out = Vector.from_type(self.type, self.ncols)
 
         mask, semiring, accum, desc = self._get_args(**kwargs)
         stop_val = self.nrows if desc in descriptor.T_A else self.ncols
         I, ni, size = _build_range(vslice, stop_val)
 
         _check(lib.GrB_Col_extract(
-            new_vec[0],
+            out.vector[0],
             mask,
             accum,
             self.matrix[0],
@@ -862,18 +861,18 @@ class Matrix:
             index,
             desc
             ))
-        return Vector(new_vec, self.type)
+        return out
 
     def __getitem__(self, index):
         if isinstance(index, int):
             # a[3] extract single row
-            return self.slice_vector(index, None, desc=descriptor.tooo)
+            return self.extract_vector(index, None, desc=descriptor.tooo)
         if isinstance(index, slice):
             # a[3:] extract submatrix of rows
-            return self.slice_matrix(index, None)
+            return self.extract_matrix(index, None)
 
         if isinstance(index, Matrix):
-            return self.slice_matrix(mask=index)
+            return self.extract_matrix(mask=index)
 
         if not isinstance(index, (tuple, list)):
             raise TypeError
@@ -892,15 +891,15 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
-            return self.slice_vector(i0, i1, desc=descriptor.tooo)
+            return self.extract_vector(i0, i1, desc=descriptor.tooo)
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector
-            return self.slice_vector(i1, i0)
+            return self.extract_vector(i1, i0)
 
         if isinstance(i0, slice) and isinstance(i1, slice):
             # a[:,:] extract submatrix
-            return self.slice_matrix(i0, i1)
+            return self.extract_matrix(i0, i1)
 
     def assign_col(self, index, value, vslice=None, desc=descriptor.oooo):
         """Assign a vector to a column.
@@ -960,6 +959,31 @@ class Matrix:
             nj,
             NULL))
 
+    def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+        if row_slice:
+            I, ni, isize = _build_range(i0, self.nrows - 1)
+        else:
+            I = lib.GrB_ALL
+            ni = 0
+        if col_slice:
+            J, nj, jsize = _build_range(i1, self.ncols - 1)
+        else:
+            J = lib.GrB_ALL
+            nj = 0
+        scalar_type = types._gb_from_type(type(value))
+        _check(scalar_type.Matrix_assignScalar(
+            self.matrix[0],
+            mask,
+            accum,
+            value,
+            I,
+            ni,
+            J,
+            nj,
+            desc
+            ))
+
     def __setitem__(self, index, value):
         if isinstance(index, int):
             # A[3] = assign single row  vector
@@ -982,18 +1006,7 @@ class Matrix:
             if not isinstance(value, (bool, int, float)):
                 raise TypeError
             # A[M] = s masked scalar assignment
-            scalar_type = types._gb_from_type(type(value))
-            _check(scalar_type.Matrix_assignScalar(
-                self.matrix[0],
-                index.matrix[0],
-                NULL,
-                value,
-                lib.GrB_ALL,
-                0,
-                lib.GrB_ALL,
-                0,
-                NULL
-                ))
+            self.assign_scalar(value, mask=index)
             return
 
         if not isinstance(index, (tuple, list)):
