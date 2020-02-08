@@ -94,7 +94,7 @@ class Matrix:
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols):
-        """Create a new matrix by reading a Matrix Market file.
+        """Create a new matrix by reading a tab separated value file.
 
         """
         m = ffi.new('GrB_Matrix*')

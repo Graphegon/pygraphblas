@@ -11,10 +11,10 @@ def draw_vector(V, name='', rankdir='LR', ioff=0, joff=0):
         g.node(str(i+ioff), label='%s:%s' % (str(i), str(v)))
     return g
 
-def draw_graph(M, name='', rankdir='LR', show_weight=True,
+def draw_graph(M, name='', rankdir='LR', show_weight=True, concentrate=True,
                label_vector=None, label_width=None, size_vector=None, ioff=0, joff=0):
     g = Digraph(name)
-    g.attr(rankdir=rankdir, ranksep='1', overlap='false')
+    g.attr(rankdir=rankdir, ranksep='1', overlap='false', concentrate='true')
     for i, j, v in M:
         size = _str(size_vector[i], label_width) if size_vector else '0.5'
         ilabel = _str(label_vector[i], label_width) if label_vector else str(i)
