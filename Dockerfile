@@ -1,5 +1,5 @@
 ARG BASE_CONTAINER=jupyter/minimal-notebook
-FROM $BASE_CONTAINER
+FROM ${BASE_CONTAINER}
 
 USER root
 
@@ -27,16 +27,18 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
+ARG SS_RELEASE=3.2.0draft27
+    
 # get GraphBLAS, compile with debug symbols
 
-RUN curl -s -L  http://faculty.cse.tamu.edu/davis/GraphBLAS/GraphBLAS-3.1.1.tar.gz | tar -xz && \
-     cd GraphBLAS-3.1.1 && \
+RUN curl -s -L  https://github.com/DrTimothyAldenDavis/GraphBLAS/archive/${SS_RELEASE}.tar.gz | tar -xz && \
+     cd GraphBLAS-${SS_RELEASE} && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
     make library \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
-RUN cd .. && /bin/rm -Rf GraphBLAS
+RUN cd .. && /bin/rm -Rf GraphBLAS-${SS_RELEASE}
 
 RUN conda install -y graphviz
 
