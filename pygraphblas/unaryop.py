@@ -21,7 +21,7 @@ class UnaryOp:
     def __exit__(self, *errors):
         return False
 
-__all__ = ['UnaryOp', 'uop']
+__all__ = ['UnaryOp', 'unary_op']
 
 grb_uop_re = re.compile(
     '^GrB_(IDENTITY|AINV|MINV|LNOT|ONE|ABS)_'
@@ -48,7 +48,7 @@ def _build_uop_def(name, arg_type, result_type):
     """.format(_uop_name(name), arg_type, result_type))
     return decl
 
-def uop(arg_type, result_type=None):
+def unary_op(arg_type, result_type=None):
     if result_type is None:
         result_type = arg_type
     def inner(func):
