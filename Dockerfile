@@ -31,11 +31,11 @@ ARG SS_RELEASE=3.2.0draft27
     
 # get GraphBLAS, compile with debug symbols
 
-RUN curl -s -L  https://github.com/DrTimothyAldenDavis/GraphBLAS/archive/${SS_RELEASE}.tar.gz | tar -xz && \
+RUN curl -s -L -J  https://github.com/DrTimothyAldenDavis/GraphBLAS/archive/${SS_RELEASE}.tar.gz | tar -xz && \
      cd GraphBLAS-${SS_RELEASE} && \
 #    sed -i 's/^\/\/ #undef NDEBUG/#undef NDEBUG/g' Source/GB.h && \
 #    sed -i 's/^\/\/ #define GB_PRINT_MALLOC 1/#define GB_PRINT_MALLOC 1/g' Source/GB.h && \
-    make library \
+    make library JOBS=4 \
 #    CMAKE_OPTIONS='-DCMAKE_BUILD_TYPE=Debug' \
     && make install
 RUN cd .. && /bin/rm -Rf GraphBLAS-${SS_RELEASE}
