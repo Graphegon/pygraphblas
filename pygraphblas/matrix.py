@@ -22,6 +22,7 @@ from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
+from .monoid import Monoid, current_monoid
 from . import descriptor
 
 __all__ = ['Matrix']
@@ -529,7 +530,9 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = lib.GxB_LOR_BOOL_MONOID
+            monoid = current_monoid.get(self.type.monoid)
+        elif isinstance(monoid, Monoid):
+            monoid = monoid.get_monoid(self)
 
         result = ffi.new('_Bool*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -546,7 +549,10 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = lib.GxB_PLUS_INT64_MONOID
+            monoid = current_monoid.get(lib.GxB_PLUS_INT64_MONOID)
+        elif isinstance(monoid, Monoid):
+            monoid = monoid.get_monoid(self)
+
         result = ffi.new('int64_t*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_INT64(
@@ -562,7 +568,10 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = lib.GxB_PLUS_FP64_MONOID
+            monoid = current_monoid.get(lib.GxB_PLUS_FP64_MONOID)
+        elif isinstance(monoid, Monoid):
+            monoid = monoid.get_monoid(self)
+
         mask, semiring, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
@@ -578,7 +587,10 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = self.type.monoid
+            monoid = current_monoid.get(self.type.monoid)
+        elif isinstance(monoid, Monoid):
+            monoid = monoid.get_monoid(self)
+            
         if out is None:
             out = Vector.from_type(self.type, self.nrows)
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -598,7 +610,7 @@ class Matrix:
         if out is None:
             out = self.__class__.from_type(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
-            nop = op.unaryop
+            nop = op.get_unaryop(self)
         elif isinstance(op, pytypes.FunctionType):
             uop = ffi.new('GrB_UnaryOp*')
             def op_func(z, x):
@@ -633,7 +645,7 @@ class Matrix:
         if out is NULL:
             out = self.__class__.from_type(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
-            op = op.unaryop
+            op = op.get_unaryop(self)
         elif isinstance(op, str):
             op = _get_select_op(op)
 
@@ -726,7 +738,8 @@ class Matrix:
         return self.compare(other, operator.ne, '!=')
 
     def _get_args(self,
-            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+                  mask=NULL, accum=NULL, semiring=NULL,
+                  desc=descriptor.oooo):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if isinstance(mask, Vector):

@@ -7,14 +7,17 @@ from .scalar import Scalar
 from .semiring import build_semirings
 from .binaryop import build_binaryops
 from .unaryop import build_unaryops
+from .monoid import build_monoids
 
 build_semirings()
 build_binaryops()
 build_unaryops()
+build_monoids()
 
 from .semiring import *
 from .binaryop import *
 from .unaryop import *
+from .monoid import *
 from .types import *
 
 

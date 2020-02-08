@@ -19,6 +19,7 @@ from .scalar import Scalar
 from .semiring import Semiring, current_semiring
 from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
+from .monoid import Monoid, current_monoid
 from . import descriptor
 
 __all__ = ['Vector']
@@ -405,7 +406,9 @@ class Vector:
 
     def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
         if monoid is NULL:
-            monoid = self.type.monoid
+            monoid = current_monoid.get(self.type.monoid)
+        elif isinstance(monoid, Monoid):
+            monoid = monoid.get_monoid(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -414,11 +417,11 @@ class Vector:
             mask = mask.vector[0]
         return mask, monoid, accum, desc
 
-    def reduce_bool(self, **kwargs):
+    def reduce_bool(self, monoid=NULL, **kwargs):
         """Reduce vector to a boolean.
 
         """
-        mask, monoid, accum, desc = self._get_args(**kwargs)
+        mask, monoid, accum, desc = self._get_args(monoid=monoid, **kwargs)
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
             result,
@@ -428,11 +431,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_int(self, **kwargs):
+    def reduce_int(self, monoid=NULL, **kwargs):
         """Reduce vector to a integer.
 
         """
-        mask, monoid, accum, desc = self._get_args(**kwargs)
+        mask, monoid, accum, desc = self._get_args(monoid=monoid, **kwargs)
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
             result,
@@ -442,11 +445,11 @@ class Vector:
             desc))
         return result[0]
 
-    def reduce_float(self, **kwargs):
+    def reduce_float(self, monoid=NULL, **kwargs):
         """Reduce vector to a float.
 
         """
-        mask, monoid, accum, desc = self._get_args(**kwargs)
+        mask, monoid, accum, desc = self._get_args(monoid=monoid, **kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
             result,
