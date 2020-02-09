@@ -130,7 +130,7 @@ class Vector:
             new_vec = ffi.new('GrB_Vector*')
         else:
             assert out.type == self.type
-            new_vec = out.vector[0]
+            new_vec = out.vector
         _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
         return self.__class__(new_vec, self.type)
 
