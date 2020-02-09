@@ -36,7 +36,7 @@ def dnn(W, B, Y):
 def load_images(neurons, dest):
     fname = '{}/sparse-images-{}.{}'
     binfile = fname.format(dest, neurons, 'ssb')
-    if Path(binfile).exists:
+    if Path(binfile).exists():
         return Matrix.from_binfile(binfile.encode('ascii'))
     images = Path(fname.format(dest, neurons, 'tsv'))
     with images.open() as i:
@@ -56,7 +56,7 @@ def load_categories(neurons, nlayers, dest):
 def load_layer(i, dest):
     fname = '{}/neuron{}/n{}-l{}.{}'
     binfile = fname.format(dest, neurons, neurons, str(i+1), 'ssb')
-    if Path(binfile).exists:
+    if Path(binfile).exists():
         return Matrix.from_binfile(binfile.encode('ascii'))
     l = Path(fname.format(dest, neurons, neurons, str(i+1), 'tsv'))
     with l.open() as f:
