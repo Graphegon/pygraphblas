@@ -262,7 +262,7 @@ class Matrix:
         """Write this matrix using custom SuiteSparse binary format.
 
         """
-        _check(lib.LAGraph_binwrite(self.matrix[0], filename, comments))
+        _check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists.

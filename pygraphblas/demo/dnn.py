@@ -34,12 +34,17 @@ def dnn(W, B, Y):
 
 @timing
 def load_images(neurons, dest):
-    images = Path('{}/sparse-images-{}.tsv'.format(dest, neurons))
+    fname = '{}/sparse-images-{}'
+    images = Path(fname.format(dest, neurons) + '.tsv')
     with images.open() as i:
-        return Matrix.from_tsv(i, FP32, NFEATURES, neurons)
+        m = Matrix.from_tsv(i, FP32, NFEATURES, neurons)
+        binfile = fname.format(dest, neurons) + '.ssb'
+        m.to_binfile(binfile.encode('ascii'))
+        return m
 
 def load_categories(neurons, nlayers, dest):
-    cats = Path('{}/neuron{}-l{}-categories.tsv'.format(dest, neurons, nlayers))
+    fname = '{}/neuron{}-l{}-categories.tsv'
+    cats = Path(fname.format(dest, neurons, nlayers))
     result = Vector.from_type(BOOL, NFEATURES)
     with cats.open() as i:
         for line in i.readlines():
@@ -47,9 +52,13 @@ def load_categories(neurons, nlayers, dest):
     return result
 
 def load_layer(i, dest):
-    l = Path('{}/neuron{}/n{}-l{}.tsv'.format(dest, neurons, neurons, str(i+1)))
+    fname = '{}/neuron{}/n{}-l{}'
+    l = Path(fname.format(dest, neurons, neurons, str(i+1)) + '.tsv')
     with l.open() as f:
-        return Matrix.from_tsv(f, FP32, neurons, neurons)
+        m = Matrix.from_tsv(f, FP32, neurons, neurons)
+        binfile = fname.format(dest, neurons, neurons, str(i+1)) + '.ssb'
+        m.to_binfile(binfile.encode('ascii'))
+        return m
 
 @timing
 def generate_layers(neurons, nlayers, dest):
