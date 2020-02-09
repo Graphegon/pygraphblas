@@ -40,7 +40,7 @@ def load_images(neurons, dest):
 
 def load_categories(neurons, nlayers, dest):
     cats = Path('{}/neuron{}-l{}-categories.tsv'.format(dest, neurons, nlayers))
-    result = Vector.from_type(bool, NFEATURES)
+    result = Vector.from_type(BOOL, NFEATURES)
     with cats.open() as i:
         for line in i.readlines():
             result[int(line.strip())-1] = True
@@ -74,7 +74,7 @@ def run(neurons, images, layers, bias, dest):
                  bias,
                  images)
     r = result.reduce_vector()
-    cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(bool, r.size))
+    cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(BOOL, r.size))
     truecats = load_categories(neurons, nlayers, dest)
     assert cats == truecats
 
