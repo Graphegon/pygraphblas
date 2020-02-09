@@ -107,7 +107,9 @@ class Matrix:
         """
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_binread(m, bin_file))
-        return cls(m, typ)
+        new_type = ffi.new('GrB_Type*')
+        _check(lib.GxB_Matrix_type(new_type, m[0]))
+        return cls(m, types.gb_type_to_type(new_type[0]))
 
     @classmethod
     def from_random(cls, typ, nrows, ncols, nvals,

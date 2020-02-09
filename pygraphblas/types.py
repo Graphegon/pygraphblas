@@ -7,13 +7,19 @@ from pygraphblas import  lib, ffi
 from pygraphblas.base import lazy_property
 from cffi import FFI
 
+def gb_type_to_type(gb_type):
+    return MetaType._gb_type_map[gb_type]
+
 class MetaType(type):
+
+    _gb_type_map = {}
 
     def __new__(meta, type_name, bases, members):
         if members.get('base', False):
             cls = super().__new__(meta, type_name, bases, members)
             return cls
         cls = super().__new__(meta, type_name, bases, members)
+        meta._gb_type_map[cls.gb_type] = cls
         type_name = cls.__name__
         c_name = cls.c_name
         add = cls.add
