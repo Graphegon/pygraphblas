@@ -198,11 +198,15 @@ class Matrix:
     def T(self):
         return self.transpose()
 
-    def dup(self):
+    def dup(self, out=None):
         """Create an duplicate Matrix.
 
         """
-        new_mat = ffi.new('GrB_Matrix*')
+        if out is None:
+            new_mat = ffi.new('GrB_Matrix*')
+        else:
+            assert out.type == self.type
+            new_mat = out.matrix[0]
         _check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
