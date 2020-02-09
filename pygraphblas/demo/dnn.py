@@ -3,11 +3,9 @@ from functools import wraps, partial
 from time import time
 from statistics import mean
 from pathlib import Path
-from pygraphblas import Matrix, Vector, lib
-from pygraphblas import plus_plus
+from pygraphblas import *
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
-
 
 NFEATURES = 60000
 BIAS = {1024: -0.3, 4096: -0.35, 16384: -0.4, 65536: -0.45}
@@ -38,7 +36,7 @@ def dnn(W, B, Y):
 def load_images(neurons, dest):
     images = Path('{}/sparse-images-{}.tsv'.format(dest, neurons))
     with images.open() as i:
-        return Matrix.from_tsv(i, lib.GrB_FP32, NFEATURES, neurons)
+        return Matrix.from_tsv(i, FP32, NFEATURES, neurons)
 
 def load_categories(neurons, nlayers, dest):
     cats = Path('{}/neuron{}-l{}-categories.tsv'.format(dest, neurons, nlayers))
@@ -51,7 +49,7 @@ def load_categories(neurons, nlayers, dest):
 def load_layer(i, dest):
     l = Path('{}/neuron{}/n{}-l{}.tsv'.format(dest, neurons, neurons, str(i+1)))
     with l.open() as f:
-        return Matrix.from_tsv(f, lib.GrB_FP32, neurons, neurons)
+        return Matrix.from_tsv(f, FP32, neurons, neurons)
 
 @timing
 def generate_layers(neurons, nlayers, dest):
@@ -63,7 +61,7 @@ def generate_layers(neurons, nlayers, dest):
 def generate_bias(neurons, nlayers):
     result = []
     for i in range(nlayers):
-        bias = Matrix.from_type(lib.GrB_FP32, neurons, neurons)
+        bias = Matrix.from_type(FP32, neurons, neurons)
         for i in range(neurons):
             bias[i,i] = BIAS[neurons]
         bias.nvals # causes async completion

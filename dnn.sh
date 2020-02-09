@@ -35,8 +35,8 @@ fi
 
 cd -
 
-docker run --env DEST=$1 --env NEURONS=$2 --env NLAYERS=$3 \
-       -v `pwd`/$1:/pygraphblas/$1 \
-       -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
-       -it pygraphblas/pygraphblas ipython -i -m pygraphblas.demo.dnn
+docker run --user root -e NB_UID=$(id -u) -e NB_GID=$(id -g) --env DEST=$1 --env NEURONS=$2 --env NLAYERS=$3 \
+       -v $1:$1 \
+       -v `pwd`/pygraphblas:/home/jovyan/pygraphblas \
+       -it graphblas/pygraphblas-notebook ipython -i -m pygraphblas.demo.dnn
 
