@@ -33,6 +33,18 @@ def dnn(W, B, Y):
     return Y
 
 @timing
+def dnn2(W, B, Y):
+    for w, b in zip(W, B):
+        Y = Y.mxm(w, out=Y)
+        with plus_plus:
+            Y = Y.mxm(b, out=Y)
+        Y.select('>0', out=Y)
+        M = Y.select('>', 32)
+        if len(M):
+            Y[M] = 32
+    return Y
+
+@timing
 def load_images(neurons, dest):
     fname = '{}/sparse-images-{}.{}'
     binfile = fname.format(dest, neurons, 'ssb')
@@ -83,9 +95,9 @@ def generate_bias(neurons, nlayers):
 
 @timing
 def run(neurons, images, layers, bias, dest):
-    result = dnn(layers,
-                 bias,
-                 images)
+    result = dnn2(layers,
+                  bias,
+                  images)
     r = result.reduce_vector()
     cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(BOOL, r.size))
     truecats = load_categories(neurons, nlayers, dest)
