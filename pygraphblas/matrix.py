@@ -45,25 +45,28 @@ class Matrix:
         _check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def from_type(cls, typ, nrows=0, ncols=0):
+    def from_type(cls, typ, nrows=0, ncols=0, **options):
         """Create an empty Matrix from the given type, number of rows, and
         number of columns.
 
         """
         new_mat = ffi.new('GrB_Matrix*')
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
-        return cls(new_mat, typ)
+        m = cls(new_mat, typ)
+        if options:
+            m.options_set(**options)
+        return m
 
     @classmethod
-    def dense(cls, typ, nrows, ncols, fill=None):
-        m = cls.from_type(typ, nrows, ncols)
+    def dense(cls, typ, nrows, ncols, fill=None, **options):
+        m = cls.from_type(typ, nrows, ncols, **options)
         if fill is None:
             fill = m.type.aidentity
         m[:,:] = fill
         return m
 
     @classmethod
-    def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
+    def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None, **options):
         """Create a new matrix from the given lists of row indices, column
         indices, and values.  If nrows or ncols are not provided, they
         are computed from the max values of the provides row and
@@ -79,7 +82,7 @@ class Matrix:
         # TODO use ffi and GrB_Matrix_build
         if typ is None:
             typ = types._gb_from_type(type(V[0]))
-        m = cls.from_type(typ, nrows, ncols)
+        m = cls.from_type(typ, nrows, ncols, **options)
         for i, j, v in zip(I, J, V):
             m[i, j] = v
         return m
@@ -142,8 +145,8 @@ class Matrix:
         return cls(result, typ)
 
     @classmethod
-    def identity(cls, typ, nrows):
-        result = cls.from_type(typ, nrows, nrows)
+    def identity(cls, typ, nrows, **options):
+        result = cls.from_type(typ, nrows, nrows, **options)
         for i in range(nrows):
             result[i,i] = result.type.aidentity
         return result
