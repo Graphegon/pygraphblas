@@ -36,10 +36,12 @@ class Matrix:
 
     __slots__ = ('matrix', 'type', '_funcs', '_keep_alives')
 
-    def __init__(self, matrix, typ):
+    def __init__(self, matrix, typ, **options):
         self.matrix = matrix
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
+        if options:
+            self.options_set(**options)
 
     def __del__(self):
         _check(lib.GrB_Matrix_free(self.matrix))
@@ -52,9 +54,7 @@ class Matrix:
         """
         new_mat = ffi.new('GrB_Matrix*')
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
-        m = cls(new_mat, typ)
-        if options:
-            m.options_set(**options)
+        m = cls(new_mat, typ, **options)
         return m
 
     @classmethod
@@ -88,22 +88,24 @@ class Matrix:
         return m
 
     @classmethod
-    def from_mm(cls, mm_file, typ):
+    def from_mm(cls, mm_file, typ, **options):
         """Create a new matrix by reading a Matrix Market file.
 
         """
         m = ffi.new('GrB_Matrix*')
+        i = cls(m, typ, **options)
         _check(lib.LAGraph_mmread(m, mm_file))
-        return cls(m, typ)
+        return i
 
     @classmethod
-    def from_tsv(cls, tsv_file, typ, nrows, ncols):
+    def from_tsv(cls, tsv_file, typ, nrows, ncols, **options):
         """Create a new matrix by reading a tab separated value file.
 
         """
         m = ffi.new('GrB_Matrix*')
+        i = cls(m, typ, **options)
         _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
-        return cls(m, typ)
+        return i
 
     @classmethod
     def from_binfile(cls, bin_file):
@@ -119,13 +121,14 @@ class Matrix:
     def from_random(cls, typ, nrows, ncols, nvals,
                     make_pattern=False, make_symmetric=False,
                     make_skew_symmetric=False, make_hermitian=True,
-                    no_diagonal=False, seed=None):
+                    no_diagonal=False, seed=None, **options):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
         """
         result = ffi.new('GrB_Matrix*')
+        i = cls(result, typ, **options)
         fseed = ffi.new('uint64_t*')
         if seed is None:
             seed = randint(0, sys.maxsize)
@@ -142,7 +145,7 @@ class Matrix:
             make_hermitian,
             no_diagonal,
             fseed))
-        return cls(result, typ)
+        return i
 
     @classmethod
     def identity(cls, typ, nrows, **options):
@@ -202,15 +205,11 @@ class Matrix:
     def T(self):
         return self.transpose()
 
-    def dup(self, out=None):
+    def dup(self):
         """Create an duplicate Matrix.
 
         """
-        if out is None:
-            new_mat = ffi.new('GrB_Matrix*')
-        else:
-            assert out.type == self.type
-            new_mat = out.matrix[0]
+        new_mat = ffi.new('GrB_Matrix*')
         _check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 

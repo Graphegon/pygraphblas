@@ -122,15 +122,11 @@ class Vector:
             return cls(new_vec, types.INT32)
         return cls(new_vec, types.INT64)
 
-    def dup(self, out=None):
+    def dup(self):
         """Create an duplicate Vector from the given argument.
 
         """
-        if out is None:
-            new_vec = ffi.new('GrB_Vector*')
-        else:
-            assert out.type == self.type
-            new_vec = out.vector
+        new_vec = ffi.new('GrB_Vector*')
         _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
         return self.__class__(new_vec, self.type)
 
