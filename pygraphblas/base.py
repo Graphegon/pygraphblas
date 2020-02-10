@@ -18,9 +18,22 @@ __all__ = [
     'InsufficientSpace',
     'IndexOutOfBound',
     'Panic',
+    'options_set',
     ]
 
 NULL = ffi.NULL
+
+def options_set(nthreads=None, chunk=None):
+    if nthreads:
+        nthreads = ffi.cast('int', nthreads)
+        _check(lib.GxB_Global_Option_set(
+            lib.GxB_GLOBAL_NTHREADS,
+            nthreads))
+    if chunk:
+        chunk = ffi.cast('double', chunk)
+        _check(lib.GxB_Global_Option_set(
+            lib.GxB_GLOBAL_CHUNK,
+            chunk))
 
 class GraphBLASException(Exception):
     pass
