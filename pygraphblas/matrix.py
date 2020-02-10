@@ -63,7 +63,7 @@ class Matrix:
         return m
 
     @classmethod
-    def from_lists(cls, I, J, V, nrows=None, ncols=None):
+    def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
         """Create a new matrix from the given lists of row indices, column
         indices, and values.  If nrows or ncols are not provided, they
         are computed from the max values of the provides row and
@@ -77,7 +77,8 @@ class Matrix:
         if not ncols:
             ncols = max(J) + 1
         # TODO use ffi and GrB_Matrix_build
-        typ = types._gb_from_type(type(V[0]))
+        if typ is None:
+            typ = types._gb_from_type(type(V[0]))
         m = cls.from_type(typ, nrows, ncols)
         for i, j, v in zip(I, J, V):
             m[i, j] = v
