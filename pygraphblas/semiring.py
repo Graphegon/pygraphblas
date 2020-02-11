@@ -51,18 +51,18 @@ class AutoSemiring(Semiring):
 __all__ = ['Semiring', 'AutoSemiring', 'current_semiring']
 
 non_boolean_re = re.compile(
-    '^GxB_(MIN|MAX|PLUS|TIMES)_'
-    '(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR)_'
+    '^GxB_(MIN|MAX|PLUS|TIMES|ANY)_'
+    '(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_'
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 boolean_re = re.compile(
-    '^GxB_(LOR|LAND|LXOR|EQ)_'
+    '^GxB_(LOR|LAND|LXOR|EQ|ANY)_'
     '(EQ|NE|GT|LT|GE|LE)_'
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 pure_bool_re = re.compile(
-    '^GxB_(LOR|LAND|LXOR|EQ)_'
-    '(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE)_(BOOL)$')
+    '^GxB_(LOR|LAND|LXOR|EQ|ANY)_'
+    '(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_(BOOL)$')
 
 def semiring_group(reg):
     srs = []

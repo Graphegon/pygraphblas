@@ -33,7 +33,7 @@ def build_ffi():
         source,
         libraries=['graphblas'])
 
-    gb_cdef = open('pygraphblas/cdef/gb_3.1.0_cdef.h')
+    gb_cdef = open('pygraphblas/cdef/GraphBLAS-3.2.0.h')
     la_cdef = open('pygraphblas/cdef/la_a6fcf0_cdef.h')
     ex_cdef = open('pygraphblas/cdef/extra.h')
 

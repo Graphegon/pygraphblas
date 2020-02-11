@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-ARG SS_RELEASE=3.2.0draft27
+ARG SS_RELEASE=3.2.0draft28
     
 # get GraphBLAS, compile with debug symbols
 
