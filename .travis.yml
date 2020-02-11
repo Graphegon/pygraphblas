@@ -10,5 +10,5 @@ services:
   - docker
 
 script:
-  - ./build.sh
+  - ./build.sh 3.2.0draft28
   - ./test.sh
