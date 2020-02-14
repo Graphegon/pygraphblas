@@ -35,7 +35,8 @@ def build_ffi():
     ffibuilder.set_source(
         "_pygraphblas",
         source,
-        libraries=['graphblas'])
+        libraries=['graphblas'],
+        extra_compile_args=['-std=c11', '-lm', '-Wno-pragmas', '-fopenmp'])
 
     with open(p / 'GraphBLAS-3.2.0.h') as gb_cdef:
         ffibuilder.cdef(gb_cdef.read())

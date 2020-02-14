@@ -205,13 +205,13 @@ class Matrix:
     def T(self):
         return self.transpose()
 
-    def dup(self):
+    def dup(self, **options):
         """Create an duplicate Matrix.
 
         """
         new_mat = ffi.new('GrB_Matrix*')
         _check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
-        return self.__class__(new_mat, self.type)
+        return self.__class__(new_mat, self.type, **options)
 
     def options_set(self, hyper=None, format=None):
         if hyper:
