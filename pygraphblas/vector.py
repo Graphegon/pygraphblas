@@ -155,6 +155,8 @@ class Vector:
         return [list(I), list(map(self.type.to_value, V))]
 
     def to_arrays(self):
+        if self.type.typecode is None:
+            raise TypeError('This matrix has no array typecode.')
         nvals = self.nvals
         _nvals = ffi.new('GrB_Index[1]', [nvals])
         I = ffi.new('GrB_Index[%s]' % nvals)

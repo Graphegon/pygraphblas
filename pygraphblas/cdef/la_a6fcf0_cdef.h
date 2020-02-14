@@ -46,6 +46,7 @@
 
 // use the ANSI C functions by default (or mx* functions if the #ifdef
 // above redefines them).  See Source/Utility/LAGraph_malloc.c.
+extern GrB_Type LAGraph_Complex ;
 
 extern GrB_BinaryOp
 

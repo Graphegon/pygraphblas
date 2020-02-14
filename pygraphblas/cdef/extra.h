@@ -1,4 +1,3 @@
-
 const double INFINITY = 0.0;  // ... is ints only, so this is a workaround
 
 #define UINT64_MAX ...

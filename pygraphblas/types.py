@@ -30,32 +30,44 @@ class MetaType(type):
         cls.aidentity = cls.aidentity
         cls.identity = cls.identity
         get = partial(getattr, lib)
-        cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
-        cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
-        cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
-        cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
-        cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
-        cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
-        cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
-        cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
-        cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
-        cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
-        cls.add_op = get('GrB_PLUS_{}'.format(type_name))
-        cls.mult_op = get('GrB_TIMES_{}'.format(type_name))
-        cls.eq_op = get('GrB_EQ_{}'.format(type_name))
-        cls.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
-        cls.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
-        cls.invert = get('GrB_MINV_{}'.format(type_name))
-        cls.neg = get('GrB_AINV_{}'.format(type_name))
-        cls.abs_ = get('GxB_ABS_{}'.format(type_name))
-        cls.not_ = get('GxB_LNOT_{}'.format(type_name))
-        cls.first = get('GrB_FIRST_{}'.format(type_name))
-        cls.gt = get('GrB_GT_{}'.format(type_name))
-        cls.lt = get('GrB_LT_{}'.format(type_name))
-        cls.ge = get('GrB_GE_{}'.format(type_name))
-        cls.le = get('GrB_LE_{}'.format(type_name))
-        cls.ne = get('GrB_NE_{}'.format(type_name))
-        cls.eq = get('GrB_EQ_{}'.format(type_name))
+        if getattr(cls, 'udt', False):
+            cls.Matrix_setElement = lib.GrB_Matrix_setElement_UDT
+            cls.Matrix_extractElement = lib.GrB_Matrix_extractElement_UDT
+            cls.Matrix_extractTuples = lib.GrB_Matrix_extractTuples_UDT
+            cls.Matrix_assignScalar = lib.GrB_Matrix_assign_UDT
+            cls.Vector_setElement = lib.GrB_Vector_setElement_UDT
+            cls.Vector_extractElement = lib.GrB_Vector_extractElement_UDT
+            cls.Vector_extractTuples = lib.GrB_Vector_extractTuples_UDT
+            cls.Vector_assignScalar = lib.GrB_Vector_assign_UDT
+            cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
+            cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
+        else:
+            cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
+            cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
+            cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
+            cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
+            cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
+            cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
+            cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
+            cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
+            cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
+            cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
+            cls.add_op = get('GrB_PLUS_{}'.format(type_name))
+            cls.mult_op = get('GrB_TIMES_{}'.format(type_name))
+            cls.eq_op = get('GrB_EQ_{}'.format(type_name))
+            cls.monoid = get('GxB_{}_{}_MONOID'.format(add, type_name))
+            cls.semiring = get('GxB_{}_{}_{}'.format(add, mult, type_name))
+            cls.invert = get('GrB_MINV_{}'.format(type_name))
+            cls.neg = get('GrB_AINV_{}'.format(type_name))
+            cls.abs_ = get('GxB_ABS_{}'.format(type_name))
+            cls.not_ = get('GxB_LNOT_{}'.format(type_name))
+            cls.first = get('GrB_FIRST_{}'.format(type_name))
+            cls.gt = get('GrB_GT_{}'.format(type_name))
+            cls.lt = get('GrB_LT_{}'.format(type_name))
+            cls.ge = get('GrB_GE_{}'.format(type_name))
+            cls.le = get('GrB_LE_{}'.format(type_name))
+            cls.ne = get('GrB_NE_{}'.format(type_name))
+            cls.eq = get('GrB_EQ_{}'.format(type_name))
         return cls
 
 class Type(metaclass=MetaType):
@@ -132,6 +144,25 @@ class FP64(Type):
     gb_type = lib.GrB_FP64
     c_name = 'double'
     typecode = 'd'
+
+class Complex(Type):
+    gb_type = lib.LAGraph_Complex
+    c_name = 'double _Complex'
+    typecode = None
+    udt = True
+    add_op = lib.Complex_plus
+    mult_op = lib.Complex_times
+    eq_op = lib.Complex_eq
+    monoid = lib.Complex_plus_monoid
+    semiring = lib.Complex_plus_times
+
+    @classmethod
+    def from_value(cls, value):
+        return ffi.new(cls.ptr, value)
+
+    @classmethod
+    def to_value(cls, data):
+        return data
 
 def _gb_from_type(typ):
     if typ is int:

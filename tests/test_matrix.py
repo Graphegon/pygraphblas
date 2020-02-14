@@ -749,3 +749,9 @@ def test_pow():
 def test_T():
     m = Matrix.dense(UINT8, 10, 10)
     assert m.T == m.transpose()
+
+def test_complex():
+    m = Matrix.from_type(Complex, 10, 10)
+    m[2,3] = 3+4j
+    assert m[2,3] == 3+4j
+
