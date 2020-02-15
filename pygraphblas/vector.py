@@ -21,6 +21,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
+from .descriptor import Descriptor, Default, TransposeA
 
 __all__ = ['Vector']
 
@@ -258,7 +259,7 @@ class Vector:
         return self.compare(other, operator.ne, '!=')
 
     def eadd(self, other, add_op=NULL, out=None,
-                  mask=NULL, accum=NULL, desc=descriptor.oooo):
+                  mask=NULL, accum=NULL, desc=Default):
         """Element-wise addition with other vector.
 
         Element-wise addition applies a binary operator element-wise
@@ -281,6 +282,8 @@ class Vector:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
+        if isinstance(desc, Descriptor):
+            desc = desc.desc[0]
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
@@ -296,7 +299,7 @@ class Vector:
         return out
 
     def emult(self, other, mult_op=NULL, out=None,
-                   mask=NULL, accum=NULL, desc=descriptor.oooo):
+                   mask=NULL, accum=NULL, desc=Default):
         """Element-wise multiplication with other vector.
 
         Element-wise multiplication applies a binary operator
@@ -319,6 +322,8 @@ class Vector:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
+        if isinstance(desc, Descriptor):
+            desc = desc.desc[0]
         if out is None:
             _out = ffi.new('GrB_Vector*')
             _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
@@ -334,7 +339,7 @@ class Vector:
         return out
 
     def vxm(self, other, out=None,
-            mask=NULL, accum=NULL, semiring=NULL, desc=descriptor.oooo):
+            mask=NULL, accum=NULL, semiring=NULL, desc=Default):
         """Vector-Matrix multiply.
         """
         from .matrix import Matrix
@@ -352,6 +357,8 @@ class Vector:
             accum = current_accum.get(self.type.mult_op)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
+        if isinstance(desc, Descriptor):
+            desc = desc.desc[0]
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
@@ -406,7 +413,7 @@ class Vector:
             self.vector[0],
             size))
 
-    def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=descriptor.oooo):
+    def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=Default):
         if monoid is NULL:
             monoid = current_monoid.get(self.type.monoid)
         elif isinstance(monoid, Monoid):
@@ -417,6 +424,8 @@ class Vector:
             accum = accum.get_binaryop(self)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
+        if isinstance(desc, Descriptor):
+            desc = desc.desc[0]
         return mask, monoid, accum, desc
 
     def reduce_bool(self, monoid=NULL, **kwargs):

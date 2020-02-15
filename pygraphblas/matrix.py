@@ -24,6 +24,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
+from .descriptor import Descriptor, Default, TransposeA
 
 __all__ = ['Matrix']
 
@@ -750,7 +751,7 @@ class Matrix:
 
     def _get_args(self,
                   mask=NULL, accum=NULL, semiring=NULL,
-                  desc=descriptor.oooo):
+                  desc=Default):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         if isinstance(mask, Vector):
@@ -763,6 +764,8 @@ class Matrix:
             accum = current_accum.get(NULL)
         elif isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self)
+        if isinstance(desc, Descriptor):
+            desc = desc.desc[0]
         return mask, semiring, accum, desc
 
     def mxm(self, other, out=None, **kwargs):
@@ -838,9 +841,10 @@ class Matrix:
         """Slice a submatrix.
 
         """
+        ta = TransposeA in kwargs.get('desc', ())
         mask, semiring, accum, desc = self._get_args(**kwargs)
-        result_nrows = self.ncols if desc in descriptor.T_A else self.nrows
-        result_ncols = self.nrows if desc in descriptor.T_A else self.ncols
+        result_nrows = self.ncols if ta else self.nrows
+        result_ncols = self.nrows if ta else self.ncols
 
         I, ni, isize = _build_range(rindex, result_nrows - 1)
         J, nj, jsize = _build_range(cindex, result_ncols - 1)
@@ -864,16 +868,16 @@ class Matrix:
             desc))
         return out
 
-    def extract_vector(self, index, vslice=None, out=None, **kwargs):
+    def extract_vector(self, col_index, row_slice=None, out=None, **kwargs):
         """Slice a subvector.
 
         """
-        mask, semiring, accum, desc = self._get_args(**kwargs)
-        stop_val = self.nrows if desc in descriptor.T_A else self.ncols
+        stop_val = self.nrows if TransposeA in kwargs.get('desc', ()) else self.ncols
         if out is None:
             out = Vector.from_type(self.type, stop_val)
 
-        I, ni, size = _build_range(vslice, stop_val)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+        I, ni, size = _build_range(row_slice, stop_val)
 
         _check(lib.GrB_Col_extract(
             out.vector[0],
@@ -882,7 +886,7 @@ class Matrix:
             self.matrix[0],
             I,
             ni,
-            index,
+            col_index,
             desc
             ))
         return out
@@ -890,7 +894,7 @@ class Matrix:
     def __getitem__(self, index):
         if isinstance(index, int):
             # a[3] extract single row
-            return self.extract_vector(index, None, desc=descriptor.tooo)
+            return self.extract_vector(index, None, desc=TransposeA)
         if isinstance(index, slice):
             # a[3:] extract submatrix of rows
             return self.extract_matrix(index, None)
@@ -915,7 +919,7 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
-            return self.extract_vector(i0, i1, desc=descriptor.tooo)
+            return self.extract_vector(i0, i1, desc=TransposeA)
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector
@@ -925,43 +929,45 @@ class Matrix:
             # a[:,:] extract submatrix
             return self.extract_matrix(i0, i1)
 
-    def assign_col(self, index, value, vslice=None, desc=descriptor.oooo):
+    def assign_col(self, col_index, value, row_slice=None, **kwargs):
         """Assign a vector to a column.
 
         """
-        stop_val = self.ncols if desc in descriptor.T_A else self.nrows
-        I, ni, size = _build_range(vslice, stop_val)
+        stop_val = self.ncols if TransposeA in kwargs.get('desc', ()) else self.nrows
+        I, ni, size = _build_range(row_slice, stop_val)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
 
         _check(lib.GrB_Col_assign(
             self.matrix[0],
-            NULL,
-            NULL,
+            mask,
+            accum,
             value.vector[0],
             I,
             ni,
-            index,
+            col_index,
             desc
             ))
 
-    def assign_row(self, index, value, vslice=None, desc=descriptor.oooo):
+    def assign_row(self, row_index, value, col_slice=None, **kwargs):
         """Assign a vector to a row.
 
         """
-        stop_val = self.nrows if desc in descriptor.T_A else self.ncols
-        I, ni, size = _build_range(vslice, stop_val)
+        stop_val = self.nrows if TransposeA in kwargs.get('desc', ()) else self.ncols
+        I, ni, size = _build_range(col_slice, stop_val)
 
+        mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Row_assign(
             self.matrix[0],
-            NULL,
-            NULL,
+            mask,
+            accum,
             value.vector[0],
-            index,
+            row_index,
             I,
             ni,
             desc
             ))
 
-    def assign_matrix(self, value, rindex=None, cindex=None, desc=descriptor.oooo):
+    def assign_matrix(self, value, rindex=None, cindex=None, desc=Default):
         """Assign a submatrix.
 
         """

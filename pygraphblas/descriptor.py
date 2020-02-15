@@ -1,23 +1,54 @@
-from .base import lib
+from .base import lib, ffi, _check
 
-ooco = lib.LAGraph_desc_ooco # compl mask
-ooor = lib.LAGraph_desc_ooor # replace
-otoo = lib.LAGraph_desc_otoo # transpose A (A')
-tocr = lib.LAGraph_desc_tocr # A', compl mask, replace
-ttco = lib.LAGraph_desc_ttco # A', B', compl mask
-ttor = lib.LAGraph_desc_ttor # A', B', replace
-oocr = lib.LAGraph_desc_oocr # compl mask, replace
-otco = lib.LAGraph_desc_otco # B', compl mask
-otor = lib.LAGraph_desc_otor # B', replace
-tooo = lib.LAGraph_desc_tooo # A'
-ttcr = lib.LAGraph_desc_ttcr # A', B', compl mask, replace
-oooo = lib.LAGraph_desc_oooo # default (NULL)
-otcr = lib.LAGraph_desc_otcr # B' compl mask, replace
-toco = lib.LAGraph_desc_toco # A', compl mask
-toor = lib.LAGraph_desc_toor # A', replace
-ttoo = lib.LAGraph_desc_ttoo # A', B'
+class Descriptor:
 
-T_A = (tocr, ttco, ttor, tooo, ttcr, toco, toor, ttoo)
-T_B = (otoo, ttco, ttor, otco, otor, ttcr, otcr, ttoo)
-C_M = (ooco, tocr, ttco, oocr, otco, ttcr, otcr, toco)
-R_V = (ooor, tocr, ttor, oocr, otor, ttcr, otcr, toor)
+    def __init__(self, field, value):
+        self.field = field
+        self.value = value
+        self.desc = ffi.new('GrB_Descriptor*')
+        _check(lib.GrB_Descriptor_new(self.desc))
+        self[field] = value
+
+    def __del__(self):
+        if lib is not None:
+            _check(lib.GrB_Descriptor_free(self.desc))
+        
+    def __or__(self, other):
+        d = Descriptor(self.field, self.value)
+        d[other.field] = other.value
+        return d
+
+    def __contains__(self, other):
+        return self[other.field] != lib.GxB_DEFAULT
+
+    def __setitem__(self, field, value):
+        _check(lib.GrB_Descriptor_set(self.desc[0], field, value))
+
+    def __getitem__(self, field):
+        val = ffi.new('GrB_Desc_Value*')
+        _check(lib.GxB_Desc_get(self.desc[0], field, val))
+        return val[0]
+
+
+oooo = Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT)
+tooo = TransposeA = Descriptor(lib.GrB_INP0, lib.GrB_TRAN)
+otoo = TransposeB = Descriptor(lib.GrB_INP1, lib.GrB_TRAN)
+ooco = ComplementMask = Descriptor(lib.GrB_MASK, lib.GrB_SCMP)
+ooor = Replace = Descriptor(lib.GrB_OUTP, lib.GrB_REPLACE)
+
+toco = tooo | ooco
+toor = tooo | ooor
+ttoo = tooo | otoo
+oocr = ooco | ooor
+otco = otoo | ooco
+otor = otoo | ooor
+
+tocr = tooo | ooco | ooor
+ttco = tooo | otoo | ooco
+ttor = tooo | otoo | ooor
+otcr = otoo | ooco | ooor
+ttcr = tooo | otoo | ooco | ooor
+
+__all__ = [
+    'Default', 'TransposeA', 'TransposeB', 'ComplementMask', 'Replace',
+    ]

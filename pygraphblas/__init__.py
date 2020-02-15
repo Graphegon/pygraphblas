@@ -20,5 +20,4 @@ from .binaryop import *
 from .unaryop import *
 from .monoid import *
 from .types import *
-
-
+from .descriptor import *
