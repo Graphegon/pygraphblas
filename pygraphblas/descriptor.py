@@ -29,19 +29,18 @@ class Descriptor:
         _check(lib.GxB_Desc_get(self.desc[0], field, val))
         return val[0]
 
-
 oooo = Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT)
 tooo = TransposeA = Descriptor(lib.GrB_INP0, lib.GrB_TRAN)
 otoo = TransposeB = Descriptor(lib.GrB_INP1, lib.GrB_TRAN)
 ooco = ComplementMask = Descriptor(lib.GrB_MASK, lib.GrB_SCMP)
 ooor = Replace = Descriptor(lib.GrB_OUTP, lib.GrB_REPLACE)
 
-toco = tooo | ooco
-toor = tooo | ooor
-ttoo = tooo | otoo
-oocr = ooco | ooor
-otco = otoo | ooco
-otor = otoo | ooor
+toco = TransposeAComplementMask = tooo | ooco
+toor = TransposeAReplace = tooo | ooor
+otco = TransposeBComplementMask = otoo | ooco
+otor = TransposeBReplace = otoo | ooor
+ttoo = TransposeATransposeB = tooo | otoo
+oocr = ComplementMaskReplace = ooco | ooor
 
 tocr = tooo | ooco | ooor
 ttco = tooo | otoo | ooco
@@ -51,4 +50,7 @@ ttcr = tooo | otoo | ooco | ooor
 
 __all__ = [
     'Default', 'TransposeA', 'TransposeB', 'ComplementMask', 'Replace',
+    'TransposeAComplementMask', 'TransposeAReplace',
+    'TransposeBComplementMask', 'TransposeBReplace',
+    'TransposeATransposeB', 'ComplementMaskReplace',
     ]
