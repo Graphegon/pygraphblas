@@ -868,11 +868,11 @@ class Matrix:
         """Slice a subvector.
 
         """
-        if out is None:
-            out = Vector.from_type(self.type, self.ncols)
-
         mask, semiring, accum, desc = self._get_args(**kwargs)
         stop_val = self.nrows if desc in descriptor.T_A else self.ncols
+        if out is None:
+            out = Vector.from_type(self.type, stop_val)
+
         I, ni, size = _build_range(vslice, stop_val)
 
         _check(lib.GrB_Col_extract(
