@@ -5,6 +5,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .base import lib, ffi, _gb_from_name, _check
+from . import types
 
 current_accum = contextvars.ContextVar('current_accum')
 current_binop = contextvars.ContextVar('current_binop')
@@ -29,6 +30,9 @@ class BinaryOp:
         self.name = '_'.join((op, typ))
         self.token = None
         self.__class__._auto_binaryops[op][_gb_from_name(typ)] = binaryop
+        cls = getattr(types, typ, None)
+        if cls is not None:
+            setattr(cls, op, self)
 
     def __enter__(self):
         self.token = current_binop.set(self)
@@ -83,7 +87,7 @@ pure_bool_re = re.compile('^GrB_(LOR|LAND|LXOR)_BOOL$')
 def binop_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        op, typ = list(map(lambda g: g.lower(), n.groups()))
+        op, typ = n.groups()
         srs.append(BinaryOp(op, typ, getattr(lib, n.string)))
     return srs
 

@@ -7,6 +7,7 @@ import contextvars
 from collections import defaultdict
 
 from .base import lib, ffi as core_ffi, _gb_from_name, _check
+from . import types
 
 current_uop = contextvars.ContextVar('current_uop')
 
@@ -22,6 +23,9 @@ class UnaryOp:
         self.ffi = ffi
         self.token = None
         self.__class__._auto_unaryops[name][_gb_from_name(typ)] = op
+        cls = getattr(types, typ, None)
+        if cls is not None:
+            setattr(cls, name, self)
 
     def __enter__(self):
         self.token = current_uop.set(self)
@@ -50,7 +54,7 @@ grb_uop_re = re.compile(
     '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 gxb_uop_re = re.compile(
-    '^GrB_(ONE|ABS)_'
+    '^GxB_(ONE|ABS)_'
     '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 bool_uop_re = re.compile('^GrB_LNOT$')
@@ -58,7 +62,7 @@ bool_uop_re = re.compile('^GrB_LNOT$')
 def uop_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        op, typ = list(map(lambda g: g.lower(), n.groups()))
+        op, typ = n.groups()
         srs.append(UnaryOp(op, typ, getattr(lib, n.string)))
     return srs
 

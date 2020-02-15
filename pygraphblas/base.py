@@ -212,12 +212,12 @@ def _get_select_op(op):
 
 def _get_bin_op(op, funcs):
     return {
-        '>':  funcs.gt,
-        '<':  funcs.lt,
-        '>=': funcs.ge,
-        '<=': funcs.le,
-        '!=': funcs.ne,
-        '==': funcs.eq,
+        '>':  funcs.GT,
+        '<':  funcs.LT,
+        '>=': funcs.GE,
+        '<=': funcs.LE,
+        '!=': funcs.NE,
+        '==': funcs.EQ,
     }[op]
 
 

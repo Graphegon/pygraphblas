@@ -59,10 +59,8 @@ class Vector:
         return zip(I, X)
 
     def iseq(self, other):
-        if isinstance(self.type.eq_op, BinaryOp):
-            eq_op = self.type.eq_op.get_binaryop(self, other)
-        else:
-            eq_op = self.type.eq_op
+        if isinstance(self.type.EQ, BinaryOp):
+            eq_op = self.type.EQ.get_binaryop(self, other)
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(
             result,
@@ -219,7 +217,7 @@ class Vector:
             lib.GrB_ALL,
             0,
             NULL))
-        return self.eadd(B, self.type.first)
+        return self.eadd(B, self.type.FIRST)
 
     def compare(self, other, op, strop):
         C = self.__class__.from_type(types.BOOL, self.size)
@@ -273,11 +271,11 @@ class Vector:
 
         """
         if add_op is NULL:
-            add_op = current_binop.get(self.type.add_op)
-        if isinstance(add_op, BinaryOp):
-            mult_op = mult_op.get_binaryop(self, other)
-        elif isinstance(add_op, str):
+            add_op = current_binop.get(self.type.PLUS)
+        if isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
+        if isinstance(add_op, BinaryOp):
+            add_op = add_op.get_binaryop(self, other)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -313,11 +311,11 @@ class Vector:
 
         """
         if mult_op is NULL:
-            mult_op = current_binop.get(self.type.mult_op)
+            mult_op = current_binop.get(self.type.TIMES)
+        if isinstance(mult_op, str):
+            mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
             mult_op = mult_op.get_binaryop(self, other)
-        elif isinstance(mult_op, str):
-            mult_op = _get_bin_op(mult_op, self.type)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -350,11 +348,11 @@ class Vector:
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
-            semiring = current_semiring.get(self.type.semiring)
+            semiring = current_semiring.get(self.type.PLUS_TIMES)
         if isinstance(semiring, Semiring):
             semiring = semiring.get_semiring(self)
         if accum is NULL:
-            accum = current_accum.get(self.type.mult_op)
+            accum = current_accum.get(self.type.TIMES)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self, other)
         if isinstance(desc, Descriptor):
@@ -400,10 +398,13 @@ class Vector:
         return self.emult(other, mult_op=binaryop.div, out=self)
 
     def __invert__(self):
-        return self.apply(self.type.invert)
+        return self.apply(self.type.MINV)
+
+    def __neg__(self):
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(self.type.abs_)
+        return self.apply(self.type.ABS)
 
     def clear(self):
         _check(lib.GrB_Vector_clear(self.vector[0]))
@@ -415,8 +416,8 @@ class Vector:
 
     def _get_args(self, mask=NULL, accum=NULL, monoid=NULL, desc=Default):
         if monoid is NULL:
-            monoid = current_monoid.get(self.type.monoid)
-        elif isinstance(monoid, Monoid):
+            monoid = current_monoid.get(self.type.PLUS_MONOID)
+        if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
@@ -493,10 +494,10 @@ class Vector:
     def select(self, op, thunk=NULL, out=None, **kwargs):
         if out is None:
             out = Vector.from_type(self.type, self.size)
+        if isinstance(op, str):
+            op = _get_select_op(op)
         if isinstance(op, UnaryOp):
             op = op.unaryop
-        elif isinstance(op, str):
-            op = _get_select_op(op)
 
         if isinstance(thunk, (bool, int, float)):
             thunk = Scalar.from_value(thunk)

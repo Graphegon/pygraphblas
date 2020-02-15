@@ -350,7 +350,7 @@ class Matrix:
 
         """
         if add_op is NULL:
-            add_op = current_binop.get(self.type.add_op)
+            add_op = current_binop.get(self.type.PLUS)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
         if isinstance(add_op, BinaryOp):
@@ -386,7 +386,7 @@ class Matrix:
 
         """
         if mult_op is NULL:
-            mult_op = current_binop.get(self.type.mult_op)
+            mult_op = current_binop.get(self.type.TIMES)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
@@ -412,10 +412,8 @@ class Matrix:
         """Compare two matrices for equality.
         """
         result = ffi.new('_Bool*')
-        if isinstance(self.type.eq_op, BinaryOp):
-            eq_op = self.type.eq_op.get_binaryop(self, other)
-        else:
-            eq_op = self.type.eq_op
+        if isinstance(self.type.EQ, BinaryOp):
+            eq_op = self.type.EQ.get_binaryop(self, other)
         _check(lib.LAGraph_isequal(
             result,
             self.matrix[0],
@@ -501,10 +499,10 @@ class Matrix:
         return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        return self.eadd(other, add_op=binaryop.sub)
+        return self.eadd(other, add_op=binaryop.SUB)
 
     def __isub__(self, other):
-        return self.eadd(other, add_op=binaryop.sub, out=self)
+        return self.eadd(other, add_op=binaryop.SUB, out=self)
 
     def __mul__(self, other):
         return self.emult(other)
@@ -513,19 +511,19 @@ class Matrix:
         return self.emult(other, out=self)
 
     def __truediv__(self, other):
-        return self.emult(other, mult_op=binaryop.div)
+        return self.emult(other, mult_op=binaryop.DIV)
 
     def __itruediv__(self, other):
-        return self.emult(other, mult_op=binaryop.div, out=self)
+        return self.emult(other, mult_op=binaryop.DIV, out=self)
 
     def __invert__(self):
-        return self.apply(self.type.invert)
+        return self.apply(self.type.MINV)
 
     def __neg__(self):
-        return self.apply(self.type.neg)
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(self.type.abs_)
+        return self.apply(self.type.ABS)
 
     def __pow__(self, exponent):
         if exponent == 0:
@@ -542,8 +540,8 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = current_monoid.get(self.type.monoid)
-        elif isinstance(monoid, Monoid):
+            monoid = current_monoid.get(lib.GxB_LOR_BOOL_MONOID)
+        if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
 
         result = ffi.new('_Bool*')
@@ -562,7 +560,7 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = current_monoid.get(lib.GxB_PLUS_INT64_MONOID)
-        elif isinstance(monoid, Monoid):
+        if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
 
         result = ffi.new('int64_t*')
@@ -581,7 +579,7 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = current_monoid.get(lib.GxB_PLUS_FP64_MONOID)
-        elif isinstance(monoid, Monoid):
+        if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
 
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -599,8 +597,8 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = current_monoid.get(self.type.monoid)
-        elif isinstance(monoid, Monoid):
+            monoid = current_monoid.get(self.type.PLUS_MONOID)
+        if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
             
         if out is None:
@@ -710,7 +708,7 @@ class Matrix:
             lib.GrB_ALL,
             0,
             NULL))
-        return self.eadd(B, self.type.first)
+        return self.eadd(B, self.type.FIRST)
 
     def compare(self, other, op, strop):
         C = self.__class__.from_type(types.BOOL, self.nrows, self.ncols)
@@ -757,7 +755,7 @@ class Matrix:
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
-            semiring = current_semiring.get(self.type.semiring)
+            semiring = current_semiring.get(self.type.PLUS_TIMES)
         if isinstance(semiring, Semiring):
             semiring = semiring.get_semiring(self)
         if accum is NULL:
@@ -824,7 +822,9 @@ class Matrix:
                 self.nrows*other.nrows,
                 self.ncols*other.ncols)
         if op is NULL:
-            op = self.type.mult_op
+            op = self.type.TIMES
+        if isinstance(op, BinaryOp):
+            op = op.get_binaryop(self, other)
         mask, semiring, accum, desc = self._get_args(**kwargs)
 
         _check(lib.GxB_kron(

@@ -5,6 +5,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .base import lib, ffi, _gb_from_name, _check
+from . import types
 
 current_monoid = contextvars.ContextVar('current_monoid')
 
@@ -27,7 +28,10 @@ class Monoid:
             self.monoid = monoid
         self.name = '_'.join((op, typ, 'monoid'))
         self.token = None
-        self.__class__._auto_monoids[op+'_monoid'][_gb_from_name(typ)] = monoid
+        self.__class__._auto_monoids[op+'_MONOID'][_gb_from_name(typ)] = monoid
+        cls = getattr(types, typ, None)
+        if cls is not None:
+            setattr(cls, op+'_MONOID', self)
 
     def __enter__(self):
         self.token = current_monoid.set(self)
@@ -60,7 +64,7 @@ pure_bool_re = re.compile('^GxB_(LOR|LAND|LXOR|EQ)_(BOOL)_MONOID$')
 def monoid_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        op, typ = list(map(lambda g: g.lower(), n.groups()))
+        op, typ = n.groups()
         srs.append(Monoid(op, typ, getattr(lib, n.string)))
     return srs
 

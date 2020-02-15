@@ -15,9 +15,9 @@ build_binaryops()
 build_unaryops()
 build_monoids()
 
+from .types import *
 from .semiring import *
 from .binaryop import *
 from .unaryop import *
 from .monoid import *
-from .types import *
 from .descriptor import *

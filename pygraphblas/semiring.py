@@ -5,6 +5,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .base import lib, ffi, _gb_from_name, _check
+from . import types
 
 current_semiring = contextvars.ContextVar('current_semiring')
 
@@ -19,8 +20,12 @@ class Semiring:
         self.name = '_'.join((pls, mul, typ))
         self.semiring = semiring
         self.token = None
-        self.__class__._auto_semirings[pls+'_'+mul][_gb_from_name(typ)] = semiring
-
+        name = pls+'_'+mul
+        self.__class__._auto_semirings[name][_gb_from_name(typ)] = semiring
+        cls = getattr(types, typ, None)
+        if cls is not None:
+            setattr(cls, name, self)
+    
     def __enter__(self):
         self.token = current_semiring.set(self)
         return self
@@ -67,7 +72,7 @@ pure_bool_re = re.compile(
 def semiring_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        pls, mul, typ = list(map(lambda g: g.lower(), n.groups()))
+        pls, mul, typ = n.groups()
         srs.append(Semiring(pls, mul, typ, getattr(lib, n.string)))
     return srs
 

@@ -198,7 +198,7 @@ def test_apply():
         [0, 1, 2],
         [2.0, 4.0, 8.0])
 
-    w = v.apply(unaryop.ainv_int64)
+    w = v.apply(INT64.AINV)
     assert w.iseq(Vector.from_lists(
         [0, 1, 2],
         [-2.0, -4.0, -8.0]))
