@@ -2,6 +2,7 @@ import re, sys
 from itertools import chain
 from textwrap import dedent
 from cffi import FFI
+import numba
 from numba import cfunc, jit, carray, cffi_support
 import contextvars
 from collections import defaultdict
@@ -17,10 +18,9 @@ class UnaryOp:
     
     __slots__ = ('name', 'unaryop', 'ffi', 'token')
 
-    def __init__(self, name, typ, op, ffi=None):
+    def __init__(self, name, typ, op):
         self.name = '_'.join((name, typ))
         self.unaryop = op
-        self.ffi = ffi
         self.token = None
         self.__class__._auto_unaryops[name][_gb_from_name(typ)] = op
         cls = getattr(types, typ, None)
@@ -86,16 +86,14 @@ def _build_uop_def(name, arg_type, result_type):
     """.format(_uop_name(name), arg_type, result_type))
     return decl
 
-def unary_op(arg_type, result_type=None):
+def unary_op(arg_type, result_type=None, boolean=False):
     if result_type is None:
         result_type = arg_type
     def inner(func):
         func_name = func.__name__
-        ffi = FFI()
-        ffi.cdef(_build_uop_def(func_name, arg_type.c_name, result_type.c_name))
-        sig = cffi_support.map_type(
-            ffi.typeof(_uop_name(func_name)),
-            use_record_dtype=True)
+        sig = numba.void(numba.types.CPointer(numba.boolean)
+                         if boolean else numba.types.CPointer(arg_type.numba_t),
+                         numba.types.CPointer(arg_type.numba_t))
         jitfunc = jit(func, nopython=True)
         @cfunc(sig, nopython=True)
         def wrapper(z, x):
@@ -109,6 +107,6 @@ def unary_op(arg_type, result_type=None):
             result_type.gb_type,
             arg_type.gb_type)
 
-        return UnaryOp(func_name, arg_type.c_name, out[0], ffi)
+        return UnaryOp(func_name, arg_type.c_name, out[0])
     return inner
 

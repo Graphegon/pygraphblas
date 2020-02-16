@@ -3,6 +3,7 @@ import re
 import contextvars
 from itertools import chain
 from collections import defaultdict
+import numba
 
 from .base import lib, ffi, _gb_from_name, _check
 from . import types
@@ -72,7 +73,7 @@ class Accum:
     def get_binaryop(self, operand1=None, operand2=None):
         return self.binaryop.get_binaryop(operand1)
 
-__all__ = ['BinaryOp', 'AutoBinaryOp', 'Accum', 'current_binop', 'current_accum']
+__all__ = ['BinaryOp', 'AutoBinaryOp', 'Accum', 'current_binop', 'current_accum', 'binary_op']
 
 grb_binop_re = re.compile(
     '^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_'
@@ -101,3 +102,29 @@ def build_binaryops():
         setattr(this, name, bo)
         __all__.append(name)
         
+def binary_op(arg_type, result_type=None):
+    if result_type is None:
+        result_type = arg_type
+    def inner(func):
+        func_name = func.__name__
+        sig = numba.void(numba.types.CPointer(numba.boolean)
+                         if result_type is types.BOOL else numba.types.CPointer(arg_type.numba_t),
+                         numba.types.CPointer(arg_type.numba_t),
+                         numba.types.CPointer(arg_type.numba_t))
+        jitfunc = numba.jit(func, nopython=True)
+        @numba.cfunc(sig, nopython=True)
+        def wrapper(z, x, y):
+            result = jitfunc(x[0], y[0])
+            z[0] = result
+
+        out = ffi.new('GrB_BinaryOp*')
+        lib.GrB_BinaryOp_new(
+            out,
+            ffi.cast('GxB_binary_function', wrapper.address),
+            result_type.gb_type,
+            arg_type.gb_type,
+            arg_type.gb_type)
+
+        return BinaryOp(func_name, arg_type.c_name, out[0])
+    return inner
+

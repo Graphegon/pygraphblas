@@ -2,10 +2,28 @@ from .base import lib, _check
 from textwrap import dedent
 from operator import methodcaller, itemgetter
 from functools import partial
+import numba
 from numba import cfunc, jit, carray, cffi_support
 from pygraphblas import  lib, ffi
 from pygraphblas.base import lazy_property
 from cffi import FFI
+
+__all__ = [
+    'Type',
+    'BOOL',
+    'INT8',
+    'INT16',
+    'INT32',
+    'INT64',
+    'UINT8',
+    'UINT16',
+    'UINT32',
+    'UINT64',
+    'FP32',
+    'FP64',
+    'Struct',
+    'binop',
+    ]
 
 class classproperty(object):
     def __init__(self, f):
@@ -26,19 +44,16 @@ class MetaType(type):
             return cls
         cls = super().__new__(meta, type_name, bases, members)
         meta._gb_type_map[cls.gb_type] = cls
-        type_name = cls.__name__
         c_name = cls.c_name
-        add = cls.add
-        mult = cls.mult
         cls.ffi = ffi
         cls.C = c_name
         cls.ptr = c_name + '*'
-        cls.aidentity = cls.aidentity
-        cls.identity = cls.identity
+        cls.zero = cls.zero
+        cls.one = cls.one
         get = partial(getattr, lib)
-        if getattr(cls, 'udt', False):
-            type_name = 'UDT'
+        cls.base_name = type_name = getattr(cls, 'base_name', cls.__name__)
 
+        cls.Monoid_new = get('GrB_Monoid_new_{}'.format(type_name))
         cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
         cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
         cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
@@ -51,11 +66,32 @@ class MetaType(type):
         cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
         return cls
 
+    def new_monoid(cls, op, identity):
+        monoid = ffi.new('GrB_Monoid[1]')
+        if cls.base_name == 'UDT':
+            i = ffi.new(cls.ptr)
+            i[0] = identity
+            identity = i
+        _check(cls.Monoid_new(monoid, op.binaryop, identity))
+        return monoid
+
+    def new_semiring(cls, monoid, op):
+        from .semiring import Semiring
+        semiring = ffi.new('GrB_Semiring[1]')
+        _check(lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(ffi.NULL)))
+        return Semiring('PLUS', 'TIMES', cls.__name__, semiring[0])
+
+    @lazy_property
+    def monoid(cls):
+        return cls.new_monoid(cls.PLUS, cls.one)
+
+    @lazy_property
+    def semiring(cls):
+        return cls.new_semiring(cls.monoid, cls.TIMES)
+
 class Type(metaclass=MetaType):
-    add = 'PLUS'
-    mult = 'TIMES'
-    aidentity = 1
-    identity = 0
+    one = 1
+    zero = 0
     base = True
     typecode = None
 
@@ -67,14 +103,22 @@ class Type(metaclass=MetaType):
     def to_value(cls, data):
         return data
 
+
 class BOOL(Type):
     gb_type = lib.GrB_BOOL
     c_name = '_Bool'
-    add = 'LOR'
-    mult = 'LAND'
-    aidentity = True
-    identity = False
+    one = True
+    zero = False
     typecode = 'B'
+    numba_t = numba.boolean
+
+    @classproperty
+    def PLUS(cls):
+        return cls.LOR
+
+    @classproperty
+    def TIMES(cls):
+        return cls.LAND
 
     @classproperty
     def PLUS_MONOID(cls):
@@ -92,51 +136,65 @@ class INT8(Type):
     gb_type = lib.GrB_INT8
     c_name = 'int8_t'
     typecode = 'b'
+    numba_t = numba.int8
 
 class UINT8(Type):
     gb_type = lib.GrB_UINT8
     c_name =  'uint8_t'
     typecode = 'B'
-
+    numba_t = numba.uint8
+    
 class INT16(Type):
     gb_type = lib.GrB_INT16
     c_name = 'int16_t'
     typecode = 'i'
+    numba_t = numba.int16
 
 class UINT16(Type):
     gb_type = lib.GrB_UINT16
     c_name = 'uint16_t'
     typecode = 'I'
+    numba_t = numba.uint16
 
 class INT32(Type):
     gb_type = lib.GrB_INT32
     c_name =  'int32_t'
     typecode = 'l'
+    numba_t = numba.int32
 
 class UINT32(Type):
     gb_type = lib.GrB_UINT32
     c_name =  'uint32_t'
     typecode = 'L'
+    numba_t = numba.uint32
 
 class INT64(Type):
     gb_type = lib.GrB_INT64
     c_name = 'int64_t'
     typecode = 'q'
+    numba_t = numba.int64
 
 class UINT64(Type):
     gb_type = lib.GrB_UINT64
     c_name = 'uint64_t'
     typecode = 'Q'
+    numba_t = numba.uint64
 
 class FP32(Type):
+    one = 1.0
+    zero = 0.0
     gb_type = lib.GrB_FP32
     c_name = 'float'
     typecode = 'f'
+    numba_t = numba.float32
 
 class FP64(Type):
+    one = 1.0
+    zero = 0.0
     gb_type = lib.GrB_FP64
     c_name = 'double'
     typecode = 'd'
+    numba_t = numba.float64
 
 # class Complex(Type):
 #     gb_type = lib.LAGraph_Complex
@@ -206,10 +264,15 @@ def binop(boolean=False):
         def __set_name__(self, cls, name):
             func_name = self.func.__name__
             cls_name = cls.__name__
-            cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
-            sig = cffi_support.map_type(
-                cls.ffi.typeof(binop_name(cls_name, func_name)),
-                use_record_dtype=True)
+            import pdb; pdb.set_trace()
+            if isinstance(cls, MetaStruct):
+                cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
+                sig = cffi_support.map_type(
+                    cls.ffi.typeof(binop_name(cls_name, func_name)),
+                    use_record_dtype=True)
+            else:
+                sig = numba.void(cls.numba_t, cls.numba_t, cls.numba_t)
+                
             jitfunc = jit(self.func, nopython=True)
             @cfunc(sig)
             def wrapper(z_, x_, y_):
@@ -251,30 +314,11 @@ class MetaStruct(type):
         cls.Vector_assignScalar = lib.GrB_Vector_assign_UDT
         cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
         cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
-        cls.identity = cls.from_value(cls.identity)
-        for op_name in ['eq_op', 'add_op', 'mult_op']:
+        cls.one = cls.from_value(cls.one)
+        for op_name in ['EQ', 'PLUS', 'TIMES']:
             if not hasattr(cls, op_name):
                 setattr(cls, op_name, cls.ffi.NULL)
         return cls
-
-    def new_monoid(cls, op, identity):
-        monoid = ffi.new('GrB_Monoid[1]')
-        _check(lib.GrB_Monoid_new_UDT(monoid, op.binaryop, identity))
-        return monoid
-
-    def new_semiring(cls, monoid, op):
-        from .semiring import Semiring
-        semiring = ffi.new('GrB_Semiring[1]')
-        _check(lib.GrB_Semiring_new(semiring, monoid[0], op.binaryop))
-        return Semiring('add', 'mult', cls.__name__, semiring[0])
-
-    @lazy_property
-    def monoid(cls):
-        return cls.new_monoid(cls.add_op, cls.identity)
-
-    @lazy_property
-    def semiring(cls):
-        return cls.new_semiring(cls.monoid, cls.mult_op)
 
 class Struct(metaclass=MetaStruct):
 

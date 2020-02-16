@@ -228,10 +228,10 @@ def test_to_dense():
 def test_dense():
     m = Vector.dense(UINT8, 10)
     assert len(m) == 10
-    assert all(x[1] == 1 for x in m)
-    m = Vector.dense(UINT8, 10, 0)
-    assert len(m) == 10
     assert all(x[1] == 0 for x in m)
+    m = Vector.dense(UINT8, 10, 1)
+    assert len(m) == 10
+    assert all(x[1] == 1 for x in m)
 
 def test_compare():
     v = Vector.from_lists(

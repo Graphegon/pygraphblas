@@ -719,16 +719,16 @@ def test_shape_repr():
 def test_dense():
     m = Matrix.dense(UINT8, 10, 10)
     assert len(m) == 100
-    assert all(x[2] == 1 for x in m)
-    m = Matrix.dense(UINT8, 10, 10, 0)
-    assert len(m) == 100
     assert all(x[2] == 0 for x in m)
+    m = Matrix.dense(UINT8, 10, 10, 1)
+    assert len(m) == 100
+    assert all(x[2] == 1 for x in m)
 
 def test_identity():
     m = Matrix.identity(UINT8, 10)
     assert len(m) == 10
     for i in range(len(m)):
-        assert m[i,i] == UINT8.aidentity
+        assert m[i,i] == UINT8.one
 
 def test_to_arrays():
     m = Matrix.dense(UINT8, 10, 10)
@@ -736,7 +736,7 @@ def test_to_arrays():
     assert len(I) == 100
     assert len(J) == 100
     assert len(X) == 100
-    assert all(x == 1 for x in X)
+    assert all(x == 0 for x in X)
 
 def test_pow():
     m = Matrix.dense(UINT8, 10, 10)

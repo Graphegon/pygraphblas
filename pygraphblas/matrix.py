@@ -62,7 +62,7 @@ class Matrix:
     def dense(cls, typ, nrows, ncols, fill=None, **options):
         m = cls.from_type(typ, nrows, ncols, **options)
         if fill is None:
-            fill = m.type.aidentity
+            fill = m.type.zero
         m[:,:] = fill
         return m
 
@@ -152,7 +152,7 @@ class Matrix:
     def identity(cls, typ, nrows, **options):
         result = cls.from_type(typ, nrows, nrows, **options)
         for i in range(nrows):
-            result[i,i] = result.type.aidentity
+            result[i,i] = result.type.one
         return result
 
     @property
@@ -696,7 +696,7 @@ class Matrix:
     def full(self, identity=None):
         B = self.__class__.from_type(self.type, self.nrows, self.ncols)
         if identity is None:
-            identity = self.type.identity
+            identity = self.type.one
 
         _check(self.type.Matrix_assignScalar(
             B.matrix[0],

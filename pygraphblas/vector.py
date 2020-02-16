@@ -133,7 +133,7 @@ class Vector:
     def dense(cls, typ, size, fill=None):
         v = cls.from_type(typ, size)
         if fill is None:
-            fill = v.type.aidentity
+            fill = v.type.zero
         v[:] = fill
         return v
 
@@ -207,7 +207,7 @@ class Vector:
     def full(self, identity=None):
         B = self.__class__.from_type(self.type, self.size)
         if identity is None:
-            identity = self.type.identity
+            identity = self.type.one
 
         _check(self.type.Vector_assignScalar(
             B.vector[0],
