@@ -264,7 +264,6 @@ def binop(boolean=False):
         def __set_name__(self, cls, name):
             func_name = self.func.__name__
             cls_name = cls.__name__
-            import pdb; pdb.set_trace()
             if isinstance(cls, MetaStruct):
                 cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
                 sig = cffi_support.map_type(
