@@ -354,6 +354,13 @@ def test_matrix_slicing():
         [0, 1, 0, 1, 0, 1],
         [1, 2, 4, 5, 7, 8], 3, 2))
 
+    # submatrix slice out listed columns
+    sm = m[:,[0,2]]
+    assert sm.iseq(Matrix.from_lists(
+        [0, 0, 1, 1, 2, 2],
+        [0, 1, 0, 1, 0, 1],
+        [0, 2, 3, 5, 6, 8], 3, 2))
+
     # submatrix slice out rows
     n = m[1:,:]
     assert n.iseq(Matrix.from_lists(
@@ -367,6 +374,13 @@ def test_matrix_slicing():
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
         [3, 4, 5, 6, 7, 8], 2, 3))
+
+    # submatrix slice out listed rows
+    sm = m[[0,2],:]
+    assert sm.iseq(Matrix.from_lists(
+        [0, 0, 0, 1, 1, 1],
+        [0, 1, 2, 0, 1, 2],
+        [0, 1, 2, 6, 7, 8], 2, 3))
 
 def test_matrix_assign():
     m = Matrix.from_lists(

@@ -144,6 +144,10 @@ def _gb_from_name(name):
         return lib.GrB_FP64
 
 def _build_range(rslice, stop_val):
+    # if already a list, return it and its length
+    if isinstance(rslice, list):
+        return rslice, len(rslice), len(rslice)
+
     if rslice is None or \
        (rslice.start is None and
         rslice.stop is None and
