@@ -146,6 +146,14 @@ def test_vector_slice():
     assert w.to_lists() == [
         [0, 1, 2, 3],
         [7, 5, 3, 1]]
+    # slice vector based on listed indices
+    indices = [2, 3, 5, 7]
+    w = v[indices]
+    assert w.size == len(indices)
+    assert w.nvals == len(indices)
+    assert w.to_lists() == [
+        list(range(len(indices))),
+        indices]
 
 def test_vector_assign():
     v = Vector.from_type(INT64, 10)
