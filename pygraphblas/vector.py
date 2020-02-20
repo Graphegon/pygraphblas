@@ -624,5 +624,18 @@ class Vector:
         except NoValue:
             return False
 
+    def to_string(self, format_string='{:>2}', empty_char=''):
+        result = ''
+        format_string = format_string + '|' + format_string + '\n'
+
+        for i in range(self.size):
+            try:
+                value = self[i]
+            except:
+                value = empty_char
+            result += format_string.format(i, value)
+
+        return result
+
     def __repr__(self):
         return '<Vector (%s: %s)>' % (self.size, self.nvals)
