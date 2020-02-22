@@ -924,9 +924,8 @@ class Matrix:
             # a[:,3] extract slice of col vector
             return self.extract_vector(i1, i0)
 
-        if isinstance(i0, slice) and isinstance(i1, slice):
-            # a[:,:] extract submatrix
-            return self.extract_matrix(i0, i1)
+        # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
+        return self.extract_matrix(i0, i1)
 
     def assign_col(self, col_index, value, row_slice=None, **kwargs):
         """Assign a vector to a column.
