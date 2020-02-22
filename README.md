@@ -41,12 +41,13 @@ the following Notebooks:
  - [Triangle Counting](./pygraphblas/demo/Triangle-Counting.ipynb)
  - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net-with-pygraphblas.ipynb)
  - [User Defined Types](./pygraphblas/demo/User-Defined-Types.ipynb)
+ - [Log Semiring Type](./pygraphblas/demo/Log-Semiring.ipynb)
 
 # Tests
 
 Next run the tests:
 
-    $ docker run -it pygraphblas/pygraphblas pytest
+    $ ./test.sh
     ========================================== test session starts ==========================================
     platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
     rootdir: /pygraphblas, inifile: setup.cfg
