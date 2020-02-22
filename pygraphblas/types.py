@@ -4,7 +4,7 @@ from operator import methodcaller, itemgetter
 from functools import partial
 import numba
 from numba import cfunc, jit, carray, cffi_support
-from pygraphblas import  lib, ffi
+from pygraphblas import  lib, ffi as core_ffi
 from pygraphblas.base import lazy_property
 from cffi import FFI
 
@@ -21,7 +21,6 @@ __all__ = [
     'UINT64',
     'FP32',
     'FP64',
-    'Struct',
     'binop',
     ]
 
@@ -38,38 +37,50 @@ class MetaType(type):
 
     _gb_type_map = {}
 
-    def __new__(meta, type_name, bases, members):
-        if members.get('base', False):
-            cls = super().__new__(meta, type_name, bases, members)
+    def __new__(meta, type_name, bases, attrs):
+        if attrs.get('base', False):
+            cls = super().__new__(meta, type_name, bases, attrs)
             return cls
-        cls = super().__new__(meta, type_name, bases, members)
+        if 'members' in attrs:
+            m = attrs['members']
+            cls_ffi = FFI()
+            cls_ffi.cdef(build_udt_def(type_name, m))
+            t = core_ffi.new('GrB_Type*')
+            _check(lib.GrB_Type_new(t, cls_ffi.sizeof(type_name)))
+            cffi_support.map_type(cls_ffi.typeof(type_name), use_record_dtype=True)
+            attrs['ffi'] = cls_ffi
+            attrs['gb_type'] = t[0]
+            attrs['C'] = type_name
+            attrs['member_def'] = list(map(methodcaller('split'), m))
+            attrs['base_name'] = 'UDT'
+        else:
+            attrs['ffi'] = core_ffi
+            gb_type_name = type_name
+        
+        cls = super().__new__(meta, type_name, bases, attrs)
         meta._gb_type_map[cls.gb_type] = cls
-        c_name = cls.c_name
-        cls.ffi = ffi
-        cls.C = c_name
-        cls.ptr = c_name + '*'
-        cls.zero = cls.zero
-        cls.one = cls.one
+        cls.ptr = cls.C + '*'
+        cls.zero = getattr(cls, 'zero', core_ffi.NULL)
+        cls.one = getattr(cls, 'one', core_ffi.NULL)
         get = partial(getattr, lib)
-        cls.base_name = type_name = getattr(cls, 'base_name', cls.__name__)
-
-        cls.Monoid_new = get('GrB_Monoid_new_{}'.format(type_name))
-        cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(type_name))
-        cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(type_name))
-        cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(type_name))
-        cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(type_name))
-        cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(type_name))
-        cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(type_name))
-        cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(type_name))
-        cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(type_name))
-        cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(type_name))
-        cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(type_name))
+        cls.base_name = base_name = getattr(cls, 'base_name', cls.__name__)
+        cls.Monoid_new = get('GrB_Monoid_new_{}'.format(base_name))
+        cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(base_name))
+        cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(base_name))
+        cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(base_name))
+        cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(base_name))
+        cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(base_name))
+        cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(base_name))
+        cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(base_name))
+        cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(base_name))
+        cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(base_name))
+        cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(base_name))
         return cls
 
     def new_monoid(cls, op, identity):
-        monoid = ffi.new('GrB_Monoid[1]')
+        monoid = core_ffi.new('GrB_Monoid[1]')
         if cls.base_name == 'UDT':
-            i = ffi.new(cls.ptr)
+            i = cls.ffi.new(cls.ptr)
             i[0] = identity
             identity = i
         _check(cls.Monoid_new(monoid, op.binaryop, identity))
@@ -77,17 +88,9 @@ class MetaType(type):
 
     def new_semiring(cls, monoid, op):
         from .semiring import Semiring
-        semiring = ffi.new('GrB_Semiring[1]')
-        _check(lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(ffi.NULL)))
+        semiring = core_ffi.new('GrB_Semiring[1]')
+        _check(lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(core_ffi.NULL)))
         return Semiring('PLUS', 'TIMES', cls.__name__, semiring[0])
-
-    @lazy_property
-    def monoid(cls):
-        return cls.new_monoid(cls.PLUS, cls.one)
-
-    @lazy_property
-    def semiring(cls):
-        return cls.new_semiring(cls.monoid, cls.TIMES)
 
 class Type(metaclass=MetaType):
     one = 1
@@ -97,16 +100,22 @@ class Type(metaclass=MetaType):
 
     @classmethod
     def from_value(cls, value):
-        return value
-
-    @classmethod
-    def to_value(cls, data):
+        if cls.base_name != 'UDT':
+            return value
+        data = cls.ffi.new('%s[1]' % cls.__name__)
+        for (_, name), val in zip(cls.member_def, value):
+            setattr(data[0], name, val)
         return data
 
+    @classmethod
+    def to_value(cls, cdata):
+        if cls.base_name != 'UDT':
+            return cdata
+        return tuple(getattr(cdata, name) for (_, name) in cls.member_def)
 
 class BOOL(Type):
     gb_type = lib.GrB_BOOL
-    c_name = '_Bool'
+    C = '_Bool'
     one = True
     zero = False
     typecode = 'B'
@@ -134,49 +143,49 @@ class BOOL(Type):
 
 class INT8(Type):
     gb_type = lib.GrB_INT8
-    c_name = 'int8_t'
+    C = 'int8_t'
     typecode = 'b'
     numba_t = numba.int8
 
 class UINT8(Type):
     gb_type = lib.GrB_UINT8
-    c_name =  'uint8_t'
+    C =  'uint8_t'
     typecode = 'B'
     numba_t = numba.uint8
     
 class INT16(Type):
     gb_type = lib.GrB_INT16
-    c_name = 'int16_t'
+    C = 'int16_t'
     typecode = 'i'
     numba_t = numba.int16
 
 class UINT16(Type):
     gb_type = lib.GrB_UINT16
-    c_name = 'uint16_t'
+    C = 'uint16_t'
     typecode = 'I'
     numba_t = numba.uint16
 
 class INT32(Type):
     gb_type = lib.GrB_INT32
-    c_name =  'int32_t'
+    C =  'int32_t'
     typecode = 'l'
     numba_t = numba.int32
 
 class UINT32(Type):
     gb_type = lib.GrB_UINT32
-    c_name =  'uint32_t'
+    C =  'uint32_t'
     typecode = 'L'
     numba_t = numba.uint32
 
 class INT64(Type):
     gb_type = lib.GrB_INT64
-    c_name = 'int64_t'
+    C = 'int64_t'
     typecode = 'q'
     numba_t = numba.int64
 
 class UINT64(Type):
     gb_type = lib.GrB_UINT64
-    c_name = 'uint64_t'
+    C = 'uint64_t'
     typecode = 'Q'
     numba_t = numba.uint64
 
@@ -184,7 +193,7 @@ class FP32(Type):
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP32
-    c_name = 'float'
+    C = 'float'
     typecode = 'f'
     numba_t = numba.float32
 
@@ -192,13 +201,13 @@ class FP64(Type):
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP64
-    c_name = 'double'
+    C = 'double'
     typecode = 'd'
     numba_t = numba.float64
 
 # class Complex(Type):
 #     gb_type = lib.LAGraph_Complex
-#     c_name = 'double _Complex'
+#     C = 'double _Complex'
 #     typecode = None
 #     udt = True
 #     add_op = lib.Complex_plus
@@ -264,7 +273,7 @@ def binop(boolean=False):
         def __set_name__(self, cls, name):
             func_name = self.func.__name__
             cls_name = cls.__name__
-            if isinstance(cls, MetaStruct):
+            if cls.base_name == 'UDT':
                 cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
                 sig = cffi_support.map_type(
                     cls.ffi.typeof(binop_name(cls_name, func_name)),
@@ -283,54 +292,3 @@ def binop(boolean=False):
             setattr(cls, func_name, self.op)
 
     return inner
-
-class MetaStruct(type):
-
-    def __new__(meta, type_name, bases, members):
-        if members.get('base'):
-            cls = super().__new__(meta, type_name, bases, members)
-            return cls
-        m = members['members']
-        cls_ffi = members['ffi'] = FFI()
-        cls_ffi.cdef(build_udt_def(type_name, m))
-        t = ffi.new('GrB_Type*')
-        _check(lib.GrB_Type_new(t, cls_ffi.sizeof(type_name)))
-        cffi_support.map_type(cls_ffi.typeof(type_name), use_record_dtype=True)
-        members['gb_type'] = t[0]
-        
-        cls = super().__new__(meta, type_name, bases, members)
-        cls.member_def = list(map(methodcaller('split'), m))
-        cls.C = type_name
-        cls.ptr = type_name + '*'
-        get = partial(getattr, lib)
-        cls.Matrix_setElement = lib.GrB_Matrix_setElement_UDT
-        cls.Matrix_extractElement = lib.GrB_Matrix_extractElement_UDT
-        cls.Matrix_extractTuples = lib.GrB_Matrix_extractTuples_UDT
-        cls.Matrix_assignScalar = lib.GrB_Matrix_assign_UDT
-        cls.Vector_setElement = lib.GrB_Vector_setElement_UDT
-        cls.Vector_extractElement = lib.GrB_Vector_extractElement_UDT
-        cls.Vector_extractTuples = lib.GrB_Vector_extractTuples_UDT
-        cls.Vector_assignScalar = lib.GrB_Vector_assign_UDT
-        cls.Scalar_setElement = lib.GxB_Scalar_setElement_UDT
-        cls.Scalar_extractElement = lib.GxB_Scalar_extractElement_UDT
-        cls.one = cls.from_value(cls.one)
-        for op_name in ['EQ', 'PLUS', 'TIMES']:
-            if not hasattr(cls, op_name):
-                setattr(cls, op_name, cls.ffi.NULL)
-        return cls
-
-class Struct(metaclass=MetaStruct):
-
-    members = ()
-    base = True
-
-    @classmethod
-    def from_value(cls, value):
-        data = cls.ffi.new('%s[1]' % cls.__name__)
-        for (_, name), val in zip(cls.member_def, value):
-            setattr(data[0], name, val)
-        return data
-
-    @classmethod
-    def to_value(cls, cdata):
-        return tuple(getattr(cdata, name) for (_, name) in cls.member_def)

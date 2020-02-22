@@ -74,7 +74,6 @@ class Matrix:
         column indices lists.
 
         """
-        assert len(V)
         assert len(I) == len(J) == len(V)
         if not nrows:
             nrows = max(I) + 1
@@ -755,7 +754,7 @@ class Matrix:
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
-            semiring = current_semiring.get(self.type.PLUS_TIMES)
+            semiring = current_semiring.get(getattr(self.type, 'PLUS_TIMES', NULL))
         if isinstance(semiring, Semiring):
             semiring = semiring.get_semiring(self)
         if accum is NULL:

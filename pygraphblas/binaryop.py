@@ -108,7 +108,8 @@ def binary_op(arg_type, result_type=None):
     def inner(func):
         func_name = func.__name__
         sig = numba.void(numba.types.CPointer(numba.boolean)
-                         if result_type is types.BOOL else numba.types.CPointer(arg_type.numba_t),
+                         if result_type is types.BOOL else
+                         numba.types.CPointer(arg_type.numba_t),
                          numba.types.CPointer(arg_type.numba_t),
                          numba.types.CPointer(arg_type.numba_t))
         jitfunc = numba.jit(func, nopython=True)
@@ -125,6 +126,6 @@ def binary_op(arg_type, result_type=None):
             arg_type.gb_type,
             arg_type.gb_type)
 
-        return BinaryOp(func_name, arg_type.c_name, out[0])
+        return BinaryOp(func_name, arg_type.C, out[0])
     return inner
 

@@ -76,7 +76,6 @@ def build_unaryops():
         setattr(this, name, bo)
         __all__.append(name)
         
-
 def _uop_name(name):
     return '_{0}_uop_function'.format(name)
 
@@ -107,6 +106,6 @@ def unary_op(arg_type, result_type=None, boolean=False):
             result_type.gb_type,
             arg_type.gb_type)
 
-        return UnaryOp(func_name, arg_type.c_name, out[0])
+        return UnaryOp(func_name, arg_type.C, out[0])
     return inner
 
