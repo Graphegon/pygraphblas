@@ -1,6 +1,7 @@
 import sys
 from itertools import repeat
 from array import array
+import re
 
 from pygraphblas import *
 
@@ -275,3 +276,6 @@ def test_contains():
     assert 9 in v
     assert 10 not in v
 
+def test_to_string():
+    v = Vector.from_lists(*(map(list, zip((0, 10), (2, 11)))))
+    assert re.search('10.*\n.*-.*\n.*11', v.to_string(empty_char='-'))
