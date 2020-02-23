@@ -1084,6 +1084,22 @@ class Matrix:
             return
         raise TypeError('Unknown index or value for matrix assignment.')
 
+    def to_string(self, format_string='{:>2}', empty_char=''):
+        header = format_string.format('') + ' ' + ''.join(format_string.format(i) for i in range(self.ncols))
+        result = header + '\n'
+        for row in range(self.nrows):
+            result += format_string.format(row) + '|'
+            for col in range(self.ncols):
+                try:
+                    value = self[row, col]
+                except:
+                    value = empty_char
+                result += format_string.format(value)
+            result += '|' + format_string.format(row) + '\n'
+        result += header
+
+        return result
+
     def __repr__(self):
         return '<Matrix (%sx%s : %s:%s)>' % (
             self.nrows,

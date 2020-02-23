@@ -1,6 +1,7 @@
 import sys
 from operator import mod
 from itertools import product, repeat
+import re
 
 import pytest
 
@@ -763,6 +764,10 @@ def test_pow():
 def test_T():
     m = Matrix.dense(UINT8, 10, 10)
     assert m.T == m.transpose()
+
+def test_to_string():
+    M = Matrix.from_lists(*(map(list, zip((0, 1, 10), (1, 0, 11)))))
+    assert re.search('-.*10.*\n.*11.*-', M.to_string(empty_char='-'))
 
 # def test_complex():
 #     m = Matrix.from_type(Complex, 10, 10)
