@@ -145,9 +145,9 @@ matrix being utilized.
 
 By using a sparse matrix instead of dense, only the elements used are
 actually stored in memory. The parts of the matrix with no value are
-*interpreted*, but not necessarily stored, as an "identity" value,
-which may or may not be the actual number zero, but possibly other
-values like positive or negative infinity depending on the particular
+*interpreted*, but not necessarily stored, as an identity value, which
+may or may not be the actual number zero, but possibly other values
+like positive or negative infinity depending on the particular
 semiring operations applied to the matrix.
 
 Semirings encapsulate different algebraic operations and identities
@@ -157,63 +157,3 @@ referred to as "plus_times".  This is the common operation of
 multiplying two matrices containing real numbers, the corresponding row
 and column entries are multipled and the results are summed for the
 final value.
-
-When using matrices to solve graph problems, it's useful to have a
-wide variety of semirings that replace the multplication and addition
-operators and identities with other operations and values.  For
-example, finding a shortest path between nodes involves substituting
-the `min()` function for the add operation, and the plus function for
-the times.  pygraphblas wraps all 960 distinct built-in semirings that
-come with the SuiteSparse GraphBLAS implementation.
-
-Semirings can also work over different domains than just numbers,
-however pygraphblas does not support the GraphBLAS user defined types
-(UDT) integration yet.  This is being actively worked on.
-
-# Solving Graph Problems with Semirings
-
-Once encoded as matrices, graph problems can be solved be using matrix
-multiplication over a variety of semrings.  For numerical problems,
-matrix multiplication with libraries and languages like BLAS, MATLAB
-and numpy is done with real numbers using the arithmetic plus and
-times semiring.  GraphBLAS can do this as well, of course, but it also
-abstracts out the numerical type and operators that can be used for
-"matrix multiplication".
-
-
-# API
-
-Coming soon, real API docs.
-
-The pygraphblas package contains the following sub-modules:
-
-- `pygrablas.matrix` contains the Matrix type
-
-- `pygrablas.vector` contains the Vector type
-
-- `pygrablas.descriptor` contains descriptor types
-
-- `pygrablas.semiring` contains Semiring types
-
-- `pygrablas.binaryop` contains BinaryOp types
-
-- `pygrablas.unaryop` contains UnaryOp types
-
-- `pygrablas.base` contains low-level API and FFI wrappers.
-
-Full API documentation coming soon, for now, check out the complete
-tests for usage.
-
-# TODO
-
-- User Defined Types
-
-- Push for 100% coverage.
-
-- A lot more documentation.
-
-- ReadTheDocs site.
-
-- User defined types.
-
-- optimize construction from numpy.array and scipy.sparse
