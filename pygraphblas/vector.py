@@ -624,6 +624,12 @@ class Vector:
         except NoValue:
             return False
 
+    def get(self, i, default=None):
+        try:
+            return self[i]
+        except NoValue:
+            return default
+
     def to_string(self, format_string='{:>2}', empty_char=''):
         result = ''
         format_string = format_string + '|' + format_string + '\n'

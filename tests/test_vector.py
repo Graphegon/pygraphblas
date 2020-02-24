@@ -279,3 +279,14 @@ def test_contains():
 def test_to_string():
     v = Vector.from_lists(*(map(list, zip((0, 10), (2, 11)))))
     assert re.search('10.*\n.*-.*\n.*11', v.to_string(empty_char='-'))
+
+def test_get_contains():
+    v = Vector.dense(UINT8, 10)
+    v.resize(20)
+    for i in range(v.size):
+        if i < 10:
+            assert i in v
+            assert v.get(i) == 0
+        else:
+            assert i not in v
+            assert v.get(i) is None

@@ -199,7 +199,7 @@ def test_mxm():
         [0, 1, 2],
         [0, 1, 2],
         [7, 10, 9]))
-    
+
     with semiring.LOR_LAND_BOOL:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
@@ -774,3 +774,13 @@ def test_to_string():
 #     m[2,3] = 3+4j
 #     assert m[2,3] == 3+4j
 
+def test_get_contains():
+    m = Matrix.identity(UINT8, 10)
+    for i in range(m.nrows):
+        for j in range(m.ncols):
+            if i == j:
+                assert (i,j) in m
+                assert m.get(i,j) == 1
+            else:
+                assert (i,j) not in m
+                assert m.get(i,j) is None

@@ -9,6 +9,7 @@ from .base import (
     lib,
     ffi,
     NULL,
+    NoValue,
     _check,
     _build_range,
     _get_select_op,
@@ -599,7 +600,7 @@ class Matrix:
             monoid = current_monoid.get(self.type.PLUS_MONOID)
         if isinstance(monoid, Monoid):
             monoid = monoid.get_monoid(self)
-            
+
         if out is None:
             out = Vector.from_type(self.type, self.nrows)
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -1083,6 +1084,19 @@ class Matrix:
             self.assign_matrix(value, i0, i1)
             return
         raise TypeError('Unknown index or value for matrix assignment.')
+
+    def __contains__(self, index):
+        try:
+            v = self[index]
+            return True
+        except NoValue:
+            return False
+
+    def get(self, i, j, default=None):
+        try:
+            return self[i,j]
+        except NoValue:
+            return default
 
     def to_string(self, format_string='{:>2}', empty_char=''):
         header = format_string.format('') + ' ' + ''.join(format_string.format(i) for i in range(self.ncols))
