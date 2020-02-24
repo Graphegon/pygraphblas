@@ -869,10 +869,10 @@ class Matrix:
         return out
 
     def extract_vector(self, col_index, row_slice=None, out=None, **kwargs):
-        """Slice a subvector.
-
+        """Slice a column as subvector.
+        Use `desc=TransposeA` to slice a row.
         """
-        stop_val = self.nrows if TransposeA in kwargs.get('desc', ()) else self.ncols
+        stop_val = self.ncols if TransposeA in kwargs.get('desc', ()) else self.nrows
         if out is None:
             out = Vector.from_type(self.type, stop_val)
 
