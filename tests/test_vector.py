@@ -68,28 +68,44 @@ def test_vector_eq():
     assert v.isne(x)
 
 def test_vector_eadd():
-    v = Vector.from_list(list(range(10)))
-    w = Vector.from_list(list(range(10)))
-    x = v.eadd(w)
-    assert x.iseq(Vector.from_lists(
-        list(range(10)),
-        list(range(0, 20, 2))))
-    z = v + w
-    assert x.iseq(z)
-    v += w
-    assert v.iseq(z)
+    V = list(range(10))
+    v = Vector.from_list(V)
+    w = Vector.from_list(V)
+    sum1 = v.eadd(w)
+    assert sum1.iseq(Vector.from_lists(V, list(range(0, 20, 2))))
+    sum2 = v + w
+    assert sum1.iseq(sum2)
+    sum3 = v.dup()
+    sum3 += w
+    assert sum3.iseq(sum2)
+
+    # subtraction
+    subtraction_ref = Vector.from_list([0] * 10)
+    diff1 = v - w
+    assert diff1.iseq(subtraction_ref)
+    diff2 = v.dup()
+    diff2 -= w
+    assert diff2.iseq(subtraction_ref)
 
 def test_vector_emult():
-    v = Vector.from_list(list(range(10)))
-    w = Vector.from_list(list(range(10)))
-    x = v.emult(w)
-    assert x.iseq(Vector.from_lists(
-        list(range(10)),
-        list(map(lambda x: x*x, list(range(10))))))
-    z = v * w
-    assert x.iseq(z)
-    v *= w
-    assert v.iseq(z)
+    V = list(range(1, 10 + 1))
+    v = Vector.from_list(V)
+    w = Vector.from_list(V)
+    mul1 = v.emult(w)
+    assert mul1.iseq(Vector.from_list([v * v for v in V]))
+    mul2 = v * w
+    assert mul1.iseq(mul2)
+    mul3 = v.dup()
+    mul3 *= w
+    assert mul3.iseq(mul2)
+
+    # division
+    division_ref = Vector.from_list([1] * 10)
+    div1 = v / w
+    assert div1.iseq(division_ref)
+    div2 = v.dup()
+    div2 /= w
+    assert div2.iseq(division_ref)
 
 def test_vector_reduce_bool():
     v = Vector.from_type(BOOL, 10)
