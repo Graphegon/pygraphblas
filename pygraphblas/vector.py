@@ -635,10 +635,7 @@ class Vector:
         format_string = format_string + '|' + format_string + '\n'
 
         for i in range(self.size):
-            try:
-                value = self[i]
-            except:
-                value = empty_char
+            value = self.get(i, empty_char)
             result += format_string.format(i, value)
 
         return result

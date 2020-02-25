@@ -1104,10 +1104,7 @@ class Matrix:
         for row in range(self.nrows):
             result += format_string.format(row) + '|'
             for col in range(self.ncols):
-                try:
-                    value = self[row, col]
-                except:
-                    value = empty_char
+                value = self.get(row, col, empty_char)
                 result += format_string.format(value)
             result += '|' + format_string.format(row) + '\n'
         result += header
