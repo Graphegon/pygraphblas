@@ -310,10 +310,16 @@ def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
+    # slice out row vector
     v = m[2]
     assert v == Vector.from_lists(
         [0, 1, 2],
         [6, 7, 8])
+    # slice out row vector from rectangular matrix
+    v = m[:, 0:1][2]
+    assert v == Vector.from_lists(
+        [0, 1],
+        [6, 7])
 
     # slice out row vector
     v = m[2,:]
