@@ -103,7 +103,7 @@ pygraphblas, please consider sending me a pull request.
 Matrices can be used as powerful representations of graphs, as
 described [in this mathmatical introduction to
 GraphBLAS](http://www.mit.edu/~kepner/GraphBLAS/GraphBLAS-Math-release.pdf)
-by [Dr. Jermey Kepner](http://www.mit.edu/~kepner/) head and founder
+by [Dr. Jeremy Kepner](http://www.mit.edu/~kepner/) head and founder
 of [MIT Lincoln Laboratory Supercomputing
 Center](http://news.mit.edu/2016/lincoln-laboratory-establishes-supercomputing-center-0511).
 
