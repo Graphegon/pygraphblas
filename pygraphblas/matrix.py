@@ -312,9 +312,11 @@ class Matrix:
     def transpose(self, out=None, **kwargs):
         """ Transpose matrix. """
         if out is None:
+            new_dimensions = (self.nrows, self.ncols) if TransposeA in kwargs.get('desc', ()) \
+                else (self.ncols, self.nrows)
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
-                _out, self.type.gb_type, self.ncols, self.nrows))
+                _out, self.type.gb_type, *new_dimensions))
             out = self.__class__(_out, self.type)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_transpose(
