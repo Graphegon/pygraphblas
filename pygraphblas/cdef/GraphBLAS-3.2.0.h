@@ -7,10 +7,10 @@
 
 /* //------------------------------------------------------------------------------ */
 
-/* // SuiteSparse:GraphBLAS is an full implementation of the GraphBLAS standard, */
+/* // SuiteSparse:GraphBLAS is an full implementation of the GraphBLAS standard , */
 /* // which defines a set of sparse matrix operations on an extended algebra of */
-/* // semirings, using an almost unlimited variety of operators and types.  When */
-/* // applied to sparse adjacency matrices, these algebraic operations are */
+/* // semirings , using an almost unlimited variety of operators and types.  When */
+/* // applied to sparse adjacency matrices , these algebraic operations are */
 /* // equivalent to computations on graphs.  GraphBLAS provides a powerful and */
 /* // expressive framework creating graph algorithms based on the elegant */
 /* // mathematics of sparse matrix operations on a semiring. */

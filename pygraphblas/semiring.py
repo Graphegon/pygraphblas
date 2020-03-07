@@ -82,9 +82,7 @@ def build_semirings():
                    semiring_group(boolean_re),
                    semiring_group(pure_bool_re)):
         setattr(this, r.name, r)
-        __all__.append(r.name)
     for name in Semiring._auto_semirings:
         sr = AutoSemiring(name)
         setattr(this, name, sr)
-        __all__.append(name)
         

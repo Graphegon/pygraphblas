@@ -96,11 +96,9 @@ def build_binaryops():
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(gxb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
-        __all__.append(r.name)
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)
-        __all__.append(name)
         
 def binary_op(arg_type, result_type=None):
     if result_type is None:

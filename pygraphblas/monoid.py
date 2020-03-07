@@ -72,9 +72,7 @@ def build_monoids():
     this = sys.modules[__name__]
     for r in chain(monoid_group(gxb_monoid_re), monoid_group(pure_bool_re)):
         setattr(this, r.name, r)
-        __all__.append(r.name)
     for name in Monoid._auto_monoids:
         bo = AutoMonoid(name)
         setattr(this, name, bo)
-        __all__.append(name)
         

@@ -70,11 +70,9 @@ def build_unaryops():
     this = sys.modules[__name__]
     for r in chain(uop_group(grb_uop_re), uop_group(gxb_uop_re)):
         setattr(this, r.name, r)
-        __all__.append(r.name)
     for name in UnaryOp._auto_unaryops:
         bo = AutoUnaryOp(name)
         setattr(this, name, bo)
-        __all__.append(name)
         
 def _uop_name(name):
     return '_{0}_uop_function'.format(name)

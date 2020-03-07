@@ -480,24 +480,6 @@ def test_apply():
         [0, 1, 2],
         [-2, -3, -4]))
 
-def test_apply_lambda():
-    v = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [22, 33, 44])
-
-    w = v.apply(lambda x: mod(x, 10))
-    assert w.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [2, 3, 4]))
-
-    w = v.apply(lambda x: mod(x, 7))
-    assert w.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [1, 5, 2]))
-
 def test_get_set_options():
     v = Matrix.from_random(INT8, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)

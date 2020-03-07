@@ -1,5 +1,4 @@
 import sys
-import types as pytypes
 import weakref
 import operator
 from random import randint
@@ -355,8 +354,8 @@ class Matrix:
             add_op = current_binop.get(self.type.PLUS)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
-        if isinstance(add_op, BinaryOp):
-            add_op = add_op.get_binaryop(self, other)
+
+        add_op = add_op.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -391,8 +390,8 @@ class Matrix:
             mult_op = current_binop.get(self.type.TIMES)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
-        if isinstance(mult_op, BinaryOp):
-            mult_op = mult_op.get_binaryop(self, other)
+
+        mult_op = mult_op.get_binaryop(self, other)
         if out is None:
             _out = ffi.new('GrB_Matrix*')
             _check(lib.GrB_Matrix_new(
@@ -414,8 +413,7 @@ class Matrix:
         """Compare two matrices for equality.
         """
         result = ffi.new('_Bool*')
-        if isinstance(self.type.EQ, BinaryOp):
-            eq_op = self.type.EQ.get_binaryop(self, other)
+        eq_op = self.type.EQ.get_binaryop(self, other)
         _check(lib.LAGraph_isequal(
             result,
             self.matrix[0],
@@ -542,10 +540,8 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = current_monoid.get(lib.GxB_LOR_BOOL_MONOID)
-        if isinstance(monoid, Monoid):
-            monoid = monoid.get_monoid(self)
-
+            monoid = current_monoid.get(types.BOOL.LOR_MONOID)
+        monoid = monoid.get_monoid(self)
         result = ffi.new('_Bool*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_BOOL(
@@ -561,10 +557,8 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = current_monoid.get(lib.GxB_PLUS_INT64_MONOID)
-        if isinstance(monoid, Monoid):
-            monoid = monoid.get_monoid(self)
-
+            monoid = current_monoid.get(types.INT64.PLUS_MONOID)
+        monoid = monoid.get_monoid(self)
         result = ffi.new('int64_t*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_INT64(
@@ -580,10 +574,8 @@ class Matrix:
 
         """
         if monoid is NULL:
-            monoid = current_monoid.get(lib.GxB_PLUS_FP64_MONOID)
-        if isinstance(monoid, Monoid):
-            monoid = monoid.get_monoid(self)
-
+            monoid = current_monoid.get(types.FP64.PLUS_MONOID)
+        monoid = monoid.get_monoid(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
@@ -600,9 +592,7 @@ class Matrix:
         """
         if monoid is NULL:
             monoid = current_monoid.get(self.type.PLUS_MONOID)
-        if isinstance(monoid, Monoid):
-            monoid = monoid.get_monoid(self)
-
+        monoid = monoid.get_monoid(self)
         if out is None:
             out = Vector.from_type(self.type, self.nrows)
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -621,27 +611,7 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.from_type(self.type, self.nrows, self.ncols)
-        if isinstance(op, UnaryOp):
-            nop = op.get_unaryop(self)
-        elif isinstance(op, pytypes.FunctionType):
-            uop = ffi.new('GrB_UnaryOp*')
-            def op_func(z, x):
-                z = self.type.ffi.cast(self.type.ptr, z)
-                x = self.type.ffi.cast(self.type.ptr, x)
-                z[0] = op(x[0])
-            func = self.type.ffi.callback('void(void*, const void*)', op_func)
-            self._keep_alives[self.matrix] = (op, uop, func)
-            _check(lib.GrB_UnaryOp_new(
-                uop,
-                func,
-                self.type.gb_type,
-                self.type.gb_type
-                ))
-            self._keep_alives[self.matrix] = (op, uop, func)
-            nop = uop[0]
-        else:
-            nop = op
-
+        nop = op.get_unaryop(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_apply(
             out.matrix[0],
@@ -721,7 +691,7 @@ class Matrix:
                 self.emult(B, strop, out=C)
                 return C
             else:
-                self.select(strop, other).apply(lib.GxB_ONE_BOOL, out=C)
+                self.select(strop, other).apply(types.BOOL.ONE, out=C)
                 return C
         elif isinstance(other, Matrix):
             A = self.full()
@@ -754,7 +724,7 @@ class Matrix:
                   desc=Default):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
-        if isinstance(mask, Vector):
+        elif isinstance(mask, Vector):
             mask = mask.vector[0]
         if semiring is NULL:
             semiring = current_semiring.get(getattr(self.type, 'PLUS_TIMES', NULL))
