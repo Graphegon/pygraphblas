@@ -840,7 +840,7 @@ class Matrix:
             desc))
         return out
 
-    def extract_vector(self, col_index, row_slice=None, out=None, **kwargs):
+    def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
         """Slice a column as subvector.
         Use `desc=TransposeA` to slice a row.
         """
@@ -863,10 +863,18 @@ class Matrix:
             ))
         return out
 
+    def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
+        """Slice a row as subvector.
+        """
+        desc = TransposeA
+        if 'desc' in kwargs:
+            desc = desc | kwargs['desc']
+        return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)
+
     def __getitem__(self, index):
         if isinstance(index, int):
             # a[3] extract single row
-            return self.extract_vector(index, None, desc=TransposeA)
+            return self.extract_row(index, None)
         if isinstance(index, slice):
             # a[3:] extract submatrix of rows
             return self.extract_matrix(index, None)
@@ -891,11 +899,11 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
-            return self.extract_vector(i0, i1, desc=TransposeA)
+            return self.extract_row(i0, i1)
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector
-            return self.extract_vector(i1, i0)
+            return self.extract_col(i1, i0)
 
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
