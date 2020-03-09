@@ -1,0 +1,9 @@
+pytest
+pytest-cov
+ipdb
+RISE
+graphviz
+numba
+pandas
+networkx
+git+https://github.com/taynaud/python-louvain.git
