@@ -28,12 +28,13 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ARG SS_RELEASE=v3.2.0
+ARG SS_BURBLE=0
 
 # get GraphBLAS, compile with debug symbols
 
 RUN git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git && \
      cd GraphBLAS && \
-    make library JOBS=4 \
+    make library JOBS=4 CFLAGS=-DGB_BURBLE=${SS_BURBLE}  \
     && make install
 RUN cd .. && /bin/rm -Rf GraphBLAS
 

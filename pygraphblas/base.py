@@ -23,17 +23,22 @@ __all__ = [
 
 NULL = ffi.NULL
 
-def options_set(nthreads=None, chunk=None):
-    if nthreads:
+def options_set(nthreads=None, chunk=None, burble=None):
+    if nthreads is not None:
         nthreads = ffi.cast('int', nthreads)
         _check(lib.GxB_Global_Option_set(
             lib.GxB_GLOBAL_NTHREADS,
             nthreads))
-    if chunk:
+    if chunk is not None:
         chunk = ffi.cast('double', chunk)
         _check(lib.GxB_Global_Option_set(
             lib.GxB_GLOBAL_CHUNK,
             chunk))
+    if burble is not None:
+        burble = ffi.cast('int', burble)
+        _check(lib.GxB_Global_Option_set(
+            lib.GxB_BURBLE,
+            burble))
 
 class GraphBLASException(Exception):
     pass
