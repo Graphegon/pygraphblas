@@ -761,7 +761,7 @@ class Matrix:
 
         """
         if out is None:
-            out = Vector.from_type(self.type, self.ncols)
+            out = Vector.from_type(self.type, self.nrows)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_mxv(
             out.vector[0],

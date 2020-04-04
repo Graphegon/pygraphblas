@@ -219,16 +219,16 @@ def test_mxm():
 
 def test_mxv():
     m = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [1,2,3])
+        [0,1,2,3],
+        [1,2,0,1],
+        [1,2,3,4])
     v = Vector.from_lists(
         [0,1,2],
         [2,3,4])
     o = m.mxv(v)
     assert o == Vector.from_lists(
-        [0, 1, 2],
-        [3, 8, 6])
+        [0, 1, 2, 3],
+        [3, 8, 6, 12])
 
     assert m @ v == o
 
