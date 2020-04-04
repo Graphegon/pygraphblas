@@ -232,6 +232,8 @@ def test_mxv():
 
     assert o.iseq(m @ v)
 
+    assert o.iseq(m.transpose().mxv(v, desc=descriptor.TransposeA))
+
 def test_matrix_pattern():
     v = Matrix.from_lists(
         list(range(10)),
