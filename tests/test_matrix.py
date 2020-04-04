@@ -226,11 +226,11 @@ def test_mxv():
         [0,1,2],
         [2,3,4])
     o = m.mxv(v)
-    assert o == Vector.from_lists(
+    assert o.iseq(Vector.from_lists(
         [0, 1, 2, 3],
-        [3, 8, 6, 12])
+        [3, 8, 6, 12]))
 
-    assert m @ v == o
+    assert o.iseq(m @ v)
 
 def test_matrix_pattern():
     v = Matrix.from_lists(
