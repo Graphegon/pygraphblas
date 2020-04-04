@@ -21,7 +21,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeA
+from .descriptor import Descriptor, Default, TransposeB
 
 __all__ = ['Vector']
 
@@ -342,7 +342,9 @@ class Vector:
         """
         from .matrix import Matrix
         if out is None:
-            out = Vector.from_type(self.type, self.size)
+            new_dimension = other.nrows if TransposeB in desc \
+                else other.ncols
+            out = Vector.from_type(self.type, new_dimension)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
