@@ -380,10 +380,10 @@ class Vector:
         return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        return self.eadd(other, add_op=binaryop.sub)
+        return self.eadd(other, add_op=binaryop.SUB)
 
     def __isub__(self, other):
-        return self.eadd(other, add_op=binaryop.sub, out=self)
+        return self.eadd(other, add_op=binaryop.SUB, out=self)
 
     def __mul__(self, other):
         return self.emult(other)
@@ -392,10 +392,10 @@ class Vector:
         return self.emult(other, out=self)
 
     def __truediv__(self, other):
-        return self.emult(other, mult_op=binaryop.div)
+        return self.emult(other, mult_op=binaryop.DIV)
 
     def __itruediv__(self, other):
-        return self.emult(other, mult_op=binaryop.div, out=self)
+        return self.emult(other, mult_op=binaryop.DIV, out=self)
 
     def __invert__(self):
         return self.apply(self.type.MINV)
