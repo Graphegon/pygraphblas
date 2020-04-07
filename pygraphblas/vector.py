@@ -380,10 +380,10 @@ class Vector:
         return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        return self.eadd(other, add_op=binaryop.MINUS)
+        return self + (-other)
 
     def __isub__(self, other):
-        return self.eadd(other, add_op=binaryop.MINUS, out=self)
+        return self.eadd(-other, out=self)
 
     def __mul__(self, other):
         return self.emult(other)

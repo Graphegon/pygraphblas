@@ -68,19 +68,30 @@ def test_vector_eq():
     assert v.isne(x)
 
 def test_vector_eadd():
-    V = list(range(10))
-    v = Vector.from_list(V)
-    w = Vector.from_list(V)
+    V = list(range(2, 10))
+    v = Vector.from_lists(V, V)
+    v[0] = 1
+    w = Vector.from_lists(V, V)
+    w[1] = 1
+
+    addition_ref = Vector.from_lists(V, list(range(2*2, 2*10, 2)))
+    addition_ref[0] = 1
+    addition_ref[1] = 1
+
     sum1 = v.eadd(w)
-    assert sum1.iseq(Vector.from_lists(V, list(range(0, 20, 2))))
+    assert sum1.iseq(addition_ref)
     sum2 = v + w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
     sum3 += w
     assert sum3.iseq(sum2)
 
-    # subtraction
-    subtraction_ref = Vector.from_list([0] * 10)
+    # subtraction:
+    # 1 - empty = 1
+    # empty - 1 = -1 (assuming implicit 0)
+    # explicit zeros where same numbers are subtracted
+    subtraction_ref = Vector.from_list([1, -1] + ([0] * 8))
+
     diff1 = v - w
     assert diff1.iseq(subtraction_ref)
     diff2 = v.dup()

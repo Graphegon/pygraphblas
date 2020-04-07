@@ -96,18 +96,29 @@ def test_matrix_gb_type():
 def test_matrix_eadd():
     I = list(range(10))
     v = Matrix.from_lists(I, I, I)
+    v[0, 1] = 1
     w = Matrix.from_lists(I, I, I)
+    w[1, 0] = 1
+
+    addition_ref = Matrix.from_lists(I, I, list(range(0, 20, 2)))
+    addition_ref[0, 1] = 1
+    addition_ref[1, 0] = 1
 
     sum1 = v.eadd(w)
-    assert sum1.iseq(Matrix.from_lists(I, I, list(range(0, 20, 2))))
+    assert sum1.iseq(addition_ref)
     sum2 = v + w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
     sum3 += w
     assert sum3.iseq(sum2)
 
-    # subtraction
+    # subtraction (explicit zeros, if same numbers are subtracted)
     subtraction_ref = Matrix.from_lists(I, I, [0] * 10)
+    # 1 - empty = 1
+    subtraction_ref[0, 1] = 1
+    # empty - 1 = -1 (assuming implicit zero for elements not present)
+    subtraction_ref[1, 0] = -1
+
     diff1 = v - w
     assert diff1.iseq(subtraction_ref)
     diff2 = v.dup()
