@@ -517,6 +517,14 @@ class Vector:
             ))
         return out
 
+    def pattern(self, typ=types.BOOL):
+        """Return the pattern of the vector, this is a boolean Vector where
+        every present value in this vector is set to True.
+        """
+        result = Vector.from_type(typ, self.size)
+        self.apply(types.BOOL.ONE, out=result)
+        return result
+
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
 
