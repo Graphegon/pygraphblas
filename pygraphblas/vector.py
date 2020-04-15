@@ -484,7 +484,7 @@ class Vector:
         if out is None:
             out = Vector.from_type(self.type, self.size)
         if isinstance(op, UnaryOp):
-            op = op.unaryop
+            op = op.get_unaryop(self)
 
         mask, monoid, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Vector_apply(

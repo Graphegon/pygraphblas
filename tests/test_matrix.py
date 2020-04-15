@@ -490,6 +490,12 @@ def test_apply():
         [0, 1, 2],
         [0, 1, 2],
         [-2, -3, -4]))
+    
+    w2 = v.apply(unaryop.AINV)
+    assert w.iseq(w2)
+    
+    w3 = v.apply(lib.GrB_AINV_INT64)
+    assert w.iseq(w3)
 
 def test_get_set_options():
     v = Matrix.from_random(INT8, 10, 10, 10, seed=42)

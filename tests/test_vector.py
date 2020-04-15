@@ -224,6 +224,12 @@ def test_apply():
         [0, 1, 2],
         [-2.0, -4.0, -8.0]))
 
+    w2 = v.apply(unaryop.AINV)
+    assert w.iseq(w2)
+
+    w3 = v.apply(lib.GrB_AINV_INT64)
+    assert w.iseq(w3)
+
     w = ~v
     assert w.iseq(Vector.from_lists(
         [0, 1, 2],

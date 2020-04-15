@@ -615,13 +615,14 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.from_type(self.type, self.nrows, self.ncols)
-        nop = op.get_unaryop(self)
+        if isinstance(op, UnaryOp):
+            op = op.get_unaryop(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_apply(
             out.matrix[0],
             mask,
             accum,
-            nop,
+            op,
             self.matrix[0],
             desc
             ))
