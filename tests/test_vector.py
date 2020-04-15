@@ -4,6 +4,18 @@ from array import array
 import re
 
 from pygraphblas import *
+from pygraphblas.base import _check
+
+
+def test_vector_init_without_type():
+    vec = Vector.from_type(INT8)
+
+    # get a raw Vector pointer and wrap it without knowing its type
+    new_vec = ffi.new('GrB_Vector*')
+    _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
+    vec2 = Vector(new_vec)
+
+    assert vec.type == vec2.type
 
 def test_vector_create_from_type():
     m = Vector.from_type(INT64)
