@@ -3,7 +3,8 @@ from textwrap import dedent
 from operator import methodcaller, itemgetter
 from functools import partial
 import numba
-from numba import cfunc, jit, carray, cffi_support
+from numba import cfunc, jit, carray
+from numba.core.typing import cffi_utils as cffi_support
 from pygraphblas import  lib, ffi as core_ffi
 from pygraphblas.base import lazy_property
 from cffi import FFI

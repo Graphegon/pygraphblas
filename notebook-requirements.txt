@@ -6,4 +6,5 @@ graphviz
 numba
 pandas
 networkx
+scipy
 git+https://github.com/taynaud/python-louvain.git
