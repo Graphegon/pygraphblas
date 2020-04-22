@@ -185,22 +185,25 @@ def test_vector_assign():
 
 def test_vxm():
     m = Matrix.from_lists(
-        [0, 1, 2],
-        [1, 2, 0],
-        [1, 2, 3])
+        [0, 1, 2, 0],
+        [1, 2, 0, 3],
+        [1, 2, 3, 4])
     v = Vector.from_lists(
         [0, 1, 2],
         [2, 3, 4])
     o = v.vxm(m)
     assert o.iseq(Vector.from_lists(
-        [0, 1, 2],
-        [12, 2, 6]))
-
-    w = Vector.dup(v)
+        [ 0, 1, 2, 3],
+        [12, 2, 6, 8]))
 
     assert (v @ m).iseq(o)
-    # v @= m
-    # assert v.iseq(o)
+
+    assert v.vxm(m.transpose(), desc=TransposeB).iseq(o)
+
+    # m2 = m[:, :2]
+    # v2 = v.dup()
+    # v2 @= m2
+    # assert v2.iseq(o[:2])
 
 def test_apply():
     v = Vector.from_lists(
