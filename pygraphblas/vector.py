@@ -34,7 +34,13 @@ class Vector:
 
     __slots__ = ('vector', 'type', '_keep_alives')
 
-    def __init__(self, vec, typ):
+    def __init__(self, vec, typ=None):
+        if typ is None:
+            new_type = ffi.new('GrB_Type*')
+            _check(lib.GxB_Vector_type(new_type, vec[0]))
+
+            typ = types.gb_type_to_type(new_type[0])
+
         self.vector = vec
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
@@ -484,7 +490,7 @@ class Vector:
         if out is None:
             out = Vector.from_type(self.type, self.size)
         if isinstance(op, UnaryOp):
-            op = op.unaryop
+            op = op.get_unaryop(self)
 
         mask, monoid, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Vector_apply(

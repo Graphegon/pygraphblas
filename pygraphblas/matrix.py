@@ -37,7 +37,13 @@ class Matrix:
 
     __slots__ = ('matrix', 'type', '_funcs', '_keep_alives')
 
-    def __init__(self, matrix, typ, **options):
+    def __init__(self, matrix, typ=None, **options):
+        if typ is None:
+            new_type = ffi.new('GrB_Type*')
+            _check(lib.GxB_Matrix_type(new_type, matrix[0]))
+
+            typ = types.gb_type_to_type(new_type[0])
+
         self.matrix = matrix
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
@@ -113,9 +119,7 @@ class Matrix:
         """
         m = ffi.new('GrB_Matrix*')
         _check(lib.LAGraph_binread(m, bin_file))
-        new_type = ffi.new('GrB_Type*')
-        _check(lib.GxB_Matrix_type(new_type, m[0]))
-        return cls(m, types.gb_type_to_type(new_type[0]))
+        return cls(m)
 
     @classmethod
     def from_random(cls, typ, nrows, ncols, nvals,
@@ -611,13 +615,14 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.from_type(self.type, self.nrows, self.ncols)
-        nop = op.get_unaryop(self)
+        if isinstance(op, UnaryOp):
+            op = op.get_unaryop(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_apply(
             out.matrix[0],
             mask,
             accum,
-            nop,
+            op,
             self.matrix[0],
             desc
             ))

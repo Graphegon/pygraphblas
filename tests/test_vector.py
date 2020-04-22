@@ -4,6 +4,18 @@ from array import array
 import re
 
 from pygraphblas import *
+from pygraphblas.base import _check
+
+
+def test_vector_init_without_type():
+    vec = Vector.from_type(INT8)
+
+    # get a raw Vector pointer and wrap it without knowing its type
+    new_vec = ffi.new('GrB_Vector*')
+    _check(lib.GrB_Vector_dup(new_vec, vec.vector[0]))
+    vec2 = Vector(new_vec)
+
+    assert vec.type == vec2.type
 
 def test_vector_create_from_type():
     m = Vector.from_type(INT64)
@@ -231,6 +243,12 @@ def test_apply():
     assert w.iseq(Vector.from_lists(
         [0, 1, 2],
         [-2.0, -4.0, -8.0]))
+
+    w2 = v.apply(unaryop.AINV)
+    assert w.iseq(w2)
+
+    w3 = v.apply(lib.GrB_AINV_INT64)
+    assert w.iseq(w3)
 
     w = ~v
     assert w.iseq(Vector.from_lists(

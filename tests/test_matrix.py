@@ -6,7 +6,18 @@ import re
 import pytest
 
 from pygraphblas import *
-from pygraphblas.base import lib
+from pygraphblas.base import lib, _check
+
+
+def test_matrix_init_without_type():
+    mx = Matrix.from_type(INT8)
+
+    # get a raw Matrix pointer and wrap it without knowing its type
+    new_mx = ffi.new('GrB_Matrix*')
+    _check(lib.GrB_Matrix_dup(new_mx, mx.matrix[0]))
+    mx2 = Matrix(new_mx)
+
+    assert mx.type == mx2.type
 
 def test_matrix_create_from_type():
     m = Matrix.from_type(INT8)
@@ -481,6 +492,12 @@ def test_apply():
         [0, 1, 2],
         [0, 1, 2],
         [-2, -3, -4]))
+    
+    w2 = v.apply(unaryop.AINV)
+    assert w.iseq(w2)
+    
+    w3 = v.apply(lib.GrB_AINV_INT64)
+    assert w.iseq(w3)
 
 def test_get_set_options():
     v = Matrix.from_random(INT8, 10, 10, 10, seed=42)
