@@ -91,6 +91,23 @@ def test_vector_emult():
     v *= w
     assert v.iseq(z)
 
+def test_vector_pattern():
+    v = Vector.from_type(INT64, 3)
+    v[0] = 0
+    v[2] = 42
+
+    p = v.pattern()
+    p_ref = Vector.from_type(BOOL, v.size)
+    p_ref[0] = True
+    p_ref[2] = True
+    assert p.iseq(p_ref)
+
+    p2 = v.pattern(INT8)
+    p2_ref = Vector.from_type(INT8, v.size)
+    p2_ref[0] = 1
+    p2_ref[2] = 1
+    assert p2.iseq(p2_ref)
+
 def test_vector_reduce_bool():
     v = Vector.from_type(BOOL, 10)
     assert not v.reduce_bool()
