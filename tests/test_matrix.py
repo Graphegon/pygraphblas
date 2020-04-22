@@ -105,44 +105,58 @@ def test_matrix_gb_type():
     assert v.gb_type == lib.GrB_FP64
 
 def test_matrix_eadd():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
-    w = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    I = list(range(10))
+    v = Matrix.from_lists(I, I, I)
+    v[0, 1] = 1
+    w = Matrix.from_lists(I, I, I)
+    w[1, 0] = 1
 
-    x = v.eadd(w)
-    assert x.iseq(Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(0, 20, 2))))
-    z = v + w
-    assert x == z
-    v += w
-    assert v == z
+    addition_ref = Matrix.from_lists(I, I, list(range(0, 20, 2)))
+    addition_ref[0, 1] = 1
+    addition_ref[1, 0] = 1
 
-def test_vector_emult():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
-    w = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    sum1 = v.eadd(w)
+    assert sum1.iseq(addition_ref)
+    sum2 = v + w
+    assert sum1.iseq(sum2)
+    sum3 = v.dup()
+    sum3 += w
+    assert sum3.iseq(sum2)
 
-    x = v.emult(w)
-    assert x.iseq(Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(map(lambda x: x*x, list(range(10))))))
-    z = v * w
-    assert x.iseq(z)
-    v *= w
-    assert v.iseq(z)
+    # subtraction (explicit zeros, if same numbers are subtracted)
+    subtraction_ref = Matrix.from_lists(I, I, [0] * 10)
+    # 1 - empty = 1
+    subtraction_ref[0, 1] = 1
+    # empty - 1 = -1 (assuming implicit zero for elements not present)
+    subtraction_ref[1, 0] = -1
+
+    diff1 = v - w
+    assert diff1.iseq(subtraction_ref)
+    diff2 = v.dup()
+    diff2 -= w
+    assert diff2.iseq(subtraction_ref)
+
+def test_matrix_emult():
+    I = list(range(10))
+    V = list(range(1, 10 + 1))
+    v = Matrix.from_lists(I, I, V)
+    w = Matrix.from_lists(I, I, V)
+
+    mult1 = v.emult(w)
+    assert mult1.iseq(Matrix.from_lists(I, I, [v * v for v in V]))
+    mult2 = v * w
+    assert mult1.iseq(mult2)
+    mult3 = v.dup()
+    mult3 *= w
+    assert mult3.iseq(mult2)
+
+    # division
+    division_ref = Matrix.from_lists(I, I, [1] * 10)
+    div1 = v / w
+    assert div1.iseq(division_ref)
+    div2 = v.dup()
+    div2 /= w
+    assert div2.iseq(division_ref)
 
 def test_matrix_reduce_bool():
     v = Matrix.from_type(BOOL, 10, 10)
