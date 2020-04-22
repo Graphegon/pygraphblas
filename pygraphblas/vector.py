@@ -276,6 +276,8 @@ class Vector:
             add_op = _get_bin_op(add_op, self.type)
         if isinstance(add_op, BinaryOp):
             add_op = add_op.get_binaryop(self, other)
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -316,6 +318,8 @@ class Vector:
             mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
             mult_op = mult_op.get_binaryop(self, other)
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
