@@ -21,7 +21,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeA
+from .descriptor import Descriptor, Default, TransposeB
 
 __all__ = ['Vector']
 
@@ -34,7 +34,13 @@ class Vector:
 
     __slots__ = ('vector', 'type', '_keep_alives')
 
-    def __init__(self, vec, typ):
+    def __init__(self, vec, typ=None):
+        if typ is None:
+            new_type = ffi.new('GrB_Type*')
+            _check(lib.GxB_Vector_type(new_type, vec[0]))
+
+            typ = types.gb_type_to_type(new_type[0])
+
         self.vector = vec
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
@@ -276,6 +282,8 @@ class Vector:
             add_op = _get_bin_op(add_op, self.type)
         if isinstance(add_op, BinaryOp):
             add_op = add_op.get_binaryop(self, other)
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -316,6 +324,8 @@ class Vector:
             mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
             mult_op = mult_op.get_binaryop(self, other)
+        if isinstance(mask, Vector):
+            mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
@@ -342,7 +352,9 @@ class Vector:
         """
         from .matrix import Matrix
         if out is None:
-            out = Vector.from_type(self.type, self.size)
+            new_dimension = other.nrows if TransposeB in desc \
+                else other.ncols
+            out = Vector.from_type(self.type, new_dimension)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
@@ -380,10 +392,10 @@ class Vector:
         return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        return self.eadd(other, add_op=binaryop.SUB)
+        return self + (-other)
 
     def __isub__(self, other):
-        return self.eadd(other, add_op=binaryop.SUB, out=self)
+        return self.eadd(-other, out=self)
 
     def __mul__(self, other):
         return self.emult(other)
@@ -478,7 +490,7 @@ class Vector:
         if out is None:
             out = Vector.from_type(self.type, self.size)
         if isinstance(op, UnaryOp):
-            op = op.unaryop
+            op = op.get_unaryop(self)
 
         mask, monoid, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Vector_apply(
@@ -516,6 +528,14 @@ class Vector:
             desc
             ))
         return out
+
+    def pattern(self, typ=types.BOOL):
+        """Return the pattern of the vector, this is a boolean Vector where
+        every present value in this vector is set to True.
+        """
+        result = Vector.from_type(typ, self.size)
+        self.apply(types.BOOL.ONE, out=result)
+        return result
 
     def nonzero(self):
         return self.select(lib.GxB_NONZERO)
