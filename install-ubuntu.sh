@@ -9,12 +9,13 @@ sudo apt install -y curl m4 g++
 # Install the required version of SuiteSparse:GraphBLAS
 
 SS_RELEASE=v3.2.0
-SS_BURBLE=0
-JOBS=$(nproc) # use all threads for compiling
+GB_BURBLE=0
+GBCOMPACT=0
+export JOBS=$(nproc) # use all threads for compiling
 
 git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git
 cd GraphBLAS
-make library CFLAGS=-DGB_BURBLE=${SS_BURBLE}
+make library CFLAGS="-DGB_BURBLE=${GB_BURBLE} -DGBCOMPACT=${GBCOMPACT}"
 sudo make install
 cd ..
 
