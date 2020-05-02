@@ -737,7 +737,7 @@ class Matrix:
             semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(NULL)
-        elif isinstance(accum, BinaryOp):
+        if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
