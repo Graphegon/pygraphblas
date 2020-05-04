@@ -1,6 +1,11 @@
+import contextvars
 from .base import lib, ffi, _check
 
+current_desc = contextvars.ContextVar('current_desc')
+
 class Descriptor:
+
+    __slots__ = ('field', 'value', 'desc', 'token')
 
     def __init__(self, field, value):
         self.field = field
@@ -8,6 +13,14 @@ class Descriptor:
         self.desc = ffi.new('GrB_Descriptor*')
         _check(lib.GrB_Descriptor_new(self.desc))
         self[field] = value
+        self.token = None
+
+    def __enter__(self):
+        self.token = current_desc.set(self)
+        return self
+
+    def __exit__(self, *errors):
+        current_desc.reset(self.token)
 
     def __del__(self):
         if lib is not None:
@@ -47,6 +60,8 @@ ttco = tooo | otoo | ooco
 ttor = tooo | otoo | ooor
 otcr = otoo | ooco | ooor
 ttcr = tooo | otoo | ooco | ooor
+
+__all__ = ['BinaryOp', 'AutoBinaryOp', 'Accum', 'current_binop', 'current_accum', 'binary_op']
 
 __all__ = [
     'Default', 'TransposeA', 'TransposeB', 'ComplementMask', 'Replace',

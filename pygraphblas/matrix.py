@@ -24,7 +24,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeA
+from .descriptor import Descriptor, Default, TransposeA, current_desc
 
 __all__ = ['Matrix']
 
@@ -739,6 +739,8 @@ class Matrix:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self)
+        if desc is NULL:
+            desc = current_desc.get(NULL)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         return mask, semiring, accum, desc
