@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libpython3-dev     \
     && rm -rf /var/lib/apt/lists/*
 
-ADD . /
-WORKDIR /
+ADD . /pygraphblas
+WORKDIR /pygraphblas
     
 RUN pip3 install -r minimal-requirements.txt
 RUN python3 setup.py clean
