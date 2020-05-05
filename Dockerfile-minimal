@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 ADD . /
 WORKDIR /
     
+RUN pip install -r minimal-requirements.txt
 RUN python3 setup.py clean
 RUN python3 setup.py develop
-RUN pip install -r minimal-requirements.txt
 RUN ldconfig
