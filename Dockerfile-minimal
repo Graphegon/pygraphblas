@@ -4,15 +4,16 @@ FROM ${BASE_CONTAINER}
 USER root
 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
-    build-essential \
+    build-essential    \
     libsuitesparse-dev \
-    libpython3-dev \
+    python3            \
+    libpython3-dev     \
     && rm -rf /var/lib/apt/lists/*
 
 ADD . /
 WORKDIR /
     
-RUN python setup.py clean
-RUN python setup.py develop
+RUN python3 setup.py clean
+RUN python3 setup.py develop
 RUN pip install -r minimal-requirements.txt
 RUN ldconfig
