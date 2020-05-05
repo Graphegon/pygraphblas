@@ -6,16 +6,17 @@ if [ $# -eq 0 ]
         exit 1
 fi
 
-BASE_NAME=minimal
-BRANCH=master
+SS_RELEASE=$1
+BASE_NAME=$2
+BRANCH=$3
 
 /bin/rm -Rf docker_build
 mkdir docker_build
 pushd docker_build
 git clone --branch $BRANCH https://github.com/michelp/pygraphblas.git
 cd pygraphblas
-docker build -f Dockerfile-${BASE_NAME} --build-arg SS_RELEASE=$1 -t graphblas/pygraphblas-${BASE_NAME}:$1 .
-docker push graphblas/pygraphblas-${BASE_NAME}:$1
-docker tag graphblas/pygraphblas-${BASE_NAME}:$1 graphblas/pygraphblas-${BASE_NAME}:latest
+docker build -f Dockerfile-${BASE_NAME} --build-arg SS_RELEASE=${SS_RELEASE} -t graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} .
+docker push graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE}
+docker tag graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} graphblas/pygraphblas-${BASE_NAME}:latest
 docker push graphblas/pygraphblas-${BASE_NAME}:latest
 
