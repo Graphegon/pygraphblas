@@ -6,6 +6,7 @@ USER root
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
     libsuitesparse-dev \
+    libpython3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 ADD . /
