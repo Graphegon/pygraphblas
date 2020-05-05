@@ -1,4 +1,5 @@
 from _pygraphblas import lib, ffi
+from numba import njit
 
 __all__ = [
     'lib', 'ffi', 'NULL',

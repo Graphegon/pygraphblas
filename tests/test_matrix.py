@@ -10,7 +10,7 @@ from pygraphblas.base import lib, _check
 
 
 def test_matrix_init_without_type():
-    mx = Matrix.from_type(INT8)
+    mx = Matrix.sparse(INT8)
 
     # get a raw Matrix pointer and wrap it without knowing its type
     new_mx = ffi.new('GrB_Matrix*')
@@ -19,19 +19,19 @@ def test_matrix_init_without_type():
 
     assert mx.type == mx2.type
 
-def test_matrix_create_from_type():
-    m = Matrix.from_type(INT8)
+def test_matrix_create_sparse():
+    m = Matrix.sparse(INT8)
     assert m.nrows == 0
     assert m.ncols == 0
     assert m.nvals == 0
-    m = Matrix.from_type(INT8, 10, 10)
+    m = Matrix.sparse(INT8, 10, 10)
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 0
     assert len(m) == 0
 
 def test_matrix_get_set_element():
-    m = Matrix.from_type(INT8, 10, 10)
+    m = Matrix.sparse(INT8, 10, 10)
     m[3,3] = 3
     assert m.nrows == 10
     assert m.ncols == 10
@@ -74,7 +74,7 @@ def test_resize():
     assert list(v.vals) == list(range(10))
 
 def test_matrix_create_dup():
-    m = Matrix.from_type(INT8, 10, 10)
+    m = Matrix.sparse(INT8, 10, 10)
     m[3,3] = 3
     n = Matrix.dup(m)
     assert n.nrows == 10
@@ -97,11 +97,11 @@ def test_matrix_to_from_lists():
         ]
 
 def test_matrix_gb_type():
-    v = Matrix.from_type(BOOL, 10)
+    v = Matrix.sparse(BOOL, 10)
     assert v.gb_type == lib.GrB_BOOL
-    v = Matrix.from_type(INT8, 10)
+    v = Matrix.sparse(INT8, 10)
     assert v.gb_type == lib.GrB_INT8
-    v = Matrix.from_type(FP64, 10)
+    v = Matrix.sparse(FP64, 10)
     assert v.gb_type == lib.GrB_FP64
 
 def test_matrix_eadd():
@@ -159,13 +159,13 @@ def test_matrix_emult():
     assert div2.iseq(division_ref)
 
 def test_matrix_reduce_bool():
-    v = Matrix.from_type(BOOL, 10, 10)
+    v = Matrix.sparse(BOOL, 10, 10)
     assert not v.reduce_bool()
     v[3,3] = True
     assert v.reduce_bool()
 
 def test_matrix_reduce_int():
-    v = Matrix.from_type(INT8, 10, 10)
+    v = Matrix.sparse(INT8, 10, 10)
     r = v.reduce_int()
     assert type(r) is int
     assert r == 0
@@ -174,7 +174,7 @@ def test_matrix_reduce_int():
     assert v.reduce_int() == 7
 
 def test_matrix_reduce_float():
-    v = Matrix.from_type(FP64, 10, 10)
+    v = Matrix.sparse(FP64, 10, 10)
     r = v.reduce_float()
     assert type(r) is float
     assert r == 0.0
@@ -327,11 +327,11 @@ def test_matrix_tsv_read(tmp_path):
         [2, 3, 4]]
 
 def test_matrix_random():
-    m = Matrix.from_random(INT8, 10, 10, 5, seed=42)
+    m = Matrix.random(INT8, 10, 10, 5, seed=42)
     assert m.nrows == 10
     assert m.ncols == 10
     assert len(list(m)) == 5
-    m = Matrix.from_random(INT8, 10, 10, 5)
+    m = Matrix.random(INT8, 10, 10, 5)
     assert m.nrows == 10
     assert m.ncols == 10
     assert 0 < len(list(m)) <= 5
@@ -459,7 +459,7 @@ def test_matrix_assign():
         [0, 1, 2, 2, 2],
         [0, 1, 6, 6, 6], 3, 3))
 
-    m = Matrix.from_type(INT64, 3, 3)
+    m = Matrix.sparse(INT64, 3, 3)
     assert m.nvals == 0
     n = Matrix.from_lists(
         [0, 1, 2],
@@ -514,7 +514,7 @@ def test_apply():
     assert w.iseq(w3)
 
 def test_get_set_options():
-    v = Matrix.from_random(INT8, 10, 10, 10, seed=42)
+    v = Matrix.random(INT8, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
 
@@ -794,7 +794,7 @@ def test_to_string():
     assert re.search('-.*10.*\n.*11.*-', M.to_string(empty_char='-'))
 
 # def test_complex():
-#     m = Matrix.from_type(Complex, 10, 10)
+#     m = Matrix.sparse(Complex, 10, 10)
 #     m[2,3] = 3+4j
 #     assert m[2,3] == 3+4j
 

@@ -15,8 +15,7 @@ from .base import (
     _get_bin_op,
 )
 
-from . import types
-from . import binaryop
+from . import types, binaryop, monoid, unaryop
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import Semiring, current_semiring
@@ -54,7 +53,7 @@ class Matrix:
         _check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def from_type(cls, typ, nrows=0, ncols=0, **options):
+    def sparse(cls, typ, nrows=0, ncols=0, **options):
         """Create an empty Matrix from the given type, number of rows, and
         number of columns.
 
@@ -66,7 +65,7 @@ class Matrix:
 
     @classmethod
     def dense(cls, typ, nrows, ncols, fill=None, **options):
-        m = cls.from_type(typ, nrows, ncols, **options)
+        m = cls.sparse(typ, nrows, ncols, **options)
         if fill is None:
             fill = m.type.zero
         m[:,:] = fill
@@ -88,7 +87,7 @@ class Matrix:
         # TODO use ffi and GrB_Matrix_build
         if typ is None:
             typ = types._gb_from_type(type(V[0]))
-        m = cls.from_type(typ, nrows, ncols, **options)
+        m = cls.sparse(typ, nrows, ncols, **options)
         for i, j, v in zip(I, J, V):
             m[i, j] = v
         return m
@@ -122,10 +121,10 @@ class Matrix:
         return cls(m)
 
     @classmethod
-    def from_random(cls, typ, nrows, ncols, nvals,
-                    make_pattern=False, make_symmetric=False,
-                    make_skew_symmetric=False, make_hermitian=True,
-                    no_diagonal=False, seed=None, **options):
+    def random(cls, typ, nrows, ncols, nvals,
+               make_pattern=False, make_symmetric=False,
+               make_skew_symmetric=False, make_hermitian=True,
+               no_diagonal=False, seed=None, **options):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
@@ -153,7 +152,7 @@ class Matrix:
 
     @classmethod
     def identity(cls, typ, nrows, **options):
-        result = cls.from_type(typ, nrows, nrows, **options)
+        result = cls.sparse(typ, nrows, nrows, **options)
         for i in range(nrows):
             result[i,i] = result.type.one
         return result
@@ -355,7 +354,7 @@ class Matrix:
 
         """
         if add_op is NULL:
-            add_op = current_binop.get(self.type.PLUS)
+            add_op = current_binop.get(binaryop.PLUS)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
@@ -391,7 +390,7 @@ class Matrix:
 
         """
         if mult_op is NULL:
-            mult_op = current_binop.get(self.type.TIMES)
+            mult_op = current_binop.get(binaryop.TIMES)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
@@ -521,13 +520,13 @@ class Matrix:
         return self.emult(other, mult_op=binaryop.DIV, out=self)
 
     def __invert__(self):
-        return self.apply(self.type.MINV)
+        return self.apply(unaryop.MINV)
 
     def __neg__(self):
-        return self.apply(self.type.AINV)
+        return self.apply(unaryop.AINV)
 
     def __abs__(self):
-        return self.apply(self.type.ABS)
+        return self.apply(unaryop.ABS)
 
     def __pow__(self, exponent):
         if exponent == 0:
@@ -539,72 +538,72 @@ class Matrix:
             result.mxm(self, out=result)
         return result
 
-    def reduce_bool(self, monoid=NULL, **kwargs):
+    def reduce_bool(self, mon=NULL, **kwargs):
         """Reduce matrix to a boolean.
 
         """
-        if monoid is NULL:
-            monoid = current_monoid.get(types.BOOL.LOR_MONOID)
-        monoid = monoid.get_monoid(self)
+        if mon is NULL:
+            mon = current_monoid.get(types.BOOL.LOR_MONOID)
+        mon = mon.get_monoid(self)
         result = ffi.new('_Bool*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_BOOL(
             result,
             accum,
-            monoid,
+            mon,
             self.matrix[0],
             desc))
         return result[0]
 
-    def reduce_int(self, monoid=NULL, **kwargs):
+    def reduce_int(self, mon=NULL, **kwargs):
         """Reduce matrix to an integer.
 
         """
-        if monoid is NULL:
-            monoid = current_monoid.get(types.INT64.PLUS_MONOID)
-        monoid = monoid.get_monoid(self)
+        if mon is NULL:
+            mon = current_monoid.get(types.INT64.PLUS_MONOID)
+        mon = mon.get_monoid(self)
         result = ffi.new('int64_t*')
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_INT64(
             result,
             accum,
-            monoid,
+            mon,
             self.matrix[0],
             desc))
         return result[0]
 
-    def reduce_float(self, monoid=NULL, **kwargs):
+    def reduce_float(self, mon=NULL, **kwargs):
         """Reduce matrix to an float.
 
         """
-        if monoid is NULL:
-            monoid = current_monoid.get(types.FP64.PLUS_MONOID)
-        monoid = monoid.get_monoid(self)
+        if mon is NULL:
+            mon = current_monoid.get(types.FP64.PLUS_MONOID)
+        mon = mon.get_monoid(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Matrix_reduce_FP64(
             result,
             accum,
-            monoid,
+            mon,
             self.matrix[0],
             desc))
         return result[0]
 
-    def reduce_vector(self, monoid=NULL, out=None, **kwargs):
+    def reduce_vector(self, mon=NULL, out=None, **kwargs):
         """Reduce matrix to a vector.
 
         """
-        if monoid is NULL:
-            monoid = current_monoid.get(self.type.PLUS_MONOID)
-        monoid = monoid.get_monoid(self)
+        if mon is NULL:
+            mon = current_monoid.get(getattr(self.type, 'PLUS_MONOID', NULL))
+        mon = mon.get_monoid(self)
         if out is None:
-            out = Vector.from_type(self.type, self.nrows)
+            out = Vector.sparse(self.type, self.nrows)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_Monoid(
             out.vector[0],
             mask,
             accum,
-            monoid,
+            mon,
             self.matrix[0],
             desc))
         return out
@@ -614,7 +613,7 @@ class Matrix:
 
         """
         if out is None:
-            out = self.__class__.from_type(self.type, self.nrows, self.ncols)
+            out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.get_unaryop(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
@@ -630,7 +629,7 @@ class Matrix:
 
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
         if out is NULL:
-            out = self.__class__.from_type(self.type, self.nrows, self.ncols)
+            out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.get_unaryop(self)
         elif isinstance(op, str):
@@ -671,7 +670,7 @@ class Matrix:
         return self.select(lib.GxB_NONZERO)
 
     def full(self, identity=None):
-        B = self.__class__.from_type(self.type, self.nrows, self.ncols)
+        B = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if identity is None:
             identity = self.type.one
 
@@ -688,7 +687,7 @@ class Matrix:
         return self.eadd(B, self.type.FIRST)
 
     def compare(self, other, op, strop):
-        C = self.__class__.from_type(types.BOOL, self.nrows, self.ncols)
+        C = self.__class__.sparse(types.BOOL, self.nrows, self.ncols)
         if isinstance(other, (bool, int, float)):
             if op(other, 0):
                 B = self.__class__.dup(self)
@@ -750,7 +749,7 @@ class Matrix:
 
         """
         if out is None:
-            out = self.__class__.from_type(self.type, self.nrows, other.ncols)
+            out = self.__class__.sparse(self.type, self.nrows, other.ncols)
 
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_mxm(
@@ -770,7 +769,7 @@ class Matrix:
         if out is None:
             new_dimension = self.ncols if TransposeA in kwargs.get('desc', ()) \
                 else self.nrows
-            out = Vector.from_type(self.type, new_dimension)
+            out = Vector.sparse(self.type, new_dimension)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_mxv(
             out.vector[0],
@@ -798,7 +797,7 @@ class Matrix:
 
         """
         if out is None:
-            out = self.__class__.from_type(
+            out = self.__class__.sparse(
                 self.type,
                 self.nrows*other.nrows,
                 self.ncols*other.ncols)
@@ -835,7 +834,7 @@ class Matrix:
             jsize = result_ncols
 
         if out is None:
-            out = self.__class__.from_type(self.type, isize, jsize)
+            out = self.__class__.sparse(self.type, isize, jsize)
 
         _check(lib.GrB_Matrix_extract(
             out.matrix[0],
@@ -855,7 +854,7 @@ class Matrix:
         """
         stop_val = self.ncols if TransposeA in kwargs.get('desc', ()) else self.nrows
         if out is None:
-            out = Vector.from_type(self.type, stop_val)
+            out = Vector.sparse(self.type, stop_val)
 
         mask, semiring, accum, desc = self._get_args(**kwargs)
         I, ni, size = _build_range(row_slice, stop_val)

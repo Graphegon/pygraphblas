@@ -23,6 +23,7 @@ __all__ = [
     'FP32',
     'FP64',
     'binop',
+    'promote',
     ]
 
 class classproperty(object):
@@ -293,3 +294,32 @@ def binop(boolean=False):
             setattr(cls, func_name, self.op)
 
     return inner
+
+def promote(left, right):
+    if left == right:
+        return left
+    elif left == FP64 or right == FP64:
+        return FP64
+    elif left == FP32 or right == FP32:
+        return FP32
+    elif left == UINT64 or right == UINT64:
+        return UINT64
+    elif left == INT64 or right == INT64:
+        return INT64
+    elif left == UINT32 or right == UINT32:
+        return UINT32
+    elif left == INT32 or right == INT32:
+        return INT32
+    elif left == UINT16 or right == UINT16:
+        return UINT16
+    elif left == INT16 or right == INT16:
+        return INT16
+    elif left == UINT8 or right == UINT8:
+        return UINT8
+    elif left == INT8 or right == INT8:
+        return INT8
+    elif left == BOOL or right == BOOL:
+        return BOOL
+    else:
+        raise TypeError('inconvertable types %s and %s' % (repr(left,), repr(right)))
+    

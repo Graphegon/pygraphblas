@@ -53,7 +53,11 @@ class AutoBinaryOp(BinaryOp):
         self.token = None
 
     def get_binaryop(self, operand1=None, operand2=None):
-        return BinaryOp._auto_binaryops[self.name][operand1.gb_type]
+        if operand2 is None:
+            ptype = operand1.type
+        else:
+            ptype = types.promote(operand1.type, operand2.type)
+        return BinaryOp._auto_binaryops[self.name][ptype.gb_type]
 
 class Accum:
 

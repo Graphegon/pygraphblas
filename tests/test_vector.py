@@ -8,7 +8,7 @@ from pygraphblas.base import _check
 
 
 def test_vector_init_without_type():
-    vec = Vector.from_type(INT8)
+    vec = Vector.sparse(INT8)
 
     # get a raw Vector pointer and wrap it without knowing its type
     new_vec = ffi.new('GrB_Vector*')
@@ -17,41 +17,41 @@ def test_vector_init_without_type():
 
     assert vec.type == vec2.type
 
-def test_vector_create_from_type():
-    m = Vector.from_type(INT64)
+def test_vector_create_sparse():
+    m = Vector.sparse(INT64)
     assert m.size == 0
     assert m.nvals == 0
-    m = Vector.from_type(INT64, 10)
+    m = Vector.sparse(INT64, 10)
     assert m.size == 10
 
 def test_vector_gb_type():
-    v = Vector.from_type(BOOL, 10)
+    v = Vector.sparse(BOOL, 10)
     assert v.gb_type == lib.GrB_BOOL
-    v = Vector.from_type(INT64, 10)
+    v = Vector.sparse(INT64, 10)
     assert v.gb_type == lib.GrB_INT64
-    v = Vector.from_type(FP64, 10)
+    v = Vector.sparse(FP64, 10)
     assert v.gb_type == lib.GrB_FP64
 
 def test_vector_set_element():
-    m = Vector.from_type(INT64, 10)
+    m = Vector.sparse(INT64, 10)
     m[3] = 3
     assert m.size == 10
     assert m.nvals == 1
     assert len(list(m)) == 1
     assert m[3] == 3
-    m = Vector.from_type(BOOL, 10)
+    m = Vector.sparse(BOOL, 10)
     m[3] = True
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == True
-    m = Vector.from_type(FP64, 10)
+    m = Vector.sparse(FP64, 10)
     m[3] = 3.3
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == 3.3
 
 def test_vector_create_dup():
-    m = Vector.from_type(INT64, 10)
+    m = Vector.sparse(INT64, 10)
     m[3] = 3
     n = Vector.dup(m)
     assert n.size == 10
@@ -131,30 +131,30 @@ def test_vector_emult():
     assert div2.iseq(division_ref)
 
 def test_vector_pattern():
-    v = Vector.from_type(INT64, 3)
+    v = Vector.sparse(INT64, 3)
     v[0] = 0
     v[2] = 42
 
     p = v.pattern()
-    p_ref = Vector.from_type(BOOL, v.size)
+    p_ref = Vector.sparse(BOOL, v.size)
     p_ref[0] = True
     p_ref[2] = True
     assert p.iseq(p_ref)
 
     p2 = v.pattern(INT8)
-    p2_ref = Vector.from_type(INT8, v.size)
+    p2_ref = Vector.sparse(INT8, v.size)
     p2_ref[0] = 1
     p2_ref[2] = 1
     assert p2.iseq(p2_ref)
 
 def test_vector_reduce_bool():
-    v = Vector.from_type(BOOL, 10)
+    v = Vector.sparse(BOOL, 10)
     assert not v.reduce_bool()
     v[3] = True
     assert v.reduce_bool()
 
 def test_vector_reduce_int():
-    v = Vector.from_type(INT64, 10)
+    v = Vector.sparse(INT64, 10)
     r = v.reduce_int()
     assert type(r) is int
     assert r == 0
@@ -163,7 +163,7 @@ def test_vector_reduce_int():
     assert v.reduce_int() == 7
 
 def test_vector_reduce_float():
-    v = Vector.from_type(FP64, 10)
+    v = Vector.sparse(FP64, 10)
     r = v.reduce_float()
     assert type(r) is float
     assert r == 0.0
@@ -213,7 +213,7 @@ def test_vector_slice():
         indices]
 
 def test_vector_assign():
-    v = Vector.from_type(INT64, 10)
+    v = Vector.sparse(INT64, 10)
     assert v.nvals == 0
     w = Vector.from_lists(
         list(range(10)),

@@ -6,5 +6,12 @@ if [ $# -eq 0 ]
         exit 1
 fi
 
+/bin/rm -Rf docker_build
+mkdir docker_build
+pushd docker_build
+git clone https://github.com/michelp/pygraphblas.git
+cd pygraphblas
 docker build --build-arg SS_RELEASE=$1 -t graphblas/pygraphblas-notebook:$1 .
 docker tag graphblas/pygraphblas-notebook:$1 graphblas/pygraphblas-notebook:latest
+docker push graphblas/pygraphblas-notebook:latest
+
