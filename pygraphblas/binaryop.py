@@ -80,7 +80,7 @@ class Accum:
 __all__ = ['BinaryOp', 'AutoBinaryOp', 'Accum', 'current_binop', 'current_accum', 'binary_op']
 
 grb_binop_re = re.compile(
-    '^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR)_'
+    '^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR|BOR|BAND|BXOR|BXNOR)_'
     '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 gxb_binop_re = re.compile(
