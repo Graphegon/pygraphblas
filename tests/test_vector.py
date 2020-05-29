@@ -355,3 +355,13 @@ def test_get_contains():
         else:
             assert i not in v
             assert v.get(i) is None
+
+def test_bitwise():
+    s1 = 5
+    s2 = 9
+    u = Vector.from_lists([1], [s1], typ=UINT64)
+    v = Vector.from_lists([1], [s2], typ=UINT64)
+
+    w = u.eadd(v, v.type.BOR)
+
+    assert w[1] == s1 | s2
