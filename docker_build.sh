@@ -1,6 +1,7 @@
 if [ $# -eq 0 ]
     then
         echo "Usage: ./build.sh SS_RELEASE BASE_NAME BRANCH [LOCATION PUSH]"
+        echo "Note: BASE_NAME=minimal image does not use SS_RELEASE parameter"
         echo
         echo "Example: ./build.sh v3.2.0 notebook master clone push"
         exit 1
@@ -11,6 +12,10 @@ BASE_NAME=$2
 BRANCH=$3
 LOCATION=$4
 PUSH=$5
+
+# for BASE_NAME=notebook image
+# set env var to 1 for faster SuiteSparse compilation, but the code will be slower
+SS_COMPACT=${SS_COMPACT:-0}
 
 if [ "$LOCATION" = "clone" ]
 then
@@ -27,7 +32,12 @@ then
     cd pygraphblas
 fi
 
-docker build -f Dockerfile-${BASE_NAME} -t graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} .
+docker build \
+       --build-arg SS_RELEASE=${SS_RELEASE} \
+       --build-arg SS_COMPACT=${SS_COMPACT} \
+       -f Dockerfile-${BASE_NAME} \
+       -t graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} \
+       .
 
 if [ "$PUSH" = "push" ]
 then
