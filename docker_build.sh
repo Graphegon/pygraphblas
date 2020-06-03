@@ -39,9 +39,10 @@ docker build \
        -t graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} \
        .
 
+docker tag graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} graphblas/pygraphblas-${BASE_NAME}:latest
+
 if [ "$PUSH" = "push" ]
 then
     docker push graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE}
-    docker tag graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} graphblas/pygraphblas-${BASE_NAME}:latest
     docker push graphblas/pygraphblas-${BASE_NAME}:latest
 fi
