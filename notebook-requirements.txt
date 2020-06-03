@@ -3,7 +3,6 @@ pytest-cov
 ipdb
 RISE
 graphviz
-numba
 pandas
 networkx
 scipy

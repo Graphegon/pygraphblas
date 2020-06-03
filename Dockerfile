@@ -12,6 +12,6 @@ ADD . /
 WORKDIR /
     
 RUN python setup.py clean
-RUN python setup.py develop
+RUN python setup.py install
 RUN pip install -r minimal-requirements.txt
 RUN ldconfig
