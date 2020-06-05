@@ -8,16 +8,16 @@ sudo apt install -y curl m4 g++
 
 # Install the required version of SuiteSparse:GraphBLAS
 
-SS_RELEASE=v3.2.0
-GB_BURBLE=0
-GBCOMPACT=0
-export JOBS=$(nproc) # use all threads for compiling
+SS_RELEASE=v3.2.2
+SS_BURBLE=0
+SS_COMPACT=0
 
-git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git
-cd GraphBLAS
-make library CFLAGS="-DGB_BURBLE=${GB_BURBLE} -DGBCOMPACT=${GBCOMPACT}"
+git clone --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git
+cd GraphBLAS/build
+cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT}
+make -j$(nproc)
 sudo make install
-cd ..
+cd ../..
 
 # Install Python components
 sudo apt install -y python3-pip

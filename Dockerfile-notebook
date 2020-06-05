@@ -34,10 +34,11 @@ ARG SS_COMPACT=0
 # get GraphBLAS, compile with debug symbols
 
 RUN git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git && \
-     cd GraphBLAS && \
-    make library JOBS=4 CFLAGS="-DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT}"  \
-    && make install
-RUN cd .. && /bin/rm -Rf GraphBLAS
+     cd GraphBLAS/build && \
+     cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && \
+     make -j4 && \
+     make install
+RUN cd ../.. && /bin/rm -Rf GraphBLAS
 
 RUN conda install -y graphviz
 
