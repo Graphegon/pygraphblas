@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if threads is not None:
         options_set(nthreads=threads)
 
-    for subdir in ['kron', 'road', 'twitter', 'urand', 'web']:
+    for subdir in ['road', 'kron', 'twitter', 'urand', 'web']:
         fname = 'GAP/GAP-{0}/GAP-{0}.grb'.format(subdir)
         if not Path(fname).exists():
             print('Skipping {} No binfile found at {}'.format(subdir, fname))
@@ -88,6 +88,8 @@ if __name__ == '__main__':
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
-            result.to_mm(open('bc_{}_{}.mtx'.format(subdir, i), 'a'))
+            resultm = Matrix.sparse(v.type, result.size, 1)
+            resultm[:,0] = result
+            resultm.to_mm(open('bc_{}_{}.mtx'.format(subdir, i), 'a'))
 
         print('BetweenessCentraility {} average time {}'.format(subdir, mean(timings)))
