@@ -43,7 +43,7 @@ if threads is not None:
 
 if __name__ == '__main__':
     for subdir in ['kron', 'road', 'twitter', 'urand', 'web']:
-        fname = '/GAP/GAP-{}/GAP-{}.grb'.format(subdir, subdir)
+        fname = 'GAP/GAP-{}/GAP-{}.grb'.format(subdir, subdir)
         if not Path(fname).exists():
             print('Skipping {} No binfile found at {}'.format(subdir, fname))
             continue

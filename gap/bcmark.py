@@ -6,7 +6,7 @@ from statistics import mean
 from pygraphblas import *
 
 def load_sources(subdir):
-    fname = '/GAP/GAP-{0}/GAP-{0}_sources.mtx'.format(subdir)
+    fname = 'GAP/GAP-{0}/GAP-{0}_sources.mtx'.format(subdir)
     if not Path(fname).exists():
         raise Exception('No sourcefile for {} found at {}'.format(subdir, fname))
     with open(fname) as f:
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         options_set(nthreads=threads)
 
     for subdir in ['kron', 'road', 'twitter', 'urand', 'web']:
-        fname = '/GAP/GAP-{0}/GAP-{0}.grb'.format(subdir)
+        fname = 'GAP/GAP-{0}/GAP-{0}.grb'.format(subdir)
         if not Path(fname).exists():
             print('Skipping {} No binfile found at {}'.format(subdir, fname))
             continue
