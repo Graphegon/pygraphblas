@@ -89,4 +89,4 @@ if __name__ == '__main__':
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
 
-        print('BetweenessCentraility {} average time {} for {} rounds'.format(subdir, mean(timings), rounds))
+        print('BetweenessCentraility {} average time {}'.format(subdir, mean(timings)))
