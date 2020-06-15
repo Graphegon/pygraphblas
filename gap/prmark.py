@@ -60,5 +60,6 @@ if __name__ == '__main__':
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
+            pr.to_mm(open('bc_{}_{}.mtx'.format(subdir, i), 'a'))
 
         print('PageRank {} average time {} for {} rounds'.format(subdir, mean(timings), rounds))
