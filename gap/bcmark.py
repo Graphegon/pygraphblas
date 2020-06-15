@@ -84,7 +84,7 @@ if __name__ == '__main__':
         sources = load_sources(subdir)
         for i, s in enumerate(sources):
             start = time()
-            pr = bc(s, M.T, M)
+            result = bc(s, M.T, M)
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
