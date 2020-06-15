@@ -93,7 +93,7 @@ references below.
 
 While it is my goal to make it so that pygraphblas works with any
 GraphBLAS implementation, it currently only works with SuiteSparse
-v3.1.0.  SuiteSparse provides several "extension" features and
+v3.3.0.  SuiteSparse provides several "extension" features and
 pre-packaged objects that are very useful for pygraphblas.  If there
 is a GraphBLAS implementation you would like to see support for in
 pygraphblas, please consider sending me a pull request.

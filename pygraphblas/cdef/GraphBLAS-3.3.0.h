@@ -766,6 +766,31 @@ extern GrB_BinaryOp
     GxB_ISGE_FP32,      GxB_ISLE_FP32,
     GxB_ISGE_FP64,      GxB_ISLE_FP64,
 
+
+// Bitwise operations on signed and unsigned integers: note that
+// bitwise operations on signed integers can lead to different results,
+// depending on your compiler; results are implementation-defined.
+
+// z = (x | y)      z = (x & y)         z = (x ^ y)        z = ~(x ^ y)
+    GrB_BOR_INT8,       GrB_BAND_INT8,      GrB_BXOR_INT8,     GrB_BXNOR_INT8,
+    GrB_BOR_INT16,      GrB_BAND_INT16,     GrB_BXOR_INT16,    GrB_BXNOR_INT16,
+    GrB_BOR_INT32,      GrB_BAND_INT32,     GrB_BXOR_INT32,    GrB_BXNOR_INT32,
+    GrB_BOR_INT64,      GrB_BAND_INT64,     GrB_BXOR_INT64,    GrB_BXNOR_INT64,
+    GrB_BOR_UINT8,      GrB_BAND_UINT8,     GrB_BXOR_UINT8,    GrB_BXNOR_UINT8,
+    GrB_BOR_UINT16,     GrB_BAND_UINT16,    GrB_BXOR_UINT16,   GrB_BXNOR_UINT16,
+    GrB_BOR_UINT32,     GrB_BAND_UINT32,    GrB_BXOR_UINT32,   GrB_BXNOR_UINT32,
+    GrB_BOR_UINT64,     GrB_BAND_UINT64,    GrB_BXOR_UINT64,   GrB_BXNOR_UINT64,
+
+// z = bitget(x,y)  z = bitset(x,y)     z = bitclr(x,y)
+    GxB_BGET_INT8,      GxB_BSET_INT8,      GxB_BCLR_INT8,
+    GxB_BGET_INT16,     GxB_BSET_INT16,     GxB_BCLR_INT16,
+    GxB_BGET_INT32,     GxB_BSET_INT32,     GxB_BCLR_INT32,
+    GxB_BGET_INT64,     GxB_BSET_INT64,     GxB_BCLR_INT64,
+    GxB_BGET_UINT8,     GxB_BSET_UINT8,     GxB_BCLR_UINT8,
+    GxB_BGET_UINT16,    GxB_BSET_UINT16,    GxB_BCLR_UINT16,
+    GxB_BGET_UINT32,    GxB_BSET_UINT32,    GxB_BCLR_UINT32,
+    GxB_BGET_UINT64,    GxB_BSET_UINT64,    GxB_BCLR_UINT64 ,
+
 // Six comparison operators z=f(x,y) return their result as boolean, but where
 // x and y have the same type (any one of the 11 built-in types).  The suffix
 // in their names refers to the type of x and y since z is always boolean.  If
@@ -6044,7 +6069,39 @@ extern GrB_Monoid
     GxB_LOR_BOOL_MONOID,          // identity: false        terminal: true
     GxB_LAND_BOOL_MONOID,         // identity: true         terminal: false
     GxB_LXOR_BOOL_MONOID,         // identity: false
-    GxB_EQ_BOOL_MONOID ;          // identity: true
+    GxB_EQ_BOOL_MONOID ,          // identity: true
+
+
+//--------------------------------------------------------------------------
+// 16 Bitwise-or monoids:
+//--------------------------------------------------------------------------
+
+// The v1.3 specification adds the bitwise operators, but no predefined
+// monoids or semirings that use them.
+
+    // BOR monoids (bitwise or):
+    GxB_BOR_UINT8_MONOID,         // identity: 0   terminal: 0xFF
+    GxB_BOR_UINT16_MONOID,        // identity: 0   terminal: 0xFFFF
+    GxB_BOR_UINT32_MONOID,        // identity: 0   terminal: 0xFFFFFFFF
+    GxB_BOR_UINT64_MONOID,        // identity: 0   terminal: 0xFFFFFFFFFFFFFFFF
+
+    // BAND monoids (bitwise and):
+    GxB_BAND_UINT8_MONOID,        // identity: 0xFF               terminal: 0
+    GxB_BAND_UINT16_MONOID,       // identity: 0xFFFF             terminal: 0
+    GxB_BAND_UINT32_MONOID,       // identity: 0xFFFFFFFF         terminal: 0
+    GxB_BAND_UINT64_MONOID,       // identity: 0xFFFFFFFFFFFFFFFF terminal: 0
+
+    // BXOR monoids (bitwise xor):
+    GxB_BXOR_UINT8_MONOID,        // identity: 0
+    GxB_BXOR_UINT16_MONOID,       // identity: 0
+    GxB_BXOR_UINT32_MONOID,       // identity: 0
+    GxB_BXOR_UINT64_MONOID,       // identity: 0
+
+    // BXNOR monoids (bitwise xnor):
+    GxB_BXNOR_UINT8_MONOID,       // identity: 0xFF
+    GxB_BXNOR_UINT16_MONOID,      // identity: 0xFFFF
+    GxB_BXNOR_UINT32_MONOID,      // identity: 0xFFFFFFFF
+    GxB_BXNOR_UINT64_MONOID ;     // identity: 0xFFFFFFFFFFFFFFFF
 
 //------------------------------------------------------------------------------
 // built-in semirings
@@ -6429,7 +6486,41 @@ extern GrB_Semiring
     GxB_LOR_GT_BOOL        , GxB_LAND_GT_BOOL       , GxB_LXOR_GT_BOOL       , GxB_EQ_GT_BOOL         , GxB_ANY_GT_BOOL        , 
     GxB_LOR_LT_BOOL        , GxB_LAND_LT_BOOL       , GxB_LXOR_LT_BOOL       , GxB_EQ_LT_BOOL         , GxB_ANY_LT_BOOL        , 
     GxB_LOR_GE_BOOL        , GxB_LAND_GE_BOOL       , GxB_LXOR_GE_BOOL       , GxB_EQ_GE_BOOL         , GxB_ANY_GE_BOOL        , 
-    GxB_LOR_LE_BOOL        , GxB_LAND_LE_BOOL       , GxB_LXOR_LE_BOOL       , GxB_EQ_LE_BOOL         , GxB_ANY_LE_BOOL        ; 
+    GxB_LOR_LE_BOOL        , GxB_LAND_LE_BOOL       , GxB_LXOR_LE_BOOL       , GxB_EQ_LE_BOOL         , GxB_ANY_LE_BOOL        ,
+//------------------------------------------------------------------------------
+// 64 bitwise semirings
+//------------------------------------------------------------------------------
+
+// monoids: (BOR, BAND, BXOR, BXNOR) x
+// mult:    (BOR, BAND, BXOR, BXNOR) x
+// types:   (UINT8, UINT16, UINT32, UINT64)
+
+// Many other bitwise semirings can be constructed using predefined types
+// and operators.  Bitwise monoids can be constructed for signed integer
+// types, but these are not well-defined by the ANSI C specification, so
+// they are excluded from the pre-defined monoids in SuiteSparse:GraphBLAS.
+// Additional semirings can also be constructed with a multiplicative
+// binary operator on any signed or unsigned integer type, as well.
+
+    GxB_BOR_BOR_UINT8      , GxB_BOR_BOR_UINT16     , GxB_BOR_BOR_UINT32     , GxB_BOR_BOR_UINT64     ,
+    GxB_BOR_BAND_UINT8     , GxB_BOR_BAND_UINT16    , GxB_BOR_BAND_UINT32    , GxB_BOR_BAND_UINT64    ,
+    GxB_BOR_BXOR_UINT8     , GxB_BOR_BXOR_UINT16    , GxB_BOR_BXOR_UINT32    , GxB_BOR_BXOR_UINT64    ,
+    GxB_BOR_BXNOR_UINT8    , GxB_BOR_BXNOR_UINT16   , GxB_BOR_BXNOR_UINT32   , GxB_BOR_BXNOR_UINT64   ,
+
+    GxB_BAND_BOR_UINT8     , GxB_BAND_BOR_UINT16    , GxB_BAND_BOR_UINT32    , GxB_BAND_BOR_UINT64    ,
+    GxB_BAND_BAND_UINT8    , GxB_BAND_BAND_UINT16   , GxB_BAND_BAND_UINT32   , GxB_BAND_BAND_UINT64   ,
+    GxB_BAND_BXOR_UINT8    , GxB_BAND_BXOR_UINT16   , GxB_BAND_BXOR_UINT32   , GxB_BAND_BXOR_UINT64   ,
+    GxB_BAND_BXNOR_UINT8   , GxB_BAND_BXNOR_UINT16  , GxB_BAND_BXNOR_UINT32  , GxB_BAND_BXNOR_UINT64  ,
+
+    GxB_BXOR_BOR_UINT8     , GxB_BXOR_BOR_UINT16    , GxB_BXOR_BOR_UINT32    , GxB_BXOR_BOR_UINT64    ,
+    GxB_BXOR_BAND_UINT8    , GxB_BXOR_BAND_UINT16   , GxB_BXOR_BAND_UINT32   , GxB_BXOR_BAND_UINT64   ,
+    GxB_BXOR_BXOR_UINT8    , GxB_BXOR_BXOR_UINT16   , GxB_BXOR_BXOR_UINT32   , GxB_BXOR_BXOR_UINT64   ,
+    GxB_BXOR_BXNOR_UINT8   , GxB_BXOR_BXNOR_UINT16  , GxB_BXOR_BXNOR_UINT32  , GxB_BXOR_BXNOR_UINT64  ,
+
+    GxB_BXNOR_BOR_UINT8    , GxB_BXNOR_BOR_UINT16   , GxB_BXNOR_BOR_UINT32   , GxB_BXNOR_BOR_UINT64   ,
+    GxB_BXNOR_BAND_UINT8   , GxB_BXNOR_BAND_UINT16  , GxB_BXNOR_BAND_UINT32  , GxB_BXNOR_BAND_UINT64  ,
+    GxB_BXNOR_BXOR_UINT8   , GxB_BXNOR_BXOR_UINT16  , GxB_BXNOR_BXOR_UINT32  , GxB_BXNOR_BXOR_UINT64  ,
+    GxB_BXNOR_BXNOR_UINT8  , GxB_BXNOR_BXNOR_UINT16 , GxB_BXNOR_BXNOR_UINT32 , GxB_BXNOR_BXNOR_UINT64 ;
 
 
 //------------------------------------------------------------------------------
