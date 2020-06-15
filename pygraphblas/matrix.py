@@ -954,7 +954,7 @@ class Matrix:
             desc
             ))
 
-    def assign_matrix(self, value, rindex=None, cindex=None, desc=Default):
+    def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
         """Assign a submatrix.
 
         """
@@ -965,16 +965,18 @@ class Matrix:
         if jsize is None:
             jsize = self.ncols
 
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+
         _check(lib.GrB_Matrix_assign(
             self.matrix[0],
-            NULL,
-            NULL,
+            mask,
+            accum,
             value.matrix[0],
             I,
             ni,
             J,
             nj,
-            NULL))
+            desc))
 
     def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
         mask, semiring, accum, desc = self._get_args(**kwargs)
