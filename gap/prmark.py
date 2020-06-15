@@ -57,10 +57,12 @@ if __name__ == '__main__':
         timings = []
         for i in range(rounds):
             start = time()
-            pr = pagerank(M, 0.85, 100)
+            result = pagerank(M, 0.85, 100)
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
-            pr.to_mm(open('pr_{}_{}.mtx'.format(subdir, i), 'a'))
+            resultm = Matrix.sparse(result.type, result.size, 1)
+            resultm[:,0] = result
+            resultm.to_mm(open('pr_{}_{}.mtx'.format(subdir, i), 'a'))
 
         print('PageRank {} average time {} for {} rounds'.format(subdir, mean(timings), rounds))
