@@ -74,8 +74,9 @@ if __name__ == '__main__':
 
         timings = []
         for i in range(rounds):
+            new_d = dout.dup()
             start = time()
-            result = pagerank(M, d_out.dup(), 0.85, 100)
+            result = pagerank(M, new_d, 0.85, 100)
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
