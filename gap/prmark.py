@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
         timings = []
         for i in range(rounds):
-            new_d = dout.dup()
+            new_d = d_out.dup()
             start = time()
             result = pagerank(M, new_d, 0.85, 100)
             delta = time() - start
