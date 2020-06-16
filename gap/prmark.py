@@ -31,15 +31,15 @@ def pagerank(A, d, damping, itermax):
         print('{}: {:.6f}'.format(i, rdiff))
     return r
 
-argc = len(sys.argv)
-
-rounds = int(sys.argv[1]) if argc > 1 else 16
-threads = int(sys.argv[2]) if argc > 2 else None
-
-if threads is not None:
-    options_set(nthreads=threads)
-
 if __name__ == '__main__':
+    argc = len(sys.argv)
+
+    rounds = int(sys.argv[1]) if argc > 1 else 16
+    threads = int(sys.argv[2]) if argc > 2 else None
+
+    if threads is not None:
+        options_set(nthreads=threads)
+
     for subdir in ['road', 'kron', 'twitter', 'urand', 'web']:
         fname = '/GAP/GAP-{}/GAP-{}.grb'.format(subdir, subdir)
         if not Path(fname).exists():
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         timings = []
         for i in range(rounds):
             start = time()
-            result = pagerank(M, d_out, 0.85, 100)
+            result = pagerank(M, d_out.dup(), 0.85, 100)
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
