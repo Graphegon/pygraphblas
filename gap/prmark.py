@@ -55,7 +55,7 @@ if __name__ == '__main__':
         d_in =  M.reduce_vector(desc=TransposeA)
         edges_added = 0
         if d_out.nvals < M.nrows or d_in.nvals < M.nrows:
-            printf ("Matrix has {} empty rows and {} empty cols\n".format(M.nrows - d_out.nvals, M.nrows - d_in.nvals))
+            print ("Matrix has {} empty rows and {} empty cols\n".format(M.nrows - d_out.nvals, M.nrows - d_in.nvals))
             for i in range(M.nrows):
                 din = d_in[i]
                 dout = d_in[i]
