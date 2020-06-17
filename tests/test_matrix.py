@@ -808,3 +808,11 @@ def test_get_contains():
             else:
                 assert (i,j) not in m
                 assert m.get(i,j) is None
+
+def scalar_assign():
+    m = Matrix.sparse(UINT8, 10, 10)
+    m.assign_scalar(42, 1, 1)
+    assert m[1,1] == 42
+    m.assign_scalar(43, 2, 2)
+    assert m[2,2] == 43
+

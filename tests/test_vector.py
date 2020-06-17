@@ -2,6 +2,7 @@ import sys
 from itertools import repeat
 from array import array
 import re
+import pytest
 
 from pygraphblas import *
 from pygraphblas.base import _check
@@ -289,6 +290,7 @@ def test_select():
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [3]]
 
+pytest.mark.skip()
 def test_to_dense():
     v = Vector.from_lists(list(range(0, 6, 2)), list(range(3)))
     assert v.size == 5

@@ -981,12 +981,12 @@ class Matrix:
     def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
         mask, semiring, accum, desc = self._get_args(**kwargs)
         if row_slice:
-            I, ni, isize = _build_range(i0, self.nrows - 1)
+            I, ni, isize = _build_range(row_slice, self.nrows - 1)
         else:
             I = lib.GrB_ALL
             ni = 0
         if col_slice:
-            J, nj, jsize = _build_range(i1, self.ncols - 1)
+            J, nj, jsize = _build_range(col_slice, self.ncols - 1)
         else:
             J = lib.GrB_ALL
             nj = 0
@@ -1015,8 +1015,7 @@ class Matrix:
                 self.assign_matrix(value, index, None)
                 return
             if isinstance(value, (bool, int, float)):
-                # scalar assignment TODO
-                raise NotImplementedError
+                self.assign_scalar(value, index, None)
 
         if isinstance(index, Matrix):
             if isinstance(value, Matrix):
@@ -1054,20 +1053,7 @@ class Matrix:
 
         if isinstance(i0, slice) and isinstance(i1, slice):
             if isinstance(value, (bool, int, float)):
-                I, ni, isize = _build_range(i0, self.nrows - 1)
-                J, nj, jsize = _build_range(i1, self.ncols - 1)
-                scalar_type = types._gb_from_type(type(value))
-                _check(scalar_type.Matrix_assignScalar(
-                    self.matrix[0],
-                    NULL,
-                    NULL,
-                    value,
-                    I,
-                    ni,
-                    J,
-                    nj,
-                    NULL
-                    ))
+                self.assign_scalar(value, i0, i1)
                 return
 
             # a[:,:] assign submatrix

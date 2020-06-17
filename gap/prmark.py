@@ -49,22 +49,15 @@ if __name__ == '__main__':
         print('loading {} file.'.format(fname))
         A = Matrix.from_binfile(fname.encode('utf8'))
         M = A.pattern(UINT64)
+
         M.options_set(format=lib.GxB_BY_COL)
         M.nvals  # finish compute
-        d_out = M.reduce_vector()
-        d_in =  M.reduce_vector(desc=TransposeA)
-        edges_added = 0
-        if d_out.nvals < M.nrows or d_in.nvals < M.nrows:
-            print ("Matrix has {} empty rows and {} empty cols\n".format(M.nrows - d_out.nvals, M.nrows - d_in.nvals))
-            for i in range(M.nrows):
-                din = d_in[i]
-                dout = d_in[i]
-                if din is False or dout is False:
-                    edges_added += 1
-                    M[i:i] = True
 
-        d_out = Vector.sparse(FP32, A.nrows)
+        edges_added = add_identity(M)
+
+        d_out = Vector.sparse(FP32, M.nrows)
         M.reduce_vector(FP32.PLUS_MONOID, out=d_out)
+
         M = M.pattern()
 
         print ("input graph: nodes: {} edges: {}".format(M.nrows, M.nvals))

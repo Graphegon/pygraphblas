@@ -154,6 +154,9 @@ def _build_range(rslice, stop_val):
     if isinstance(rslice, list):
         return rslice, len(rslice), len(rslice)
 
+    if isinstance(rslice, int):
+        return ffi.new('GrB_Index[1]', [rslice]), 1, 1
+
     if rslice is None or \
        (rslice.start is None and
         rslice.stop is None and
