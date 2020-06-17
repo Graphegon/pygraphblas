@@ -16,49 +16,54 @@ def load_sources(subdir):
 def bc(sources, AT, A):
     n = A.nrows
     ns = len(sources)
-    centrality = Vector.dense (FP32, n, 0)
     paths      = Matrix.dense (FP32, ns, n, 0)
     frontier   = Matrix.sparse(FP32, ns, n)
     S = []
-    
+
     for i, s in enumerate(sources):
         paths[   i, sources[i]] = 1
         frontier[i, sources[i]] = 1
 
     frontier.mxm(
-        A, 
-        out=frontier, 
-        mask=paths, 
-        semiring=FP32.PLUS_FIRST, 
+        A,
+        out=frontier,
+        mask=paths,
+        semiring=FP32.PLUS_FIRST,
         desc=descriptor.oocr)
-    
+
     for depth in range(n):
         if frontier.nvals == 0:
             break
         s = Matrix.sparse(BOOL, ns, n)
         frontier.apply(BOOL.ONE, out=s)
         S.append(s)
-
         paths.assign_matrix(frontier, accum=FP32.PLUS)
-
-        frontier.mxm(
-            A, 
-            out=frontier, 
-            mask=paths, 
-            semiring=FP32.PLUS_FIRST, 
+        frontier.mxm(A,
+            out=frontier,
+            mask=paths,
+            semiring=FP32.PLUS_FIRST,
             desc=descriptor.oocr)
-      
+
     bc = Matrix.dense(FP32, ns, n, 1)
     W = Matrix.sparse(FP32, ns, n)
-    
+
     for i in range(depth - 1, 0, -1):
-        bc.emult(paths, FP32.DIV, out=W, mask=S[i], desc=Replace)
-        W.mxm(AT, out=W, mask=S[i-1], semiring=FP32.PLUS_FIRST, desc=Replace)
-        W.emult(paths, FP32.TIMES, accum=FP32.PLUS, out=bc)
-    
-    centrality[:] = -ns
-    bc.reduce_vector(accum=FP32.PLUS, out=centrality, desc=TransposeA)
-    
+        bc.emult(paths, FP32.DIV,
+                 out=W,
+                 mask=S[i],
+                 desc=Replace)
+        W.mxm(AT, out=W,
+              mask=S[i-1],
+              semiring=FP32.PLUS_FIRST,
+              desc=Replace)
+        W.emult(paths, FP32.TIMES,
+                out=bc,
+                accum=FP32.PLUS)
+
+    centrality = Vector.dense (FP32, n, -ns)
+    bc.reduce_vector(accum=FP32.PLUS,
+                     out=centrality,
+                     desc=TransposeA)
     return centrality
 
 if __name__ == '__main__':
@@ -73,7 +78,7 @@ if __name__ == '__main__':
         if not Path(fname).exists():
             print('Skipping {} No binfile found at {}'.format(subdir, fname))
             continue
-        
+
         print('loading {} file.'.format(fname))
         M = Matrix.from_binfile(fname.encode('utf8'))
 

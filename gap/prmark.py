@@ -15,8 +15,7 @@ def pagerank(A, d, damping, itermax):
     tol = 1e-4
     rdiff = 1.0
     for i in range(itermax):
-        if rdiff <= tol:
-            break
+        # swap t and r
         temp = t ; t = r ; r = temp
         w = t / d
         r[:] = teleport
@@ -29,6 +28,8 @@ def pagerank(A, d, damping, itermax):
         t.apply(FP32.ABS, out=t)
         rdiff = t.reduce_float()
         print('{}: {:.6f}'.format(i, rdiff))
+        if rdiff <= tol:
+            break
     return r
 
 if __name__ == '__main__':
@@ -66,7 +67,6 @@ if __name__ == '__main__':
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
-            # uncomment to dump binary result files:
             # resultm = Matrix.sparse(result.type, result.size, 1)
             # resultm[:,0] = result
             # resultm.to_mm(open('pr_{}_{}.mtx'.format(subdir, i), 'a'))
