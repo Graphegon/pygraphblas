@@ -577,7 +577,7 @@ class Matrix:
 
         """
         if mon is NULL:
-            mon = current_monoid.get(types.FP64.PLUS_MONOID)
+            mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
         result = ffi.new('double*')

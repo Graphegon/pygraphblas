@@ -47,22 +47,15 @@ if __name__ == '__main__':
             continue
 
         print('loading {} file.'.format(fname))
-        A = Matrix.from_binfile(fname.encode('utf8'))
-        M = A.pattern(UINT64)
+        A = Matrix.from_binfile(fname.encode('utf8')).pattern()
 
         M.options_set(format=lib.GxB_BY_COL)
         M.nvals  # finish compute
 
-        edges_added = add_identity(M)
-
         d_out = Vector.sparse(FP32, M.nrows)
         M.reduce_vector(FP32.PLUS_MONOID, out=d_out)
 
-        M = M.pattern()
-
         print ("input graph: nodes: {} edges: {}".format(M.nrows, M.nvals))
-        print ("diag entries added: {}".format(edges_added))
-
         print ('Ranking...')
 
         timings = []

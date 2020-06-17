@@ -39,8 +39,7 @@ def bc(sources, AT, A):
         frontier.apply(BOOL.ONE, out=s)
         S.append(s)
 
-        with Accum(FP32.PLUS):
-            paths[:,:] = frontier
+        paths.assign_matrix(frontier, accum=FP32.PLUS)
 
         frontier.mxm(
             A, 
