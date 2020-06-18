@@ -92,8 +92,8 @@ if __name__ == '__main__':
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
-            resultm = Matrix.sparse(result.type, result.size, 1)
-            resultm[:,0] = result
-            resultm.to_mm(open('bc_{}_{}.mtx'.format(subdir, i), 'a'))
+            # resultm = Matrix.sparse(result.type, result.size, 1)
+            # resultm[:,0] = result
+            # resultm.to_mm(open('bc_{}_{}.mtx'.format(subdir, i), 'a'))
 
         print('BetweenessCentraility {} average time {}'.format(subdir, mean(timings)))
