@@ -81,14 +81,14 @@ if __name__ == '__main__':
 
         print('loading {} file.'.format(fname))
         M = Matrix.from_binfile(fname.encode('utf8'))
+        MT = M.T
 
         print('Betweening...')
-
         timings = []
         sources = load_sources(subdir)
         for i, s in enumerate(sources):
             start = time()
-            result = bc(s, M.T, M)
+            result = bc(s, MT, M)
             delta = time() - start
             print('Round {} took {}'.format(i, delta))
             timings.append(delta)
