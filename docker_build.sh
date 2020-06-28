@@ -3,7 +3,7 @@ if [ $# -eq 0 ]
         echo "Usage: ./docker_build.sh SS_RELEASE BASE_NAME BRANCH [LOCATION PUSH]"
         echo "Note: BASE_NAME=minimal image does not use SS_RELEASE parameter"
         echo
-        echo "Example: ./docker_build.sh v3.2.0 notebook master clone push"
+        echo "Example: ./docker_build.sh v3.3.1 notebook master clone push"
         exit 1
 fi
 
