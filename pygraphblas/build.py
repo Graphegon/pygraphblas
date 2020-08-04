@@ -38,7 +38,7 @@ def build_ffi():
         libraries=['graphblas'],
         extra_compile_args=['-std=c11', '-lm', '-Wno-pragmas', '-fopenmp'])
 
-    with open(p / 'GraphBLAS-3.3.0.h') as gb_cdef:
+    with open(p / 'GraphBLAS-3.3.3.h') as gb_cdef:
         ffibuilder.cdef(gb_cdef.read())
 
     with open(p / 'la_a6fcf0_cdef.h') as la_cdef:
