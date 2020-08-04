@@ -25,11 +25,12 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     m4 \
     libxml2-dev \
     zlib1g-dev \
+	gdb \
     && rm -rf /var/lib/apt/lists/*
 
-ARG SS_RELEASE=v3.2.2
-ARG SS_BURBLE=0
-ARG SS_COMPACT=0
+ARG SS_RELEASE=v3.3.3
+ARG SS_BURBLE=1
+ARG SS_COMPACT=1
 
 # get GraphBLAS, compile with debug symbols
 

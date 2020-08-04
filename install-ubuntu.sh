@@ -8,7 +8,7 @@ sudo apt install -y curl m4 g++
 
 # Install the required version of SuiteSparse:GraphBLAS
 
-SS_RELEASE=v3.2.2
+SS_RELEASE=v3.3.1
 SS_BURBLE=0
 SS_COMPACT=0
 

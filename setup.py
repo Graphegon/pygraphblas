@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pygraphblas',
-    version='3.2.0',
+    version='3.3.1',
     description='GraphBLAS Python bindings.',
     author='Michel Pelletier',
     packages=['pygraphblas'],

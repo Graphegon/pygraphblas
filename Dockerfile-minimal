@@ -3,13 +3,44 @@ FROM ${BASE_CONTAINER}
 
 USER root
 
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential    \
-    libsuitesparse-dev \
     python3            \
     python3-pip        \
     libpython3-dev     \
+    git \
+    unzip \
+    make \
+    cmake \
+    curl \
+    sudo \
+    libreadline-dev \
+    zile \
+    zip \
+    vim \
+    gawk \
+    wget \
+    m4 \
+    libxml2-dev \
+    zlib1g-dev \
+	gdb \
     && rm -rf /var/lib/apt/lists/*
+
+ARG SS_RELEASE=v3.3.3
+ARG SS_BURBLE=1
+ARG SS_COMPACT=1
+
+# get GraphBLAS, compile with debug symbols
+
+RUN git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git && \
+     cd GraphBLAS/build && \
+     cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && \
+     make -j4 && \
+     make install
+RUN cd ../.. && /bin/rm -Rf GraphBLAS
 
 ADD . /pygraphblas
 WORKDIR /pygraphblas
