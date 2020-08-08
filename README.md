@@ -22,14 +22,14 @@ pygraphblas is distributed as a docker image on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
 and can be run with the command:
 
-    docker run --rm -it graphblas/pygraphblas-notebook ipython
+    docker run --rm -it graphblas/pygraphblas-minimal ipython
 
 ## Tutorial
 
 You can run a Jupyter notebook server with docker and try the example
 Notebooks:
 
-    ./notebook.sh
+    docker run --rm -it graphblas/pygraphblas-notebook
 
 Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
 the following Notebooks:
@@ -45,21 +45,9 @@ the following Notebooks:
 
 # Tests
 
-Next run the tests:
+To run the tests checkout pygraphblas and use:
 
     $ ./test.sh
-    ========================================== test session starts ==========================================
-    platform linux -- Python 3.7.3, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
-    rootdir: /pygraphblas, inifile: setup.cfg
-    plugins: cov-2.7.1
-    collected 54 items
-
-    tests/test_demo.py .                                                                              [  1%]
-    tests/test_matrix.py ...............................                                              [ 59%]
-    tests/test_scalar.py ....                                                                         [ 66%]
-    tests/test_vector.py ..................                                                           [100%]
-
-    ======================================= 54 passed in 1.04 seconds =======================================
 
 # Summary
 
@@ -92,11 +80,13 @@ you with a lot more background information, in addition to the
 references below.
 
 While it is my goal to make it so that pygraphblas works with any
-GraphBLAS implementation, it currently only works with SuiteSparse
-v3.3.0.  SuiteSparse provides several "extension" features and
-pre-packaged objects that are very useful for pygraphblas.  If there
-is a GraphBLAS implementation you would like to see support for in
-pygraphblas, please consider sending me a pull request.
+GraphBLAS implementation, it currently only works with SuiteSparse.
+SuiteSparse is currently the only realistically usable GraphBLAS
+implementation, and additionally it provides several "extension"
+features and pre-packaged objects that are very useful for
+pygraphblas.  If there is a GraphBLAS implementation you would like to
+see support for in pygraphblas, please consider creating an issue for
+it for discussion and/or sending me a pull request.
 
 # Intro
 
