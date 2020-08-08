@@ -1103,6 +1103,17 @@ class Matrix:
             return
         raise TypeError('Unknown index or value for matrix assignment.')
 
+    def __delitem__(self, index):
+        if not isinstance(index, tuple) and \
+           isinstance(index[0], int) and \
+           isinstance(index[1], int):
+            raise TypeError("__delitem__ currently only supports single element removal")
+        _check(lib.GrB_Matrix_removeElement(
+            self.matrix[0],
+            index[0],
+            index[1]
+            ))
+
     def __contains__(self, index):
         try:
             v = self[index]

@@ -627,6 +627,14 @@ class Vector:
         else:
             return self.extract(index)
 
+    def __delitem__(self, index):
+        if not isinstance(index, int):
+            raise TypeError("__delitem__ currently only supports single element removal")
+        _check(lib.GrB_Vector_removeElement(
+            self.vector[0],
+            index
+            ))
+
     def extract_element(self, index):
         result = self.type.ffi.new(self.type.ptr)
         _check(self.type.Vector_extractElement(

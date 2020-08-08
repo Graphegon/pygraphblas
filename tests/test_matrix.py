@@ -832,3 +832,13 @@ def test_apply_second():
         [0, 1], [0, 1], [4, 2]
     )
     assert m.apply_first(UINT8.PLUS, 2).to_lists() == [[0, 1], [0, 1], [6, 4]]
+
+def test_delitem():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    assert len(m) == 2
+    del m[0,0]
+    assert len(m) == 1
+    assert m[1,1] == 2
+

@@ -370,3 +370,12 @@ def test_wait():
     v = Vector.sparse(UINT8, 10)
     v[:] = 1
     v.wait()
+
+def test_delitem():
+    v = Vector.from_lists(
+        [0, 1], [4, 2]
+    )
+    assert len(v) == 2
+    del v[0]
+    assert len(v) == 1
+    assert v[1] == 2
