@@ -1,6 +1,5 @@
 from .base import *
 lib.LAGraph_init()
-lib.Complex_init()
 
 from .matrix import Matrix
 from .vector import Vector

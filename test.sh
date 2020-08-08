@@ -3,7 +3,7 @@ if [ -n "$1" ]
       docker pull graphblas/pygraphblas-minimal:latest
 fi
 docker run --rm \
-       -v `pwd`/tests:/home/jovyan/tests \
-       -v `pwd`/pygraphblas:/home/jovyan/pygraphblas \
+       -v `pwd`/tests:/pygraphblas/tests \
+       -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
        -it graphblas/pygraphblas-minimal \
        pytest --cov=pygraphblas --cov-report=term-missing

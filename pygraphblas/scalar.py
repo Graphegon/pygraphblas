@@ -88,7 +88,10 @@ class Scalar:
             self.scalar[0],
             ffi.cast(self._type.C, value)
         ))
-    
+
+    def wait(self):
+        _check(lib.GxB_Scalar_wait(self.scalar))
+
     @property
     def nvals(self):
         """Return the number of values in the scalar (0 or 1).

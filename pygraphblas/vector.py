@@ -426,7 +426,7 @@ class Vector:
         _check(lib.GrB_Vector_clear(self.vector[0]))
 
     def resize(self, size):
-        _check(lib.GxB_Vector_resize(
+        _check(lib.GrB_Vector_resize(
             self.vector[0],
             size))
 
@@ -666,6 +666,10 @@ class Vector:
             return self[i]
         except NoValue:
             return default
+
+
+    def wait(self):
+        _check(lib.GrB_Vector_wait(self.vector))
 
     def to_string(self, format_string='{:>2}', empty_char=''):
         result = ''

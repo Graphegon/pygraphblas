@@ -363,7 +363,10 @@ def test_bitwise():
     s2 = 9
     u = Vector.from_lists([1], [s1], typ=UINT64)
     v = Vector.from_lists([1], [s2], typ=UINT64)
-
     w = u.eadd(v, v.type.BOR)
-
     assert w[1] == s1 | s2
+
+def test_wait():
+    v = Vector.sparse(UINT8, 10)
+    v[:] = 1
+    v.wait()

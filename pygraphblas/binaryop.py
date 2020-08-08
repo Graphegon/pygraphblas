@@ -80,25 +80,23 @@ class Accum:
 __all__ = ['BinaryOp', 'AutoBinaryOp', 'Accum', 'current_binop', 'current_accum', 'binary_op']
 
 grb_binop_re = re.compile(
-    '^GrB_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR|BOR|BAND|BXOR|BXNOR)_'
+    '^(GrB|GxB)_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|'
+    'PAIR|ANY|POW|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR|BOR|BAND|BXOR|BXNOR|'
+    'ATAN2|HYPOT|FMOD|REMAINDER|LDEXP|COPYSIGN|BGET|BSET|BCLR|BSHIFT|CMPLX)_'
     '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
-gxb_binop_re = re.compile(
-    '^GxB_(RMINUS|RDIV|ISEQ|ISNE|ISGT|ISLT|ISLE|ISGE|PAIR|ANY)_'
-    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
-
-pure_bool_re = re.compile('^GrB_(LOR|LAND|LXOR)_BOOL$')
+pure_bool_re = re.compile('^(GrB|GxB)_(LOR|LAND|LXOR)_(BOOL)$')
 
 def binop_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        op, typ = n.groups()
+        prefix, op, typ = n.groups()
         srs.append(BinaryOp(op, typ, getattr(lib, n.string)))
     return srs
 
 def build_binaryops():
     this = sys.modules[__name__]
-    for r in chain(binop_group(grb_binop_re), binop_group(gxb_binop_re), binop_group(pure_bool_re)):
+    for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
