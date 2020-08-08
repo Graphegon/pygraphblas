@@ -42,3 +42,7 @@ def test_scalar_clear():
     assert m.nvals == 0
     with pytest.raises(KeyError) as e:
         assert m[0]
+
+def test_scalar_wait():
+    s = Scalar.from_value(2)
+    s.wait()

@@ -426,7 +426,7 @@ class Vector:
         _check(lib.GrB_Vector_clear(self.vector[0]))
 
     def resize(self, size):
-        _check(lib.GxB_Vector_resize(
+        _check(lib.GrB_Vector_resize(
             self.vector[0],
             size))
 
@@ -627,6 +627,14 @@ class Vector:
         else:
             return self.extract(index)
 
+    def __delitem__(self, index):
+        if not isinstance(index, int):
+            raise TypeError("__delitem__ currently only supports single element removal")
+        _check(lib.GrB_Vector_removeElement(
+            self.vector[0],
+            index
+            ))
+
     def extract_element(self, index):
         result = self.type.ffi.new(self.type.ptr)
         _check(self.type.Vector_extractElement(
@@ -666,6 +674,10 @@ class Vector:
             return self[i]
         except NoValue:
             return default
+
+
+    def wait(self):
+        _check(lib.GrB_Vector_wait(self.vector))
 
     def to_string(self, format_string='{:>2}', empty_char=''):
         result = ''

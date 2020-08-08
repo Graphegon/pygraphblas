@@ -56,23 +56,34 @@ class AutoSemiring(Semiring):
 __all__ = ['Semiring', 'AutoSemiring', 'current_semiring']
 
 non_boolean_re = re.compile(
-    '^GxB_(MIN|MAX|PLUS|TIMES|ANY)_'
-    '(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_'
+    '^(GxB|GrB)_(MIN|MAX|PLUS|TIMES|ANY)_'
+    '(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|'
+    'ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_'
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 boolean_re = re.compile(
-    '^GxB_(LOR|LAND|LXOR|EQ|ANY)_'
+    '^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_'
     '(EQ|NE|GT|LT|GE|LE)_'
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 pure_bool_re = re.compile(
-    '^GxB_(LOR|LAND|LXOR|EQ|ANY)_'
+    '^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_'
     '(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_(BOOL)$')
+
+complex_re = re.compile(
+    '^(GxB|GrB)_(PLUS|TIMES|ANY)_'
+    '(FIRST|SECOND|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|PAIR)_'
+    '(FC32|FC64)$')
+
+bitwise_re = re.compile(
+    '^(GxB|GrB)_(BOR|BAND|BXOR|BXNOR)_'
+    '(BOR|BAND|BXOR|BXNOR)_'
+    '(UINT8|UINT16|UINT32|UINT64)$')
 
 def semiring_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        pls, mul, typ = n.groups()
+        prefix, pls, mul, typ = n.groups()
         srs.append(Semiring(pls, mul, typ, getattr(lib, n.string)))
     return srs
 
@@ -80,7 +91,9 @@ def build_semirings():
     this = sys.modules[__name__]
     for r in chain(semiring_group(non_boolean_re),
                    semiring_group(boolean_re),
-                   semiring_group(pure_bool_re)):
+                   semiring_group(pure_bool_re),
+                   semiring_group(bitwise_re),
+                   semiring_group(complex_re)):
         setattr(this, r.name, r)
     for name in Semiring._auto_semirings:
         sr = AutoSemiring(name)

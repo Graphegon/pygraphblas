@@ -22,6 +22,8 @@ __all__ = [
     'UINT64',
     'FP32',
     'FP64',
+    'FC32',
+    'FC64',
     'binop',
     'promote',
     ]
@@ -66,15 +68,20 @@ class MetaType(type):
         cls.one = getattr(cls, 'one', core_ffi.NULL)
         get = partial(getattr, lib)
         cls.base_name = base_name = getattr(cls, 'base_name', cls.__name__)
-        cls.Monoid_new = get('GrB_Monoid_new_{}'.format(base_name))
-        cls.Matrix_setElement = get('GrB_Matrix_setElement_{}'.format(base_name))
-        cls.Matrix_extractElement = get('GrB_Matrix_extractElement_{}'.format(base_name))
-        cls.Matrix_extractTuples = get('GrB_Matrix_extractTuples_{}'.format(base_name))
-        cls.Matrix_assignScalar = get('GrB_Matrix_assign_{}'.format(base_name))
-        cls.Vector_setElement = get('GrB_Vector_setElement_{}'.format(base_name))
-        cls.Vector_extractElement = get('GrB_Vector_extractElement_{}'.format(base_name))
-        cls.Vector_extractTuples = get('GrB_Vector_extractTuples_{}'.format(base_name))
-        cls.Vector_assignScalar = get('GrB_Vector_assign_{}'.format(base_name))
+        cls.prefix = prefix = getattr(cls, 'prefix', 'GrB')
+        cls.Monoid_new = get('{}_Monoid_new_{}'.format(prefix, base_name))
+        cls.Matrix_setElement = get('{}_Matrix_setElement_{}'.format(prefix, base_name))
+        cls.Matrix_extractElement = get('{}_Matrix_extractElement_{}'.format(prefix, base_name))
+        cls.Matrix_extractTuples = get('{}_Matrix_extractTuples_{}'.format(prefix, base_name))
+        cls.Matrix_assignScalar = get('{}_Matrix_assign_{}'.format(prefix, base_name))
+        cls.Matrix_apply_BinaryOp1st = get('{}_Matrix_apply_BinaryOp1st_{}'.format(prefix, base_name))
+        cls.Matrix_apply_BinaryOp2nd = get('{}_Matrix_apply_BinaryOp2nd_{}'.format(prefix, base_name))
+        cls.Vector_setElement = get('{}_Vector_setElement_{}'.format(prefix, base_name))
+        cls.Vector_extractElement = get('{}_Vector_extractElement_{}'.format(prefix, base_name))
+        cls.Vector_extractTuples = get('{}_Vector_extractTuples_{}'.format(prefix, base_name))
+        cls.Vector_assignScalar = get('{}_Vector_assign_{}'.format(prefix, base_name))
+        cls.Vector_apply_BinaryOp1st = get('{}_Vector_apply_BinaryOp1st_{}'.format(prefix, base_name))
+        cls.Vector_apply_BinaryOp2nd = get('{}_Vector_apply_BinaryOp2nd_{}'.format(prefix, base_name))
         cls.Scalar_setElement = get('GxB_Scalar_setElement_{}'.format(base_name))
         cls.Scalar_extractElement = get('GxB_Scalar_extractElement_{}'.format(base_name))
         return cls
@@ -206,6 +213,22 @@ class FP64(Type):
     C = 'double'
     typecode = 'd'
     numba_t = numba.float64
+
+class FC32(Type):
+    prefix = 'GxB'
+    one = complex(1.0)
+    zero = complex(0.0)
+    gb_type = lib.GxB_FC32
+    C = 'float _Complex'
+    numba_t = numba.complex64
+
+class FC64(Type):
+    prefix = 'GxB'
+    one = complex(1.0)
+    zero = complex(0.0)
+    gb_type = lib.GxB_FC64
+    C = 'double _Complex'
+    numba_t = numba.complex128
 
 # class Complex(Type):
 #     gb_type = lib.LAGraph_Complex

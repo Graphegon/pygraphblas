@@ -1,4 +1,8 @@
-
+from .base import (
+    lib,
+    ffi,
+    _check,
+)
 
 def add_identity(M):
     from . import TransposeA
@@ -12,3 +16,9 @@ def add_identity(M):
                 M.assign_scalar(M.type.one, i, i)
                 edges_added += 1
     return edges_added
+
+def get_version():
+    version = ffi.new('unsigned int*')
+    subversion = ffi.new('unsigned int*')
+    _check(lib.GrB_getVersion(version, subversion))
+    return (version[0], subversion[0])

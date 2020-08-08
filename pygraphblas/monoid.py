@@ -56,10 +56,15 @@ class AutoMonoid(Monoid):
 __all__ = ['Monoid', 'AutoMonoid', 'current_monoid']
 
 gxb_monoid_re = re.compile(
-    '^GxB_(MIN|MAX|PLUS|TIMES)_'
+    '^GxB_(MIN|MAX|PLUS|TIMES|BOR|BAND|BXOR|BXNOR)_'
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)_MONOID$')
 
+grb_monoid_re = re.compile(
+    '^GrB_(MIN|MAX|PLUS|TIMES)_MONOID_'
+    '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+
 pure_bool_re = re.compile('^GxB_(LOR|LAND|LXOR|EQ)_(BOOL)_MONOID$')
+pure_bool_re_v13 = re.compile('^GrB_(LOR|LAND|LXOR|EQ)_(MONOID)_BOOL$')
 
 def monoid_group(reg):
     srs = []
@@ -70,7 +75,10 @@ def monoid_group(reg):
 
 def build_monoids():
     this = sys.modules[__name__]
-    for r in chain(monoid_group(gxb_monoid_re), monoid_group(pure_bool_re)):
+    for r in chain(monoid_group(gxb_monoid_re),
+                   monoid_group(grb_monoid_re),
+                   monoid_group(pure_bool_re),
+                   monoid_group(pure_bool_re_v13)):
         setattr(this, r.name, r)
     for name in Monoid._auto_monoids:
         bo = AutoMonoid(name)

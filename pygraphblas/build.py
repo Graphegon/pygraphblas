@@ -7,6 +7,7 @@ def build_ffi():
     source = r"""
         #include <math.h>
         #include <stdint.h>
+        #include <complex.h>
         """
     p = Path('pygraphblas/cdef')
     l = Path('pygraphblas/cdef/LAGraph')
@@ -29,14 +30,21 @@ def build_ffi():
             """
             source += code
 
-    with open(p / 'usercomplex.c') as cmx:
-        source += cmx.read()
+    # with open(p / 'usercomplex.c') as cmx:
+    #     source += cmx.read()
 
     ffibuilder.set_source(
         "_pygraphblas",
         source,
         libraries=['graphblas'],
-        extra_compile_args=['-std=c11', '-lm', '-Wno-pragmas', '-fopenmp'])
+        extra_compile_args=[
+            '-std=c11',
+            '-lm',
+            '-Wno-pragmas',
+            '-fopenmp',
+            '-Wno-sign-compare',
+            '-Wno-unused-variable',
+        ])
 
     with open(p / 'GraphBLAS-3.3.3.h') as gb_cdef:
         ffibuilder.cdef(gb_cdef.read())
@@ -47,8 +55,8 @@ def build_ffi():
     with open(p / 'extra.h') as ex_cdef:
         ffibuilder.cdef(ex_cdef.read())
 
-    with open(p / 'usercomplex.h') as gb_cdef:
-        ffibuilder.cdef(gb_cdef.read())
+    # with open(p / 'usercomplex.h') as gb_cdef:
+    #     ffibuilder.cdef(gb_cdef.read())
 
     return ffibuilder
 

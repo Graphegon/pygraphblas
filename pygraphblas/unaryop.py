@@ -50,26 +50,23 @@ class AutoUnaryOp(UnaryOp):
 
 __all__ = ['UnaryOp', 'AutoUnaryOp', 'unary_op', 'current_uop']
 
-grb_uop_re = re.compile(
-    '^GrB_(IDENTITY|AINV|MINV|LNOT|ONE|ABS)_'
-    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
-
-gxb_uop_re = re.compile(
-    '^GxB_(ONE|ABS)_'
-    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
-
-bool_uop_re = re.compile('^GrB_LNOT$')
+uop_re = re.compile(
+    '^(GrB|GxB)_(ONE|ABS|SQRT|LOG|EXP|LOG2|SIN|COS|TAN|ACOS|ASIN|ATAN|SINH|'
+    'COSH|TANH|ACOSH|ASINH|ATANH|SIGNUM|CEIL|FLOOR|ROUND|TRUNC|EXP2|EXPM1|'
+    'LOG12|LOG1P|LGAMMA|TGAMMA|ERF|ERFC|FREXPX|FREXPE|CONJ|CREAL|CIMAG|CARG|'
+    'IDENTITY|AINV|MINV|LNOT|ONE|ABS|ISINF|ISNAN|ISFINITE)_'
+    '(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64|FC32|FC64)$')
 
 def uop_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
-        op, typ = n.groups()
+        prefix, op, typ = n.groups()
         srs.append(UnaryOp(op, typ, getattr(lib, n.string)))
     return srs
 
 def build_unaryops():
     this = sys.modules[__name__]
-    for r in chain(uop_group(grb_uop_re), uop_group(gxb_uop_re)):
+    for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
     for name in UnaryOp._auto_unaryops:
         bo = AutoUnaryOp(name)

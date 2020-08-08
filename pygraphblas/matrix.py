@@ -306,7 +306,7 @@ class Matrix:
         outside the resized matrix are deleted.
 
         """
-        _check(lib.GxB_Matrix_resize(
+        _check(lib.GrB_Matrix_resize(
             self.matrix[0],
             nrows,
             ncols))
@@ -627,6 +627,46 @@ class Matrix:
             ))
         return out
 
+    def apply_first(self, op, first, out=None, **kwargs):
+        """Apply a binary operator to the entries in a matrix, binding the first input
+        to a scalar first.
+        """
+        if out is None:
+            out = self.__class__.sparse(self.type, self.nrows, self.ncols)
+        if isinstance(op, BinaryOp):
+            op = op.get_binaryop(self)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+        _check(self.type.Matrix_apply_BinaryOp1st(
+            out.matrix[0],
+            mask,
+            accum,
+            op,
+            first,
+            self.matrix[0],
+            desc
+        ))
+        return out
+
+    def apply_second(self, op, second, out=None, **kwargs):
+        """Apply a binary operator to the entries in a matrix, binding the second input
+        to a scalar second.
+        """
+        if out is None:
+            out = self.__class__.sparse(self.type, self.nrows, self.ncols)
+        if isinstance(op, BinaryOp):
+            op = op.get_binaryop(self)
+        mask, semiring, accum, desc = self._get_args(**kwargs)
+        _check(self.type.Matrix_apply_BinaryOp2nd(
+            out.matrix[0],
+            mask,
+            accum,
+            op,
+            second,
+            self.matrix[0],
+            desc
+        ))
+        return out
+
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
         if out is NULL:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -792,7 +832,7 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kron(self, other, op=NULL, out=None, **kwargs):
+    def kronecker(self, other, op=NULL, out=None, **kwargs):
         """Kronecker product.
 
         """
@@ -807,7 +847,7 @@ class Matrix:
             op = op.get_binaryop(self, other)
         mask, semiring, accum, desc = self._get_args(**kwargs)
 
-        _check(lib.GxB_kron(
+        _check(lib.GrB_Matrix_kronecker_BinaryOp(
             out.matrix[0],
             mask,
             accum,
@@ -816,6 +856,8 @@ class Matrix:
             other.matrix[0],
             desc))
         return out
+
+    kron = kronecker  # new v1.3 name
 
     def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
         """Slice a submatrix.
@@ -1061,6 +1103,17 @@ class Matrix:
             return
         raise TypeError('Unknown index or value for matrix assignment.')
 
+    def __delitem__(self, index):
+        if not isinstance(index, tuple) and \
+           isinstance(index[0], int) and \
+           isinstance(index[1], int):
+            raise TypeError("__delitem__ currently only supports single element removal")
+        _check(lib.GrB_Matrix_removeElement(
+            self.matrix[0],
+            index[0],
+            index[1]
+            ))
+
     def __contains__(self, index):
         try:
             v = self[index]
@@ -1073,6 +1126,9 @@ class Matrix:
             return self[i,j]
         except NoValue:
             return default
+
+    def wait(self):
+        _check(lib.GrB_Matrix_wait(self.matrix))
 
     def to_string(self, format_string='{:>2}', empty_char=''):
         header = format_string.format('') + ' ' + ''.join(format_string.format(i) for i in range(self.ncols))

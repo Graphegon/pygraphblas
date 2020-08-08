@@ -506,10 +506,10 @@ def test_apply():
         [0, 1, 2],
         [0, 1, 2],
         [-2, -3, -4]))
-    
+
     w2 = v.apply(unaryop.AINV)
     assert w.iseq(w2)
-    
+
     w3 = v.apply(lib.GrB_AINV_INT64)
     assert w.iseq(w3)
 
@@ -815,4 +815,30 @@ def scalar_assign():
     assert m[1,1] == 42
     m.assign_scalar(43, 2, 2)
     assert m[2,2] == 43
+
+def test_wait():
+    m = Matrix.sparse(UINT8, 10, 10)
+    m[:,:] = 1
+    m.wait()
+
+def test_apply_first():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    assert m.apply_first(UINT8.PLUS, 2).to_lists() == [[0, 1], [0, 1], [6, 4]]
+
+def test_apply_second():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    assert m.apply_first(UINT8.PLUS, 2).to_lists() == [[0, 1], [0, 1], [6, 4]]
+
+def test_delitem():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    assert len(m) == 2
+    del m[0,0]
+    assert len(m) == 1
+    assert m[1,1] == 2
 
