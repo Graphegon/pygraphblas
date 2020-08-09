@@ -53,17 +53,17 @@ To run the tests checkout pygraphblas and use:
 
 pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
-programming language using the
+programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provide high level Matrix and Vector Python
-types.
+level GraphBLAS API and provides high level Matrix and Vector Python
+types that make GraphBLAS simple and easy.
 
 GraphBLAS is a sparse linear algebra API optimized for processing
 graphs encoded as sparse matrices and vectors.  In addition to common
-real/integer matrix algebra operations, GraphBLAS supports up to 960
-different [Semiring](https://en.wikipedia.org/wiki/Semiring) algebra
-operations, that can be used as basic building blocks to implement a
-wide variety of graph algorithms. See
+real/integer matrix algebra operations, GraphBLAS supports over a
+thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
+algebra operations, that can be used as basic building blocks to
+implement a wide variety of graph algorithms. See
 [Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
 from Wikipedia for some specific examples.
 
