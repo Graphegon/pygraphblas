@@ -24,7 +24,7 @@ def timing(f):
 def dnn(W, B, Y):
     for w, b in zip(W, B):
         Y = Y @ w
-        with plus_plus:
+        with FP32.PLUS_PLUS:
             Y = Y @ b
         Y = Y.select('>0')
         M = Y.select('>', 32)
@@ -36,7 +36,7 @@ def dnn(W, B, Y):
 def dnn2(W, B, Y):
     for w, b in zip(W, B):
         Y = Y.mxm(w, out=Y)
-        with plus_plus:
+        with FP32.PLUS_PLUS:
             Y = Y.mxm(b, out=Y)
         Y.select('>0', out=Y)
         M = Y.select('>', 32)
@@ -59,7 +59,7 @@ def load_images(neurons, dest):
 def load_categories(neurons, nlayers, dest):
     fname = '{}/neuron{}-l{}-categories.tsv'
     cats = Path(fname.format(dest, neurons, nlayers))
-    result = Vector.from_type(BOOL, NFEATURES)
+    result = Vector.sparse(BOOL, NFEATURES)
     with cats.open() as i:
         for line in i.readlines():
             result[int(line.strip())-1] = True
@@ -86,7 +86,7 @@ def generate_layers(neurons, nlayers, dest):
 def generate_bias(neurons, nlayers):
     result = []
     for i in range(nlayers):
-        bias = Matrix.from_type(FP32, neurons, neurons)
+        bias = Matrix.sparse(FP32, neurons, neurons)
         for i in range(neurons):
             bias[i,i] = BIAS[neurons]
         bias.nvals # causes async completion
@@ -99,7 +99,7 @@ def run(neurons, images, layers, bias, dest):
                   bias,
                   images)
     r = result.reduce_vector()
-    cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.from_type(BOOL, r.size))
+    cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.sparse(BOOL, r.size))
     truecats = load_categories(neurons, nlayers, dest)
     assert cats == truecats
 
