@@ -23,18 +23,6 @@ def timing(f):
 @timing
 def dnn(W, B, Y):
     for w, b in zip(W, B):
-        Y = Y @ w
-        with FP32.PLUS_PLUS:
-            Y = Y @ b
-        Y = Y.select('>0')
-        M = Y.select('>', 32)
-        if len(M):
-            Y[M] = 32
-    return Y
-
-@timing
-def dnn2(W, B, Y):
-    for w, b in zip(W, B):
         Y = Y.mxm(w, out=Y)
         with FP32.PLUS_PLUS:
             Y = Y.mxm(b, out=Y)
@@ -77,7 +65,7 @@ def load_layer(i, dest):
         return m
 
 @timing
-def generate_layers(neurons, nlayers, dest):
+def load_layers(neurons, nlayers, dest):
     neurons = Path('{}/neuron{}'.format(dest, neurons))
     with ThreadPool(cpu_count()) as pool:
         return pool.map(partial(load_layer, dest=dest), range(nlayers))
@@ -95,14 +83,13 @@ def generate_bias(neurons, nlayers):
 
 @timing
 def run(neurons, images, layers, bias, dest):
-    result = dnn2(layers,
-                  bias,
-                  images)
+    result = dnn(layers,
+                 bias,
+                 images)
     r = result.reduce_vector()
-    cats = r.apply(lib.GxB_ONE_BOOL, out=Vector.sparse(BOOL, r.size))
+    cats = r.apply(BOOL.ONE, out=Vector.sparse(BOOL, r.size))
     truecats = load_categories(neurons, nlayers, dest)
     assert cats == truecats
-
 
 num_neurons = [1024, 4096, 16384, 65536]
 num_layers = [120, 480, 1920]
@@ -116,13 +103,13 @@ if __name__ == '__main__':
         neurons = int(neurons)
         nlayers = int(nlayers)
         images = load_images(neurons, dest)
-        layers = generate_layers(neurons, nlayers, dest)
+        layers = load_layers(neurons, nlayers, dest)
         bias = generate_bias(neurons, nlayers)
         run(neurons, images, layers, bias, dest)
     else:
         for neurons in num_neurons:
             print('Building layers for %s neurons' % neurons)
-            layers = generate_layers(neurons, 1920, dest)
+            layers = load_layers(neurons, 1920, dest)
             bias = generate_bias(neurons, 1920)
             images = load_images(neurons, dest)
             for nlayers in num_layers:
