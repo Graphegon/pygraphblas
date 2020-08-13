@@ -123,12 +123,18 @@ def test_matrix_eadd():
     sum3 += w
     assert sum3.iseq(sum2)
 
+def test_sub():
+    I = list(range(10))
+    v = Matrix.from_lists(I, I, I)
+    v[0, 1] = 1
+    w = Matrix.from_lists(I, I, I)
+    w[1, 0] = 1
     # subtraction (explicit zeros, if same numbers are subtracted)
     subtraction_ref = Matrix.from_lists(I, I, [0] * 10)
     # 1 - empty = 1
     subtraction_ref[0, 1] = 1
     # empty - 1 = -1 (assuming implicit zero for elements not present)
-    subtraction_ref[1, 0] = -1
+    subtraction_ref[1, 0] = 1
 
     diff1 = v - w
     assert diff1.iseq(subtraction_ref)
@@ -825,13 +831,51 @@ def test_apply_first():
     m = Matrix.from_lists(
         [0, 1], [0, 1], [4, 2]
     )
-    assert m.apply_first(UINT8.PLUS, 2).to_lists() == [[0, 1], [0, 1], [6, 4]]
+    assert m.apply_first(2, INT8.PLUS).to_lists() == [[0, 1], [0, 1], [6, 4]]
 
 def test_apply_second():
     m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2]
+        [0, 1], [0, 1], [5, 1]
     )
-    assert m.apply_first(UINT8.PLUS, 2).to_lists() == [[0, 1], [0, 1], [6, 4]]
+    assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [0, 1], [3, -1]]
+
+def test_add_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (m + 3).to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+
+def test_radd_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (3 + m).to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+
+def test_iadd_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    m += 3
+    assert m.to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+
+def test_sub_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (m - 3).to_lists() ==  [[0, 1], [0, 1], [2, -2]]
+
+def test_rsub_scalar_second():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (3 - m).to_lists() ==  [[0, 1], [0, 1], [-2, 2]]
+
+def test_iadd_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    m -= 3
+    assert m.to_lists() ==  [[0, 1], [0, 1], [2, -2]]
 
 def test_delitem():
     m = Matrix.from_lists(
@@ -841,4 +885,3 @@ def test_delitem():
     del m[0,0]
     assert len(m) == 1
     assert m[1,1] == 2
-
