@@ -1,36 +1,14 @@
-import os
-from functools import wraps, partial
-from time import time
-from statistics import mean
+from functools import partial
 from pathlib import Path
-from pygraphblas import *
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
+from pygraphblas import Matrix, Vector, FP32, BOOL
+
+from . import timing
+from .dnn import dnn
 
 NFEATURES = 60000
 BIAS = {1024: -0.3, 4096: -0.35, 16384: -0.4, 65536: -0.45}
-
-def timing(f):
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        print('func:%r took: %2.4f' % (f.__name__, te-ts))
-        return result
-    return wrap
-
-@timing
-def dnn(W, B, Y):
-    for w, b in zip(W, B):
-        Y = Y.mxm(w, out=Y)
-        with FP32.PLUS_PLUS:
-            Y = Y.mxm(b, out=Y)
-        Y.select('>0', out=Y)
-        M = Y.select('>', 32)
-        if len(M):
-            Y[M] = 32
-    return Y
 
 @timing
 def load_images(neurons, dest):
@@ -53,7 +31,7 @@ def load_categories(neurons, nlayers, dest):
             result[int(line.strip())-1] = True
     return result
 
-def load_layer(i, dest):
+def load_layer(neurons, dest, i):
     fname = '{}/neuron{}/n{}-l{}.{}'
     binfile = fname.format(dest, neurons, neurons, str(i+1), 'ssb')
     if Path(binfile).exists():
@@ -65,10 +43,9 @@ def load_layer(i, dest):
         return m
 
 @timing
-def load_layers(neurons, nlayers, dest):
-    neurons = Path('{}/neuron{}'.format(dest, neurons))
+def load_layers(neurons, dest, nlayers):
     with ThreadPool(cpu_count()) as pool:
-        return pool.map(partial(load_layer, dest=dest), range(nlayers))
+        return pool.map(partial(load_layer, neurons, dest), range(nlayers))
 
 @timing
 def generate_bias(neurons, nlayers):
@@ -88,30 +65,5 @@ def run(neurons, images, layers, bias, dest):
                  images)
     r = result.reduce_vector()
     cats = r.apply(BOOL.ONE, out=Vector.sparse(BOOL, r.size))
-    truecats = load_categories(neurons, nlayers, dest)
+    truecats = load_categories(neurons, len(layers), dest)
     assert cats == truecats
-
-num_neurons = [1024, 4096, 16384, 65536]
-num_layers = [120, 480, 1920]
-
-if __name__ == '__main__':
-    dest = os.getenv('DEST')
-    neurons = os.getenv('NEURONS')
-    nlayers = os.getenv('NLAYERS')
-
-    if neurons and nlayers:
-        neurons = int(neurons)
-        nlayers = int(nlayers)
-        images = load_images(neurons, dest)
-        layers = load_layers(neurons, nlayers, dest)
-        bias = generate_bias(neurons, nlayers)
-        run(neurons, images, layers, bias, dest)
-    else:
-        for neurons in num_neurons:
-            print('Building layers for %s neurons' % neurons)
-            layers = load_layers(neurons, 1920, dest)
-            bias = generate_bias(neurons, 1920)
-            images = load_images(neurons, dest)
-            for nlayers in num_layers:
-                print('Benching %s neurons %s layers' % (neurons, nlayers))
-                run(neurons, images, layers[:nlayers], bias[:nlayers], dest)

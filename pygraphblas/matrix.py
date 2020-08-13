@@ -661,8 +661,8 @@ class Matrix:
             mask,
             accum,
             op,
-            second,
             self.matrix[0],
+            second,
             desc
         ))
         return out
