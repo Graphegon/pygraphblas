@@ -870,13 +870,51 @@ def test_rsub_scalar_second():
     )
     assert (3 - m).to_lists() ==  [[0, 1], [0, 1], [-2, 2]]
 
-def test_iadd_scalar():
+def test_isub_scalar():
     m = Matrix.from_lists(
         [0, 1], [0, 1], [5, 1]
     )
     m -= 3
     assert m.to_lists() ==  [[0, 1], [0, 1], [2, -2]]
 
+def test_mul_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (m * 3).to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+
+def test_rmul_scalar_second():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    assert (3 * m).to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+
+def test_imul_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [5, 1]
+    )
+    m *= 3
+    assert m.to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+
+def test_truediv_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [15, 3]
+    )
+    assert (m / 3).to_lists() ==  [[0, 1], [0, 1], [5, 1]]
+
+def test_rtruediv_scalar_second():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [3, 5]
+    )
+    assert (15 / m).to_lists() ==  [[0, 1], [0, 1], [5, 3]]
+
+def test_itruediv_scalar():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [15, 3]
+    )
+    m /= 3
+    assert m.to_lists() ==  [[0, 1], [0, 1], [5, 1]]
+    
 def test_delitem():
     m = Matrix.from_lists(
         [0, 1], [0, 1], [4, 2]
