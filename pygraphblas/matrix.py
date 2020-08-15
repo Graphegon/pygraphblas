@@ -496,28 +496,111 @@ class Matrix:
         return self.reduce_bool()
 
     def __add__(self, other):
-        return self.eadd(other)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.PLUS, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+
+    def __radd__(self, other):
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_first(
+                other, self.type.PLUS,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self,
+                         mask=mask, accum=accum, desc=desc)
 
     def __iadd__(self, other):
-        return self.eadd(other, out=self)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.PLUS, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, out=self,
+                         mask=mask, accum=accum, desc=desc)
 
     def __sub__(self, other):
-        return self + (-other)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.MINUS, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rsub__(self, other):
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_first(
+                other, self.type.MINUS,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
 
     def __isub__(self, other):
-        return self.eadd(-other, out=self)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.MINUS, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
 
     def __mul__(self, other):
-        return self.emult(other)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.TIMES, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rmul__(self, other):
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_first(
+                other, self.type.TIMES,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
 
     def __imul__(self, other):
-        return self.emult(other, out=self)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.TIMES, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
 
     def __truediv__(self, other):
-        return self.emult(other, mult_op=binaryop.DIV)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.DIV, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rtruediv__(self, other):
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_first(
+                other, self.type.DIV,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
 
     def __itruediv__(self, other):
-        return self.emult(other, mult_op=binaryop.DIV, out=self)
+        mask, semiring, accum, desc = self._get_args()
+        if not isinstance(other, Matrix):
+            return self.apply_second(
+                self.type.DIV, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -627,7 +710,7 @@ class Matrix:
             ))
         return out
 
-    def apply_first(self, op, first, out=None, **kwargs):
+    def apply_first(self, first, op, out=None, **kwargs):
         """Apply a binary operator to the entries in a matrix, binding the first input
         to a scalar first.
         """
@@ -636,7 +719,11 @@ class Matrix:
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self)
         mask, semiring, accum, desc = self._get_args(**kwargs)
-        _check(self.type.Matrix_apply_BinaryOp1st(
+        if isinstance(first, Scalar):
+            f = lib.GxB_Matrix_apply_BinaryOp1st
+        else:
+            f = self.type.Matrix_apply_BinaryOp1st
+        _check(f(
             out.matrix[0],
             mask,
             accum,
