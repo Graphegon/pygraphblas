@@ -361,9 +361,14 @@ def get_ztype(bop):
     return gb_type_to_type(typ[0])
 
 def promote(left, right, semiring=None):
-    if semiring:
+    from .semiring import AutoSemiring
+    if semiring is not None and not isinstance(semiring, AutoSemiring):
         return get_ztype(get_binaryop(get_add(semiring.get_semiring(left, right))))
     if left == right:
+        return left
+    elif left is None:
+        return right
+    elif right is None:
         return left
     elif left == BOOL:
         return right

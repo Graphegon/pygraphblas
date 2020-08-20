@@ -257,10 +257,12 @@ def test_vxm():
 
     assert v.vxm(m.transpose(), desc=TransposeB).iseq(o)
 
-    # m2 = m[:, :2]
-    # v2 = v.dup()
-    # v2 @= m2
-    # assert v2.iseq(o[:2])
+    with semiring.PLUS_PLUS:
+        o = v.vxm(m)
+        assert o.iseq(Vector.from_lists(
+            [0, 1, 2, 3],
+            [7, 3, 5, 6]))
+        assert o.iseq(v @ m)
 
 def test_apply():
     v = Vector.from_lists(

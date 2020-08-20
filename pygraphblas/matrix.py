@@ -897,7 +897,7 @@ class Matrix:
             out.matrix[0],
             mask,
             accum,
-            semiring.get_semiring(self, other),
+            semiring.get_semiring(typ),
             self.matrix[0],
             other.matrix[0],
             desc))
@@ -924,7 +924,7 @@ class Matrix:
             out.vector[0],
             mask,
             accum,
-            semiring.get_semiring(self, other),
+            semiring.get_semiring(typ),
             self.matrix[0],
             other.vector[0],
             desc))

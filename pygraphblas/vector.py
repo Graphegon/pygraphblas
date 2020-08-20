@@ -348,12 +348,15 @@ class Vector:
         return out
 
     def vxm(self, other, cast=None, out=None,
-            mask=NULL, accum=NULL, semiring=NULL, desc=Default):
+            mask=NULL, accum=NULL, semiring=None, desc=Default):
         """Vector-Matrix multiply.
         """
         from .matrix import Matrix
+        if semiring is None:
+            semiring = current_semiring.get(None)
+
+        typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            typ = cast or types.promote(self.type, other.type, semiring)
             new_dimension = other.nrows if TransposeB in desc \
                 else other.ncols
             out = Vector.sparse(typ, new_dimension)
@@ -361,25 +364,19 @@ class Vector:
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
             mask = mask.vector[0]
-        if semiring is NULL:
-            if self.type == types.BOOL:
-                dring = sring.LOR_LAND
-            else:
-                dring = sring.PLUS_TIMES
-            semiring = current_semiring.get(dring)
-        if isinstance(semiring, Semiring):
-            semiring = semiring.get_semiring(self.type, other.type)
         if accum is NULL:
             accum = current_accum.get(binaryop.TIMES)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
+        if semiring is None:
+            semiring = typ.PLUS_TIMES
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
             accum,
-            semiring,
+            semiring.get_semiring(typ),
             self.vector[0],
             other.matrix[0],
             desc))

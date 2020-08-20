@@ -277,6 +277,13 @@ def test_mxv():
 
     assert o.iseq(m.transpose().mxv(v, desc=descriptor.TransposeA))
 
+    with semiring.PLUS_PLUS:
+        o = m.mxv(v)
+        assert o.iseq(Vector.from_lists(
+            [0, 1, 2, 3],
+            [4, 6, 5, 7]))
+        assert o.iseq(m @ v)
+
 def test_matrix_pattern():
     v = Matrix.from_lists(
         list(range(10)),
