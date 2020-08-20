@@ -108,12 +108,6 @@ _default_type_ops = {
                    lib.GrB_TIMES_BOOL),
     }
 
-def _default_add_op(obj):
-    return _default_type_ops(obj.gb_type)[0]
-
-def _default_mul_op(obj):
-    return _default_type_ops(obj.gb_type)[1]
-
 def _check(res):
     if res != lib.GrB_SUCCESS:
         raise _error_codes[res](ffi.string(lib.GrB_error()))

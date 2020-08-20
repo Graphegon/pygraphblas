@@ -10,8 +10,6 @@ from .base import (
     _check,
     _get_bin_op,
     _get_select_op,
-    _default_add_op,
-    _default_mul_op,
     _build_range,
 )
 from . import binaryop, unaryop, monoid, semiring as sring, types

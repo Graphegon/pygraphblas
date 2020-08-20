@@ -303,7 +303,6 @@ def test_matrix_transpose():
     v2 = v.transpose(desc=descriptor.TransposeA)
     assert v2.iseq(v)
 
-#@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
     mmf.touch()
@@ -326,7 +325,17 @@ def test_matrix_mm_read_write(tmp_path):
         n = Matrix.from_mm(f, INT8)
     assert n.iseq(m)
 
-pytest.mark.skip()
+def test_matrix_binfile_read_write(tmp_path):
+    binfilef = tmp_path / 'binfilewrite_test.binfile'
+    binfilef.touch()
+    m = Matrix.from_lists(
+        [0,1,2],
+        [0,1,2],
+        [2,3,4])
+    m.to_binfile(bytes(binfilef))
+    n = Matrix.from_binfile(bytes(binfilef))
+    assert n.iseq(m)
+
 def test_matrix_tsv_read(tmp_path):
     mmf = tmp_path / 'tsv_test.mm'
     mmf.touch()
