@@ -262,7 +262,7 @@ class Vector:
     def __ne__(self, other):
         return self.compare(other, operator.ne, '!=')
 
-    def eadd(self, other, add_op=NULL, out=None,
+    def eadd(self, other, add_op=NULL, cast=None, out=None,
                   mask=NULL, accum=NULL, desc=Default):
         """Element-wise addition with other vector.
 
@@ -290,10 +290,12 @@ class Vector:
             accum = accum.get_binaryop(self, other)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
+
         if out is None:
+            typ = cast or types.promote(self.type, other.type)
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
-            out = self.__class__(_out, self.type)
+            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            out = self.__class__(_out, typ)
         _check(lib.GrB_eWiseAdd_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -304,7 +306,7 @@ class Vector:
             desc))
         return out
 
-    def emult(self, other, mult_op=NULL, out=None,
+    def emult(self, other, mult_op=NULL, cast=None, out=None,
                    mask=NULL, accum=NULL, desc=Default):
         """Element-wise multiplication with other vector.
 
@@ -333,9 +335,10 @@ class Vector:
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         if out is None:
+            typ = cast or types.promote(self.type, other.type)
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
-            out = self.__class__(_out, self.type)
+            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            out = self.__class__(_out, typ)
         _check(lib.GrB_eWiseMult_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -346,15 +349,16 @@ class Vector:
             desc))
         return out
 
-    def vxm(self, other, out=None,
+    def vxm(self, other, cast=None, out=None,
             mask=NULL, accum=NULL, semiring=NULL, desc=Default):
         """Vector-Matrix multiply.
         """
         from .matrix import Matrix
         if out is None:
+            typ = cast or types.promote(self.type, other.type, semiring)
             new_dimension = other.nrows if TransposeB in desc \
                 else other.ncols
-            out = Vector.sparse(self.type, new_dimension)
+            out = Vector.sparse(typ, new_dimension)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
@@ -690,4 +694,4 @@ class Vector:
         return result
 
     def __repr__(self):
-        return '<Vector (%s: %s)>' % (self.size, self.nvals)
+        return '<Vector (%s: %s:%s)>' % (self.size, self.nvals, self.type.__name__)

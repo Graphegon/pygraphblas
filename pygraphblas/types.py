@@ -6,7 +6,6 @@ import numba
 from numba import cfunc, jit, carray
 from numba.core.typing import cffi_utils as cffi_support
 from pygraphblas import  lib, ffi as core_ffi
-from pygraphblas.base import lazy_property
 from cffi import FFI
 
 __all__ = [
@@ -60,7 +59,7 @@ class MetaType(type):
         else:
             attrs['ffi'] = core_ffi
             gb_type_name = type_name
-        
+
         cls = super().__new__(meta, type_name, bases, attrs)
         meta._gb_type_map[cls.gb_type] = cls
         cls.ptr = cls.C + '*'
@@ -99,13 +98,17 @@ class MetaType(type):
         from .semiring import Semiring
         semiring = core_ffi.new('GrB_Semiring[1]')
         _check(lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(core_ffi.NULL)))
-        return Semiring('PLUS', 'TIMES', cls.__name__, semiring[0])
+        return Semiring('PLUS', 'TIMES', cls.__name__, semiring[0], udt=cls)
 
 class Type(metaclass=MetaType):
     one = 1
     zero = 0
     base = True
     typecode = None
+
+    @classmethod
+    def format_value(cls, val, width=2):
+        return ('{:>%s}' % width).format(val)
 
     @classmethod
     def from_value(cls, value):
@@ -130,6 +133,13 @@ class BOOL(Type):
     typecode = 'B'
     numba_t = numba.boolean
 
+    @classmethod
+    def format_value(cls, val, width=2):
+        f = '{:>%s}' % width
+        if not isinstance(val, bool):
+            return f.format(val)
+        return f.format('t') if val is True else f.format('f')
+
     @classproperty
     def PLUS(cls):
         return cls.LOR
@@ -150,6 +160,10 @@ class BOOL(Type):
     def PLUS_TIMES(cls):
         return cls.LOR_LAND
 
+    @classmethod
+    def to_value(cls, cdata):
+        return bool(cdata)
+
 class INT8(Type):
     gb_type = lib.GrB_INT8
     C = 'int8_t'
@@ -161,7 +175,7 @@ class UINT8(Type):
     C =  'uint8_t'
     typecode = 'B'
     numba_t = numba.uint8
-    
+
 class INT16(Type):
     gb_type = lib.GrB_INT16
     C = 'int16_t'
@@ -305,7 +319,7 @@ def binop(boolean=False):
                     use_record_dtype=True)
             else:
                 sig = numba.void(cls.numba_t, cls.numba_t, cls.numba_t)
-                
+
             jitfunc = jit(self.func, nopython=True)
             @cfunc(sig)
             def wrapper(z_, x_, y_):
@@ -318,31 +332,23 @@ def binop(boolean=False):
 
     return inner
 
-def promote(left, right):
+_promotion_order = (FC64, FC32,
+                    FP64, FP32,
+                    INT64, UINT64,
+                    INT32, UINT32,
+                    INT16, UINT16,
+                    INT8, UINT8)
+
+def promote(left, right, semiring=None):
+    if semiring:
+        return semiring.get_monoid().get_binaryop().get_ztype()
     if left == right:
         return left
-    elif left == FP64 or right == FP64:
-        return FP64
-    elif left == FP32 or right == FP32:
-        return FP32
-    elif left == UINT64 or right == UINT64:
-        return UINT64
-    elif left == INT64 or right == INT64:
-        return INT64
-    elif left == UINT32 or right == UINT32:
-        return UINT32
-    elif left == INT32 or right == INT32:
-        return INT32
-    elif left == UINT16 or right == UINT16:
-        return UINT16
-    elif left == INT16 or right == INT16:
-        return INT16
-    elif left == UINT8 or right == UINT8:
-        return UINT8
-    elif left == INT8 or right == INT8:
-        return INT8
-    elif left == BOOL or right == BOOL:
-        return BOOL
-    else:
-        raise TypeError('inconvertable types %s and %s' % (repr(left,), repr(right)))
-    
+    elif left == BOOL:
+        return right
+    elif right == BOOL:
+        return left
+    for t in _promotion_order:
+        if left == t or right == t:
+            return t
+    raise TypeError('inconvertable types %s and %s' % (repr(left,), repr(right)))

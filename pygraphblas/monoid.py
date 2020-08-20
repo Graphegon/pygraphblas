@@ -1,3 +1,4 @@
+import os
 import sys
 import re
 import contextvars
@@ -5,6 +6,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .base import lib, ffi, _gb_from_name, _check
+from .binaryop import BinaryOp
 from . import types
 
 current_monoid = contextvars.ContextVar('current_monoid')
@@ -13,7 +15,7 @@ class Monoid:
 
     _auto_monoids = defaultdict(dict)
 
-    __slots__ = ('name', 'monoid', 'token')
+    __slots__ = ('name', 'monoid', 'token', 'op', 'type')
 
     def __init__(self, op, typ, monoid, udt=None, boolean=False):
         if udt is not None:
@@ -26,12 +28,14 @@ class Monoid:
             self.monoid = o[0]
         else:
             self.monoid = monoid
+            self.__class__._auto_monoids[op+'_MONOID'][_gb_from_name(typ)] = monoid
+            cls = getattr(types, typ, None)
+            if cls is not None:
+                setattr(cls, op+'_MONOID', self)
+        self.op = op
+        self.type = typ
         self.name = '_'.join((op, typ, 'monoid'))
         self.token = None
-        self.__class__._auto_monoids[op+'_MONOID'][_gb_from_name(typ)] = monoid
-        cls = getattr(types, typ, None)
-        if cls is not None:
-            setattr(cls, op+'_MONOID', self)
 
     def __enter__(self):
         self.token = current_monoid.set(self)
@@ -43,6 +47,13 @@ class Monoid:
 
     def get_monoid(self, operand1=None, operand2=None):
         return self.monoid
+
+    def get_binaryop(self):
+        op = ffi.new('GrB_BinaryOp*')
+        _check(lib.GxB_Monoid_operator(
+            op,
+            self.monoid))
+        return BinaryOp(self.op, self.type, op[0])
 
 class AutoMonoid(Monoid):
 
@@ -64,13 +75,14 @@ grb_monoid_re = re.compile(
     '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
 
 pure_bool_re = re.compile('^GxB_(LOR|LAND|LXOR|EQ)_(BOOL)_MONOID$')
-pure_bool_re_v13 = re.compile('^GrB_(LOR|LAND|LXOR|EQ)_(MONOID)_BOOL$')
+pure_bool_re_v13 = re.compile('^GrB_(LOR|LAND|LXOR|EQ)_MONOID_(BOOL)$')
 
 def monoid_group(reg):
     srs = []
     for n in filter(None, [reg.match(i) for i in dir(lib)]):
         op, typ = n.groups()
-        srs.append(Monoid(op, typ, getattr(lib, n.string)))
+        m = Monoid(op, typ, getattr(lib, n.string))
+        srs.append(m)
     return srs
 
 def build_monoids():
@@ -83,4 +95,3 @@ def build_monoids():
     for name in Monoid._auto_monoids:
         bo = AutoMonoid(name)
         setattr(this, name, bo)
-        

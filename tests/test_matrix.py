@@ -221,27 +221,37 @@ def test_mxm():
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1]))
+        [True, True, True]))
+
+def test_mxm_context():
+    m = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [1,2,3])
+    n = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [2,3,4])
 
     with semiring.PLUS_PLUS:
         o = m @ n
 
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
-        [7, 10, 9]))
+        [2, 0, 1],
+        [4, 6, 5]))
 
     with semiring.LOR_LAND_BOOL:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
+        [2, 0, 1],
         [1, 1, 1]))
     with semiring.LOR_LAND_BOOL:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
+        [2, 0, 1],
         [1, 1, 1]))
     with pytest.raises(TypeError):
         m @ 3
@@ -923,3 +933,38 @@ def test_delitem():
     del m[0,0]
     assert len(m) == 1
     assert m[1,1] == 2
+
+def test_cast():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    n = m.cast(FP64)
+    assert n.iseq(Matrix.from_lists(
+        [0, 1], [0, 1], [4.0, 2.0]
+        ))
+
+def test_promotion():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=FP32
+    )
+    n = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=FP64
+    )
+    o = m @ n
+    assert o.type == FP64
+    n = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=UINT8
+    )
+    o = m @ n
+    assert o.type == FP32
+
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [-4, 2],
+        typ=INT8
+    )
+    o = m @ n
+    assert o.type == INT8
+    
