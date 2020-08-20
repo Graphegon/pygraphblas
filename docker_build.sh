@@ -3,15 +3,16 @@ if [ $# -eq 0 ]
         echo "Usage: ./docker_build.sh SS_RELEASE BASE_NAME BRANCH [LOCATION PUSH]"
         echo "Note: BASE_NAME=minimal image does not use SS_RELEASE parameter"
         echo
-        echo "Example: ./docker_build.sh v3.3.1 notebook master clone push"
+        echo "Example: ./docker_build.sh v3.3.3 v3.4.0 notebook master clone push"
         exit 1
 fi
 
 SS_RELEASE=$1
-BASE_NAME=$2
-BRANCH=$3
-LOCATION=$4
-PUSH=$5
+PY_RELEASE=$2
+BASE_NAME=$3
+BRANCH=$4
+LOCATION=$5
+PUSH=$6
 
 # for BASE_NAME=notebook image
 # set env var to 1 for faster SuiteSparse compilation, but the code will be slower
@@ -36,13 +37,13 @@ docker build \
        --build-arg SS_RELEASE=${SS_RELEASE} \
        --build-arg SS_COMPACT=${SS_COMPACT} \
        -f Dockerfile-${BASE_NAME} \
-       -t graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} \
+       -t graphblas/pygraphblas-${BASE_NAME}:${PY_RELEASE} \
        .
 
-docker tag graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE} graphblas/pygraphblas-${BASE_NAME}:latest
+docker tag graphblas/pygraphblas-${BASE_NAME}:${PY_RELEASE} graphblas/pygraphblas-${BASE_NAME}:latest
 
 if [ "$PUSH" = "push" ]
 then
-    docker push graphblas/pygraphblas-${BASE_NAME}:${SS_RELEASE}
+    docker push graphblas/pygraphblas-${BASE_NAME}:${PY_RELEASE}
     docker push graphblas/pygraphblas-${BASE_NAME}:latest
 fi

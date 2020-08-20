@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=ubuntu:20.04
+ARG BASE_CONTAINER=debian:buster-slim
 FROM ${BASE_CONTAINER}
 
 USER root
@@ -12,26 +12,19 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     python3-pip        \
     libpython3-dev     \
     git \
-    unzip \
     make \
     cmake \
     curl \
     sudo \
     libreadline-dev \
-    zile \
-    zip \
-    vim \
-    gawk \
-    wget \
     m4 \
     libxml2-dev \
     zlib1g-dev \
-	gdb \
     && rm -rf /var/lib/apt/lists/*
 
 ARG SS_RELEASE=v3.3.3
-ARG SS_BURBLE=1
-ARG SS_COMPACT=1
+ARG SS_BURBLE=0
+ARG SS_COMPACT=0
 
 # get GraphBLAS, compile with debug symbols
 
@@ -47,6 +40,6 @@ WORKDIR /pygraphblas
     
 RUN pip3 install -r minimal-requirements.txt
 RUN python3 setup.py clean
-RUN python3 setup.py develop
+RUN python3 setup.py install
 RUN ldconfig
 # ENTRYPOINT ["ipython"]

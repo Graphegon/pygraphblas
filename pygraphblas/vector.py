@@ -822,5 +822,8 @@ class Vector:
 
         return result
 
+    def __str__(self):
+        return self.to_string()
+
     def __repr__(self):
         return '<Vector (%s: %s:%s)>' % (self.size, self.nvals, self.type.__name__)
