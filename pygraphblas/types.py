@@ -1,4 +1,4 @@
-from .base import lib, _check
+from .base import lib, _check, ffi
 from textwrap import dedent
 from operator import methodcaller, itemgetter
 from functools import partial
@@ -339,9 +339,30 @@ _promotion_order = (FC64, FC32,
                     INT16, UINT16,
                     INT8, UINT8)
 
+def get_add(sring):
+    monoid = ffi.new('GrB_Monoid*')
+    _check(lib.GxB_Semiring_add(
+        monoid,
+        sring))
+    return monoid[0]
+
+def get_binaryop(moid):
+    op = ffi.new('GrB_BinaryOp*')
+    _check(lib.GxB_Monoid_operator(
+        op,
+        moid))
+    return op[0]
+
+def get_ztype(bop):
+    typ = ffi.new('GrB_Type*')
+    _check(lib.GxB_BinaryOp_ztype(
+        typ,
+        bop))
+    return gb_type_to_type(typ[0])
+
 def promote(left, right, semiring=None):
     if semiring:
-        return semiring.get_monoid().get_binaryop().get_ztype()
+        return get_ztype(get_binaryop(get_add(semiring.get_semiring(left, right))))
     if left == right:
         return left
     elif left == BOOL:

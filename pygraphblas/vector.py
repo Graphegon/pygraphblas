@@ -66,7 +66,7 @@ class Vector:
 
     def iseq(self, other, eq_op=None):
         if eq_op is None:
-            eq_op = self.type.EQ.get_binaryop(self, other)
+            eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(
             result,
@@ -281,13 +281,13 @@ class Vector:
         if isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
         if isinstance(add_op, BinaryOp):
-            add_op = add_op.get_binaryop(self, other)
+            add_op = add_op.get_binaryop(self.type, other.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
 
@@ -325,13 +325,13 @@ class Vector:
         if isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
-            mult_op = mult_op.get_binaryop(self, other)
+            mult_op = mult_op.get_binaryop(self.type, other.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         if out is None:
@@ -370,11 +370,11 @@ class Vector:
                 dring = sring.PLUS_TIMES
             semiring = current_semiring.get(dring)
         if isinstance(semiring, Semiring):
-            semiring = semiring.get_semiring(self)
+            semiring = semiring.get_semiring(self.type, other.type)
         if accum is NULL:
             accum = current_accum.get(binaryop.TIMES)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         _check(lib.GrB_vxm(
@@ -442,11 +442,11 @@ class Vector:
                 dmon = monoid.PLUS_MONOID
             mon = current_monoid.get(dmon)
         if isinstance(mon, Monoid):
-            mon = mon.get_monoid(self)
+            mon = mon.get_monoid(self.type)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self)
+            accum = accum.get_binaryop(self.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if isinstance(desc, Descriptor):
@@ -459,7 +459,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
@@ -476,7 +476,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
@@ -493,7 +493,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(

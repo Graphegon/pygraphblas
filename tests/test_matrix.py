@@ -246,13 +246,15 @@ def test_mxm_context():
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [2, 0, 1],
-        [1, 1, 1]))
-    with semiring.LOR_LAND_BOOL:
+        [True, True, True]))
+
+    with BOOL.LOR_LAND:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [2, 0, 1],
-        [1, 1, 1]))
+        [True, True, True]))
+
     with pytest.raises(TypeError):
         m @ 3
     with pytest.raises(TypeError):
@@ -924,7 +926,7 @@ def test_itruediv_scalar():
     )
     m /= 3
     assert m.to_lists() ==  [[0, 1], [0, 1], [5, 1]]
-    
+
 def test_delitem():
     m = Matrix.from_lists(
         [0, 1], [0, 1], [4, 2]
@@ -967,4 +969,3 @@ def test_promotion():
     )
     o = m @ n
     assert o.type == INT8
-    

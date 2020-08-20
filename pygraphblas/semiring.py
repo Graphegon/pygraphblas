@@ -39,15 +39,8 @@ class Semiring:
         current_semiring.reset(self.token)
         return False
 
-    def get_semiring(self, operand1=None, operand2=None):
+    def get_semiring(self, left=None, right=None):
         return self.semiring
-
-    def get_monoid(self, operand1=None, operand2=None):
-        monoid = ffi.new('GrB_Monoid*')
-        _check(lib.GxB_Semiring_add(
-            monoid,
-            self.semiring))
-        return Monoid(self.pls, self.type, monoid[0])
 
 class AutoSemiring(Semiring):
 
@@ -55,9 +48,9 @@ class AutoSemiring(Semiring):
         self.name = name
         self.token = None
 
-    def get_semiring(self, operand1=None, operand2=None):
-        typ = operand1.gb_type
-        return Semiring._auto_semirings[self.name][typ]
+    def get_semiring(self, left=None, right=None):
+        typ = types.promote(left, right)
+        return Semiring._auto_semirings[self.name][typ.gb_type]
 
 __all__ = ['Semiring', 'AutoSemiring', 'current_semiring']
 

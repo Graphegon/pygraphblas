@@ -43,15 +43,8 @@ class BinaryOp:
         current_binop.reset(self.token)
         return False
 
-    def get_binaryop(self, operand1=None, operand2=None):
+    def get_binaryop(self, left=None, right=None):
         return self.binaryop
-
-    def get_ztype(self):
-        typ = ffi.new('GrB_Type*')
-        _check(lib.GxB_BinaryOp_ztype(
-            typ,
-            self.binaryop))
-        return types.gb_type_to_type(typ[0])
 
 class AutoBinaryOp(BinaryOp):
 
@@ -59,8 +52,9 @@ class AutoBinaryOp(BinaryOp):
         self.name = name
         self.token = None
 
-    def get_binaryop(self, operand1=None, operand2=None):
-        return BinaryOp._auto_binaryops[self.name][operand1.type.gb_type]
+    def get_binaryop(self, left=None, right=None):
+        typ = types.promote(left, right)
+        return BinaryOp._auto_binaryops[self.name][typ.gb_type]
 
 class Accum:
 

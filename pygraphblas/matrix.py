@@ -882,13 +882,16 @@ class Matrix:
         """Matrix-matrix multiply.
 
         """
+        if semiring is None:
+            semiring = current_semiring.get(None)
+
         mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
 
         if semiring is None:
-            semiring = current_semiring.get(typ.PLUS_TIMES)
+            semiring = typ.PLUS_TIMES
 
         _check(lib.GrB_mxm(
             out.matrix[0],
@@ -904,6 +907,9 @@ class Matrix:
         """Matrix-vector multiply.
 
         """
+        if semiring is None:
+            semiring = current_semiring.get(None)
+
         mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
@@ -912,7 +918,7 @@ class Matrix:
             out = Vector.sparse(typ, new_dimension)
 
         if semiring is None:
-            semiring = current_semiring.get(typ.PLUS_TIMES)
+            semiring = typ.PLUS_TIMES
 
         _check(lib.GrB_mxv(
             out.vector[0],
@@ -949,7 +955,7 @@ class Matrix:
         if op is NULL:
             op = typ.TIMES
         if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self, other)
+            op = op.get_binaryop(self.type, other.type)
 
         _check(lib.GrB_Matrix_kronecker_BinaryOp(
             out.matrix[0],

@@ -45,15 +45,8 @@ class Monoid:
         current_monoid.reset(self.token)
         return False
 
-    def get_monoid(self, operand1=None, operand2=None):
+    def get_monoid(self, left=None, right=None):
         return self.monoid
-
-    def get_binaryop(self):
-        op = ffi.new('GrB_BinaryOp*')
-        _check(lib.GxB_Monoid_operator(
-            op,
-            self.monoid))
-        return BinaryOp(self.op, self.type, op[0])
 
 class AutoMonoid(Monoid):
 
@@ -61,8 +54,9 @@ class AutoMonoid(Monoid):
         self.name = name
         self.token = None
 
-    def get_monoid(self, operand1=None, operand2=None):
-        return Monoid._auto_monoids[self.name][operand1.gb_type]
+    def get_monoid(self, left=None, right=None):
+        typ = types.promote(left, right)
+        return Monoid._auto_monoids[self.name][typ.gb_type]
 
 __all__ = ['Monoid', 'AutoMonoid', 'current_monoid']
 
