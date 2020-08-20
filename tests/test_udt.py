@@ -2,7 +2,6 @@ import pytest
 
 from pygraphblas import *
 
-@pytest.mark.skip
 def test_udt():
 
     class BF(Type):
