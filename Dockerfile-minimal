@@ -1,45 +1,26 @@
-ARG BASE_CONTAINER=debian:buster-slim
+ARG BASE_CONTAINER=ubuntu:20.04
 FROM ${BASE_CONTAINER}
+ENV DEBIAN_FRONTEND=noninteractive
 
-USER root
+RUN apt-get update && apt-get install -yq cmake make wget libpython3-dev python3-pip libreadline-dev llvm-10-dev
 
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-RUN apt-get update && apt-get install -yq --no-install-recommends \
-    build-essential    \
-    python3            \
-    python3-pip        \
-    libpython3-dev     \
-    git \
-    make \
-    cmake \
-    curl \
-    sudo \
-    libreadline-dev \
-    m4 \
-    libxml2-dev \
-    zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-ARG SS_RELEASE=v3.3.3
+ARG SS_RELEASE=3.3.3
 ARG SS_BURBLE=0
 ARG SS_COMPACT=0
 
-# get GraphBLAS, compile with debug symbols
+WORKDIR /build
+RUN wget --quiet https://github.com/DrTimothyAldenDavis/GraphBLAS/archive/v$SS_RELEASE.tar.gz
+RUN tar -xf v$SS_RELEASE.tar.gz
 
-RUN git clone  --branch ${SS_RELEASE} --single-branch https://github.com/DrTimothyAldenDavis/GraphBLAS.git && \
-     cd GraphBLAS/build && \
-     cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && \
-     make -j4 && \
-     make install
-RUN cd ../.. && /bin/rm -Rf GraphBLAS
+WORKDIR /build/GraphBLAS-$SS_RELEASE/build
+RUN cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && make -j8 && make install
+RUN ldconfig
+RUN /bin/rm -Rf /build
 
 ADD . /pygraphblas
 WORKDIR /pygraphblas
     
 RUN pip3 install -r minimal-requirements.txt
-RUN python3 setup.py clean
 RUN python3 setup.py install
 RUN ldconfig
-# ENTRYPOINT ["ipython"]
+RUN pytest

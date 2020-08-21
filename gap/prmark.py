@@ -48,7 +48,7 @@ if __name__ == '__main__':
             continue
 
         print('loading {} file.'.format(fname))
-        A = Matrix.from_binfile(fname.encode('utf8')).pattern()
+        M = Matrix.from_binfile(fname.encode('utf8')).pattern()
 
         M.options_set(format=lib.GxB_BY_COL)
         M.nvals  # finish compute

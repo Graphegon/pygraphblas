@@ -17,6 +17,7 @@ PUSH=$6
 # for BASE_NAME=notebook image
 # set env var to 1 for faster SuiteSparse compilation, but the code will be slower
 SS_COMPACT=${SS_COMPACT:-0}
+SS_BURBLE=${SS_BURBLE:-0}
 
 if [ "$LOCATION" = "clone" ]
 then
@@ -36,6 +37,7 @@ fi
 docker build \
        --build-arg SS_RELEASE=${SS_RELEASE} \
        --build-arg SS_COMPACT=${SS_COMPACT} \
+       --build-arg SS_BURBLE=${SS_BURBLE} \
        -f Dockerfile-${BASE_NAME} \
        -t graphblas/pygraphblas-${BASE_NAME}:${PY_RELEASE} \
        .

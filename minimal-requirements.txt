@@ -1,3 +1,5 @@
+numpy
+numba
 pytest
 pytest-cov
 setuptools
