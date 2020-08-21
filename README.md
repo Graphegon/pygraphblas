@@ -18,21 +18,21 @@ An installation script for Ubuntu 18.04 is provided in the `install-ubuntu.sh` f
 
 ## Docker 
 
-pygraphblas is distributed as a docker image on [Docker
+pygraphblas is distributed as two different docker images on [Docker
 Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
-and can be run with the command:
+.  The "minimal" image, containing only the library and
+[ipython](https://ipython.org/) and can be run with the command:
 
     docker run --rm -it graphblas/pygraphblas-minimal ipython
 
-## Tutorial
-
-You can run a Jupyter notebook server with docker and try the example
-Notebooks:
+You can run a "full" [Jupyter notebook](https://jupyter.org/) server
+with docker and try the example Notebooks use the command:
 
     docker run --rm -it graphblas/pygraphblas-notebook
 
-Open up the URL `http://127.0.0.1:8888/tree/pygraphblas/demo` and see
-the following Notebooks:
+Open up the URL printed on your terminal screen, typically something
+liker `http://127.0.0.1:8888/tree/pygraphblas/demo` and see the
+following Notebooks:
 
  - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction-to-GraphBLAS-with-Python.ipynb)
  - [PageRank](./pygraphblas/demo/PageRank.ipynb)
@@ -88,9 +88,9 @@ pygraphblas.  If there is a GraphBLAS implementation you would like to
 see support for in pygraphblas, please consider creating an issue for
 it for discussion and/or sending me a pull request.
 
-# Intro
+# Introduction to Graphs and Matrices
 
-Matrices can be used as powerful representations of graphs, as
+GraphBLAS uses matrices and Linear Algebra to represent graphs, as
 described [in this mathmatical introduction to
 GraphBLAS](http://www.mit.edu/~kepner/GraphBLAS/GraphBLAS-Math-release.pdf)
 by [Dr. Jeremy Kepner](http://www.mit.edu/~kepner/) head and founder
@@ -105,7 +105,7 @@ simpler, but the same ideas apply to both, both are suported by
 GraphBLAS and pygraphblas, and it is easy to switch back and forth
 between them.
 
-![An example graph and its adjacency matrix](./docs/GraphMatrix.svg)
+![An example graph and adjacency matrix](./docs/AdjacencyMatrix.svg)
 
 On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every node in the

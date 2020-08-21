@@ -6,7 +6,9 @@ from pygraphblas.base import lib
 def test_scalar_create_from_type():
 
     m = Scalar.from_type(INT64)
+    assert m.gb_type == lib.GrB_INT64
     assert m.nvals == 0
+    assert len(m) == 0
     assert not m
     with pytest.raises(KeyError) as e:
         assert m[0]
@@ -14,6 +16,7 @@ def test_scalar_create_from_type():
     m[0] = 2
     assert m[0] == 2
     assert m.nvals == 1
+    assert len(m) == 1
     assert m
 
 def test_scalar_from_value():

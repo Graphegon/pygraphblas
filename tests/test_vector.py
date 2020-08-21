@@ -93,17 +93,17 @@ def test_vector_eadd():
 
     sum1 = v.eadd(w)
     assert sum1.iseq(addition_ref)
-    sum2 = v + w
+    sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
-    sum3 += w
+    sum3 |= w
     assert sum3.iseq(sum2)
 
     # subtraction:
     # 1 - empty = 1
     # empty - 1 = -1 (assuming implicit 0)
     # explicit zeros where same numbers are subtracted
-    subtraction_ref = Vector.from_list([1, -1] + ([0] * 8))
+    subtraction_ref = Vector.from_list([1, 1] + ([0] * 8))
 
     diff1 = v - w
     assert diff1.iseq(subtraction_ref)
@@ -117,10 +117,10 @@ def test_vector_emult():
     w = Vector.from_list(V)
     mul1 = v.emult(w)
     assert mul1.iseq(Vector.from_list([v * v for v in V]))
-    mul2 = v * w
+    mul2 = v & w
     assert mul1.iseq(mul2)
     mul3 = v.dup()
-    mul3 *= w
+    mul3 &= w
     assert mul3.iseq(mul2)
 
     # division
@@ -257,10 +257,12 @@ def test_vxm():
 
     assert v.vxm(m.transpose(), desc=TransposeB).iseq(o)
 
-    # m2 = m[:, :2]
-    # v2 = v.dup()
-    # v2 @= m2
-    # assert v2.iseq(o[:2])
+    with semiring.PLUS_PLUS:
+        o = v.vxm(m)
+        assert o.iseq(Vector.from_lists(
+            [0, 1, 2, 3],
+            [7, 3, 5, 6]))
+        assert o.iseq(v @ m)
 
 def test_apply():
     v = Vector.from_lists(
@@ -379,3 +381,91 @@ def test_delitem():
     del v[0]
     assert len(v) == 1
     assert v[1] == 2
+
+def test_apply_first():
+    m = Vector.from_lists(
+        [0, 1], [4, 2]
+    )
+    assert m.apply_first(2, INT8.PLUS).to_lists() == [[0, 1], [6, 4]]
+
+def test_apply_second():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [3, -1]]
+
+def test_add_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (m + 3).to_lists() ==  [[0, 1], [8, 4]]
+
+def test_radd_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (3 + m).to_lists() ==  [[0, 1], [8, 4]]
+
+def test_iadd_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    m += 3
+    assert m.to_lists() ==  [[0, 1], [8, 4]]
+
+def test_sub_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (m - 3).to_lists() ==  [[0, 1], [2, -2]]
+
+def test_rsub_scalar_second():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (3 - m).to_lists() ==  [[0, 1], [-2, 2]]
+
+def test_isub_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    m -= 3
+    assert m.to_lists() ==  [[0, 1], [2, -2]]
+
+def test_mul_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (m * 3).to_lists() ==  [[0, 1], [15, 3]]
+
+def test_rmul_scalar_second():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    assert (3 * m).to_lists() ==  [[0, 1], [15, 3]]
+
+def test_imul_scalar():
+    m = Vector.from_lists(
+        [0, 1], [5, 1]
+    )
+    m *= 3
+    assert m.to_lists() ==  [[0, 1], [15, 3]]
+
+def test_truediv_scalar():
+    m = Vector.from_lists(
+        [0, 1], [15, 3]
+    )
+    assert (m / 3).to_lists() ==  [[0, 1], [5, 1]]
+
+def test_rtruediv_scalar_second():
+    m = Vector.from_lists(
+        [0, 1], [3, 5]
+    )
+    assert (15 / m).to_lists() ==  [[0, 1], [5, 3]]
+
+def test_itruediv_scalar():
+    m = Vector.from_lists(
+        [0, 1], [15, 3]
+    )
+    m /= 3
+    assert m.to_lists() ==  [[0, 1], [5, 1]]

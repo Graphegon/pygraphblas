@@ -5,6 +5,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .base import lib, ffi, _gb_from_name, _check
+from .monoid import Monoid
 from . import types
 
 current_semiring = contextvars.ContextVar('current_semiring')
@@ -14,17 +15,21 @@ class Semiring:
 
     _auto_semirings = defaultdict(dict)
 
-    __slots__ = ('name', 'semiring', 'token')
+    __slots__ = ('name', 'semiring', 'token', 'pls', 'mul', 'type')
 
-    def __init__(self, pls, mul, typ, semiring):
+    def __init__(self, pls, mul, typ, semiring, udt=None):
+        self.pls = pls
+        self.mul = mul
+        self.type = typ
         self.name = '_'.join((pls, mul, typ))
         self.semiring = semiring
         self.token = None
         name = pls+'_'+mul
-        self.__class__._auto_semirings[name][_gb_from_name(typ)] = semiring
-        cls = getattr(types, typ, None)
-        if cls is not None:
-            setattr(cls, name, self)
+        if udt is None:
+            self.__class__._auto_semirings[name][_gb_from_name(typ)] = semiring
+            cls = getattr(types, typ, None)
+            if cls is not None:
+                setattr(cls, name, self)
     
     def __enter__(self):
         self.token = current_semiring.set(self)
@@ -34,15 +39,8 @@ class Semiring:
         current_semiring.reset(self.token)
         return False
 
-    def get_semiring(self, operand1=None, operand2=None):
+    def get_semiring(self, left=None, right=None):
         return self.semiring
-
-    def get_monoid(self, operand1=None, operand2=None):
-        monoid = ffi.new('GrB_Monoid*')
-        _check(lib.GxB_Semiring_add(
-            monoid,
-            self.semiring))
-        return monoid
 
 class AutoSemiring(Semiring):
 
@@ -50,8 +48,9 @@ class AutoSemiring(Semiring):
         self.name = name
         self.token = None
 
-    def get_semiring(self, operand1=None, operand2=None):
-        return Semiring._auto_semirings[self.name][operand1.gb_type]
+    def get_semiring(self, left=None, right=None):
+        typ = types.promote(left, right)
+        return Semiring._auto_semirings[self.name][typ.gb_type]
 
 __all__ = ['Semiring', 'AutoSemiring', 'current_semiring']
 

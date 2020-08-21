@@ -28,12 +28,12 @@ class BinaryOp:
             self.binaryop = o[0]
         else:
             self.binaryop = binaryop
+            self.__class__._auto_binaryops[op][_gb_from_name(typ)] = binaryop
+            cls = getattr(types, typ, None)
+            if cls is not None:
+                setattr(cls, op, self)
         self.name = '_'.join((op, typ))
         self.token = None
-        self.__class__._auto_binaryops[op][_gb_from_name(typ)] = binaryop
-        cls = getattr(types, typ, None)
-        if cls is not None:
-            setattr(cls, op, self)
 
     def __enter__(self):
         self.token = current_binop.set(self)
@@ -43,7 +43,7 @@ class BinaryOp:
         current_binop.reset(self.token)
         return False
 
-    def get_binaryop(self, operand1=None, operand2=None):
+    def get_binaryop(self, left=None, right=None):
         return self.binaryop
 
 class AutoBinaryOp(BinaryOp):
@@ -52,12 +52,9 @@ class AutoBinaryOp(BinaryOp):
         self.name = name
         self.token = None
 
-    def get_binaryop(self, operand1=None, operand2=None):
-        if operand2 is None:
-            ptype = operand1.type
-        else:
-            ptype = types.promote(operand1.type, operand2.type)
-        return BinaryOp._auto_binaryops[self.name][ptype.gb_type]
+    def get_binaryop(self, left=None, right=None):
+        typ = types.promote(left, right)
+        return BinaryOp._auto_binaryops[self.name][typ.gb_type]
 
 class Accum:
 

@@ -117,10 +117,10 @@ def test_matrix_eadd():
 
     sum1 = v.eadd(w)
     assert sum1.iseq(addition_ref)
-    sum2 = v + w
+    sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
-    sum3 += w
+    sum3 |= w
     assert sum3.iseq(sum2)
 
 def test_sub():
@@ -150,10 +150,10 @@ def test_matrix_emult():
 
     mult1 = v.emult(w)
     assert mult1.iseq(Matrix.from_lists(I, I, [v * v for v in V]))
-    mult2 = v * w
-    assert mult1.iseq(mult2)
+    mult2 = v & w
+    assert mult2.iseq(mult1)
     mult3 = v.dup()
-    mult3 *= w
+    mult3 &= w
     assert mult3.iseq(mult2)
 
     # division
@@ -221,28 +221,40 @@ def test_mxm():
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
         [0, 1, 2],
-        [1, 1, 1]))
+        [True, True, True]))
+
+def test_mxm_context():
+    m = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [1,2,3])
+    n = Matrix.from_lists(
+        [0,1,2],
+        [1,2,0],
+        [2,3,4])
 
     with semiring.PLUS_PLUS:
         o = m @ n
 
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
-        [7, 10, 9]))
+        [2, 0, 1],
+        [4, 6, 5]))
 
     with semiring.LOR_LAND_BOOL:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
-        [1, 1, 1]))
-    with semiring.LOR_LAND_BOOL:
+        [2, 0, 1],
+        [True, True, True]))
+
+    with BOOL.LOR_LAND:
         o = m @ n
     assert o.iseq(Matrix.from_lists(
         [0, 1, 2],
-        [0, 1, 2],
-        [1, 1, 1]))
+        [2, 0, 1],
+        [True, True, True]))
+
     with pytest.raises(TypeError):
         m @ 3
     with pytest.raises(TypeError):
@@ -264,6 +276,13 @@ def test_mxv():
     assert o.iseq(m @ v)
 
     assert o.iseq(m.transpose().mxv(v, desc=descriptor.TransposeA))
+
+    with semiring.PLUS_PLUS:
+        o = m.mxv(v)
+        assert o.iseq(Vector.from_lists(
+            [0, 1, 2, 3],
+            [4, 6, 5, 7]))
+        assert o.iseq(m @ v)
 
 def test_matrix_pattern():
     v = Matrix.from_lists(
@@ -291,7 +310,6 @@ def test_matrix_transpose():
     v2 = v.transpose(desc=descriptor.TransposeA)
     assert v2.iseq(v)
 
-#@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / 'mmwrite_test.mm'
     mmf.touch()
@@ -314,7 +332,17 @@ def test_matrix_mm_read_write(tmp_path):
         n = Matrix.from_mm(f, INT8)
     assert n.iseq(m)
 
-pytest.mark.skip()
+def test_matrix_binfile_read_write(tmp_path):
+    binfilef = tmp_path / 'binfilewrite_test.binfile'
+    binfilef.touch()
+    m = Matrix.from_lists(
+        [0,1,2],
+        [0,1,2],
+        [2,3,4])
+    m.to_binfile(bytes(binfilef))
+    n = Matrix.from_binfile(bytes(binfilef))
+    assert n.iseq(m)
+
 def test_matrix_tsv_read(tmp_path):
     mmf = tmp_path / 'tsv_test.mm'
     mmf.touch()
@@ -914,7 +942,7 @@ def test_itruediv_scalar():
     )
     m /= 3
     assert m.to_lists() ==  [[0, 1], [0, 1], [5, 1]]
-    
+
 def test_delitem():
     m = Matrix.from_lists(
         [0, 1], [0, 1], [4, 2]
@@ -923,3 +951,37 @@ def test_delitem():
     del m[0,0]
     assert len(m) == 1
     assert m[1,1] == 2
+
+def test_cast():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2]
+    )
+    n = m.cast(FP64)
+    assert n.iseq(Matrix.from_lists(
+        [0, 1], [0, 1], [4.0, 2.0]
+        ))
+
+def test_promotion():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=FP32
+    )
+    n = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=FP64
+    )
+    o = m @ n
+    assert o.type == FP64
+    n = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=UINT8
+    )
+    o = m @ n
+    assert o.type == FP32
+
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [-4, 2],
+        typ=INT8
+    )
+    o = m @ n
+    assert o.type == INT8

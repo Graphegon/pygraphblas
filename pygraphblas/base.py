@@ -108,12 +108,6 @@ _default_type_ops = {
                    lib.GrB_TIMES_BOOL),
     }
 
-def _default_add_op(obj):
-    return _default_type_ops(obj.gb_type)[0]
-
-def _default_mul_op(obj):
-    return _default_type_ops(obj.gb_type)[1]
-
 def _check(res):
     if res != lib.GrB_SUCCESS:
         raise _error_codes[res](ffi.string(lib.GrB_error()))
@@ -123,7 +117,7 @@ def _check_no_val_key_error(res):
         if res == lib.GrB_NO_VALUE:
             raise KeyError
         raise _error_codes[res](ffi.string(lib.GrB_error()))
-    
+
 def _gb_from_name(name):
     name = name.lower()
     if name == 'bool':
@@ -148,6 +142,11 @@ def _gb_from_name(name):
         return lib.GrB_FP32
     if name == 'fp64':
         return lib.GrB_FP64
+    if name == 'fc32':
+        return lib.GxB_FC32
+    if name == 'fc64':
+        return lib.GxB_FC64
+    raise TypeError('No such type %s' % name)
 
 def _build_range(rslice, stop_val):
     # if already a list, return it and its length
@@ -194,19 +193,6 @@ def _build_range(rslice, stop_val):
         ni = lib.GxB_STRIDE
     return I, ni, size
 
-def _get_descriptor(inp0_trans=False):
-    desc = ffi.new('GrB_Descriptor*')
-    if inp0_trans:
-        # transpose input to get row
-        _check(lib.GrB_Descriptor_new(desc))
-        _check(lib.GrB_Descriptor_set(
-            desc[0],
-            lib.GrB_INP0,
-            lib.GrB_TRAN))
-    else:
-        desc[0] = NULL
-    return desc
-
 def _get_select_op(op):
     return {
         '>': lib.GxB_GT_THUNK,
@@ -232,14 +218,3 @@ def _get_bin_op(op, funcs):
         '!=': funcs.NE,
         '==': funcs.EQ,
     }[op]
-
-
-def lazy_property(fn):
-    attr_name = '_lazy_' + fn.__name__
-
-    @property
-    def _lazy_property(self):
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, fn(self))
-        return getattr(self, attr_name)
-    return _lazy_property

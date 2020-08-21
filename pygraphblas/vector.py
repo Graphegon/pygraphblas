@@ -10,8 +10,6 @@ from .base import (
     _check,
     _get_bin_op,
     _get_select_op,
-    _default_add_op,
-    _default_mul_op,
     _build_range,
 )
 from . import binaryop, unaryop, monoid, semiring as sring, types
@@ -66,7 +64,7 @@ class Vector:
 
     def iseq(self, other, eq_op=None):
         if eq_op is None:
-            eq_op = self.type.EQ.get_binaryop(self, other)
+            eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         result = ffi.new('_Bool*')
         _check(lib.LAGraph_Vector_isequal(
             result,
@@ -262,7 +260,7 @@ class Vector:
     def __ne__(self, other):
         return self.compare(other, operator.ne, '!=')
 
-    def eadd(self, other, add_op=NULL, out=None,
+    def eadd(self, other, add_op=NULL, cast=None, out=None,
                   mask=NULL, accum=NULL, desc=Default):
         """Element-wise addition with other vector.
 
@@ -281,19 +279,21 @@ class Vector:
         if isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
         if isinstance(add_op, BinaryOp):
-            add_op = add_op.get_binaryop(self, other)
+            add_op = add_op.get_binaryop(self.type, other.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
+
         if out is None:
+            typ = cast or types.promote(self.type, other.type)
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
-            out = self.__class__(_out, self.type)
+            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            out = self.__class__(_out, typ)
         _check(lib.GrB_eWiseAdd_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -304,7 +304,7 @@ class Vector:
             desc))
         return out
 
-    def emult(self, other, mult_op=NULL, out=None,
+    def emult(self, other, mult_op=NULL, cast=None, out=None,
                    mask=NULL, accum=NULL, desc=Default):
         """Element-wise multiplication with other vector.
 
@@ -323,19 +323,20 @@ class Vector:
         if isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
         if isinstance(mult_op, BinaryOp):
-            mult_op = mult_op.get_binaryop(self, other)
+            mult_op = mult_op.get_binaryop(self.type, other.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         if out is None:
+            typ = cast or types.promote(self.type, other.type)
             _out = ffi.new('GrB_Vector*')
-            _check(lib.GrB_Vector_new(_out, self.type.gb_type, self.size))
-            out = self.__class__(_out, self.type)
+            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            out = self.__class__(_out, typ)
         _check(lib.GrB_eWiseMult_Vector_BinaryOp(
             out.vector[0],
             mask,
@@ -346,38 +347,36 @@ class Vector:
             desc))
         return out
 
-    def vxm(self, other, out=None,
-            mask=NULL, accum=NULL, semiring=NULL, desc=Default):
+    def vxm(self, other, cast=None, out=None,
+            mask=NULL, accum=NULL, semiring=None, desc=Default):
         """Vector-Matrix multiply.
         """
         from .matrix import Matrix
+        if semiring is None:
+            semiring = current_semiring.get(None)
+
+        typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
             new_dimension = other.nrows if TransposeB in desc \
                 else other.ncols
-            out = Vector.sparse(self.type, new_dimension)
+            out = Vector.sparse(typ, new_dimension)
         elif not isinstance(out, Vector):
             raise TypeError('Output argument must be Vector.')
         if isinstance(mask, Vector):
             mask = mask.vector[0]
-        if semiring is NULL:
-            if self.type == types.BOOL:
-                dring = sring.LOR_LAND
-            else:
-                dring = sring.PLUS_TIMES
-            semiring = current_semiring.get(dring)
-        if isinstance(semiring, Semiring):
-            semiring = semiring.get_semiring(self)
         if accum is NULL:
             accum = current_accum.get(binaryop.TIMES)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self, other)
+            accum = accum.get_binaryop(self.type, other.type)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
+        if semiring is None:
+            semiring = typ.PLUS_TIMES
         _check(lib.GrB_vxm(
             out.vector[0],
             mask,
             accum,
-            semiring,
+            semiring.get_semiring(typ),
             self.vector[0],
             other.matrix[0],
             desc))
@@ -389,29 +388,128 @@ class Vector:
     def __imatmul__(self, other):
         return self.vxm(other, out=self)
 
+    def __and__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc)
+
+    def __iand__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc, out=self)
+
+    def __or__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+
+    def __ior__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc, out=self)
+
     def __add__(self, other):
-        return self.eadd(other)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.PLUS, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+
+    def __radd__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_first(
+                other, self.type.PLUS,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self,
+                         mask=mask, accum=accum, desc=desc)
 
     def __iadd__(self, other):
-        return self.eadd(other, out=self)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.PLUS, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, out=self,
+                         mask=mask, accum=accum, desc=desc)
 
     def __sub__(self, other):
-        return self + (-other)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.MINUS, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rsub__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_first(
+                other, self.type.MINUS,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
 
     def __isub__(self, other):
-        return self.eadd(-other, out=self)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.MINUS, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.MINUS,
+                         mask=mask, accum=accum, desc=desc)
 
     def __mul__(self, other):
-        return self.emult(other)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.TIMES, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rmul__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_first(
+                other, self.type.TIMES,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
 
     def __imul__(self, other):
-        return self.emult(other, out=self)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.TIMES, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.TIMES,
+                         mask=mask, accum=accum, desc=desc)
 
     def __truediv__(self, other):
-        return self.emult(other, mult_op=binaryop.DIV)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.DIV, other,
+                mask=mask, accum=accum, desc=desc)
+        return self.eadd(other, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
+
+    def __rtruediv__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_first(
+                other, self.type.DIV,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
 
     def __itruediv__(self, other):
-        return self.emult(other, mult_op=binaryop.DIV, out=self)
+        mask, mon, accum, desc = self._get_args()
+        if not isinstance(other, Vector):
+            return self.apply_second(
+                self.type.DIV, other, out=self,
+                mask=mask, accum=accum, desc=desc)
+        return other.eadd(self, out=self, add_op=self.type.DIV,
+                         mask=mask, accum=accum, desc=desc)
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -438,11 +536,11 @@ class Vector:
                 dmon = monoid.PLUS_MONOID
             mon = current_monoid.get(dmon)
         if isinstance(mon, Monoid):
-            mon = mon.get_monoid(self)
+            mon = mon.get_monoid(self.type)
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self)
+            accum = accum.get_binaryop(self.type)
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if isinstance(desc, Descriptor):
@@ -455,7 +553,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('_Bool*')
         _check(lib.GrB_Vector_reduce_BOOL(
@@ -472,7 +570,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('int64_t*')
         _check(lib.GrB_Vector_reduce_INT64(
@@ -489,7 +587,7 @@ class Vector:
         """
         if mon is NULL:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new('double*')
         _check(lib.GrB_Vector_reduce_FP64(
@@ -518,6 +616,54 @@ class Vector:
             self.vector[0],
             desc
             ))
+        return out
+
+    def apply_first(self, first, op, out=None, **kwargs):
+        """Apply a binary operator to the entries in a vector, binding the first input
+        to a scalar first.
+        """
+        if out is None:
+            out = self.__class__.sparse(self.type, self.size)
+        if isinstance(op, BinaryOp):
+            op = op.get_binaryop(self)
+        mask, mon, accum, desc = self._get_args(**kwargs)
+        if isinstance(first, Scalar):
+            f = lib.GxB_Vector_apply_BinaryOp1st
+        else:
+            f = self.type.Vector_apply_BinaryOp1st
+        _check(f(
+            out.vector[0],
+            mask,
+            accum,
+            op,
+            first,
+            self.vector[0],
+            desc
+        ))
+        return out
+
+    def apply_second(self, op, second, out=None, **kwargs):
+        """Apply a binary operator to the entries in a vector, binding the second input
+        to a scalar second.
+        """
+        if out is None:
+            out = self.__class__.sparse(self.type, self.size)
+        if isinstance(op, BinaryOp):
+            op = op.get_binaryop(self)
+        mask, mon, accum, desc = self._get_args(**kwargs)
+        if isinstance(second, Scalar):
+            f = lib.GxB_Vector_apply_BinaryOp2nd
+        else:
+            f = self.type.Vector_apply_BinaryOp2nd
+        _check(f(
+            out.vector[0],
+            mask,
+            accum,
+            op,
+            self.vector[0],
+            second,
+            desc
+        ))
         return out
 
     def select(self, op, thunk=NULL, out=None, **kwargs):
@@ -689,5 +835,8 @@ class Vector:
 
         return result
 
+    def __str__(self):
+        return self.to_string()
+
     def __repr__(self):
-        return '<Vector (%s: %s)>' % (self.size, self.nvals)
+        return '<Vector (%s: %s:%s)>' % (self.size, self.nvals, self.type.__name__)
