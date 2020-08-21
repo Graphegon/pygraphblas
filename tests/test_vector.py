@@ -93,10 +93,10 @@ def test_vector_eadd():
 
     sum1 = v.eadd(w)
     assert sum1.iseq(addition_ref)
-    sum2 = v + w
+    sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
-    sum3 += w
+    sum3 |= w
     assert sum3.iseq(sum2)
 
     # subtraction:
@@ -117,10 +117,10 @@ def test_vector_emult():
     w = Vector.from_list(V)
     mul1 = v.emult(w)
     assert mul1.iseq(Vector.from_list([v * v for v in V]))
-    mul2 = v * w
+    mul2 = v & w
     assert mul1.iseq(mul2)
     mul3 = v.dup()
-    mul3 *= w
+    mul3 &= w
     assert mul3.iseq(mul2)
 
     # division

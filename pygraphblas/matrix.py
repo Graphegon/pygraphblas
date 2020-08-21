@@ -508,6 +508,22 @@ class Matrix:
     def __nonzero__(self):
         return self.reduce_bool()
 
+    def __and__(self, other):
+        mask, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc)
+
+    def __iand__(self, other):
+        mask, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc, out=self)
+
+    def __or__(self, other):
+        mask, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+
+    def __ior__(self, other):
+        mask, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc, out=self)
+
     def __add__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):

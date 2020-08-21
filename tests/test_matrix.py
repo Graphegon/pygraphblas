@@ -117,10 +117,10 @@ def test_matrix_eadd():
 
     sum1 = v.eadd(w)
     assert sum1.iseq(addition_ref)
-    sum2 = v + w
+    sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
-    sum3 += w
+    sum3 |= w
     assert sum3.iseq(sum2)
 
 def test_sub():
@@ -150,10 +150,10 @@ def test_matrix_emult():
 
     mult1 = v.emult(w)
     assert mult1.iseq(Matrix.from_lists(I, I, [v * v for v in V]))
-    mult2 = v * w
-    assert mult1.iseq(mult2)
+    mult2 = v & w
+    assert mult2.iseq(mult1)
     mult3 = v.dup()
-    mult3 *= w
+    mult3 &= w
     assert mult3.iseq(mult2)
 
     # division

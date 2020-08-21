@@ -388,6 +388,22 @@ class Vector:
     def __imatmul__(self, other):
         return self.vxm(other, out=self)
 
+    def __and__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc)
+
+    def __iand__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.emult(other, mask=mask, accum=accum, desc=desc, out=self)
+
+    def __or__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+
+    def __ior__(self, other):
+        mask, mon, accum, desc = self._get_args()
+        return self.eadd(other, mask=mask, accum=accum, desc=desc, out=self)
+
     def __add__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
