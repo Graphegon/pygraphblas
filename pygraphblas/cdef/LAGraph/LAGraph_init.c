@@ -40,7 +40,11 @@
 // See also LAGraph_xinit.
 
 #include "LAGraph_internal.h"
+#ifdef __linux__
 #include <malloc.h>
+#else
+#include <stdlib.h>
+#endif
 // #include <gnu/libc-version.h>
 
 GrB_Info LAGraph_init ( )
