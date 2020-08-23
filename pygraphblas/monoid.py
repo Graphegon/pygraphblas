@@ -9,32 +9,36 @@ from .base import lib, ffi, _gb_from_name, _check
 from .binaryop import BinaryOp
 from . import types
 
-current_monoid = contextvars.ContextVar('current_monoid')
+current_monoid = contextvars.ContextVar("current_monoid")
+
 
 class Monoid:
 
     _auto_monoids = defaultdict(dict)
 
-    __slots__ = ('name', 'monoid', 'token', 'op', 'type')
+    __slots__ = ("name", "monoid", "token", "op", "type")
 
     def __init__(self, op, typ, monoid, udt=None, boolean=False):
         if udt is not None:
-            o = ffi.new('GrB_Monoid*')
+            o = ffi.new("GrB_Monoid*")
             udt = udt.gb_type
             lib.GrB_Monoid_new(
                 o,
-                ffi.cast('GxB_binary_function', monoid.address),
-                lib.GrB_BOOL if boolean else udt, udt, udt)
+                ffi.cast("GxB_binary_function", monoid.address),
+                lib.GrB_BOOL if boolean else udt,
+                udt,
+                udt,
+            )
             self.monoid = o[0]
         else:
             self.monoid = monoid
-            self.__class__._auto_monoids[op+'_MONOID'][_gb_from_name(typ)] = monoid
+            self.__class__._auto_monoids[op + "_MONOID"][_gb_from_name(typ)] = monoid
             cls = getattr(types, typ, None)
             if cls is not None:
-                setattr(cls, op+'_MONOID', self)
+                setattr(cls, op + "_MONOID", self)
         self.op = op
         self.type = typ
-        self.name = '_'.join((op, typ, 'monoid'))
+        self.name = "_".join((op, typ, "monoid"))
         self.token = None
 
     def __enter__(self):
@@ -48,8 +52,8 @@ class Monoid:
     def get_monoid(self, left=None, right=None):
         return self.monoid
 
-class AutoMonoid(Monoid):
 
+class AutoMonoid(Monoid):
     def __init__(self, name):
         self.name = name
         self.token = None
@@ -58,18 +62,22 @@ class AutoMonoid(Monoid):
         typ = types.promote(left, right)
         return Monoid._auto_monoids[self.name][typ.gb_type]
 
-__all__ = ['Monoid', 'AutoMonoid', 'current_monoid']
+
+__all__ = ["Monoid", "AutoMonoid", "current_monoid"]
 
 gxb_monoid_re = re.compile(
-    '^GxB_(MIN|MAX|PLUS|TIMES|BOR|BAND|BXOR|BXNOR)_'
-    '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)_MONOID$')
+    "^GxB_(MIN|MAX|PLUS|TIMES|BOR|BAND|BXOR|BXNOR)_"
+    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)_MONOID$"
+)
 
 grb_monoid_re = re.compile(
-    '^GrB_(MIN|MAX|PLUS|TIMES)_MONOID_'
-    '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+    "^GrB_(MIN|MAX|PLUS|TIMES)_MONOID_"
+    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
+)
 
-pure_bool_re = re.compile('^GxB_(LOR|LAND|LXOR|EQ)_(BOOL)_MONOID$')
-pure_bool_re_v13 = re.compile('^GrB_(LOR|LAND|LXOR|EQ)_MONOID_(BOOL)$')
+pure_bool_re = re.compile("^GxB_(LOR|LAND|LXOR|EQ)_(BOOL)_MONOID$")
+pure_bool_re_v13 = re.compile("^GrB_(LOR|LAND|LXOR|EQ)_MONOID_(BOOL)$")
+
 
 def monoid_group(reg):
     srs = []
@@ -79,12 +87,15 @@ def monoid_group(reg):
         srs.append(m)
     return srs
 
+
 def build_monoids():
     this = sys.modules[__name__]
-    for r in chain(monoid_group(gxb_monoid_re),
-                   monoid_group(grb_monoid_re),
-                   monoid_group(pure_bool_re),
-                   monoid_group(pure_bool_re_v13)):
+    for r in chain(
+        monoid_group(gxb_monoid_re),
+        monoid_group(grb_monoid_re),
+        monoid_group(pure_bool_re),
+        monoid_group(pure_bool_re_v13),
+    ):
         setattr(this, r.name, r)
     for name in Monoid._auto_monoids:
         bo = AutoMonoid(name)

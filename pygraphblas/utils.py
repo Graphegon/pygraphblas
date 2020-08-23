@@ -4,10 +4,12 @@ from .base import (
     _check,
 )
 
+
 def add_identity(M):
     from . import TransposeA
+
     d_out = M.reduce_vector()
-    d_in =  M.reduce_vector(desc=TransposeA)
+    d_in = M.reduce_vector(desc=TransposeA)
 
     edges_added = 0
     if d_out.nvals < M.nrows or d_in.nvals < M.nrows:
@@ -17,8 +19,9 @@ def add_identity(M):
                 edges_added += 1
     return edges_added
 
+
 def get_version():
-    version = ffi.new('unsigned int*')
-    subversion = ffi.new('unsigned int*')
+    version = ffi.new("unsigned int*")
+    subversion = ffi.new("unsigned int*")
     _check(lib.GrB_getVersion(version, subversion))
     return (version[0], subversion[0])

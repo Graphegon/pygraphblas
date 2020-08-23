@@ -25,7 +25,8 @@ from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
 
-__all__ = ['Matrix']
+__all__ = ["Matrix"]
+
 
 class Matrix:
     """GraphBLAS Sparse Matrix
@@ -34,11 +35,11 @@ class Matrix:
 
     """
 
-    __slots__ = ('matrix', 'type', '_funcs', '_keep_alives')
+    __slots__ = ("matrix", "type", "_funcs", "_keep_alives")
 
     def __init__(self, matrix, typ=None, **options):
         if typ is None:
-            new_type = ffi.new('GrB_Type*')
+            new_type = ffi.new("GrB_Type*")
             _check(lib.GxB_Matrix_type(new_type, matrix[0]))
 
             typ = types.gb_type_to_type(new_type[0])
@@ -58,7 +59,7 @@ class Matrix:
         number of columns.
 
         """
-        new_mat = ffi.new('GrB_Matrix*')
+        new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
         m = cls(new_mat, typ, **options)
         return m
@@ -68,7 +69,7 @@ class Matrix:
         m = cls.sparse(typ, nrows, ncols, **options)
         if fill is None:
             fill = m.type.zero
-        m[:,:] = fill
+        m[:, :] = fill
         return m
 
     @classmethod
@@ -97,7 +98,7 @@ class Matrix:
         """Create a new matrix by reading a Matrix Market file.
 
         """
-        m = ffi.new('GrB_Matrix*')
+        m = ffi.new("GrB_Matrix*")
         i = cls(m, typ, **options)
         _check(lib.LAGraph_mmread(m, mm_file))
         return i
@@ -107,7 +108,7 @@ class Matrix:
         """Create a new matrix by reading a tab separated value file.
 
         """
-        m = ffi.new('GrB_Matrix*')
+        m = ffi.new("GrB_Matrix*")
         i = cls(m, typ, **options)
         _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
         return i
@@ -116,45 +117,58 @@ class Matrix:
     def from_binfile(cls, bin_file):
         """Create a new matrix by reading a SuiteSparse specific binary file.
         """
-        m = ffi.new('GrB_Matrix*')
+        m = ffi.new("GrB_Matrix*")
         _check(lib.LAGraph_binread(m, bin_file))
         return cls(m)
 
     @classmethod
-    def random(cls, typ, nrows, ncols, nvals,
-               make_pattern=False, make_symmetric=False,
-               make_skew_symmetric=False, make_hermitian=True,
-               no_diagonal=False, seed=None, **options):
+    def random(
+        cls,
+        typ,
+        nrows,
+        ncols,
+        nvals,
+        make_pattern=False,
+        make_symmetric=False,
+        make_skew_symmetric=False,
+        make_hermitian=True,
+        no_diagonal=False,
+        seed=None,
+        **options
+    ):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
         """
-        result = ffi.new('GrB_Matrix*')
+        result = ffi.new("GrB_Matrix*")
         i = cls(result, typ, **options)
-        fseed = ffi.new('uint64_t*')
+        fseed = ffi.new("uint64_t*")
         if seed is None:
             seed = randint(0, sys.maxsize)
         fseed[0] = seed
-        _check(lib.LAGraph_random(
-            result,
-            typ.gb_type,
-            nrows,
-            ncols,
-            nvals,
-            make_pattern,
-            make_symmetric,
-            make_skew_symmetric,
-            make_hermitian,
-            no_diagonal,
-            fseed))
+        _check(
+            lib.LAGraph_random(
+                result,
+                typ.gb_type,
+                nrows,
+                ncols,
+                nvals,
+                make_pattern,
+                make_symmetric,
+                make_skew_symmetric,
+                make_hermitian,
+                no_diagonal,
+                fseed,
+            )
+        )
         return i
 
     @classmethod
     def identity(cls, typ, nrows, **options):
         result = cls.sparse(typ, nrows, nrows, **options)
         for i in range(nrows):
-            result[i,i] = result.type.one
+            result[i, i] = result.type.one
         return result
 
     @property
@@ -162,7 +176,7 @@ class Matrix:
         """Return the GraphBLAS low-level type object of the Matrix.
 
         """
-        new_type = ffi.new('GrB_Type*')
+        new_type = ffi.new("GrB_Type*")
         _check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
         return new_type[0]
 
@@ -171,7 +185,7 @@ class Matrix:
         """Return the number of Matrix rows.
 
         """
-        n = ffi.new('GrB_Index*')
+        n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
@@ -180,7 +194,7 @@ class Matrix:
         """Return the number of Matrix columns.
 
         """
-        n = ffi.new('GrB_Index*')
+        n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
@@ -200,7 +214,7 @@ class Matrix:
         """Return the number of Matrix values.
 
         """
-        n = ffi.new('GrB_Index*')
+        n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
@@ -212,45 +226,27 @@ class Matrix:
         """Create an duplicate Matrix.
 
         """
-        new_mat = ffi.new('GrB_Matrix*')
+        new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type, **options)
 
     def options_set(self, hyper=None, format=None):
         if hyper:
-            hyper = ffi.cast('double', hyper)
-            _check(lib.GxB_Matrix_Option_set(
-                self.matrix[0],
-                lib.GxB_HYPER,
-                hyper))
+            hyper = ffi.cast("double", hyper)
+            _check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER, hyper))
         if format:
-            format = ffi.cast('GxB_Format_Value', format)
-            _check(lib.GxB_Matrix_Option_set(
-                self.matrix[0],
-                lib.GxB_FORMAT,
-                format))
+            format = ffi.cast("GxB_Format_Value", format)
+            _check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     def options_get(self):
-        hyper = ffi.new('double*')
-        _check(lib.GxB_Matrix_Option_get(
-            self.matrix[0],
-            lib.GxB_HYPER,
-            hyper
-            ))
+        hyper = ffi.new("double*")
+        _check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER, hyper))
 
-        format = ffi.new('GxB_Format_Value*')
-        _check(lib.GxB_Matrix_Option_get(
-            self.matrix[0],
-            lib.GxB_FORMAT,
-            format
-            ))
+        format = ffi.new("GxB_Format_Value*")
+        _check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
 
-        is_hyper = ffi.new('bool*')
-        _check(lib.GxB_Matrix_Option_get(
-            self.matrix[0],
-            lib.GxB_IS_HYPER,
-            is_hyper
-            ))
+        is_hyper = ffi.new("bool*")
+        _check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_IS_HYPER, is_hyper))
 
         return (hyper[0], format[0], is_hyper[0])
 
@@ -260,7 +256,7 @@ class Matrix:
 
         """
 
-        r = ffi.new('GrB_Matrix*')
+        r = ffi.new("GrB_Matrix*")
         _check(lib.LAGraph_pattern(r, self.matrix[0], typ.gb_type))
         return Matrix(r, typ)
 
@@ -280,18 +276,12 @@ class Matrix:
         """Extract the rows, columns and values of the Matrix as 3 lists.
 
         """
-        I = ffi.new('GrB_Index[%s]' % self.nvals)
-        J = ffi.new('GrB_Index[%s]' % self.nvals)
-        V = self.type.ffi.new(self.type.C + '[%s]' % self.nvals)
-        n = ffi.new('GrB_Index*')
+        I = ffi.new("GrB_Index[%s]" % self.nvals)
+        J = ffi.new("GrB_Index[%s]" % self.nvals)
+        V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
+        n = ffi.new("GrB_Index*")
         n[0] = self.nvals
-        _check(self.type.Matrix_extractTuples(
-            I,
-            J,
-            V,
-            n,
-            self.matrix[0]
-            ))
+        _check(self.type.Matrix_extractTuples(I, J, V, n, self.matrix[0]))
         return [list(I), list(J), list(map(self.type.to_value, V))]
 
     def clear(self):
@@ -306,32 +296,25 @@ class Matrix:
         outside the resized matrix are deleted.
 
         """
-        _check(lib.GrB_Matrix_resize(
-            self.matrix[0],
-            nrows,
-            ncols))
+        _check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, **kwargs):
         """ Transpose matrix. """
         if out is None:
-            new_dimensions = (self.nrows, self.ncols) if TransposeA in kwargs.get('desc', ()) \
+            new_dimensions = (
+                (self.nrows, self.ncols)
+                if TransposeA in kwargs.get("desc", ())
                 else (self.ncols, self.nrows)
-            _out = ffi.new('GrB_Matrix*')
+            )
+            _out = ffi.new("GrB_Matrix*")
             if cast is not None:
                 typ = cast
             else:
                 typ = self.type
-            _check(lib.GrB_Matrix_new(
-                _out, typ.gb_type, *new_dimensions))
+            _check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_transpose(
-            out.matrix[0],
-            mask,
-            accum,
-            self.matrix[0],
-            desc
-            ))
+        _check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
         return out
 
     def cast(self, cast, out=None):
@@ -373,19 +356,21 @@ class Matrix:
         mask, accum, desc = self._get_args(**kwargs)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
-            _out = ffi.new('GrB_Matrix*')
-            _check(lib.GrB_Matrix_new(
-                _out, typ.gb_type, self.nrows, self.ncols))
+            _out = ffi.new("GrB_Matrix*")
+            _check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
-        _check(lib.GrB_eWiseAdd_Matrix_BinaryOp(
-            out.matrix[0],
-            mask,
-            accum,
-            add_op,
-            self.matrix[0],
-            other.matrix[0],
-            desc))
+        _check(
+            lib.GrB_eWiseAdd_Matrix_BinaryOp(
+                out.matrix[0],
+                mask,
+                accum,
+                add_op,
+                self.matrix[0],
+                other.matrix[0],
+                desc,
+            )
+        )
         return out
 
     def emult(self, other, mult_op=NULL, cast=None, out=None, **kwargs):
@@ -410,31 +395,29 @@ class Matrix:
         mask, accum, desc = self._get_args(**kwargs)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
-            _out = ffi.new('GrB_Matrix*')
-            _check(lib.GrB_Matrix_new(
-                _out, typ.gb_type, self.nrows, self.ncols))
+            _out = ffi.new("GrB_Matrix*")
+            _check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
-        _check(lib.GrB_eWiseMult_Matrix_BinaryOp(
-            out.matrix[0],
-            mask,
-            accum,
-            mult_op,
-            self.matrix[0],
-            other.matrix[0],
-            desc))
+        _check(
+            lib.GrB_eWiseMult_Matrix_BinaryOp(
+                out.matrix[0],
+                mask,
+                accum,
+                mult_op,
+                self.matrix[0],
+                other.matrix[0],
+                desc,
+            )
+        )
         return out
 
     def iseq(self, other):
         """Compare two matrices for equality.
         """
-        result = ffi.new('_Bool*')
+        result = ffi.new("_Bool*")
         eq_op = self.type.EQ.get_binaryop(self, other)
-        _check(lib.LAGraph_isequal(
-            result,
-            self.matrix[0],
-            other.matrix[0],
-            eq_op))
+        _check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
@@ -450,36 +433,23 @@ class Matrix:
 
     def __iter__(self):
         nvals = self.nvals
-        _nvals = ffi.new('GrB_Index[1]', [nvals])
-        I = ffi.new('GrB_Index[%s]' % nvals)
-        J = ffi.new('GrB_Index[%s]' % nvals)
-        X = self.type.ffi.new('%s[%s]' % (self.type.C, nvals))
-        _check(self.type.Matrix_extractTuples(
-            I,
-            J,
-            X,
-            _nvals,
-            self.matrix[0]
-            ))
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        J = ffi.new("GrB_Index[%s]" % nvals)
+        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        _check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
         return zip(I, J, map(self.type.to_value, X))
-
 
     def to_arrays(self):
         if self.type.typecode is None:
-            raise TypeError('This matrix has no array typecode.')
+            raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
-        _nvals = ffi.new('GrB_Index[1]', [nvals])
-        I = ffi.new('GrB_Index[%s]' % nvals)
-        J = ffi.new('GrB_Index[%s]' % nvals)
-        X = self.type.ffi.new('%s[%s]' % (self.type.C, nvals))
-        _check(self.type.Matrix_extractTuples(
-            I,
-            J,
-            X,
-            _nvals,
-            self.matrix[0]
-            ))
-        return array('L', I), array('L', J), array(self.type.typecode, X)
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        J = ffi.new("GrB_Index[%s]" % nvals)
+        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        _check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        return array("L", I), array("L", J), array(self.type.typecode, X)
 
     @property
     def rows(self):
@@ -528,108 +498,111 @@ class Matrix:
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.PLUS, other,
-                mask=mask, accum=accum, desc=desc)
+                self.type.PLUS, other, mask=mask, accum=accum, desc=desc
+            )
         return self.eadd(other, mask=mask, accum=accum, desc=desc)
 
     def __radd__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_first(
-                other, self.type.PLUS,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.PLUS, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(self, mask=mask, accum=accum, desc=desc)
 
     def __iadd__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.PLUS, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, out=self,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.PLUS, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(other, out=self, mask=mask, accum=accum, desc=desc)
 
     def __sub__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.MINUS, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.MINUS, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(
+            other, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __rsub__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_first(
-                other, self.type.MINUS,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.MINUS, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __isub__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.MINUS, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.MINUS, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __mul__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.TIMES, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.TIMES, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(
+            other, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __rmul__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_first(
-                other, self.type.TIMES,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.TIMES, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __imul__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.TIMES, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.TIMES, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __truediv__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.DIV, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.DIV, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(other, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
 
     def __rtruediv__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_first(
-                other, self.type.DIV,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.DIV, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
 
     def __itruediv__(self, other):
         mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
             return self.apply_second(
-                self.type.DIV, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.DIV, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc
+        )
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -657,14 +630,9 @@ class Matrix:
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self)
-        result = ffi.new('_Bool*')
+        result = ffi.new("_Bool*")
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Matrix_reduce_BOOL(
-            result,
-            accum,
-            mon,
-            self.matrix[0],
-            desc))
+        _check(lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc))
         return result[0]
 
     def reduce_int(self, mon=NULL, **kwargs):
@@ -674,14 +642,9 @@ class Matrix:
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self)
-        result = ffi.new('int64_t*')
+        result = ffi.new("int64_t*")
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Matrix_reduce_INT64(
-            result,
-            accum,
-            mon,
-            self.matrix[0],
-            desc))
+        _check(lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc))
         return result[0]
 
     def reduce_float(self, mon=NULL, **kwargs):
@@ -692,13 +655,8 @@ class Matrix:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self)
         mask, accum, desc = self._get_args(**kwargs)
-        result = ffi.new('double*')
-        _check(lib.GrB_Matrix_reduce_FP64(
-            result,
-            accum,
-            mon,
-            self.matrix[0],
-            desc))
+        result = ffi.new("double*")
+        _check(lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc))
         return result[0]
 
     def reduce_vector(self, mon=NULL, out=None, **kwargs):
@@ -706,18 +664,16 @@ class Matrix:
 
         """
         if mon is NULL:
-            mon = current_monoid.get(getattr(self.type, 'PLUS_MONOID', NULL))
+            mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
         mon = mon.get_monoid(self)
         if out is None:
             out = Vector.sparse(self.type, self.nrows)
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Matrix_reduce_Monoid(
-            out.vector[0],
-            mask,
-            accum,
-            mon,
-            self.matrix[0],
-            desc))
+        _check(
+            lib.GrB_Matrix_reduce_Monoid(
+                out.vector[0], mask, accum, mon, self.matrix[0], desc
+            )
+        )
         return out
 
     def apply(self, op, out=None, **kwargs):
@@ -729,14 +685,9 @@ class Matrix:
         if isinstance(op, UnaryOp):
             op = op.get_unaryop(self)
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Matrix_apply(
-            out.matrix[0],
-            mask,
-            accum,
-            op,
-            self.matrix[0],
-            desc
-            ))
+        _check(
+            lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
+        )
         return out
 
     def apply_first(self, first, op, out=None, **kwargs):
@@ -752,15 +703,7 @@ class Matrix:
             f = lib.GxB_Matrix_apply_BinaryOp1st
         else:
             f = self.type.Matrix_apply_BinaryOp1st
-        _check(f(
-            out.matrix[0],
-            mask,
-            accum,
-            op,
-            first,
-            self.matrix[0],
-            desc
-        ))
+        _check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
@@ -772,15 +715,11 @@ class Matrix:
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self)
         mask, accum, desc = self._get_args(**kwargs)
-        _check(self.type.Matrix_apply_BinaryOp2nd(
-            out.matrix[0],
-            mask,
-            accum,
-            op,
-            self.matrix[0],
-            second,
-            desc
-        ))
+        _check(
+            self.type.Matrix_apply_BinaryOp2nd(
+                out.matrix[0], mask, accum, op, self.matrix[0], second, desc
+            )
+        )
         return out
 
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
@@ -799,15 +738,11 @@ class Matrix:
 
         mask, accum, desc = self._get_args(**kwargs)
 
-        _check(lib.GxB_Matrix_select(
-            out.matrix[0],
-            mask,
-            accum,
-            op,
-            self.matrix[0],
-            thunk,
-            desc
-            ))
+        _check(
+            lib.GxB_Matrix_select(
+                out.matrix[0], mask, accum, op, self.matrix[0], thunk, desc
+            )
+        )
         return out
 
     def tril(self, thunk=NULL):
@@ -830,16 +765,11 @@ class Matrix:
         if identity is None:
             identity = self.type.one
 
-        _check(self.type.Matrix_assignScalar(
-            B.matrix[0],
-            NULL,
-            NULL,
-            identity,
-            lib.GrB_ALL,
-            0,
-            lib.GrB_ALL,
-            0,
-            NULL))
+        _check(
+            self.type.Matrix_assignScalar(
+                B.matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
+            )
+        )
         return self.eadd(B, self.type.FIRST)
 
     def compare(self, other, op, strop):
@@ -847,7 +777,7 @@ class Matrix:
         if isinstance(other, (bool, int, float)):
             if op(other, 0):
                 B = self.__class__.dup(self)
-                B[:,:] = other
+                B[:, :] = other
                 self.emult(B, strop, out=C)
                 return C
             else:
@@ -862,22 +792,22 @@ class Matrix:
             raise NotImplementedError
 
     def __gt__(self, other):
-        return self.compare(other, operator.gt, '>')
+        return self.compare(other, operator.gt, ">")
 
     def __lt__(self, other):
-        return self.compare(other, operator.lt, '<')
+        return self.compare(other, operator.lt, "<")
 
     def __ge__(self, other):
-        return self.compare(other, operator.ge, '>=')
+        return self.compare(other, operator.ge, ">=")
 
     def __le__(self, other):
-        return self.compare(other, operator.le, '<=')
+        return self.compare(other, operator.le, "<=")
 
     def __eq__(self, other):
-        return self.compare(other, operator.eq, '==')
+        return self.compare(other, operator.eq, "==")
 
     def __ne__(self, other):
-        return self.compare(other, operator.ne, '!=')
+        return self.compare(other, operator.ne, "!=")
 
     def _get_args(self, mask=NULL, accum=NULL, desc=Default):
         if isinstance(mask, Matrix):
@@ -909,14 +839,17 @@ class Matrix:
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
-        _check(lib.GrB_mxm(
-            out.matrix[0],
-            mask,
-            accum,
-            semiring.get_semiring(typ),
-            self.matrix[0],
-            other.matrix[0],
-            desc))
+        _check(
+            lib.GrB_mxm(
+                out.matrix[0],
+                mask,
+                accum,
+                semiring.get_semiring(typ),
+                self.matrix[0],
+                other.matrix[0],
+                desc,
+            )
+        )
         return out
 
     def mxv(self, other, cast=None, out=None, semiring=None, **kwargs):
@@ -929,21 +862,25 @@ class Matrix:
         mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = self.ncols if TransposeA in kwargs.get('desc', ()) \
-                else self.nrows
+            new_dimension = (
+                self.ncols if TransposeA in kwargs.get("desc", ()) else self.nrows
+            )
             out = Vector.sparse(typ, new_dimension)
 
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
-        _check(lib.GrB_mxv(
-            out.vector[0],
-            mask,
-            accum,
-            semiring.get_semiring(typ),
-            self.matrix[0],
-            other.vector[0],
-            desc))
+        _check(
+            lib.GrB_mxv(
+                out.vector[0],
+                mask,
+                accum,
+                semiring.get_semiring(typ),
+                self.matrix[0],
+                other.vector[0],
+                desc,
+            )
+        )
         return out
 
     def __matmul__(self, other):
@@ -952,7 +889,7 @@ class Matrix:
         elif isinstance(other, Vector):
             return self.mxv(other)
         else:
-            raise TypeError('Right argument to @ must be Matrix or Vector.')
+            raise TypeError("Right argument to @ must be Matrix or Vector.")
 
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
@@ -965,22 +902,18 @@ class Matrix:
         typ = cast or types.promote(self.type, other.type)
         if out is None:
             out = self.__class__.sparse(
-                typ,
-                self.nrows*other.nrows,
-                self.ncols*other.ncols)
+                typ, self.nrows * other.nrows, self.ncols * other.ncols
+            )
         if op is NULL:
             op = typ.TIMES
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type, other.type)
 
-        _check(lib.GrB_Matrix_kronecker_BinaryOp(
-            out.matrix[0],
-            mask,
-            accum,
-            op,
-            self.matrix[0],
-            other.matrix[0],
-            desc))
+        _check(
+            lib.GrB_Matrix_kronecker_BinaryOp(
+                out.matrix[0], mask, accum, op, self.matrix[0], other.matrix[0], desc
+            )
+        )
         return out
 
     kron = kronecker  # new v1.3 name
@@ -989,7 +922,7 @@ class Matrix:
         """Slice a submatrix.
 
         """
-        ta = TransposeA in kwargs.get('desc', ())
+        ta = TransposeA in kwargs.get("desc", ())
         mask, accum, desc = self._get_args(**kwargs)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -1004,47 +937,37 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, isize, jsize)
 
-        _check(lib.GrB_Matrix_extract(
-            out.matrix[0],
-            mask,
-            accum,
-            self.matrix[0],
-            I,
-            ni,
-            J,
-            nj,
-            desc))
+        _check(
+            lib.GrB_Matrix_extract(
+                out.matrix[0], mask, accum, self.matrix[0], I, ni, J, nj, desc
+            )
+        )
         return out
 
     def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
         """Slice a column as subvector.
         Use `desc=TransposeA` to slice a row.
         """
-        stop_val = self.ncols if TransposeA in kwargs.get('desc', ()) else self.nrows
+        stop_val = self.ncols if TransposeA in kwargs.get("desc", ()) else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
         mask, accum, desc = self._get_args(**kwargs)
         I, ni, size = _build_range(row_slice, stop_val)
 
-        _check(lib.GrB_Col_extract(
-            out.vector[0],
-            mask,
-            accum,
-            self.matrix[0],
-            I,
-            ni,
-            col_index,
-            desc
-            ))
+        _check(
+            lib.GrB_Col_extract(
+                out.vector[0], mask, accum, self.matrix[0], I, ni, col_index, desc
+            )
+        )
         return out
 
     def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
         """Slice a row as subvector.
         """
         desc = TransposeA
-        if 'desc' in kwargs:
-            desc = desc | kwargs['desc']
+        if "desc" in kwargs:
+            desc = desc | kwargs["desc"]
         return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)
 
     def __getitem__(self, index):
@@ -1066,11 +989,11 @@ class Matrix:
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
             result = self.type.ffi.new(self.type.ptr)
-            _check(self.type.Matrix_extractElement(
-                result,
-                self.matrix[0],
-                index[0],
-                index[1]))
+            _check(
+                self.type.Matrix_extractElement(
+                    result, self.matrix[0], index[0], index[1]
+                )
+            )
             return self.type.to_value(result[0])
 
         if isinstance(i0, int) and isinstance(i1, slice):
@@ -1088,39 +1011,29 @@ class Matrix:
         """Assign a vector to a column.
 
         """
-        stop_val = self.ncols if TransposeA in kwargs.get('desc', ()) else self.nrows
+        stop_val = self.ncols if TransposeA in kwargs.get("desc", ()) else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(**kwargs)
 
-        _check(lib.GrB_Col_assign(
-            self.matrix[0],
-            mask,
-            accum,
-            value.vector[0],
-            I,
-            ni,
-            col_index,
-            desc
-            ))
+        _check(
+            lib.GrB_Col_assign(
+                self.matrix[0], mask, accum, value.vector[0], I, ni, col_index, desc
+            )
+        )
 
     def assign_row(self, row_index, value, col_slice=None, **kwargs):
         """Assign a vector to a row.
 
         """
-        stop_val = self.nrows if TransposeA in kwargs.get('desc', ()) else self.ncols
+        stop_val = self.nrows if TransposeA in kwargs.get("desc", ()) else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Row_assign(
-            self.matrix[0],
-            mask,
-            accum,
-            value.vector[0],
-            row_index,
-            I,
-            ni,
-            desc
-            ))
+        _check(
+            lib.GrB_Row_assign(
+                self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
+            )
+        )
 
     def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
         """Assign a submatrix.
@@ -1135,16 +1048,11 @@ class Matrix:
 
         mask, accum, desc = self._get_args(**kwargs)
 
-        _check(lib.GrB_Matrix_assign(
-            self.matrix[0],
-            mask,
-            accum,
-            value.matrix[0],
-            I,
-            ni,
-            J,
-            nj,
-            desc))
+        _check(
+            lib.GrB_Matrix_assign(
+                self.matrix[0], mask, accum, value.matrix[0], I, ni, J, nj, desc
+            )
+        )
 
     def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
         mask, accum, desc = self._get_args(**kwargs)
@@ -1159,17 +1067,11 @@ class Matrix:
             J = lib.GrB_ALL
             nj = 0
         scalar_type = types._gb_from_type(type(value))
-        _check(scalar_type.Matrix_assignScalar(
-            self.matrix[0],
-            mask,
-            accum,
-            value,
-            I,
-            ni,
-            J,
-            nj,
-            desc
-            ))
+        _check(
+            scalar_type.Matrix_assignScalar(
+                self.matrix[0], mask, accum, value, I, ni, J, nj, desc
+            )
+        )
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
@@ -1202,11 +1104,7 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             val = self.type.from_value(value)
-            _check(self.type.Matrix_setElement(
-                self.matrix[0],
-                val,
-                i0,
-                i1))
+            _check(self.type.Matrix_setElement(self.matrix[0], val, i0, i1))
             return
 
         if isinstance(i0, int) and isinstance(i1, slice):
@@ -1227,18 +1125,18 @@ class Matrix:
             # a[:,:] assign submatrix
             self.assign_matrix(value, i0, i1)
             return
-        raise TypeError('Unknown index or value for matrix assignment.')
+        raise TypeError("Unknown index or value for matrix assignment.")
 
     def __delitem__(self, index):
-        if not isinstance(index, tuple) and \
-           isinstance(index[0], int) and \
-           isinstance(index[1], int):
-            raise TypeError("__delitem__ currently only supports single element removal")
-        _check(lib.GrB_Matrix_removeElement(
-            self.matrix[0],
-            index[0],
-            index[1]
-            ))
+        if (
+            not isinstance(index, tuple)
+            and isinstance(index[0], int)
+            and isinstance(index[1], int)
+        ):
+            raise TypeError(
+                "__delitem__ currently only supports single element removal"
+            )
+        _check(lib.GrB_Matrix_removeElement(self.matrix[0], index[0], index[1]))
 
     def __contains__(self, index):
         try:
@@ -1249,23 +1147,27 @@ class Matrix:
 
     def get(self, i, j, default=None):
         try:
-            return self[i,j]
+            return self[i, j]
         except NoValue:
             return default
 
     def wait(self):
         _check(lib.GrB_Matrix_wait(self.matrix))
 
-    def to_string(self, format_string='{:>%s}', width=2, empty_char=''):
+    def to_string(self, format_string="{:>%s}", width=2, empty_char=""):
         format_string = format_string % width
-        header = format_string.format('') + ' ' + ''.join(format_string.format(i) for i in range(self.ncols))
-        result = header + '\n'
+        header = (
+            format_string.format("")
+            + " "
+            + "".join(format_string.format(i) for i in range(self.ncols))
+        )
+        result = header + "\n"
         for row in range(self.nrows):
-            result += format_string.format(row) + '|'
+            result += format_string.format(row) + "|"
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += '|' + format_string.format(row) + '\n'
+            result += "|" + format_string.format(row) + "\n"
         result += header
 
         return result
@@ -1274,8 +1176,9 @@ class Matrix:
         return self.to_string()
 
     def __repr__(self):
-        return '<Matrix (%sx%s : %s:%s)>' % (
+        return "<Matrix (%sx%s : %s:%s)>" % (
             self.nrows,
             self.ncols,
             self.nvals,
-            self.type.__name__)
+            self.type.__name__,
+        )

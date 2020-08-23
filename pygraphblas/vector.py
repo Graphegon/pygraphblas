@@ -21,7 +21,8 @@ from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeB
 
-__all__ = ['Vector']
+__all__ = ["Vector"]
+
 
 class Vector:
     """GraphBLAS Sparse Vector
@@ -30,11 +31,11 @@ class Vector:
 
     """
 
-    __slots__ = ('vector', 'type', '_keep_alives')
+    __slots__ = ("vector", "type", "_keep_alives")
 
     def __init__(self, vec, typ=None):
         if typ is None:
-            new_type = ffi.new('GrB_Type*')
+            new_type = ffi.new("GrB_Type*")
             _check(lib.GxB_Vector_type(new_type, vec[0]))
 
             typ = types.gb_type_to_type(new_type[0])
@@ -51,26 +52,19 @@ class Vector:
 
     def __iter__(self):
         nvals = self.nvals
-        _nvals = ffi.new('GrB_Index[1]', [nvals])
-        I = ffi.new('GrB_Index[%s]' % nvals)
-        X = ffi.new('%s[%s]' % (self.type.C, nvals))
-        _check(self.type.Vector_extractTuples(
-            I,
-            X,
-            _nvals,
-            self.vector[0]
-            ))
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        X = ffi.new("%s[%s]" % (self.type.C, nvals))
+        _check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
         return zip(I, X)
 
     def iseq(self, other, eq_op=None):
         if eq_op is None:
             eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        result = ffi.new('_Bool*')
-        _check(lib.LAGraph_Vector_isequal(
-            result,
-            self.vector[0],
-            other.vector[0],
-            eq_op))
+        result = ffi.new("_Bool*")
+        _check(
+            lib.LAGraph_Vector_isequal(result, self.vector[0], other.vector[0], eq_op)
+        )
         return result[0]
 
     def isne(self, other):
@@ -81,7 +75,7 @@ class Vector:
         """Create an empty Vector from the given type and size.
 
         """
-        new_vec = ffi.new('GrB_Vector*')
+        new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
 
@@ -93,7 +87,7 @@ class Vector:
 
         """
         assert len(I) == len(V)
-        assert len(I) > 0 # must be non empty
+        assert len(I) > 0  # must be non empty
         if not size:
             size = max(I) + 1
         # TODO option to use ffi and GrB_Vector_build
@@ -119,7 +113,7 @@ class Vector:
 
     @classmethod
     def from_1_to_n(cls, n):
-        new_vec = ffi.new('GrB_Vector*')
+        new_vec = ffi.new("GrB_Vector*")
         _check(lib.LAGraph_1_to_n(new_vec, n))
         if n < lib.INT32_MAX:
             return cls(new_vec, types.INT32)
@@ -129,7 +123,7 @@ class Vector:
         """Create an duplicate Vector from the given argument.
 
         """
-        new_vec = ffi.new('GrB_Vector*')
+        new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
         return self.__class__(new_vec, self.type)
 
@@ -145,39 +139,29 @@ class Vector:
         """Extract the indices and values of the Vector as 2 lists.
 
         """
-        I = ffi.new('GrB_Index[]', self.nvals)
-        V = self.type.ffi.new(self.type.C + '[]', self.nvals)
-        n = ffi.new('GrB_Index*')
+        I = ffi.new("GrB_Index[]", self.nvals)
+        V = self.type.ffi.new(self.type.C + "[]", self.nvals)
+        n = ffi.new("GrB_Index*")
         n[0] = self.nvals
-        _check(self.type.Vector_extractTuples(
-            I,
-            V,
-            n,
-            self.vector[0]
-            ))
+        _check(self.type.Vector_extractTuples(I, V, n, self.vector[0]))
         return [list(I), list(map(self.type.to_value, V))]
 
     def to_arrays(self):
         if self.type.typecode is None:
-            raise TypeError('This matrix has no array typecode.')
+            raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
-        _nvals = ffi.new('GrB_Index[1]', [nvals])
-        I = ffi.new('GrB_Index[%s]' % nvals)
-        X = self.type.ffi.new('%s[%s]' % (self.type.C, nvals))
-        _check(self.type.Vector_extractTuples(
-            I,
-            X,
-            _nvals,
-            self.vector[0]
-            ))
-        return array('L', I), array(self.type.typecode, X)
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        _check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
+        return array("L", I), array(self.type.typecode, X)
 
     @property
     def size(self):
         """Return the size of the vector.
 
         """
-        n = ffi.new('GrB_Index*')
+        n = ffi.new("GrB_Index*")
         _check(lib.GrB_Vector_size(n, self.vector[0]))
         return n[0]
 
@@ -193,7 +177,7 @@ class Vector:
         """Return the number of values in the vector.
 
         """
-        n = ffi.new('GrB_Index*')
+        n = ffi.new("GrB_Index*")
         _check(lib.GrB_Vector_nvals(n, self.vector[0]))
         return n[0]
 
@@ -202,10 +186,8 @@ class Vector:
         """Return the GraphBLAS low-level type object of the Vector.
 
         """
-        typ = ffi.new('GrB_Type*')
-        _check(lib.GxB_Vector_type(
-            typ,
-            self.vector[0]))
+        typ = ffi.new("GrB_Type*")
+        _check(lib.GxB_Vector_type(typ, self.vector[0]))
         return typ[0]
 
     def full(self, identity=None):
@@ -213,14 +195,11 @@ class Vector:
         if identity is None:
             identity = self.type.one
 
-        _check(self.type.Vector_assignScalar(
-            B.vector[0],
-            NULL,
-            NULL,
-            identity,
-            lib.GrB_ALL,
-            0,
-            NULL))
+        _check(
+            self.type.Vector_assignScalar(
+                B.vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
+            )
+        )
         return self.eadd(B, binaryop.FIRST)
 
     def compare(self, other, op, strop):
@@ -243,25 +222,33 @@ class Vector:
             raise NotImplementedError
 
     def __gt__(self, other):
-        return self.compare(other, operator.gt, '>')
+        return self.compare(other, operator.gt, ">")
 
     def __lt__(self, other):
-        return self.compare(other, operator.lt, '<')
+        return self.compare(other, operator.lt, "<")
 
     def __ge__(self, other):
-        return self.compare(other, operator.ge, '>=')
+        return self.compare(other, operator.ge, ">=")
 
     def __le__(self, other):
-        return self.compare(other, operator.le, '<=')
+        return self.compare(other, operator.le, "<=")
 
     def __eq__(self, other):
-        return self.compare(other, operator.eq, '==')
+        return self.compare(other, operator.eq, "==")
 
     def __ne__(self, other):
-        return self.compare(other, operator.ne, '!=')
+        return self.compare(other, operator.ne, "!=")
 
-    def eadd(self, other, add_op=NULL, cast=None, out=None,
-                  mask=NULL, accum=NULL, desc=Default):
+    def eadd(
+        self,
+        other,
+        add_op=NULL,
+        cast=None,
+        out=None,
+        mask=NULL,
+        accum=NULL,
+        desc=Default,
+    ):
         """Element-wise addition with other vector.
 
         Element-wise addition applies a binary operator element-wise
@@ -291,21 +278,32 @@ class Vector:
 
         if out is None:
             typ = cast or types.promote(self.type, other.type)
-            _out = ffi.new('GrB_Vector*')
+            _out = ffi.new("GrB_Vector*")
             _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
-        _check(lib.GrB_eWiseAdd_Vector_BinaryOp(
-            out.vector[0],
-            mask,
-            accum,
-            add_op,
-            self.vector[0],
-            other.vector[0],
-            desc))
+        _check(
+            lib.GrB_eWiseAdd_Vector_BinaryOp(
+                out.vector[0],
+                mask,
+                accum,
+                add_op,
+                self.vector[0],
+                other.vector[0],
+                desc,
+            )
+        )
         return out
 
-    def emult(self, other, mult_op=NULL, cast=None, out=None,
-                   mask=NULL, accum=NULL, desc=Default):
+    def emult(
+        self,
+        other,
+        mult_op=NULL,
+        cast=None,
+        out=None,
+        mask=NULL,
+        accum=NULL,
+        desc=Default,
+    ):
         """Element-wise multiplication with other vector.
 
         Element-wise multiplication applies a binary operator
@@ -334,34 +332,45 @@ class Vector:
             desc = desc.desc[0]
         if out is None:
             typ = cast or types.promote(self.type, other.type)
-            _out = ffi.new('GrB_Vector*')
+            _out = ffi.new("GrB_Vector*")
             _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
-        _check(lib.GrB_eWiseMult_Vector_BinaryOp(
-            out.vector[0],
-            mask,
-            accum,
-            mult_op,
-            self.vector[0],
-            other.vector[0],
-            desc))
+        _check(
+            lib.GrB_eWiseMult_Vector_BinaryOp(
+                out.vector[0],
+                mask,
+                accum,
+                mult_op,
+                self.vector[0],
+                other.vector[0],
+                desc,
+            )
+        )
         return out
 
-    def vxm(self, other, cast=None, out=None,
-            mask=NULL, accum=NULL, semiring=None, desc=Default):
+    def vxm(
+        self,
+        other,
+        cast=None,
+        out=None,
+        mask=NULL,
+        accum=NULL,
+        semiring=None,
+        desc=Default,
+    ):
         """Vector-Matrix multiply.
         """
         from .matrix import Matrix
+
         if semiring is None:
             semiring = current_semiring.get(None)
 
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = other.nrows if TransposeB in desc \
-                else other.ncols
+            new_dimension = other.nrows if TransposeB in desc else other.ncols
             out = Vector.sparse(typ, new_dimension)
         elif not isinstance(out, Vector):
-            raise TypeError('Output argument must be Vector.')
+            raise TypeError("Output argument must be Vector.")
         if isinstance(mask, Vector):
             mask = mask.vector[0]
         if accum is NULL:
@@ -372,14 +381,17 @@ class Vector:
             desc = desc.desc[0]
         if semiring is None:
             semiring = typ.PLUS_TIMES
-        _check(lib.GrB_vxm(
-            out.vector[0],
-            mask,
-            accum,
-            semiring.get_semiring(typ),
-            self.vector[0],
-            other.matrix[0],
-            desc))
+        _check(
+            lib.GrB_vxm(
+                out.vector[0],
+                mask,
+                accum,
+                semiring.get_semiring(typ),
+                self.vector[0],
+                other.matrix[0],
+                desc,
+            )
+        )
         return out
 
     def __matmul__(self, other):
@@ -408,108 +420,111 @@ class Vector:
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.PLUS, other,
-                mask=mask, accum=accum, desc=desc)
+                self.type.PLUS, other, mask=mask, accum=accum, desc=desc
+            )
         return self.eadd(other, mask=mask, accum=accum, desc=desc)
 
     def __radd__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_first(
-                other, self.type.PLUS,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.PLUS, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(self, mask=mask, accum=accum, desc=desc)
 
     def __iadd__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.PLUS, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, out=self,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.PLUS, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(other, out=self, mask=mask, accum=accum, desc=desc)
 
     def __sub__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.MINUS, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.MINUS, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(
+            other, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __rsub__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_first(
-                other, self.type.MINUS,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.MINUS, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __isub__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.MINUS, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.MINUS,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.MINUS, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
+        )
 
     def __mul__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.TIMES, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.TIMES, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(
+            other, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __rmul__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_first(
-                other, self.type.TIMES,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.TIMES, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __imul__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.TIMES, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.TIMES,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.TIMES, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
+        )
 
     def __truediv__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.DIV, other,
-                mask=mask, accum=accum, desc=desc)
-        return self.eadd(other, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.DIV, other, mask=mask, accum=accum, desc=desc
+            )
+        return self.eadd(other, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
 
     def __rtruediv__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_first(
-                other, self.type.DIV,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                other, self.type.DIV, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
 
     def __itruediv__(self, other):
         mask, mon, accum, desc = self._get_args()
         if not isinstance(other, Vector):
             return self.apply_second(
-                self.type.DIV, other, out=self,
-                mask=mask, accum=accum, desc=desc)
-        return other.eadd(self, out=self, add_op=self.type.DIV,
-                         mask=mask, accum=accum, desc=desc)
+                self.type.DIV, other, out=self, mask=mask, accum=accum, desc=desc
+            )
+        return other.eadd(
+            self, out=self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc
+        )
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -524,9 +539,7 @@ class Vector:
         _check(lib.GrB_Vector_clear(self.vector[0]))
 
     def resize(self, size):
-        _check(lib.GrB_Vector_resize(
-            self.vector[0],
-            size))
+        _check(lib.GrB_Vector_resize(self.vector[0], size))
 
     def _get_args(self, mask=NULL, accum=NULL, mon=NULL, desc=Default):
         if mon is NULL:
@@ -555,13 +568,8 @@ class Vector:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
-        result = ffi.new('_Bool*')
-        _check(lib.GrB_Vector_reduce_BOOL(
-            result,
-            accum,
-            mon,
-            self.vector[0],
-            desc))
+        result = ffi.new("_Bool*")
+        _check(lib.GrB_Vector_reduce_BOOL(result, accum, mon, self.vector[0], desc))
         return result[0]
 
     def reduce_int(self, mon=NULL, **kwargs):
@@ -572,13 +580,8 @@ class Vector:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
-        result = ffi.new('int64_t*')
-        _check(lib.GrB_Vector_reduce_INT64(
-            result,
-            accum,
-            mon,
-            self.vector[0],
-            desc))
+        result = ffi.new("int64_t*")
+        _check(lib.GrB_Vector_reduce_INT64(result, accum, mon, self.vector[0], desc))
         return result[0]
 
     def reduce_float(self, mon=NULL, **kwargs):
@@ -589,13 +592,8 @@ class Vector:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
-        result = ffi.new('double*')
-        _check(lib.GrB_Vector_reduce_FP64(
-            result,
-            accum,
-            mon,
-            self.vector[0],
-            desc))
+        result = ffi.new("double*")
+        _check(lib.GrB_Vector_reduce_FP64(result, accum, mon, self.vector[0], desc))
         return result[0]
 
     def apply(self, op, out=None, **kwargs):
@@ -608,14 +606,9 @@ class Vector:
             op = op.get_unaryop(self)
 
         mask, mon, accum, desc = self._get_args(**kwargs)
-        _check(lib.GrB_Vector_apply(
-            out.vector[0],
-            mask,
-            accum,
-            op,
-            self.vector[0],
-            desc
-            ))
+        _check(
+            lib.GrB_Vector_apply(out.vector[0], mask, accum, op, self.vector[0], desc)
+        )
         return out
 
     def apply_first(self, first, op, out=None, **kwargs):
@@ -631,15 +624,7 @@ class Vector:
             f = lib.GxB_Vector_apply_BinaryOp1st
         else:
             f = self.type.Vector_apply_BinaryOp1st
-        _check(f(
-            out.vector[0],
-            mask,
-            accum,
-            op,
-            first,
-            self.vector[0],
-            desc
-        ))
+        _check(f(out.vector[0], mask, accum, op, first, self.vector[0], desc))
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
@@ -655,15 +640,7 @@ class Vector:
             f = lib.GxB_Vector_apply_BinaryOp2nd
         else:
             f = self.type.Vector_apply_BinaryOp2nd
-        _check(f(
-            out.vector[0],
-            mask,
-            accum,
-            op,
-            self.vector[0],
-            second,
-            desc
-        ))
+        _check(f(out.vector[0], mask, accum, op, self.vector[0], second, desc))
         return out
 
     def select(self, op, thunk=NULL, out=None, **kwargs):
@@ -680,16 +657,12 @@ class Vector:
             self._keep_alives[self.vector] = thunk
             thunk = thunk.scalar[0]
 
-        mask, mon, accum, desc =self._get_args(**kwargs)
-        _check(lib.GxB_Vector_select(
-            out.vector[0],
-            mask,
-            accum,
-            op,
-            self.vector[0],
-            thunk,
-            desc
-            ))
+        mask, mon, accum, desc = self._get_args(**kwargs)
+        _check(
+            lib.GxB_Vector_select(
+                out.vector[0], mask, accum, op, self.vector[0], thunk, desc
+            )
+        )
         return out
 
     def pattern(self, typ=types.BOOL):
@@ -704,13 +677,10 @@ class Vector:
         return self.select(lib.GxB_NONZERO)
 
     def to_dense(self, _id=None):
-        out = ffi.new('GrB_Vector*')
+        out = ffi.new("GrB_Vector*")
         if _id is None:
             _id = ffi.new(self.type.ptr, 0)
-        _check(lib.LAGraph_Vector_to_dense(
-            out,
-            self.vector[0],
-            _id))
+        _check(lib.LAGraph_Vector_to_dense(out, self.vector[0], _id))
         return Vector(out, self.type)
 
     def __setitem__(self, index, value):
@@ -718,10 +688,7 @@ class Vector:
         desc = NULL
         if isinstance(index, int):
             val = self.type.from_value(value)
-            _check(self.type.Vector_setElement(
-                self.vector[0],
-                val,
-                index))
+            _check(self.type.Vector_setElement(self.vector[0], val, index))
             return
         if isinstance(index, tuple):
             if len(index) == 2:
@@ -738,34 +705,26 @@ class Vector:
             if isinstance(value, (bool, int, float)):
                 self.assign_scalar(value, index, mask=mask, desc=desc)
                 return
-        raise TypeError('Unknown index or value for vector assignment.')
+        raise TypeError("Unknown index or value for vector assignment.")
 
     def assign(self, value, index=None, **kwargs):
         mask, mon, accum, desc = self._get_args(**kwargs)
         I, ni, size = _build_range(index, self.size - 1)
-        _check(lib.GrB_Vector_assign(
-            self.vector[0],
-            mask,
-            accum,
-            value.vector[0],
-            I,
-            ni,
-            desc
-            ))
+        _check(
+            lib.GrB_Vector_assign(
+                self.vector[0], mask, accum, value.vector[0], I, ni, desc
+            )
+        )
 
     def assign_scalar(self, value, index=None, **kwargs):
         mask, mon, accum, desc = self._get_args(**kwargs)
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
-        _check(scalar_type.Vector_assignScalar(
-            self.vector[0],
-            mask,
-            accum,
-            value,
-            I,
-            ni,
-            desc
-            ))
+        _check(
+            scalar_type.Vector_assignScalar(
+                self.vector[0], mask, accum, value, I, ni, desc
+            )
+        )
 
     def __getitem__(self, index):
         if isinstance(index, int):
@@ -775,18 +734,18 @@ class Vector:
 
     def __delitem__(self, index):
         if not isinstance(index, int):
-            raise TypeError("__delitem__ currently only supports single element removal")
-        _check(lib.GrB_Vector_removeElement(
-            self.vector[0],
-            index
-            ))
+            raise TypeError(
+                "__delitem__ currently only supports single element removal"
+            )
+        _check(lib.GrB_Vector_removeElement(self.vector[0], index))
 
     def extract_element(self, index):
         result = self.type.ffi.new(self.type.ptr)
-        _check(self.type.Vector_extractElement(
-            result,
-            self.vector[0],
-            ffi.cast('GrB_Index', index)))
+        _check(
+            self.type.Vector_extractElement(
+                result, self.vector[0], ffi.cast("GrB_Index", index)
+            )
+        )
         return self.type.to_value(result[0])
 
     def extract(self, index, **kwargs):
@@ -798,14 +757,11 @@ class Vector:
         if size is None:
             size = self.size
         result = Vector.sparse(self.type, size)
-        _check(lib.GrB_Vector_extract(
-            result.vector[0],
-            mask,
-            accum,
-            self.vector[0],
-            I,
-            ni,
-            desc))
+        _check(
+            lib.GrB_Vector_extract(
+                result.vector[0], mask, accum, self.vector[0], I, ni, desc
+            )
+        )
         return result
 
     def __contains__(self, index):
@@ -821,13 +777,12 @@ class Vector:
         except NoValue:
             return default
 
-
     def wait(self):
         _check(lib.GrB_Vector_wait(self.vector))
 
-    def to_string(self, format_string='{:>2}', empty_char=''):
-        result = ''
-        format_string = format_string + '|' + format_string + '\n'
+    def to_string(self, format_string="{:>2}", empty_char=""):
+        result = ""
+        format_string = format_string + "|" + format_string + "\n"
 
         for i in range(self.size):
             value = self.get(i, empty_char)
@@ -839,4 +794,4 @@ class Vector:
         return self.to_string()
 
     def __repr__(self):
-        return '<Vector (%s: %s:%s)>' % (self.size, self.nvals, self.type.__name__)
+        return "<Vector (%s: %s:%s)>" % (self.size, self.nvals, self.type.__name__)

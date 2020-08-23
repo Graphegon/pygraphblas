@@ -7,6 +7,7 @@ from pygraphblas.base import NoValue
 
 from rdflib.store import Store
 
+
 class GraphBLASStore(Store):
     """A graph composed of RDF style triples.  
 
@@ -20,6 +21,7 @@ class GraphBLASStore(Store):
     - query(subj=None, pred=None, obj=None)
 
     """
+
     def __init__(self, configuration=None, identifier=None, weight_type=bool):
         super(Memory, self).__init__(configuration)
         self.identifier = identifier
@@ -32,9 +34,8 @@ class GraphBLASStore(Store):
         self._id_node = {}  # {id -> node}
         self._edge_graph = defaultdict(
             lambda: Matrix.from_type(
-                self._weight_type,
-                self._max_index,
-                self._max_index)
+                self._weight_type, self._max_index, self._max_index
+            )
         )
 
     def _resize(self, node_id):
@@ -87,13 +88,13 @@ class GraphBLASStore(Store):
                     if 3 <= len(row) <= 4:
                         self.add(*row)
                     else:
-                        raise TypeError('Row must be 3 or 4 columns')
+                        raise TypeError("Row must be 3 or 4 columns")
 
     def __len__(self):
         """Returns the number of triples in the graph.
 
         """
-        return sum(map(attrgetter('nvals'), self._edge_graph.values()))
+        return sum(map(attrgetter("nvals"), self._edge_graph.values()))
 
     def query(self, subj=None, pred=None, obj=None):
         """Query the graph for matching triples.
@@ -103,11 +104,11 @@ class GraphBLASStore(Store):
         no values will iterate all triples.
 
         """
-        if subj is not None:         # subj,?,?
+        if subj is not None:  # subj,?,?
             if subj not in self._node_id:
                 raise KeyError(subj)
             sid = self._node_id[subj]
-            if pred is not None:     # subj,pred,?
+            if pred is not None:  # subj,pred,?
                 if pred not in self._edge_graph:
                     raise KeyError(pred)
                 graph = self._edge_graph[pred]
@@ -116,7 +117,7 @@ class GraphBLASStore(Store):
                         raise KeyError(obj)
                     oid = self._node_id[obj]
                     yield subj, pred, obj, graph[sid, oid]
-                else:                # subj,pred,None
+                else:  # subj,pred,None
                     for oid, weight in zip(*graph[sid].to_lists()):
                         yield subj, pred, self._id_node[oid], weight
             else:
@@ -126,43 +127,41 @@ class GraphBLASStore(Store):
                     oid = self._node_id[obj]
                     for pred, graph in self._edge_graph.items():
                         try:
-                            weight = graph[sid,oid]
+                            weight = graph[sid, oid]
                             yield subj, pred, obj, weight
                         except NoValue:
                             continue
-                else:                # subj,None,None
+                else:  # subj,None,None
                     for pred, graph in self._edge_graph.items():
                         try:
                             for oid, weight in zip(*graph[sid].to_lists()):
                                 yield subj, pred, self._id_node[oid], weight
                         except NoValue:
                             continue
-        elif pred is not None:       # None,pred,?
+        elif pred is not None:  # None,pred,?
             if pred not in self._edge_graph:
                 raise KeyError(pred)
             graph = self._edge_graph[pred]
-            if obj is not None:      # None,pred,obj
+            if obj is not None:  # None,pred,obj
                 if obj not in self._node_id:
                     raise KeyError(obj)
                 oid = self._node_id[obj]
-                for sid, weight in zip(*graph[:,oid].to_lists()):
+                for sid, weight in zip(*graph[:, oid].to_lists()):
                     yield self._id_node[sid], pred, obj, weight
-            else:                    # None,pred,None
+            else:  # None,pred,None
                 for sid, oid, weight in zip(*graph.to_lists()):
                     yield self._id_node[sid], pred, self._id_node[oid], weight
-        elif obj is not None:        # None,None,obj
+        elif obj is not None:  # None,None,obj
             if obj not in self._node_id:
                 raise KeyError(obj)
             oid = self._node_id[obj]
             for pred, graph in self._edge_graph.items():
                 try:
-                    for sid, weight in zip(*graph[:,oid].to_lists()):
+                    for sid, weight in zip(*graph[:, oid].to_lists()):
                         yield self._id_node[sid], pred, obj, weight
                 except NoValue:
                     continue
-        else:                        # None,None,None
+        else:  # None,None,None
             for pred, graph in self._edge_graph.items():
                 for sid, oid, weight in zip(*graph.to_lists()):
                     yield self._id_node[sid], pred, self._id_node[oid], weight
-
-

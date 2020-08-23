@@ -8,29 +8,29 @@ from .base import lib, ffi, _gb_from_name, _check
 from .monoid import Monoid
 from . import types
 
-current_semiring = contextvars.ContextVar('current_semiring')
+current_semiring = contextvars.ContextVar("current_semiring")
 
 
 class Semiring:
 
     _auto_semirings = defaultdict(dict)
 
-    __slots__ = ('name', 'semiring', 'token', 'pls', 'mul', 'type')
+    __slots__ = ("name", "semiring", "token", "pls", "mul", "type")
 
     def __init__(self, pls, mul, typ, semiring, udt=None):
         self.pls = pls
         self.mul = mul
         self.type = typ
-        self.name = '_'.join((pls, mul, typ))
+        self.name = "_".join((pls, mul, typ))
         self.semiring = semiring
         self.token = None
-        name = pls+'_'+mul
+        name = pls + "_" + mul
         if udt is None:
             self.__class__._auto_semirings[name][_gb_from_name(typ)] = semiring
             cls = getattr(types, typ, None)
             if cls is not None:
                 setattr(cls, name, self)
-    
+
     def __enter__(self):
         self.token = current_semiring.set(self)
         return self
@@ -42,8 +42,8 @@ class Semiring:
     def get_semiring(self, left=None, right=None):
         return self.semiring
 
-class AutoSemiring(Semiring):
 
+class AutoSemiring(Semiring):
     def __init__(self, name):
         self.name = name
         self.token = None
@@ -52,32 +52,39 @@ class AutoSemiring(Semiring):
         typ = types.promote(left, right)
         return Semiring._auto_semirings[self.name][typ.gb_type]
 
-__all__ = ['Semiring', 'AutoSemiring', 'current_semiring']
+
+__all__ = ["Semiring", "AutoSemiring", "current_semiring"]
 
 non_boolean_re = re.compile(
-    '^(GxB|GrB)_(MIN|MAX|PLUS|TIMES|ANY)_'
-    '(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|'
-    'ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_'
-    '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+    "^(GxB|GrB)_(MIN|MAX|PLUS|TIMES|ANY)_"
+    "(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|"
+    "ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_"
+    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
+)
 
 boolean_re = re.compile(
-    '^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_'
-    '(EQ|NE|GT|LT|GE|LE)_'
-    '(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$')
+    "^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_"
+    "(EQ|NE|GT|LT|GE|LE)_"
+    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
+)
 
 pure_bool_re = re.compile(
-    '^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_'
-    '(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_(BOOL)$')
+    "^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_"
+    "(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_(BOOL)$"
+)
 
 complex_re = re.compile(
-    '^(GxB|GrB)_(PLUS|TIMES|ANY)_'
-    '(FIRST|SECOND|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|PAIR)_'
-    '(FC32|FC64)$')
+    "^(GxB|GrB)_(PLUS|TIMES|ANY)_"
+    "(FIRST|SECOND|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|PAIR)_"
+    "(FC32|FC64)$"
+)
 
 bitwise_re = re.compile(
-    '^(GxB|GrB)_(BOR|BAND|BXOR|BXNOR)_'
-    '(BOR|BAND|BXOR|BXNOR)_'
-    '(UINT8|UINT16|UINT32|UINT64)$')
+    "^(GxB|GrB)_(BOR|BAND|BXOR|BXNOR)_"
+    "(BOR|BAND|BXOR|BXNOR)_"
+    "(UINT8|UINT16|UINT32|UINT64)$"
+)
+
 
 def semiring_group(reg):
     srs = []
@@ -86,15 +93,17 @@ def semiring_group(reg):
         srs.append(Semiring(pls, mul, typ, getattr(lib, n.string)))
     return srs
 
+
 def build_semirings():
     this = sys.modules[__name__]
-    for r in chain(semiring_group(non_boolean_re),
-                   semiring_group(boolean_re),
-                   semiring_group(pure_bool_re),
-                   semiring_group(bitwise_re),
-                   semiring_group(complex_re)):
+    for r in chain(
+        semiring_group(non_boolean_re),
+        semiring_group(boolean_re),
+        semiring_group(pure_bool_re),
+        semiring_group(bitwise_re),
+        semiring_group(complex_re),
+    ):
         setattr(this, r.name, r)
     for name in Semiring._auto_semirings:
         sr = AutoSemiring(name)
         setattr(this, name, sr)
-        
