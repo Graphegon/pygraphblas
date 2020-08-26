@@ -5,7 +5,7 @@ from itertools import chain
 from collections import defaultdict
 import numba
 
-from .base import lib, ffi, _gb_from_name, _check
+from .base import lib, ffi, _check
 from . import types
 
 current_accum = contextvars.ContextVar("current_accum")
@@ -32,7 +32,7 @@ class BinaryOp:
             self.binaryop = o[0]
         else:
             self.binaryop = binaryop
-            self.__class__._auto_binaryops[op][_gb_from_name(typ)] = binaryop
+            self.__class__._auto_binaryops[op][types.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ, None)
             if cls is not None:
                 setattr(cls, op, self)

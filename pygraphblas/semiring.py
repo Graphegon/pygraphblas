@@ -4,7 +4,7 @@ import contextvars
 from itertools import chain
 from collections import defaultdict
 
-from .base import lib, ffi, _gb_from_name, _check
+from .base import lib, ffi, _check
 from .monoid import Monoid
 from . import types
 
@@ -26,7 +26,7 @@ class Semiring:
         self.token = None
         name = pls + "_" + mul
         if udt is None:
-            self.__class__._auto_semirings[name][_gb_from_name(typ)] = semiring
+            self.__class__._auto_semirings[name][types.gb_from_name(typ)] = semiring
             cls = getattr(types, typ, None)
             if cls is not None:
                 setattr(cls, name, self)

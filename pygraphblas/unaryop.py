@@ -8,7 +8,7 @@ from numba.core.typing import cffi_utils as cffi_support
 import contextvars
 from collections import defaultdict
 
-from .base import lib, ffi as core_ffi, _gb_from_name, _check
+from .base import lib, ffi as core_ffi, _check
 from . import types
 
 current_uop = contextvars.ContextVar("current_uop")
@@ -24,7 +24,7 @@ class UnaryOp:
         self.name = "_".join((name, typ))
         self.unaryop = op
         self.token = None
-        self.__class__._auto_unaryops[name][_gb_from_name(typ)] = op
+        self.__class__._auto_unaryops[name][types.gb_from_name(typ)] = op
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, name, self)

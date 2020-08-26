@@ -985,3 +985,24 @@ def test_promotion():
     )
     o = m @ n
     assert o.type == INT8
+
+def test_str():
+    m = Matrix.from_lists(
+        [0, 1], [0, 1], [4, 2],
+        typ=INT8
+    )
+    assert str(m) == """\
+    0 1
+ 0| 4  | 0
+ 1|   2| 1
+    0 1"""
+
+    b = Matrix.from_lists(
+        [0, 1], [0, 1], [True, True]
+    )
+    assert str(b) == """\
+    0 1
+ 0| t  | 0
+ 1|   t| 1
+    0 1"""
+

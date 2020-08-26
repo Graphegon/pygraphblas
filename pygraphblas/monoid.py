@@ -5,7 +5,7 @@ import contextvars
 from itertools import chain
 from collections import defaultdict
 
-from .base import lib, ffi, _gb_from_name, _check
+from .base import lib, ffi, _check
 from .binaryop import BinaryOp
 from . import types
 
@@ -32,7 +32,7 @@ class Monoid:
             self.monoid = o[0]
         else:
             self.monoid = monoid
-            self.__class__._auto_monoids[op + "_MONOID"][_gb_from_name(typ)] = monoid
+            self.__class__._auto_monoids[op + "_MONOID"][types.gb_from_name(typ)] = monoid
             cls = getattr(types, typ, None)
             if cls is not None:
                 setattr(cls, op + "_MONOID", self)
