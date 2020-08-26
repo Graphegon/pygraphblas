@@ -197,4 +197,8 @@ def _get_bin_op(op, funcs):
         "<=": funcs.LE,
         "!=": funcs.NE,
         "==": funcs.EQ,
+        "+": funcs.PLUS,
+        "-": funcs.MINUS,
+        "*": funcs.TIMES,
+        "/": funcs.DIV,
     }[op]

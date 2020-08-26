@@ -24,6 +24,7 @@ def test_vector_create_sparse():
     assert m.nvals == 0
     m = Vector.sparse(INT64, 10)
     assert m.size == 10
+    assert m.shape == (10,)
 
 def test_vector_gb_type():
     v = Vector.sparse(BOOL, 10)
@@ -122,6 +123,9 @@ def test_vector_emult():
     mul3 = v.dup()
     mul3 &= w
     assert mul3.iseq(mul2)
+    
+    mul4 = v.emult(w, '+')
+    assert mul4.iseq(Vector.from_list([v + v for v in V]))
 
     # division
     division_ref = Vector.from_list([1] * 10)
@@ -317,8 +321,18 @@ def test_compare():
         [0, 1, 3])
     assert (v > 2).iseq(Vector.from_lists(
         [0, 1, 2], [False, False, True]))
+    assert (v >= 3).iseq(Vector.from_lists(
+        [0, 1, 2], [False, False, True]))
+    
     assert (v < 2).iseq(Vector.from_lists(
         [0, 1], [True, True], 3))
+
+    assert (v != 3).iseq(Vector.from_lists(
+        [0, 1, 2], [True, True, False], 3))
+
+    m = Matrix.sparse(types.INT8, v.size)
+    with pytest.raises(NotImplementedError):
+        v < m
 
 def test_1_to_n():
     v = Vector.from_1_to_n(10)
@@ -336,7 +350,10 @@ def test_to_arrays():
     assert v.to_arrays() == (
         array('L', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
         array('l', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-
+    c = Vector.sparse(types.FC32, 10)
+    with pytest.raises(TypeError):
+        c.to_arrays()
+ 
 def test_contains():
     v = Vector.from_lists(
         [0, 1, 9, 20],
