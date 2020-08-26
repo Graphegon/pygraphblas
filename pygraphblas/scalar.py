@@ -31,27 +31,21 @@ class Scalar:
         return self.nvals
 
     def dup(self):
-        """Create an duplicate Scalar from the given argument.
-
-        """
+        """Create an duplicate Scalar from the given argument."""
         new_sca = ffi.new("GxB_Scalar*")
         _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
         return self.__class__(new_sca, self._type)
 
     @classmethod
     def from_type(cls, typ):
-        """Create an empty Scalar from the given type and size.
-
-        """
+        """Create an empty Scalar from the given type and size."""
         new_sca = ffi.new("GxB_Scalar*")
         _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
         return cls(new_sca, typ)
 
     @classmethod
     def from_value(cls, value):
-        """Create an empty Scalar from the given type and size.
-
-        """
+        """Create an empty Scalar from the given type and size."""
         new_sca = ffi.new("GxB_Scalar*")
         typ = _gb_from_type(type(value))
         _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
@@ -61,17 +55,13 @@ class Scalar:
 
     @property
     def gb_type(self):
-        """Return the GraphBLAS low-level type object of the Scalar.
-
-        """
+        """Return the GraphBLAS low-level type object of the Scalar."""
         typ = ffi.new("GrB_Type*")
         _check(lib.GxB_Scalar_type(typ, self.scalar[0]))
         return typ[0]
 
     def clear(self):
-        """Clear the scalar.
-
-        """
+        """Clear the scalar."""
         _check(lib.GxB_Scalar_clear(self.scalar[0]))
 
     def __getitem__(self, index):
@@ -91,9 +81,7 @@ class Scalar:
 
     @property
     def nvals(self):
-        """Return the number of values in the scalar (0 or 1).
-
-        """
+        """Return the number of values in the scalar (0 or 1)."""
         n = ffi.new("GrB_Index*")
         _check(lib.GxB_Scalar_nvals(n, self.scalar[0]))
         return n[0]

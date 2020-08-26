@@ -95,9 +95,7 @@ class Matrix:
 
     @classmethod
     def from_mm(cls, mm_file, typ, **options):
-        """Create a new matrix by reading a Matrix Market file.
-
-        """
+        """Create a new matrix by reading a Matrix Market file."""
         m = ffi.new("GrB_Matrix*")
         i = cls(m, typ, **options)
         _check(lib.LAGraph_mmread(m, mm_file))
@@ -105,9 +103,7 @@ class Matrix:
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols, **options):
-        """Create a new matrix by reading a tab separated value file.
-
-        """
+        """Create a new matrix by reading a tab separated value file."""
         m = ffi.new("GrB_Matrix*")
         i = cls(m, typ, **options)
         _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
@@ -115,8 +111,7 @@ class Matrix:
 
     @classmethod
     def from_binfile(cls, bin_file):
-        """Create a new matrix by reading a SuiteSparse specific binary file.
-        """
+        """Create a new matrix by reading a SuiteSparse specific binary file."""
         m = ffi.new("GrB_Matrix*")
         _check(lib.LAGraph_binread(m, bin_file))
         return cls(m)
@@ -173,36 +168,28 @@ class Matrix:
 
     @property
     def gb_type(self):
-        """Return the GraphBLAS low-level type object of the Matrix.
-
-        """
+        """Return the GraphBLAS low-level type object of the Matrix."""
         new_type = ffi.new("GrB_Type*")
         _check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
         return new_type[0]
 
     @property
     def nrows(self):
-        """Return the number of Matrix rows.
-
-        """
+        """Return the number of Matrix rows."""
         n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        """Return the number of Matrix columns.
-
-        """
+        """Return the number of Matrix columns."""
         n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        """Numpy-like description of matrix shape.
-
-        """
+        """Numpy-like description of matrix shape."""
         return (self.nrows, self.ncols)
 
     @property
@@ -211,9 +198,7 @@ class Matrix:
 
     @property
     def nvals(self):
-        """Return the number of Matrix values.
-
-        """
+        """Return the number of Matrix values."""
         n = ffi.new("GrB_Index*")
         _check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
@@ -223,9 +208,7 @@ class Matrix:
         return self.transpose()
 
     def dup(self, **options):
-        """Create an duplicate Matrix.
-
-        """
+        """Create an duplicate Matrix."""
         new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type, **options)
@@ -261,21 +244,15 @@ class Matrix:
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        """Write this matrix to a file using the Matrix Market format.
-
-        """
+        """Write this matrix to a file using the Matrix Market format."""
         _check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=NULL):
-        """Write this matrix using custom SuiteSparse binary format.
-
-        """
+        """Write this matrix using custom SuiteSparse binary format."""
         _check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
-        """Extract the rows, columns and values of the Matrix as 3 lists.
-
-        """
+        """Extract the rows, columns and values of the Matrix as 3 lists."""
         I = ffi.new("GrB_Index[%s]" % self.nvals)
         J = ffi.new("GrB_Index[%s]" % self.nvals)
         V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
@@ -413,16 +390,14 @@ class Matrix:
         return out
 
     def iseq(self, other):
-        """Compare two matrices for equality.
-        """
+        """Compare two matrices for equality."""
         result = ffi.new("_Bool*")
         eq_op = self.type.EQ.get_binaryop(self, other)
         _check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
-        """Compare two matrices for inequality.
-        """
+        """Compare two matrices for inequality."""
         return not self.iseq(other)
 
     def __getstate__(self):
@@ -453,22 +428,19 @@ class Matrix:
 
     @property
     def rows(self):
-        """ An iterator of row indexes present in the matrix.
-        """
+        """An iterator of row indexes present in the matrix."""
         for i, j, v in self:
             yield i
 
     @property
     def cols(self):
-        """ An iterator of column indexes present in the matrix.
-        """
+        """An iterator of column indexes present in the matrix."""
         for i, j, v in self:
             yield j
 
     @property
     def vals(self):
-        """ An iterator of values present in the matrix.
-        """
+        """An iterator of values present in the matrix."""
         for i, j, v in self:
             yield v
 
@@ -624,9 +596,7 @@ class Matrix:
         return result
 
     def reduce_bool(self, mon=NULL, **kwargs):
-        """Reduce matrix to a boolean.
-
-        """
+        """Reduce matrix to a boolean."""
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self)
@@ -636,9 +606,7 @@ class Matrix:
         return result[0]
 
     def reduce_int(self, mon=NULL, **kwargs):
-        """Reduce matrix to an integer.
-
-        """
+        """Reduce matrix to an integer."""
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self)
@@ -648,9 +616,7 @@ class Matrix:
         return result[0]
 
     def reduce_float(self, mon=NULL, **kwargs):
-        """Reduce matrix to an float.
-
-        """
+        """Reduce matrix to an float."""
         if mon is NULL:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self)
@@ -660,9 +626,7 @@ class Matrix:
         return result[0]
 
     def reduce_vector(self, mon=NULL, out=None, **kwargs):
-        """Reduce matrix to a vector.
-
-        """
+        """Reduce matrix to a vector."""
         if mon is NULL:
             mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
         mon = mon.get_monoid(self)
@@ -677,9 +641,7 @@ class Matrix:
         return out
 
     def apply(self, op, out=None, **kwargs):
-        """Apply Unary op to matrix elements.
-
-        """
+        """Apply Unary op to matrix elements."""
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
@@ -809,7 +771,7 @@ class Matrix:
     def __ne__(self, other):
         return self.compare(other, operator.ne, "!=")
 
-    def _get_args(self, mask=NULL, accum=NULL, desc=Default):
+    def _get_args(self, mask=NULL, accum=NULL, desc=NULL):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         elif isinstance(mask, Vector):
@@ -819,15 +781,13 @@ class Matrix:
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self)
         if desc is NULL:
-            desc = current_desc.get(NULL)
+            desc = current_desc.get(Default)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         return mask, accum, desc
 
     def mxm(self, other, cast=None, out=None, semiring=None, **kwargs):
-        """Matrix-matrix multiply.
-
-        """
+        """Matrix-matrix multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
 
@@ -853,9 +813,7 @@ class Matrix:
         return out
 
     def mxv(self, other, cast=None, out=None, semiring=None, **kwargs):
-        """Matrix-vector multiply.
-
-        """
+        """Matrix-vector multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
 
@@ -895,9 +853,7 @@ class Matrix:
         return self.mxm(other, out=self)
 
     def kronecker(self, other, op=NULL, cast=None, out=None, **kwargs):
-        """Kronecker product.
-
-        """
+        """Kronecker product."""
         mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -919,9 +875,7 @@ class Matrix:
     kron = kronecker  # new v1.3 name
 
     def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
-        """Slice a submatrix.
-
-        """
+        """Slice a submatrix."""
         ta = TransposeA in kwargs.get("desc", ())
         mask, accum, desc = self._get_args(**kwargs)
         result_nrows = self.ncols if ta else self.nrows
@@ -963,8 +917,7 @@ class Matrix:
         return out
 
     def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
-        """Slice a row as subvector.
-        """
+        """Slice a row as subvector."""
         desc = TransposeA
         if "desc" in kwargs:
             desc = desc | kwargs["desc"]
@@ -1008,9 +961,7 @@ class Matrix:
         return self.extract_matrix(i0, i1)
 
     def assign_col(self, col_index, value, row_slice=None, **kwargs):
-        """Assign a vector to a column.
-
-        """
+        """Assign a vector to a column."""
         stop_val = self.ncols if TransposeA in kwargs.get("desc", ()) else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(**kwargs)
@@ -1022,9 +973,7 @@ class Matrix:
         )
 
     def assign_row(self, row_index, value, col_slice=None, **kwargs):
-        """Assign a vector to a row.
-
-        """
+        """Assign a vector to a row."""
         stop_val = self.nrows if TransposeA in kwargs.get("desc", ()) else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
@@ -1036,9 +985,7 @@ class Matrix:
         )
 
     def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
-        """Assign a submatrix.
-
-        """
+        """Assign a submatrix."""
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
         if isize is None:

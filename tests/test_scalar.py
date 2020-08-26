@@ -1,7 +1,7 @@
-
 import pytest
 from pygraphblas import *
 from pygraphblas.base import lib
+
 
 def test_scalar_create_from_type():
 
@@ -19,12 +19,14 @@ def test_scalar_create_from_type():
     assert len(m) == 1
     assert m
 
+
 def test_scalar_from_value():
 
     m = Scalar.from_value(2)
     assert m[0] == 2
     assert m.nvals == 1
     assert m
+
 
 def test_scalar_dup():
 
@@ -33,6 +35,7 @@ def test_scalar_dup():
     assert m[0] == 2
     assert m.nvals == 1
     assert m
+
 
 def test_scalar_clear():
 
@@ -45,6 +48,7 @@ def test_scalar_clear():
     assert m.nvals == 0
     with pytest.raises(KeyError) as e:
         assert m[0]
+
 
 def test_scalar_wait():
     s = Scalar.from_value(2)

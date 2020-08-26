@@ -9,7 +9,7 @@ from rdflib.store import Store
 
 
 class GraphBLASStore(Store):
-    """A graph composed of RDF style triples.  
+    """A graph composed of RDF style triples.
 
     Each unique predicate is an adjacency matrix from subjects to
     objects.
@@ -66,9 +66,7 @@ class GraphBLASStore(Store):
         return self._get_node_id(key)
 
     def add(self, subj, pred, obj, weight=True):
-        """Add a triple to the graph with an optional weight.
-
-        """
+        """Add a triple to the graph with an optional weight."""
         sid = self._get_or_add_node_id(subj)
         oid = self._get_or_add_node_id(obj)
         self._resize(max(sid, oid))
@@ -91,9 +89,7 @@ class GraphBLASStore(Store):
                         raise TypeError("Row must be 3 or 4 columns")
 
     def __len__(self):
-        """Returns the number of triples in the graph.
-
-        """
+        """Returns the number of triples in the graph."""
         return sum(map(attrgetter("nvals"), self._edge_graph.values()))
 
     def query(self, subj=None, pred=None, obj=None):

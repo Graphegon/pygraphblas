@@ -72,9 +72,7 @@ class Vector:
 
     @classmethod
     def sparse(cls, typ, size=0):
-        """Create an empty Vector from the given type and size.
-
-        """
+        """Create an empty Vector from the given type and size."""
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
@@ -100,9 +98,7 @@ class Vector:
 
     @classmethod
     def from_list(cls, I):
-        """Create a new dense vector from the given lists of values.
-
-        """
+        """Create a new dense vector from the given lists of values."""
         size = len(I)
         assert size > 0
         # TODO use ffi and GrB_Vector_build
@@ -120,9 +116,7 @@ class Vector:
         return cls(new_vec, types.INT64)
 
     def dup(self):
-        """Create an duplicate Vector from the given argument.
-
-        """
+        """Create an duplicate Vector from the given argument."""
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
         return self.__class__(new_vec, self.type)
@@ -136,9 +130,7 @@ class Vector:
         return v
 
     def to_lists(self):
-        """Extract the indices and values of the Vector as 2 lists.
-
-        """
+        """Extract the indices and values of the Vector as 2 lists."""
         I = ffi.new("GrB_Index[]", self.nvals)
         V = self.type.ffi.new(self.type.C + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
@@ -158,34 +150,26 @@ class Vector:
 
     @property
     def size(self):
-        """Return the size of the vector.
-
-        """
+        """Return the size of the vector."""
         n = ffi.new("GrB_Index*")
         _check(lib.GrB_Vector_size(n, self.vector[0]))
         return n[0]
 
     @property
     def shape(self):
-        """Numpy-like description of vector shape.
-
-        """
+        """Numpy-like description of vector shape."""
         return (self.size,)
 
     @property
     def nvals(self):
-        """Return the number of values in the vector.
-
-        """
+        """Return the number of values in the vector."""
         n = ffi.new("GrB_Index*")
         _check(lib.GrB_Vector_nvals(n, self.vector[0]))
         return n[0]
 
     @property
     def gb_type(self):
-        """Return the GraphBLAS low-level type object of the Vector.
-
-        """
+        """Return the GraphBLAS low-level type object of the Vector."""
         typ = ffi.new("GrB_Type*")
         _check(lib.GxB_Vector_type(typ, self.vector[0]))
         return typ[0]
@@ -358,8 +342,7 @@ class Vector:
         semiring=None,
         desc=Default,
     ):
-        """Vector-Matrix multiply.
-        """
+        """Vector-Matrix multiply."""
         from .matrix import Matrix
 
         if semiring is None:
@@ -561,9 +544,7 @@ class Vector:
         return mask, mon, accum, desc
 
     def reduce_bool(self, mon=NULL, **kwargs):
-        """Reduce vector to a boolean.
-
-        """
+        """Reduce vector to a boolean."""
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
@@ -573,9 +554,7 @@ class Vector:
         return result[0]
 
     def reduce_int(self, mon=NULL, **kwargs):
-        """Reduce vector to a integer.
-
-        """
+        """Reduce vector to a integer."""
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -585,9 +564,7 @@ class Vector:
         return result[0]
 
     def reduce_float(self, mon=NULL, **kwargs):
-        """Reduce vector to a float.
-
-        """
+        """Reduce vector to a float."""
         if mon is NULL:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -597,9 +574,7 @@ class Vector:
         return result[0]
 
     def apply(self, op, out=None, **kwargs):
-        """Apply Unary op to vector elements.
-
-        """
+        """Apply Unary op to vector elements."""
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, UnaryOp):

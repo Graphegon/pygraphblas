@@ -13,11 +13,12 @@ def test_matrix_init_without_type():
     mx = Matrix.sparse(INT8)
 
     # get a raw Matrix pointer and wrap it without knowing its type
-    new_mx = ffi.new('GrB_Matrix*')
+    new_mx = ffi.new("GrB_Matrix*")
     _check(lib.GrB_Matrix_dup(new_mx, mx.matrix[0]))
     mx2 = Matrix(new_mx)
 
     assert mx.type == mx2.type
+
 
 def test_matrix_create_sparse():
     m = Matrix.sparse(INT8)
@@ -30,38 +31,33 @@ def test_matrix_create_sparse():
     assert m.nvals == 0
     assert len(m) == 0
 
+
 def test_matrix_get_set_element():
     m = Matrix.sparse(INT8, 10, 10)
-    m[3,3] = 3
+    m[3, 3] = 3
     assert m.nrows == 10
     assert m.ncols == 10
     assert m.nvals == 1
     assert len(m) == 1
-    assert m[3,3] == 3
+    assert m[3, 3] == 3
+
 
 def test_matrix_slice_vector():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    v = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     assert v[5] == Vector.from_lists([5], [5], 10)
 
+
 def test_clear():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    v = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     assert v.nvals == 10
     assert len(v) == 10
     v.clear()
     assert v.nvals == 0
     assert len(v) == 0
 
+
 def test_resize():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    v = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     assert v.nrows == 10
     assert v.ncols == 10
     assert v.nvals == 10
@@ -73,20 +69,19 @@ def test_resize():
     assert list(v.cols) == list(range(10))
     assert list(v.vals) == list(range(10))
 
+
 def test_matrix_create_dup():
     m = Matrix.sparse(INT8, 10, 10)
-    m[3,3] = 3
+    m[3, 3] = 3
     n = Matrix.dup(m)
     assert n.nrows == 10
     assert n.ncols == 10
     assert n.nvals == 1
-    assert n[3,3] == 3
+    assert n[3, 3] == 3
+
 
 def test_matrix_to_from_lists():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    v = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     assert v.nrows == 10
     assert v.ncols == 10
     assert v.nvals == 10
@@ -94,7 +89,8 @@ def test_matrix_to_from_lists():
         list(range(10)),
         list(range(10)),
         list(range(10)),
-        ]
+    ]
+
 
 def test_matrix_gb_type():
     v = Matrix.sparse(BOOL, 10)
@@ -103,6 +99,7 @@ def test_matrix_gb_type():
     assert v.gb_type == lib.GrB_INT8
     v = Matrix.sparse(FP64, 10)
     assert v.gb_type == lib.GrB_FP64
+
 
 def test_matrix_eadd():
     I = list(range(10))
@@ -123,6 +120,7 @@ def test_matrix_eadd():
     sum3 |= w
     assert sum3.iseq(sum2)
 
+
 def test_sub():
     I = list(range(10))
     v = Matrix.from_lists(I, I, I)
@@ -141,6 +139,7 @@ def test_sub():
     diff2 = v.dup()
     diff2 -= w
     assert diff2.iseq(subtraction_ref)
+
 
 def test_matrix_emult():
     I = list(range(10))
@@ -164,114 +163,89 @@ def test_matrix_emult():
     div2 /= w
     assert div2.iseq(division_ref)
 
+
 def test_matrix_reduce_bool():
     v = Matrix.sparse(BOOL, 10, 10)
     assert not v.reduce_bool()
-    v[3,3] = True
+    v[3, 3] = True
     assert v.reduce_bool()
+
 
 def test_matrix_reduce_int():
     v = Matrix.sparse(INT8, 10, 10)
     r = v.reduce_int()
     assert type(r) is int
     assert r == 0
-    v[3,3] = 3
-    v[4,4] = 4
+    v[3, 3] = 3
+    v[4, 4] = 4
     assert v.reduce_int() == 7
+
 
 def test_matrix_reduce_float():
     v = Matrix.sparse(FP64, 10, 10)
     r = v.reduce_float()
     assert type(r) is float
     assert r == 0.0
-    v[3,3] = 3.3
-    v[4,4] = 4.4
+    v[3, 3] = 3.3
+    v[4, 4] = 4.4
     assert v.reduce_float() == 7.7
 
+
 def test_matrix_reduce_vector():
-    m = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    m = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     v = m.reduce_vector()
     v == Vector.from_list(list(range(10)))
 
+
 def test_mxm():
-    m = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [1,2,3])
-    n = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [2,3,4])
+    m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+    n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
     o = m.mxm(n)
     assert o.nrows == 3
     assert o.ncols == 3
     assert o.nvals == 3
-    r = Matrix.from_lists(
-        [0,1,2],
-        [2,0,1],
-        [3,8,6])
+    r = Matrix.from_lists([0, 1, 2], [2, 0, 1], [3, 8, 6])
     assert o.iseq(r)
     assert r.iseq(m @ n)
     m @= n
     assert r.iseq(m)
     o = m.mxm(n, semiring=BOOL.LOR_LAND)
-    assert o.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [True, True, True]))
+    assert o.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [True, True, True]))
+
 
 def test_mxm_context():
-    m = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [1,2,3])
-    n = Matrix.from_lists(
-        [0,1,2],
-        [1,2,0],
-        [2,3,4])
+    m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+    n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
 
     with semiring.PLUS_PLUS:
         o = m @ n
 
-    assert o.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [2, 0, 1],
-        [4, 6, 5]))
+    assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [4, 6, 5]))
 
     with semiring.LOR_LAND_BOOL:
         o = m @ n
-    assert o.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [2, 0, 1],
-        [True, True, True]))
+    assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [True, True, True]))
+
+    with descriptor.TransposeA:
+        o = m @ n
+
+    assert o.iseq(m.mxm(n, desc=descriptor.TransposeA))
 
     with BOOL.LOR_LAND:
         o = m @ n
-    assert o.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [2, 0, 1],
-        [True, True, True]))
+    assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [True, True, True]))
 
     with pytest.raises(TypeError):
         m @ 3
     with pytest.raises(TypeError):
         m @ Scalar.from_value(3)
 
+
 def test_mxv():
-    m = Matrix.from_lists(
-        [0,1,2,3],
-        [1,2,0,1],
-        [1,2,3,4])
-    v = Vector.from_lists(
-        [0,1,2],
-        [2,3,4])
+    m = Matrix.from_lists([0, 1, 2, 3], [1, 2, 0, 1], [1, 2, 3, 4])
+    v = Vector.from_lists([0, 1, 2], [2, 3, 4])
     o = m.mxv(v)
-    assert o.iseq(Vector.from_lists(
-        [0, 1, 2, 3],
-        [3, 8, 6, 12]))
+    assert o.iseq(Vector.from_lists([0, 1, 2, 3], [3, 8, 6, 12]))
 
     assert o.iseq(m @ v)
 
@@ -279,86 +253,69 @@ def test_mxv():
 
     with semiring.PLUS_PLUS:
         o = m.mxv(v)
-        assert o.iseq(Vector.from_lists(
-            [0, 1, 2, 3],
-            [4, 6, 5, 7]))
+        assert o.iseq(Vector.from_lists([0, 1, 2, 3], [4, 6, 5, 7]))
         assert o.iseq(m @ v)
 
+
 def test_matrix_pattern():
-    v = Matrix.from_lists(
-        list(range(10)),
-        list(range(10)),
-        list(range(10)))
+    v = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     p = v.pattern()
     assert p.gb_type == lib.GrB_BOOL
     assert p.nrows == 10
     assert p.ncols == 10
     assert p.nvals == 10
 
+
 def test_matrix_transpose():
     v = Matrix.from_lists(
-        list(range(2, -1, -1)),
-        list(range(3)),
-        list(range(3)),
-        nrows=3, ncols=4)
+        list(range(2, -1, -1)), list(range(3)), list(range(3)), nrows=3, ncols=4
+    )
     w = v.transpose()
-    assert w.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [2, 1, 0],
-        [0, 1, 2],
-        nrows=4, ncols=3))
+    assert w.iseq(Matrix.from_lists([0, 1, 2], [2, 1, 0], [0, 1, 2], nrows=4, ncols=3))
     v2 = v.transpose(desc=descriptor.TransposeA)
     assert v2.iseq(v)
 
+
 def test_matrix_mm_read_write(tmp_path):
-    mmf = tmp_path / 'mmwrite_test.mm'
+    mmf = tmp_path / "mmwrite_test.mm"
     mmf.touch()
-    m = Matrix.from_lists(
-        [0,1,2],
-        [0,1,2],
-        [2,3,4])
-    with mmf.open('w') as f:
+    m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
+    with mmf.open("w") as f:
         m.to_mm(f)
     with mmf.open() as f:
         assert f.readlines() == [
-            '%%MatrixMarket matrix coordinate integer symmetric\n',
-            '%%GraphBLAS GrB_INT64\n',
-            '3 3 3\n',
-            '1 1 2\n',
-            '2 2 3\n',
-            '3 3 4\n']
+            "%%MatrixMarket matrix coordinate integer symmetric\n",
+            "%%GraphBLAS GrB_INT64\n",
+            "3 3 3\n",
+            "1 1 2\n",
+            "2 2 3\n",
+            "3 3 4\n",
+        ]
 
     with mmf.open() as f:
         n = Matrix.from_mm(f, INT8)
     assert n.iseq(m)
 
+
 def test_matrix_binfile_read_write(tmp_path):
-    binfilef = tmp_path / 'binfilewrite_test.binfile'
+    binfilef = tmp_path / "binfilewrite_test.binfile"
     binfilef.touch()
-    m = Matrix.from_lists(
-        [0,1,2],
-        [0,1,2],
-        [2,3,4])
+    m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
     m.to_binfile(bytes(binfilef))
     n = Matrix.from_binfile(bytes(binfilef))
     assert n.iseq(m)
 
+
 def test_matrix_tsv_read(tmp_path):
-    mmf = tmp_path / 'tsv_test.mm'
+    mmf = tmp_path / "tsv_test.mm"
     mmf.touch()
-    with mmf.open('w') as f:
-        f.writelines([
-            '3\t3\t3\n',
-            '1\t1\t2\n',
-            '2\t2\t3\n',
-            '3\t3\t4\n'])
+    with mmf.open("w") as f:
+        f.writelines(["3\t3\t3\n", "1\t1\t2\n", "2\t2\t3\n", "3\t3\t4\n"])
 
     with mmf.open() as f:
         n = Matrix.from_tsv(f, INT8, 3, 3)
-    assert n.to_lists() == [
-        [0, 1, 2],
-        [0, 1, 2],
-        [2, 3, 4]]
+    assert n.to_lists() == [[0, 1, 2], [0, 1, 2], [2, 3, 4]]
+
 
 def test_matrix_random():
     m = Matrix.random(INT8, 10, 10, 5, seed=42)
@@ -370,176 +327,149 @@ def test_matrix_random():
     assert m.ncols == 10
     assert 0 < len(list(m)) <= 5
 
+
 def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
     # slice out row vector
     v = m[2]
-    assert v == Vector.from_lists(
-        [0, 1, 2],
-        [6, 7, 8])
+    assert v == Vector.from_lists([0, 1, 2], [6, 7, 8])
     # slice out row vector from rectangular matrix
     v = m[:, 0:1][2]
-    assert v == Vector.from_lists(
-        [0, 1],
-        [6, 7])
+    assert v == Vector.from_lists([0, 1], [6, 7])
 
     # slice out row vector
-    v = m[2,:]
-    assert v == Vector.from_lists(
-        [0, 1, 2],
-        [6, 7, 8])
+    v = m[2, :]
+    assert v == Vector.from_lists([0, 1, 2], [6, 7, 8])
 
     # slice out column vector
-    v = m[:,2]
-    assert v == Vector.from_lists(
-        [0, 1, 2],
-        [2, 5, 8])
+    v = m[:, 2]
+    assert v == Vector.from_lists([0, 1, 2], [2, 5, 8])
 
     # slice copy
     n = m[:]
     assert n.iseq(m)
     # also slice copy
-    n = m[:,:]
+    n = m[:, :]
     assert n.iseq(m)
 
     # submatrix slice out rows
     sm = m[0:1]
-    assert sm.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5], 2, 3))
+    assert sm.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1], [0, 1, 2, 0, 1, 2], [0, 1, 2, 3, 4, 5], 2, 3
+        )
+    )
 
     # submatrix slice out columns
-    n = m[:,1:]
-    assert n.iseq(Matrix.from_lists(
-        [0, 0, 1, 1, 2, 2],
-        [0, 1, 0, 1, 0, 1],
-        [1, 2, 4, 5, 7, 8], 3, 2))
+    n = m[:, 1:]
+    assert n.iseq(
+        Matrix.from_lists(
+            [0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [1, 2, 4, 5, 7, 8], 3, 2
+        )
+    )
 
     # submatrix slice out column range
-    sm = m[:,1:2]
-    assert sm.iseq(Matrix.from_lists(
-        [0, 0, 1, 1, 2, 2],
-        [0, 1, 0, 1, 0, 1],
-        [1, 2, 4, 5, 7, 8], 3, 2))
+    sm = m[:, 1:2]
+    assert sm.iseq(
+        Matrix.from_lists(
+            [0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [1, 2, 4, 5, 7, 8], 3, 2
+        )
+    )
 
     # submatrix slice out listed columns
-    sm = m[:,[0,2]]
-    assert sm.iseq(Matrix.from_lists(
-        [0, 0, 1, 1, 2, 2],
-        [0, 1, 0, 1, 0, 1],
-        [0, 2, 3, 5, 6, 8], 3, 2))
+    sm = m[:, [0, 2]]
+    assert sm.iseq(
+        Matrix.from_lists(
+            [0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [0, 2, 3, 5, 6, 8], 3, 2
+        )
+    )
 
     # submatrix slice out rows
-    n = m[1:,:]
-    assert n.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [3, 4, 5, 6, 7, 8], 2, 3))
+    n = m[1:, :]
+    assert n.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1], [0, 1, 2, 0, 1, 2], [3, 4, 5, 6, 7, 8], 2, 3
+        )
+    )
 
     # submatrix slice out row range
-    sm = m[1:2,:]
-    assert sm.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [3, 4, 5, 6, 7, 8], 2, 3))
+    sm = m[1:2, :]
+    assert sm.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1], [0, 1, 2, 0, 1, 2], [3, 4, 5, 6, 7, 8], 2, 3
+        )
+    )
 
     # submatrix slice out listed rows
-    sm = m[[0,2],:]
-    assert sm.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 6, 7, 8], 2, 3))
+    sm = m[[0, 2], :]
+    assert sm.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1], [0, 1, 2, 0, 1, 2], [0, 1, 2, 6, 7, 8], 2, 3
+        )
+    )
+
 
 def test_matrix_assign():
-    m = Matrix.from_lists(
-        list(range(3)),
-        list(range(3)),
-        list(range(3)))
+    m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     assert m.nvals == 3
 
     m[2] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m.iseq(Matrix.from_lists(
-        [0, 1, 2, 2, 2],
-        [0, 1, 0, 1, 2],
-        [0, 1, 6, 6, 6], 3, 3))
+    assert m.iseq(
+        Matrix.from_lists([0, 1, 2, 2, 2], [0, 1, 0, 1, 2], [0, 1, 6, 6, 6], 3, 3)
+    )
 
-    m = Matrix.from_lists(
-        list(range(3)),
-        list(range(3)),
-        list(range(3)))
+    m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     assert m.nvals == 3
 
-    m[2,:] = Vector.from_list(list(repeat(6, 3)))
+    m[2, :] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m.iseq(Matrix.from_lists(
-        [0, 1, 2, 2, 2],
-        [0, 1, 0, 1, 2],
-        [0, 1, 6, 6, 6], 3, 3))
+    assert m.iseq(
+        Matrix.from_lists([0, 1, 2, 2, 2], [0, 1, 0, 1, 2], [0, 1, 6, 6, 6], 3, 3)
+    )
 
-    m = Matrix.from_lists(
-        list(range(3)),
-        list(range(3)),
-        list(range(3)))
+    m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
 
     assert m.nvals == 3
-    m[:,2] = Vector.from_list(list(repeat(6, 3)))
+    m[:, 2] = Vector.from_list(list(repeat(6, 3)))
     assert m.nvals == 5
-    assert m.iseq(Matrix.from_lists(
-        [0, 1, 0, 1, 2],
-        [0, 1, 2, 2, 2],
-        [0, 1, 6, 6, 6], 3, 3))
+    assert m.iseq(
+        Matrix.from_lists([0, 1, 0, 1, 2], [0, 1, 2, 2, 2], [0, 1, 6, 6, 6], 3, 3)
+    )
 
     m = Matrix.sparse(INT64, 3, 3)
     assert m.nvals == 0
-    n = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0, 1, 2])
-    m[:,:] = n
+    n = Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 1, 2])
+    m[:, :] = n
     assert m.iseq(n)
 
-    n = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0, 1, 2])
+    n = Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 1, 2])
 
     mask = m > 0
     m[mask] = 9
-    assert m.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0, 9, 9]))
+    assert m.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 9, 9]))
+
 
 def test_kron():
-    n = Matrix.from_lists(
-        list(range(3)),
-        list(range(3)),
-        list(range(3)))
-    m = Matrix.from_lists(
-        list(range(3)),
-        list(range(3)),
-        list(range(3)))
+    n = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
+    m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
 
     o = n.kron(m)
-    assert o.iseq(Matrix.from_lists(
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [0, 0, 0, 0, 1, 2, 0, 2, 4]))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [0, 0, 0, 0, 1, 2, 0, 2, 4],
+        )
+    )
+
 
 def test_apply():
-    v = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [2, 3, 4])
+    v = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
     w = v.apply(INT64.AINV)
-    assert w.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [-2, -3, -4]))
+    assert w.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [-2, -3, -4]))
 
     w2 = v.apply(unaryop.AINV)
     assert w.iseq(w2)
@@ -547,89 +477,85 @@ def test_apply():
     w3 = v.apply(lib.GrB_AINV_INT64)
     assert w.iseq(w3)
 
+
 def test_get_set_options():
     v = Matrix.random(INT8, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
 
+
 def test_select():
-    v = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0, 0, 3])
+    v = Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [2], [3]]
 
-    w = v.select('!=0')
+    w = v.select("!=0")
     assert w.to_lists() == [[2], [2], [3]]
 
-    w = v.select('!=', 0)
+    w = v.select("!=", 0)
     assert w.to_lists() == [[2], [2], [3]]
 
-    w = v.select('>', 0)
+    w = v.select(">", 0)
     assert w.to_lists() == [[2], [2], [3]]
 
-    w = v.select('<', 3)
+    w = v.select("<", 3)
     assert w.to_lists() == [[0, 1], [0, 1], [0, 0]]
 
-    w = v.select('>=', 0)
+    w = v.select(">=", 0)
     assert w.iseq(v)
 
-    w = v.select('>=0')
+    w = v.select(">=0")
     assert w.iseq(v)
+
 
 def test_select_ops():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
 
-    assert m.tril().iseq(Matrix.from_lists(
-        [0, 1, 1, 2, 2, 2],
-        [0, 0, 1, 0, 1, 2],
-        [0, 3, 4, 6, 7, 8]))
+    assert m.tril().iseq(
+        Matrix.from_lists([0, 1, 1, 2, 2, 2], [0, 0, 1, 0, 1, 2], [0, 3, 4, 6, 7, 8])
+    )
 
-    assert m.triu().iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 2],
-        [0, 1, 2, 1, 2, 2],
-        [0, 1, 2, 4, 5, 8]))
+    assert m.triu().iseq(
+        Matrix.from_lists([0, 0, 0, 1, 1, 2], [0, 1, 2, 1, 2, 2], [0, 1, 2, 4, 5, 8])
+    )
 
-    assert m.diag().iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0, 4, 8]))
+    assert m.diag().iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 4, 8]))
 
-    assert m.offdiag().iseq(Matrix.from_lists(
-        [0, 0, 1, 1, 2, 2],
-        [1, 2, 0, 2, 0, 1],
-        [1, 2, 3, 5, 6, 7]))
+    assert m.offdiag().iseq(
+        Matrix.from_lists([0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1], [1, 2, 3, 5, 6, 7])
+    )
 
-    assert m.nonzero().iseq(Matrix.from_lists(
-        [0, 0, 1, 1, 1, 2, 2, 2],
-        [1, 2, 0, 1, 2, 0, 1, 2],
-        [1, 2, 3, 4, 5, 6, 7, 8]))
+    assert m.nonzero().iseq(
+        Matrix.from_lists(
+            [0, 0, 1, 1, 1, 2, 2, 2], [1, 2, 0, 1, 2, 0, 1, 2], [1, 2, 3, 4, 5, 6, 7, 8]
+        )
+    )
 
-    assert (-m).iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [0, -1, -2, -3, -4, -5, -6, -7, -8]))
+    assert (-m).iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [0, -1, -2, -3, -4, -5, -6, -7, -8],
+        )
+    )
 
     n = -m
 
-    assert abs(m).iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8]))
+    assert abs(m).iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        )
+    )
 
-    m = Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [0.0, 1.0, 2.0], 3, 3)
+    m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [0.0, 1.0, 2.0], 3, 3)
 
     n = ~m
-    assert n.iseq(Matrix.from_lists(
-        [0, 1, 2],
-        [0, 1, 2],
-        [float('inf'), 1.0, 0.5]))
+    assert n.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [float("inf"), 1.0, 0.5]))
+
 
 def test_cmp_scalar():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -641,44 +567,41 @@ def test_cmp_scalar():
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [False, False, False, False, False, False, True, True, True],
-        )
+    )
 
     n = m >= 5
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 2, 0, 1, 2],
         [False, False, False, False, False, True, True, True, True],
-        )
+    )
 
     n = m < 5
     assert n == Matrix.from_lists(
-        [0, 0, 0, 1, 1],
-        [0, 1, 2, 0, 1],
-        [True, True, True, True, True],
-        3, 3
-        )
+        [0, 0, 0, 1, 1], [0, 1, 2, 0, 1], [True, True, True, True, True], 3, 3
+    )
 
     n = m <= 5
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 1],
         [0, 1, 2, 0, 1, 2],
         [True, True, True, True, True, True],
-        3, 3
-        )
+        3,
+        3,
+    )
 
     n = m == 5
-    assert n == Matrix.from_lists(
-        [1], [2], [5],
-        3, 3
-        )
+    assert n == Matrix.from_lists([1], [2], [5], 3, 3)
 
     n = m != 5
     assert n == Matrix.from_lists(
         [0, 0, 0, 1, 1, 2, 2, 2],
         [0, 1, 2, 0, 1, 0, 1, 2],
         [0, 1, 2, 3, 4, 6, 7, 8],
-        3, 3
-        )
+        3,
+        3,
+    )
+
 
 def test_cmp():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -688,106 +611,111 @@ def test_cmp():
     n = Matrix.from_lists(I, J, W, 3, 3)
 
     o = m > n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [False, False, False, False, False, False, False, False, False],
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [False, False, False, False, False, False, False, False, False],
+        )
+    )
 
     o = m >= n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [True, True, True, False, False, False, False, False, False],
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [True, True, True, False, False, False, False, False, False],
+        )
+    )
 
     o = m < n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [False, False, False, True, True, True, True, True, True],
-        3, 3
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [False, False, False, True, True, True, True, True, True],
+            3,
+            3,
+        )
+    )
 
     o = m <= n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [True, True, True, True, True, True, True, True, True],
-        3, 3
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [True, True, True, True, True, True, True, True, True],
+            3,
+            3,
+        )
+    )
 
     o = m == n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [True, True, True, False, False, False, False, False, False],
-        3, 3
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [True, True, True, False, False, False, False, False, False],
+            3,
+            3,
+        )
+    )
 
     o = m != n
-    assert o.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        [False, False, False, True, True, True, True, True, True],
-        3, 3
-        ))
+    assert o.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [False, False, False, True, True, True, True, True, True],
+            3,
+            3,
+        )
+    )
+
 
 def test_select_cmp():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
     V = list(range(9))
     m = Matrix.from_lists(I, J, V, 3, 3)
 
-    n = m.select('>', 5)
-    assert n.iseq(Matrix.from_lists(
-        [2, 2, 2], [0, 1, 2], [6, 7, 8]
-        ))
+    n = m.select(">", 5)
+    assert n.iseq(Matrix.from_lists([2, 2, 2], [0, 1, 2], [6, 7, 8]))
 
-    n = m.select('>=', 5)
-    assert n.iseq(Matrix.from_lists(
-        [1, 2, 2, 2],
-        [2, 0, 1, 2],
-        [5, 6, 7, 8]
-        ))
+    n = m.select(">=", 5)
+    assert n.iseq(Matrix.from_lists([1, 2, 2, 2], [2, 0, 1, 2], [5, 6, 7, 8]))
 
-    n = m.select('<', 5)
-    assert n.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1],
-        [0, 1, 2, 0, 1],
-        [0, 1, 2, 3, 4],
-        3, 3
-        ))
+    n = m.select("<", 5)
+    assert n.iseq(
+        Matrix.from_lists([0, 0, 0, 1, 1], [0, 1, 2, 0, 1], [0, 1, 2, 3, 4], 3, 3)
+    )
 
-    n = m.select('<=', 5)
-    assert n.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 1],
-        [0, 1, 2, 0, 1, 2],
-        [0, 1, 2, 3, 4, 5],
-        3, 3
-        ))
+    n = m.select("<=", 5)
+    assert n.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 1], [0, 1, 2, 0, 1, 2], [0, 1, 2, 3, 4, 5], 3, 3
+        )
+    )
 
-    n = m.select('==', 5)
-    assert n.iseq(Matrix.from_lists(
-        [1],
-        [2],
-        [5],
-        3, 3
-        ))
+    n = m.select("==", 5)
+    assert n.iseq(Matrix.from_lists([1], [2], [5], 3, 3))
 
-    n = m.select('!=', 5)
-    assert n.iseq(Matrix.from_lists(
-        [0, 0, 0, 1, 1, 2, 2, 2],
-        [0, 1, 2, 0, 1, 0, 1, 2],
-        [0, 1, 2, 3, 4, 6, 7, 8],
-        3, 3
-        ))
+    n = m.select("!=", 5)
+    assert n.iseq(
+        Matrix.from_lists(
+            [0, 0, 0, 1, 1, 2, 2, 2],
+            [0, 1, 2, 0, 1, 0, 1, 2],
+            [0, 1, 2, 3, 4, 6, 7, 8],
+            3,
+            3,
+        )
+    )
+
 
 def test_shape_repr():
-    m = Matrix.from_lists(
-        [2, 2, 2], [0, 1, 2], [6, 7, 8]
-    )
+    m = Matrix.from_lists([2, 2, 2], [0, 1, 2], [6, 7, 8])
     assert m.shape == (3, 3)
-    assert repr(m) == '<Matrix (3x3 : 3:INT64)>'
+    assert repr(m) == "<Matrix (3x3 : 3:INT64)>"
+
 
 def test_dense():
     m = Matrix.dense(UINT8, 10, 10)
@@ -797,11 +725,13 @@ def test_dense():
     assert len(m) == 100
     assert all(x[2] == 1 for x in m)
 
+
 def test_identity():
     m = Matrix.identity(UINT8, 10)
     assert len(m) == 10
     for i in range(len(m)):
-        assert m[i,i] == UINT8.one
+        assert m[i, i] == UINT8.one
+
 
 def test_to_arrays():
     m = Matrix.dense(UINT8, 10, 10)
@@ -811,6 +741,7 @@ def test_to_arrays():
     assert len(X) == 100
     assert all(x == 0 for x in X)
 
+
 def test_pow():
     m = Matrix.dense(UINT8, 10, 10)
     assert m.identity(UINT8, 10) == m ** 0
@@ -819,190 +750,168 @@ def test_pow():
     vals = (m ** 3).to_arrays()[2]
     assert (x == 100 for x in vals)
 
+
 def test_T():
     m = Matrix.dense(UINT8, 10, 10)
     assert m.T == m.transpose()
 
+
 def test_to_string():
     M = Matrix.from_lists(*(map(list, zip((0, 1, 10), (1, 0, 11)))))
-    assert re.search('-.*10.*\n.*11.*-', M.to_string(empty_char='-'))
+    assert re.search("-.*10.*\n.*11.*-", M.to_string(empty_char="-"))
+
 
 # def test_complex():
 #     m = Matrix.sparse(Complex, 10, 10)
 #     m[2,3] = 3+4j
 #     assert m[2,3] == 3+4j
 
+
 def test_get_contains():
     m = Matrix.identity(UINT8, 10)
     for i in range(m.nrows):
         for j in range(m.ncols):
             if i == j:
-                assert (i,j) in m
-                assert m.get(i,j) == 1
+                assert (i, j) in m
+                assert m.get(i, j) == 1
             else:
-                assert (i,j) not in m
-                assert m.get(i,j) is None
+                assert (i, j) not in m
+                assert m.get(i, j) is None
+
 
 def scalar_assign():
     m = Matrix.sparse(UINT8, 10, 10)
     m.assign_scalar(42, 1, 1)
-    assert m[1,1] == 42
+    assert m[1, 1] == 42
     m.assign_scalar(43, 2, 2)
-    assert m[2,2] == 43
+    assert m[2, 2] == 43
+
 
 def test_wait():
     m = Matrix.sparse(UINT8, 10, 10)
-    m[:,:] = 1
+    m[:, :] = 1
     m.wait()
 
+
 def test_apply_first():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [4, 2])
     assert m.apply_first(2, INT8.PLUS).to_lists() == [[0, 1], [0, 1], [6, 4]]
 
+
 def test_apply_second():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [0, 1], [3, -1]]
 
+
 def test_add_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (m + 3).to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m + 3).to_lists() == [[0, 1], [0, 1], [8, 4]]
+
 
 def test_radd_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (3 + m).to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (3 + m).to_lists() == [[0, 1], [0, 1], [8, 4]]
+
 
 def test_iadd_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m += 3
-    assert m.to_lists() ==  [[0, 1], [0, 1], [8, 4]]
+    assert m.to_lists() == [[0, 1], [0, 1], [8, 4]]
+
 
 def test_sub_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (m - 3).to_lists() ==  [[0, 1], [0, 1], [2, -2]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m - 3).to_lists() == [[0, 1], [0, 1], [2, -2]]
+
 
 def test_rsub_scalar_second():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (3 - m).to_lists() ==  [[0, 1], [0, 1], [-2, 2]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (3 - m).to_lists() == [[0, 1], [0, 1], [-2, 2]]
+
 
 def test_isub_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m -= 3
-    assert m.to_lists() ==  [[0, 1], [0, 1], [2, -2]]
+    assert m.to_lists() == [[0, 1], [0, 1], [2, -2]]
+
 
 def test_mul_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (m * 3).to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m * 3).to_lists() == [[0, 1], [0, 1], [15, 3]]
+
 
 def test_rmul_scalar_second():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
-    assert (3 * m).to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (3 * m).to_lists() == [[0, 1], [0, 1], [15, 3]]
+
 
 def test_imul_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [5, 1]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m *= 3
-    assert m.to_lists() ==  [[0, 1], [0, 1], [15, 3]]
+    assert m.to_lists() == [[0, 1], [0, 1], [15, 3]]
+
 
 def test_truediv_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [15, 3]
-    )
-    assert (m / 3).to_lists() ==  [[0, 1], [0, 1], [5, 1]]
+    m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
+    assert (m / 3).to_lists() == [[0, 1], [0, 1], [5, 1]]
+
 
 def test_rtruediv_scalar_second():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [3, 5]
-    )
-    assert (15 / m).to_lists() ==  [[0, 1], [0, 1], [5, 3]]
+    m = Matrix.from_lists([0, 1], [0, 1], [3, 5])
+    assert (15 / m).to_lists() == [[0, 1], [0, 1], [5, 3]]
+
 
 def test_itruediv_scalar():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [15, 3]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
     m /= 3
-    assert m.to_lists() ==  [[0, 1], [0, 1], [5, 1]]
+    assert m.to_lists() == [[0, 1], [0, 1], [5, 1]]
+
 
 def test_delitem():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [4, 2])
     assert len(m) == 2
-    del m[0,0]
+    del m[0, 0]
     assert len(m) == 1
-    assert m[1,1] == 2
+    assert m[1, 1] == 2
+
 
 def test_cast():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2]
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [4, 2])
     n = m.cast(FP64)
-    assert n.iseq(Matrix.from_lists(
-        [0, 1], [0, 1], [4.0, 2.0]
-        ))
+    assert n.iseq(Matrix.from_lists([0, 1], [0, 1], [4.0, 2.0]))
+
 
 def test_promotion():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2],
-        typ=FP32
-    )
-    n = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2],
-        typ=FP64
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [4, 2], typ=FP32)
+    n = Matrix.from_lists([0, 1], [0, 1], [4, 2], typ=FP64)
     o = m @ n
     assert o.type == FP64
-    n = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2],
-        typ=UINT8
-    )
+    n = Matrix.from_lists([0, 1], [0, 1], [4, 2], typ=UINT8)
     o = m @ n
     assert o.type == FP32
 
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [-4, 2],
-        typ=INT8
-    )
+    m = Matrix.from_lists([0, 1], [0, 1], [-4, 2], typ=INT8)
     o = m @ n
     assert o.type == INT8
 
+
 def test_str():
-    m = Matrix.from_lists(
-        [0, 1], [0, 1], [4, 2],
-        typ=INT8
-    )
-    assert str(m) == """\
+    m = Matrix.from_lists([0, 1], [0, 1], [4, 2], typ=INT8)
+    assert (
+        str(m)
+        == """\
     0 1
  0| 4  | 0
  1|   2| 1
     0 1"""
-
-    b = Matrix.from_lists(
-        [0, 1], [0, 1], [True, True]
     )
-    assert str(b) == """\
+
+    b = Matrix.from_lists([0, 1], [0, 1], [True, True])
+    assert (
+        str(b)
+        == """\
     0 1
  0| t  | 0
  1|   t| 1
     0 1"""
-
+    )
