@@ -344,7 +344,7 @@ def test_contains():
     v = Vector.from_lists([0, 1, 9, 20], [0, 1, 3, 4])
     assert 1 in v
     assert 9 in v
-    assert 10 not in v
+    assert not 10 in v
 
 
 def test_to_string():

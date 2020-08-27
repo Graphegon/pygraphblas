@@ -168,7 +168,10 @@ def test_matrix_reduce_bool():
     v = Matrix.sparse(BOOL, 10, 10)
     assert not v.reduce_bool()
     v[3, 3] = True
-    assert v.reduce_bool()
+    v[4, 4] = False
+    assert v.reduce_bool() == True
+    with monoid.LAND_MONOID:
+        assert v.reduce_bool() == False
 
 
 def test_matrix_reduce_int():
@@ -179,6 +182,8 @@ def test_matrix_reduce_int():
     v[3, 3] = 3
     v[4, 4] = 4
     assert v.reduce_int() == 7
+    with monoid.TIMES_MONOID:
+        assert v.reduce_int() == 12
 
 
 def test_matrix_reduce_float():
@@ -189,6 +194,8 @@ def test_matrix_reduce_float():
     v[3, 3] = 3.3
     v[4, 4] = 4.4
     assert v.reduce_float() == 7.7
+    with monoid.TIMES_MONOID:
+        assert v.reduce_float() == 14.52
 
 
 def test_matrix_reduce_vector():
@@ -873,6 +880,12 @@ def test_delitem():
     del m[0, 0]
     assert len(m) == 1
     assert m[1, 1] == 2
+    with pytest.raises(TypeError):
+        del m[""]
+    with pytest.raises(TypeError):
+        del m["", 0]
+    with pytest.raises(TypeError):
+        del m[0, ""]
 
 
 def test_cast():

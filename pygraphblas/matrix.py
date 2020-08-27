@@ -599,7 +599,7 @@ class Matrix:
         """Reduce matrix to a boolean."""
         if mon is NULL:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         result = ffi.new("_Bool*")
         mask, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc))
@@ -609,7 +609,7 @@ class Matrix:
         """Reduce matrix to an integer."""
         if mon is NULL:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         result = ffi.new("int64_t*")
         mask, accum, desc = self._get_args(**kwargs)
         _check(lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc))
@@ -619,7 +619,7 @@ class Matrix:
         """Reduce matrix to an float."""
         if mon is NULL:
             mon = current_monoid.get(self.type.PLUS_MONOID)
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         mask, accum, desc = self._get_args(**kwargs)
         result = ffi.new("double*")
         _check(lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc))
@@ -629,7 +629,7 @@ class Matrix:
         """Reduce matrix to a vector."""
         if mon is NULL:
             mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
-        mon = mon.get_monoid(self)
+        mon = mon.get_monoid(self.type)
         if out is None:
             out = Vector.sparse(self.type, self.nrows)
         mask, accum, desc = self._get_args(**kwargs)
@@ -1077,8 +1077,8 @@ class Matrix:
     def __delitem__(self, index):
         if (
             not isinstance(index, tuple)
-            and isinstance(index[0], int)
-            and isinstance(index[1], int)
+            or not isinstance(index[0], int)
+            or not isinstance(index[1], int)
         ):
             raise TypeError(
                 "__delitem__ currently only supports single element removal"
