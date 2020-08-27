@@ -459,3 +459,14 @@ def test_itruediv_scalar():
     m = Vector.from_lists([0, 1], [15, 3])
     m /= 3
     assert m.to_lists() == [[0, 1], [5, 1]]
+
+
+def test_slicing():
+    v = Vector.from_1_to_n(10)
+    assert v[1:9:3].iseq(Vector.from_lists([0, 1, 2], [2, 5, 8], typ=types.INT32))
+
+    assert len(v[1:9:-3]) == 0
+
+    assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4], typ=types.INT32))
+
+    assert len(v[9:1:3]) == 0

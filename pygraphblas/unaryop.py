@@ -24,7 +24,7 @@ class UnaryOp:
         self.name = "_".join((name, typ))
         self.unaryop = op
         self.token = None
-        self.__class__._auto_unaryops[name][types.gb_from_name(typ)] = op
+        self.__class__._auto_unaryops[name][types.Type.gb_from_name(typ)] = op
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, name, self)

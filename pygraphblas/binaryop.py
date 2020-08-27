@@ -32,7 +32,7 @@ class BinaryOp:
             self.binaryop = o[0]
         else:
             self.binaryop = binaryop
-            self.__class__._auto_binaryops[op][types.gb_from_name(typ)] = binaryop
+            self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ, None)
             if cls is not None:
                 setattr(cls, op, self)
@@ -145,6 +145,6 @@ def binary_op(arg_type, result_type=None):
             arg_type.gb_type,
         )
 
-        return BinaryOp(func_name, arg_type.C, out[0])
+        return BinaryOp(func_name, arg_type.__name__, out[0])
 
     return inner

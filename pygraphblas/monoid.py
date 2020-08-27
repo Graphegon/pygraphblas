@@ -33,7 +33,7 @@ class Monoid:
         else:
             self.monoid = monoid
             self.__class__._auto_monoids[op + "_MONOID"][
-                types.gb_from_name(typ)
+                types.Type.gb_from_name(typ)
             ] = monoid
             cls = getattr(types, typ, None)
             if cls is not None:

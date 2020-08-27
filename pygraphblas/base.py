@@ -111,12 +111,6 @@ _error_codes = {
     13: Panic,
 }
 
-_default_type_ops = {
-    lib.GrB_INT64: (lib.GrB_PLUS_INT64, lib.GrB_TIMES_INT64),
-    lib.GrB_FP64: (lib.GrB_PLUS_FP64, lib.GrB_TIMES_FP64),
-    lib.GrB_BOOL: (lib.GrB_PLUS_BOOL, lib.GrB_TIMES_BOOL),
-}
-
 
 def _check(res):
     if res != lib.GrB_SUCCESS:

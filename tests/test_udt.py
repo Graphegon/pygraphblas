@@ -82,7 +82,6 @@ def test_udt():
     ]
 
 
-@pytest.mark.skip
 def test_log_semiring():
     from math import log, log1p, exp
 

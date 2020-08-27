@@ -43,6 +43,8 @@ def gb_type_to_type(gb_type):
 class MetaType(type):
 
     _gb_type_map = {}
+    _type_gb_map = {}
+    _name_type_map = {}
 
     def __new__(meta, type_name, bases, attrs):
         if attrs.get("base", False):
@@ -66,6 +68,9 @@ class MetaType(type):
 
         cls = super().__new__(meta, type_name, bases, attrs)
         meta._gb_type_map[cls.gb_type] = cls
+        meta._type_gb_map[cls] = cls.gb_type
+        meta._name_type_map[type_name] = cls
+
         cls.ptr = cls.C + "*"
         cls.zero = getattr(cls, "zero", core_ffi.NULL)
         cls.one = getattr(cls, "one", core_ffi.NULL)
@@ -124,6 +129,9 @@ class MetaType(type):
             lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(core_ffi.NULL))
         )
         return Semiring("PLUS", "TIMES", cls.__name__, semiring[0], udt=cls)
+
+    def gb_from_name(cls, name):
+        return cls._name_type_map[name].gb_type
 
 
 class Type(metaclass=MetaType):
@@ -457,34 +465,3 @@ def promote(left, right, semiring=None):
             repr(right),
         )
     )
-
-
-def gb_from_name(name):
-    name = name.lower()
-    if name == "bool":
-        return lib.GrB_BOOL
-    if name == "uint8":
-        return lib.GrB_UINT8
-    if name == "int8":
-        return lib.GrB_INT8
-    if name == "uint16":
-        return lib.GrB_UINT16
-    if name == "int16":
-        return lib.GrB_INT16
-    if name == "uint32":
-        return lib.GrB_UINT32
-    if name == "int32":
-        return lib.GrB_INT32
-    if name == "uint64":
-        return lib.GrB_UINT64
-    if name == "int64":
-        return lib.GrB_INT64
-    if name == "fp32":
-        return lib.GrB_FP32
-    if name == "fp64":
-        return lib.GrB_FP64
-    if name == "fc32":
-        return lib.GxB_FC32
-    if name == "fc64":
-        return lib.GxB_FC64
-    raise TypeError("No such type %s" % name)
