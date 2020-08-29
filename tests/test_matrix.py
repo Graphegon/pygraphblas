@@ -20,7 +20,7 @@ def test_matrix_init_without_type():
     assert mx.type == mx2.type
 
 
-def test_matrix_create_sparse():
+def test_matrix_create():
     m = Matrix.sparse(INT8)
     assert m.nrows == 0
     assert m.ncols == 0
@@ -30,6 +30,12 @@ def test_matrix_create_sparse():
     assert m.ncols == 10
     assert m.nvals == 0
     assert len(m) == 0
+    m = Matrix.dense(INT8)
+    assert m.nrows == 1
+    assert m.ncols == 1
+    assert m.nvals == 1
+    with pytest.raises(AssertionError):
+        m = Matrix.dense(INT8, 0, 0)
 
 
 def test_matrix_get_set_element():
@@ -119,6 +125,18 @@ def test_matrix_eadd():
     sum3 = v.dup()
     sum3 |= w
     assert sum3.iseq(sum2)
+
+    prod_ref = Matrix.from_lists(I, I, [0, 1, 4, 9, 16, 25, 36, 49, 64, 81])
+    prod_ref[0, 1] = 1
+    prod_ref[1, 0] = 1
+
+    with binaryop.TIMES:
+        prod4 = v | w
+        assert prod4.iseq(prod_ref)
+
+    prod5 = v.eadd(w, "*")
+    assert prod5.iseq(prod_ref)
+    assert prod5.isne(sum1)
 
 
 def test_sub():
@@ -458,6 +476,17 @@ def test_matrix_assign():
     m[mask] = 9
     assert m.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 9, 9]))
 
+    m = Matrix.sparse(INT64, 3, 3)
+    assert m.nvals == 0
+    m[:] = 4
+    assert m.iseq(Matrix.dense(INT64, 3, 3, 4))
+
+    m = Matrix.sparse(INT64, 3, 3)
+    n = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 2, 2])
+    assert m.nvals == 0
+    m[:] = n
+    assert m.iseq(Matrix.identity(INT64, 3, 2))
+
 
 def test_kron():
     n = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
@@ -484,11 +513,25 @@ def test_apply():
     w3 = v.apply(lib.GrB_AINV_INT64)
     assert w.iseq(w3)
 
+    with unaryop.AINV:
+        w4 = v.apply(unaryop.AINV)
+    assert w.iseq(w4)
+
 
 def test_get_set_options():
     v = Matrix.random(INT8, 10, 10, 10, seed=42)
     v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
     assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
+
+    w = Matrix.sparse(INT8, 10, 10, hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
+    assert w.options_get() == (1.0, lib.GxB_BY_COL, True)
+
+
+def test_square():
+    v = Matrix.random(INT8, 10, 10, 10, seed=42)
+    assert v.square
+    w = Matrix.random(INT8, 10, 9, 10, seed=42)
+    assert not w.square
 
 
 def test_select():
@@ -513,6 +556,10 @@ def test_select():
 
     w = v.select(">=0")
     assert w.iseq(v)
+
+    # with unaryop.NONZERO:
+    #     w = v.select()
+    # assert w.to_lists() == [[2], [2], [3]]
 
 
 def test_select_ops():
@@ -608,6 +655,8 @@ def test_cmp_scalar():
         3,
         3,
     )
+    with pytest.raises(TypeError):
+        m < ""
 
 
 def test_cmp():
@@ -747,6 +796,10 @@ def test_to_arrays():
     assert len(J) == 100
     assert len(X) == 100
     assert all(x == 0 for x in X)
+
+    m = Matrix.dense(FC64, 10, 10)
+    with pytest.raises(TypeError):
+        I, J, X = m.to_arrays()
 
 
 def test_pow():

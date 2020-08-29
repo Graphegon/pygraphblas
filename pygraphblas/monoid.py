@@ -19,25 +19,13 @@ class Monoid:
     __slots__ = ("name", "monoid", "token", "op", "type")
 
     def __init__(self, op, typ, monoid, udt=None, boolean=False):
-        if udt is not None:
-            o = ffi.new("GrB_Monoid*")
-            udt = udt.gb_type
-            lib.GrB_Monoid_new(
-                o,
-                ffi.cast("GxB_binary_function", monoid.address),
-                lib.GrB_BOOL if boolean else udt,
-                udt,
-                udt,
-            )
-            self.monoid = o[0]
-        else:
-            self.monoid = monoid
-            self.__class__._auto_monoids[op + "_MONOID"][
-                types.Type.gb_from_name(typ)
-            ] = monoid
-            cls = getattr(types, typ, None)
-            if cls is not None:
-                setattr(cls, op + "_MONOID", self)
+        self.monoid = monoid
+        self.__class__._auto_monoids[op + "_MONOID"][
+            types.Type.gb_from_name(typ)
+        ] = monoid
+        cls = getattr(types, typ, None)
+        if cls is not None:
+            setattr(cls, op + "_MONOID", self)
         self.op = op
         self.type = typ
         self.name = "_".join((op, typ, "monoid"))

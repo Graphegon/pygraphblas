@@ -65,7 +65,8 @@ class Matrix:
         return m
 
     @classmethod
-    def dense(cls, typ, nrows, ncols, fill=None, **options):
+    def dense(cls, typ, nrows=1, ncols=1, fill=None, **options):
+        assert nrows > 0 and ncols > 0, 'dense matrix must be at least 1x1'
         m = cls.sparse(typ, nrows, ncols, **options)
         if fill is None:
             fill = m.type.zero
@@ -160,10 +161,12 @@ class Matrix:
         return i
 
     @classmethod
-    def identity(cls, typ, nrows, **options):
+    def identity(cls, typ, nrows, one=None, **options):
         result = cls.sparse(typ, nrows, nrows, **options)
+        if one is None:
+            one = result.type.one
         for i in range(nrows):
-            result[i, i] = result.type.one
+            result[i, i] = one
         return result
 
     @property
@@ -329,7 +332,7 @@ class Matrix:
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
-        add_op = add_op.get_binaryop(self, other)
+        add_op = add_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(**kwargs)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -368,7 +371,7 @@ class Matrix:
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
-        mult_op = mult_op.get_binaryop(self, other)
+        mult_op = mult_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(**kwargs)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -392,19 +395,13 @@ class Matrix:
     def iseq(self, other):
         """Compare two matrices for equality."""
         result = ffi.new("_Bool*")
-        eq_op = self.type.EQ.get_binaryop(self, other)
+        eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         _check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
         """Compare two matrices for inequality."""
         return not self.iseq(other)
-
-    def __getstate__(self):
-        pass
-
-    def __setstate__(self, data):
-        pass
 
     def __iter__(self):
         nvals = self.nvals
@@ -645,7 +642,7 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self)
+            op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(**kwargs)
         _check(
             lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
@@ -659,7 +656,7 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self)
+            op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(**kwargs)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
@@ -675,7 +672,7 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self)
+            op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(**kwargs)
         _check(
             self.type.Matrix_apply_BinaryOp2nd(
@@ -687,12 +684,10 @@ class Matrix:
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
         if out is NULL:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self)
-        elif isinstance(op, str):
+        if isinstance(op, str):
             op = _get_select_op(op)
 
-        if isinstance(thunk, (bool, int, float)):
+        if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self.matrix] = thunk
@@ -736,7 +731,7 @@ class Matrix:
 
     def compare(self, other, op, strop):
         C = self.__class__.sparse(types.BOOL, self.nrows, self.ncols)
-        if isinstance(other, (bool, int, float)):
+        if isinstance(other, (bool, int, float, complex)):
             if op(other, 0):
                 B = self.__class__.dup(self)
                 B[:, :] = other
@@ -751,7 +746,7 @@ class Matrix:
             A.emult(B, strop, out=C)
             return C
         else:
-            raise NotImplementedError
+            raise TypeError("Unknown matrix comparison type.")
 
     def __gt__(self, other):
         return self.compare(other, operator.gt, ">")
@@ -779,7 +774,7 @@ class Matrix:
         if accum is NULL:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
-            accum = accum.get_binaryop(self)
+            accum = accum.get_binaryop(self.type)
         if desc is NULL:
             desc = current_desc.get(Default)
         if isinstance(desc, Descriptor):
@@ -1031,14 +1026,15 @@ class Matrix:
             if isinstance(value, Matrix):
                 self.assign_matrix(value, index, None)
                 return
-            if isinstance(value, (bool, int, float)):
+            if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index, None)
+                return
 
         if isinstance(index, Matrix):
             if isinstance(value, Matrix):
                 # A[M] = B masked matrix assignment
                 raise NotImplementedError
-            if not isinstance(value, (bool, int, float)):
+            if not isinstance(value, (bool, int, float, complex)):
                 raise TypeError
             # A[M] = s masked scalar assignment
             self.assign_scalar(value, mask=index)
@@ -1065,7 +1061,7 @@ class Matrix:
             return
 
         if isinstance(i0, slice) and isinstance(i1, slice):
-            if isinstance(value, (bool, int, float)):
+            if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, i0, i1)
                 return
 

@@ -188,7 +188,7 @@ class Vector:
 
     def compare(self, other, op, strop):
         C = self.__class__.sparse(types.BOOL, self.size)
-        if isinstance(other, (bool, int, float)):
+        if isinstance(other, (bool, int, float, complex)):
             if op(other, 0):
                 B = self.__class__.dup(self)
                 B[:] = other
@@ -626,7 +626,7 @@ class Vector:
         if isinstance(op, UnaryOp):
             op = op.unaryop
 
-        if isinstance(thunk, (bool, int, float)):
+        if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self.vector] = thunk
@@ -665,19 +665,12 @@ class Vector:
             val = self.type.from_value(value)
             _check(self.type.Vector_setElement(self.vector[0], val, index))
             return
-        if isinstance(index, tuple):
-            if len(index) == 2:
-                index, mask = index
-            elif len(index) == 3:
-                index, mask, desc = index
-        if isinstance(mask, Vector):
-            mask = mask.vector[0]
 
         if isinstance(index, slice):
             if isinstance(value, Vector):
                 self.assign(value, index, mask=mask, desc=desc)
                 return
-            if isinstance(value, (bool, int, float)):
+            if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index, mask=mask, desc=desc)
                 return
         raise TypeError("Unknown index or value for vector assignment.")

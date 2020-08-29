@@ -77,7 +77,7 @@ class Accum:
         return False
 
     def get_binaryop(self, operand1=None, operand2=None):
-        return self.binaryop.get_binaryop(operand1)
+        return self.binaryop.get_binaryop(operand1, operand2)
 
 
 __all__ = [

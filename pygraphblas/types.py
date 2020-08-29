@@ -28,14 +28,6 @@ __all__ = [
 ]
 
 
-class classproperty(object):
-    def __init__(self, f):
-        self.f = f
-
-    def __get__(self, obj, owner):
-        return self.f(owner)
-
-
 def gb_type_to_type(gb_type):
     return MetaType._gb_type_map[gb_type]
 
@@ -175,26 +167,6 @@ class BOOL(Type):
             return f.format(val)
         return f.format("t") if val is True else f.format("f")
 
-    @classproperty
-    def PLUS(cls):
-        return cls.LOR
-
-    @classproperty
-    def TIMES(cls):
-        return cls.LAND
-
-    @classproperty
-    def PLUS_MONOID(cls):
-        return cls.LOR_MONOID
-
-    @classproperty
-    def TIMES_MONOID(cls):
-        return cls.LAND_MONOID
-
-    @classproperty
-    def PLUS_TIMES(cls):
-        return cls.LOR_LAND
-
     @classmethod
     def to_value(cls, cdata):
         return bool(cdata)
@@ -319,6 +291,8 @@ def _gb_from_type(typ):
         return FP64
     if typ is bool:
         return BOOL
+    if typ is complex:
+        return FC64
     return typ
 
 
