@@ -66,7 +66,7 @@ class Matrix:
 
     @classmethod
     def dense(cls, typ, nrows=1, ncols=1, fill=None, **options):
-        assert nrows > 0 and ncols > 0, 'dense matrix must be at least 1x1'
+        assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
         m = cls.sparse(typ, nrows, ncols, **options)
         if fill is None:
             fill = m.type.zero

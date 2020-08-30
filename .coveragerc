@@ -1,4 +1,5 @@
 [run]
+source = pygraphblas
 omit =
     pygraphblas/demo/*
     pygraphblas/build.py

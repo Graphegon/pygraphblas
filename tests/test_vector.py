@@ -37,7 +37,7 @@ def test_vector_gb_type():
     assert v.gb_type == lib.GrB_FP64
 
 
-def test_vector_set_element():
+def test_vector_getset_element():
     m = Vector.sparse(INT64, 10)
     m[3] = 3
     assert m.size == 10
@@ -54,6 +54,11 @@ def test_vector_set_element():
     assert m.size == 10
     assert m.nvals == 1
     assert m[3] == 3.3
+    n = Vector.sparse(FP64, 10)
+    n[2] = 1.0
+    assert m[n].nvals == 0
+    n[3] = 1.0
+    assert m[n].nvals == 1
 
 
 def test_vector_create_dup():
