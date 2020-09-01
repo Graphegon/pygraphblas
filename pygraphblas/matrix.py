@@ -444,9 +444,6 @@ class Matrix:
     def __len__(self):
         return self.nvals
 
-    def __nonzero__(self):
-        return self.reduce_bool()
-
     def __and__(self, other):
         mask, accum, desc = self._get_args()
         return self.emult(other, mask=mask, accum=accum, desc=desc)
@@ -1068,7 +1065,6 @@ class Matrix:
             # a[:,:] assign submatrix
             self.assign_matrix(value, i0, i1)
             return
-        raise TypeError("Unknown index or value for matrix assignment.")
 
     def __delitem__(self, index):
         if (

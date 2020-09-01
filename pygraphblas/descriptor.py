@@ -24,7 +24,7 @@ class Descriptor:
         current_desc.reset(self.token)
 
     def __del__(self):
-        if lib is not None:
+        if lib is not None:  # pragma: no cover
             _check(lib.GrB_Descriptor_free(self.desc))
 
     def __or__(self, other):

@@ -105,20 +105,24 @@ class MetaType(type):
         return cls
 
     def new_monoid(cls, op, identity):
+        from .monoid import Monoid
+
         monoid = core_ffi.new("GrB_Monoid[1]")
         if cls.base_name == "UDT":
             i = cls.ffi.new(cls.ptr)
             i[0] = identity
             identity = i
         _check(cls.Monoid_new(monoid, op.binaryop, identity))
-        return monoid
+        return Monoid("PLUS", cls.__name__, monoid[0], udt=cls)
 
     def new_semiring(cls, monoid, op):
         from .semiring import Semiring
 
         semiring = core_ffi.new("GrB_Semiring[1]")
         _check(
-            lib.GrB_Semiring_new(semiring, monoid[0], op.get_binaryop(core_ffi.NULL))
+            lib.GrB_Semiring_new(
+                semiring, monoid.get_monoid(), op.get_binaryop(core_ffi.NULL)
+            )
         )
         return Semiring("PLUS", "TIMES", cls.__name__, semiring[0], udt=cls)
 
@@ -291,9 +295,9 @@ def _gb_from_type(typ):
         return FP64
     if typ is bool:
         return BOOL
-    if typ is complex:
+    if typ is complex:  # pragma: no cover
         return FC64
-    return typ
+    raise TypeError
 
 
 def udt_head(name):

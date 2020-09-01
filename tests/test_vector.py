@@ -59,6 +59,8 @@ def test_vector_getset_element():
     assert m[n].nvals == 0
     n[3] = 1.0
     assert m[n].nvals == 1
+    with pytest.raises(TypeError):
+        m[""] = 2
 
 
 def test_vector_create_dup():
@@ -250,8 +252,12 @@ def test_vector_assign():
 def test_vxm():
     m = Matrix.from_lists([0, 1, 2, 0], [1, 2, 0, 3], [1, 2, 3, 4])
     v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+    j = Vector.from_lists([1], [True], size=4)
     o = v.vxm(m)
     assert o.iseq(Vector.from_lists([0, 1, 2, 3], [12, 2, 6, 8]))
+
+    l = v.vxm(m, mask=j)
+    assert l.iseq(Vector.from_lists([1], [2], size=4))
 
     assert (v @ m).iseq(o)
 
@@ -283,6 +289,8 @@ def test_select():
     v = Vector.from_lists([0, 1, 2], [0, 0, 3])
     w = v.select(lib.GxB_NONZERO)
     assert w.to_lists() == [[2], [3]]
+    assert (v < 3).iseq(Vector.from_lists([0, 1], [True, True], size=3))
+    assert v[v < 3].iseq(Vector.from_lists([0, 1], [0, 0], size=3))
 
 
 pytest.mark.skip()
@@ -390,16 +398,23 @@ def test_delitem():
     del v[0]
     assert len(v) == 1
     assert v[1] == 2
+    with pytest.raises(TypeError):
+        del v[""]
 
 
 def test_apply_first():
     m = Vector.from_lists([0, 1], [4, 2])
     assert m.apply_first(2, INT8.PLUS).to_lists() == [[0, 1], [6, 4]]
+    assert m.apply_first(Scalar.from_value(2), INT8.PLUS).to_lists() == [[0, 1], [6, 4]]
 
 
 def test_apply_second():
     m = Vector.from_lists([0, 1], [5, 1])
     assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [3, -1]]
+    assert m.apply_second(INT8.MINUS, Scalar.from_value(2)).to_lists() == [
+        [0, 1],
+        [3, -1],
+    ]
 
 
 def test_add_scalar():
@@ -475,3 +490,29 @@ def test_slicing():
     assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4], typ=types.INT32))
 
     assert len(v[9:1:3]) == 0
+
+
+def test_str_and_repr():
+    m = Vector.from_lists([0, 1], [4, 2], typ=INT8)
+    assert (
+        str(m)
+        == """\
+0| 4
+1| 2
+"""
+    )
+
+    b = Vector.from_lists([0, 1], [True, True])
+    assert (
+        str(b)
+        == """\
+0| t
+1| t
+"""
+    )
+    assert repr(b) == "<Vector (2: 2:BOOL)>"
+
+
+def test_nonzero():
+    m = Vector.from_lists([0, 1], [0, 2])
+    assert m.nonzero().iseq(Vector.from_lists([1], [2]))

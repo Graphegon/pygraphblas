@@ -112,14 +112,9 @@ _error_codes = {
 }
 
 
-def _check(res):
+def _check(res, raise_no_val=False):
     if res != lib.GrB_SUCCESS:
-        raise _error_codes[res](ffi.string(lib.GrB_error()))
-
-
-def _check_no_val_key_error(res):
-    if res != lib.GrB_SUCCESS:
-        if res == lib.GrB_NO_VALUE:
+        if raise_no_val and res == lib.GrB_NO_VALUE:
             raise KeyError
         raise _error_codes[res](ffi.string(lib.GrB_error()))
 
@@ -128,9 +123,6 @@ def _build_range(rslice, stop_val):
     # if already a list, return it and its length
     if isinstance(rslice, list):
         return rslice, len(rslice), len(rslice)
-
-    if isinstance(rslice, int):
-        return ffi.new("GrB_Index[1]", [rslice]), 1, 1
 
     if rslice is None or (
         rslice.start is None and rslice.stop is None and rslice.step is None

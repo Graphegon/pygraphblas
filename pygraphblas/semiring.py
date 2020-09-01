@@ -29,9 +29,8 @@ class Semiring:
             self.__class__._auto_semirings[name][
                 types.Type.gb_from_name(typ)
             ] = semiring
-            cls = getattr(types, typ, None)
-            if cls is not None:
-                setattr(cls, name, self)
+            cls = getattr(types, typ)
+            setattr(cls, name, self)
 
     def __enter__(self):
         self.token = current_semiring.set(self)

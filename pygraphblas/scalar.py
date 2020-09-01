@@ -3,7 +3,6 @@ from .base import (
     ffi,
     NULL,
     _check,
-    _check_no_val_key_error,
 )
 
 from .types import _gb_from_type
@@ -66,8 +65,8 @@ class Scalar:
 
     def __getitem__(self, index):
         result = ffi.new(self._type.C + "*")
-        _check_no_val_key_error(
-            self._type.Scalar_extractElement(result, self.scalar[0])
+        _check(
+            self._type.Scalar_extractElement(result, self.scalar[0]), raise_no_val=True
         )
         return result[0]
 

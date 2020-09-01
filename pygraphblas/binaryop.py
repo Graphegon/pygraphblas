@@ -33,9 +33,8 @@ class BinaryOp:
         else:
             self.binaryop = binaryop
             self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
-            cls = getattr(types, typ, None)
-            if cls is not None:
-                setattr(cls, op, self)
+            cls = getattr(types, typ)
+            setattr(cls, op, self)
         self.name = "_".join((op, typ))
         self.token = None
 
@@ -76,9 +75,6 @@ class Accum:
         current_accum.reset(self.token)
         return False
 
-    def get_binaryop(self, operand1=None, operand2=None):
-        return self.binaryop.get_binaryop(operand1, operand2)
-
 
 __all__ = [
     "BinaryOp",
@@ -117,7 +113,7 @@ def build_binaryops():
 
 
 def binary_op(arg_type, result_type=None):
-    if result_type is None:
+    if result_type is None:  # pragma: no cover
         result_type = arg_type
 
     def inner(func):
@@ -132,7 +128,7 @@ def binary_op(arg_type, result_type=None):
         jitfunc = numba.jit(func, nopython=True)
 
         @numba.cfunc(sig, nopython=True)
-        def wrapper(z, x, y):
+        def wrapper(z, x, y):  # pragma: no cover
             result = jitfunc(x[0], y[0])
             z[0] = result
 

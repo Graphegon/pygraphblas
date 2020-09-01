@@ -36,6 +36,11 @@ def test_matrix_create():
     assert m.nvals == 1
     with pytest.raises(AssertionError):
         m = Matrix.dense(INT8, 0, 0)
+    m = Matrix.from_lists([0], [0], [0j])
+    assert m.type == FC64
+    assert m.nrows == 1
+    assert m.ncols == 1
+    assert m.nvals == 1
 
 
 def test_matrix_get_set_element():
@@ -119,6 +124,8 @@ def test_matrix_eadd():
     addition_ref[1, 0] = 1
 
     sum1 = v.eadd(w)
+    assert sum1.iseq(addition_ref)
+    sum1 = v + w
     assert sum1.iseq(addition_ref)
     sum2 = v | w
     assert sum1.iseq(sum2)
@@ -475,6 +482,8 @@ def test_matrix_assign():
     mask = m > 0
     m[mask] = 9
     assert m.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [0, 9, 9]))
+    with pytest.raises(TypeError):
+        m[mask] = ""
 
     m = Matrix.sparse(INT64, 3, 3)
     assert m.nvals == 0
@@ -486,6 +495,8 @@ def test_matrix_assign():
     assert m.nvals == 0
     m[:] = n
     assert m.iseq(Matrix.identity(INT64, 3, 2))
+    with pytest.raises(TypeError):
+        m[""] = n
 
 
 def test_kron():
@@ -981,3 +992,10 @@ def test_str():
  1|   t| 1
     0 1"""
     )
+
+
+def test_nonzero():
+    m = Matrix.sparse(INT8, 10, 10)
+    assert not bool(m)
+    m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
+    assert bool(m)
