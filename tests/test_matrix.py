@@ -783,6 +783,14 @@ def test_shape_repr():
     assert m.shape == (3, 3)
     assert repr(m) == "<Matrix (3x3 : 3:INT64)>"
 
+def test_iters():
+    m = Matrix.from_lists([2, 2, 2], [0, 1, 2], [6, 7, 8])
+    assert m.shape == (3, 3)
+    assert list(m) == [(2, 0, 6), (2, 1, 7), (2, 2, 8)]
+    assert [(i, j, k) for i, j, k in m] == [(2, 0, 6), (2, 1, 7), (2, 2, 8)]
+    assert list(m.rows) == [2, 2, 2]
+    assert list(m.cols) == [0, 1, 2]
+    assert list(m.vals) == [6, 7, 8]
 
 def test_dense():
     m = Matrix.dense(UINT8, 10, 10)

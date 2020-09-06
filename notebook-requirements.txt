@@ -6,4 +6,5 @@ graphviz
 pandas
 networkx
 scipy
+py_d3
 git+https://github.com/taynaud/python-louvain.git

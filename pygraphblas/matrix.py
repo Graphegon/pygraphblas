@@ -426,20 +426,35 @@ class Matrix:
     @property
     def rows(self):
         """An iterator of row indexes present in the matrix."""
-        for i, j, v in self:
-            yield i
+        nvals = self.nvals
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        J = NULL
+        X = NULL
+        _check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        return iter(I)
 
     @property
     def cols(self):
         """An iterator of column indexes present in the matrix."""
-        for i, j, v in self:
-            yield j
+        nvals = self.nvals
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = NULL
+        J = ffi.new("GrB_Index[%s]" % nvals)
+        X = NULL
+        _check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        return iter(J)
 
     @property
     def vals(self):
         """An iterator of values present in the matrix."""
-        for i, j, v in self:
-            yield v
+        nvals = self.nvals
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = NULL
+        J = NULL
+        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        _check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        return iter(X)
 
     def __len__(self):
         return self.nvals
