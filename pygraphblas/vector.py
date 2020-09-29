@@ -648,7 +648,7 @@ class Vector:
         I, ni, size = _build_range(index, self.size - 1)
         _check(
             lib.GrB_Vector_assign(
-                self.vector[0], mask, accum, value.vector[0], I, ni, desc
+                self.vector[0], mask, accum, value.vector[0], I, ni, desc.desc[0]
             )
         )
 
@@ -658,7 +658,7 @@ class Vector:
         I, ni, size = _build_range(index, self.size - 1)
         _check(
             scalar_type.Vector_assignScalar(
-                self.vector[0], mask, accum, value, I, ni, desc
+                self.vector[0], mask, accum, value, I, ni, desc.desc[0]
             )
         )
 

@@ -1108,7 +1108,7 @@ class Matrix:
     def wait(self):
         _check(lib.GrB_Matrix_wait(self.matrix))
 
-    def to_string(self, format_string="{:>%s}", width=2, empty_char=""):
+    def to_string(self, format_string="{:>%s}", width=3, empty_char=""):
         format_string = format_string % width
         header = (
             format_string.format("")
