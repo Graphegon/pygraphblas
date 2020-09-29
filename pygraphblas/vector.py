@@ -627,8 +627,7 @@ class Vector:
         return Vector(out, self.type)
 
     def __setitem__(self, index, value):
-        mask = NULL
-        desc = NULL
+        mask, mon, accum, desc = self._get_args()
         if isinstance(index, int):
             val = self.type.from_value(value)
             _check(self.type.Vector_setElement(self.vector[0], val, index))
