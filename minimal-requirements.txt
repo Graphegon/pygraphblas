@@ -1,4 +1,5 @@
 numpy
+scipy
 numba
 pytest
 pytest-cov

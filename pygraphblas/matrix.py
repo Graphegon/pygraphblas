@@ -1136,3 +1136,21 @@ class Matrix:
             self.nvals,
             self.type.__name__,
         )
+
+    def to_scipy_sparse(self, format="csr"):
+        from scipy import sparse
+        rows, cols, vals = self.to_lists()
+        s = sparse.coo_matrix((vals, (rows, cols)), shape=self.shape)
+        if format == "coo":
+            return s
+        if format not in {"bsr", "csr", "csc", "coo", "lil", "dia", "dok"}:
+            raise GrblasException(f"Invalid format: {format}")
+        return s.asformat(format)
+
+    def to_numpy(self):
+        s = self.to_scipy_sparse("coo")
+        return s.toarray()
+
+    def to_png(self, fname):
+        import png
+        png.from_array(self.to_numpy(), mode="L").save(fname)
