@@ -51,7 +51,7 @@ _rowgetter = attrgetter('nrows')
 @timing
 def hypergraph(mt, size=None):
     if size is None:
-        size = sum(map(_rowgetter, mt)) + mt[0].nrows
+        size = sum(map(_rowgetter, mt)) + mt[-1].nrows
     r = Matrix.sparse(FP32, size, size)
     ioffset = 0
     joffset = 0

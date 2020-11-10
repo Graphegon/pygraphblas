@@ -26,9 +26,13 @@ def draw_graph(
     size_scale=1.0,
     ioff=0,
     joff=0,
+    filename=None,
+    size=None,
 ):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep="1", overlap="false", concentrate="true")
+    if size is not None:
+        g.attr(size=size)
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
         ilabel = _str(label_vector[i], label_width) if label_vector else str(i)
@@ -37,7 +41,11 @@ def draw_graph(
 
         g.node(str(i + ioff), width=size, height=size, label=ilabel)
         g.node(str(j + joff), width=size, height=size, label=jlabel)
-        g.edge(str(i + ioff), str(j + joff), label=vlabel)
+        w = str(int(v))
+        g.edge(str(i + ioff), str(j + joff),
+               label=vlabel, weight=w, tooltip=vlabel, len=str(0.3))
+    if filename is not None:
+        g.render(filename, format='png')
     return g
 
 

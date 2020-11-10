@@ -29,6 +29,7 @@ ReLUNeuron_semiring = ReLUNeuron.new_semiring(ReLUNeuron_monoid, ReLUNeuron.TIME
 
 @timing
 def hyperdnn(nlayers, W, B, Y):
+    breakpoint()
     for i in range(nlayers):
         Y @= W
         with ReLUNeuron_semiring:

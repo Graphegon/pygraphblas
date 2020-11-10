@@ -20,6 +20,12 @@ RUN /bin/rm -Rf /build
 
 RUN conda install -y graphviz
 
+WORKDIR /build
+RUN git clone https://github.com/fcdimitr/fglt.git
+WORKDIR /build/fglt
+RUN pip install -r requirements.txt
+RUN meson build && cd build && ninja install
+
 ADD . /home/jovyan
 WORKDIR /home/jovyan
     
