@@ -45,9 +45,6 @@
 GrB_Info LAGraph_free_global ( )
 {
 
-    // free the types
-    GrB_free (&LAGraph_Complex) ;
-
     // free the unary ops
     GrB_free (&LAGraph_ISONE_INT8) ;
     GrB_free (&LAGraph_ISONE_INT16) ;
@@ -59,13 +56,13 @@ GrB_Info LAGraph_free_global ( )
     GrB_free (&LAGraph_ISONE_UINT64) ;
     GrB_free (&LAGraph_ISONE_FP32) ;
     GrB_free (&LAGraph_ISONE_FP64) ;
-    GrB_free (&LAGraph_ISONE_Complex) ;
+    GrB_free (&LAGraph_ISONE_ComplexFP64) ;
     GrB_free (&LAGraph_ISTWO_UINT32) ;
     GrB_free (&LAGraph_ISTWO_INT64) ;
     GrB_free (&LAGraph_DECR_INT32) ;
     GrB_free (&LAGraph_DECR_INT64) ;
     GrB_free (&LAGraph_TRUE_BOOL) ;
-    GrB_free (&LAGraph_TRUE_BOOL_Complex) ;
+    GrB_free (&LAGraph_TRUE_BOOL_ComplexFP64) ;
     GrB_free (&LAGraph_ONE_FP64) ;
     GrB_free (&LAGraph_ONE_UINT32) ;
     GrB_free (&LAGraph_ONE_INT64) ;
@@ -77,15 +74,13 @@ GrB_Info LAGraph_free_global ( )
     GrB_free (&LAGraph_YMAX_FP64) ;
 
     // free the binary ops
-    GrB_free (&LAGraph_EQ_Complex) ;
+    GrB_free (&LAGraph_EQ_ComplexFP64) ;
     GrB_free (&LAGraph_SKEW_INT8) ;
     GrB_free (&LAGraph_SKEW_INT16) ;
     GrB_free (&LAGraph_SKEW_INT32) ;
     GrB_free (&LAGraph_SKEW_INT64) ;
     GrB_free (&LAGraph_SKEW_FP32) ;
     GrB_free (&LAGraph_SKEW_FP64) ;
-    GrB_free (&LAGraph_SKEW_Complex) ;
-    GrB_free (&LAGraph_Hermitian) ;
     GrB_free (&LAGraph_LOR_UINT32) ;
     GrB_free (&LAGraph_LOR_INT64) ;
 

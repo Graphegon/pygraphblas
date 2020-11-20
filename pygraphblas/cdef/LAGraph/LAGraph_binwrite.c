@@ -77,6 +77,7 @@ GrB_Info LAGraph_binwrite
 
     GrB_Index *Ap = NULL, *Ai = NULL, *Ah = NULL ;
     void *Ax = NULL ;
+    int8_t *Ab = NULL ;
 
     //--------------------------------------------------------------------------
     // check inputs
@@ -98,6 +99,7 @@ GrB_Info LAGraph_binwrite
 
     GrB_Index ignore ;
     LAGRAPH_OK (GrB_Matrix_nvals (&ignore, *A)) ;
+    LAGRAPH_OK (GrB_Matrix_wait (A)) ;
 
     //--------------------------------------------------------------------------
     // determine the basic matrix properties
@@ -106,13 +108,31 @@ GrB_Info LAGraph_binwrite
     GxB_Format_Value fmt = -999 ;
     LAGRAPH_OK (GxB_get (*A, GxB_FORMAT, &fmt)) ;
 
-    bool is_hyper ;
+    bool is_hyper = false ;
+    bool is_sparse = false ;
+    bool is_bitmap = false ;
+    bool is_full  = false ;
     LAGRAPH_OK (GxB_get (*A, GxB_IS_HYPER, &is_hyper)) ;
-    // kind == 3 reserved for dense matrices
-    int32_t kind = is_hyper ? 1 : 0 ;
-
+    int32_t kind ;
     double hyper = -999 ;
+
+    #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+    LAGRAPH_OK (GxB_get (*A, GxB_HYPER_SWITCH, &hyper)) ;
+    LAGRAPH_OK (GxB_get (*A, GxB_SPARSITY_STATUS, &kind)) ;
+    #else
+    kind = is_hyper ? 1 : 0 ;
     LAGRAPH_OK (GxB_get (*A, GxB_HYPER, &hyper)) ;
+    #endif
+
+    switch (kind)
+    {
+        default : 
+        case 0 : // for backward compatibility with prior versions
+        case 2 : is_sparse = true ; break ; // GxB_SPARSE = 2
+        case 1 : is_hyper  = true ; break ; // GxB_HYPERSPARSE = 1
+        case 4 : is_bitmap = true ; break ; // GxB_BITMAP = 4
+        case 8 : is_full   = true ; break ; // GxB_FULL = 4
+    }
 
     //--------------------------------------------------------------------------
     // export the matrix
@@ -120,44 +140,146 @@ GrB_Info LAGraph_binwrite
 
     GrB_Type type ;
     GrB_Index nrows, ncols, nvals, nvec ;
+    LAGRAPH_OK (GrB_Matrix_nvals (&nvals, *A)) ;
     size_t typesize ;
-    int64_t nonempty ;
+    int64_t nonempty = -1 ;
     char *fmt_string ;
+    bool jumbled ;
+    GrB_Index Ap_size, Ah_size, Ab_size, Ai_size, Ax_size ;
 
-    if (fmt == GxB_BY_COL && !is_hyper)
-    {
-        // standard CSC
-        LAGRAPH_OK (GxB_Matrix_export_CSC (A, &type, &nrows, &ncols, &nvals,
-            &nonempty, &Ap, &Ai, &Ax, NULL)) ;
-        nvec = ncols ;
-        fmt_string = "CSC " ;
-    }
-    else if (fmt == GxB_BY_ROW && !is_hyper)
-    {
-        // standard CSR
-        LAGRAPH_OK (GxB_Matrix_export_CSR (A, &type, &nrows, &ncols, &nvals,
-            &nonempty, &Ap, &Ai, &Ax, NULL)) ;
-        nvec = nrows ;
-        fmt_string = "CSR " ;
-    }
-    else if (fmt == GxB_BY_COL && is_hyper)
+    if (fmt == GxB_BY_COL && is_hyper)
     {
         // hypersparse CSC
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
         LAGRAPH_OK (GxB_Matrix_export_HyperCSC (A, &type, &nrows, &ncols,
-            &nvals, &nonempty, &nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+            &Ap, &Ah, &Ai, &Ax, &Ap_size, &Ah_size, &Ai_size, &Ax_size,
+            &nvec, &jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_export_HyperCSC (A, &type, &nrows, &ncols,
+            &Ai_size, &jumbled, &nonempty, &nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = nvec+1 ;
+        Ah_size = nvec ;
+        Ax_size = Ai_size ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_export_HyperCSC (A, &type, &nrows, &ncols,
+            &Ai_size, &nonempty, &Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = nvec+1 ;
+        Ah_size = nvec ;
+        Ax_size = Ai_size ;
+        #endif
         fmt_string = "HCSC" ;
     }
     else if (fmt == GxB_BY_ROW && is_hyper)
     {
         // hypersparse CSR
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
         LAGRAPH_OK (GxB_Matrix_export_HyperCSR (A, &type, &nrows, &ncols,
-            &nvals, &nonempty, &nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+            &Ap, &Ah, &Ai, &Ax, &Ap_size, &Ah_size, &Ai_size, &Ax_size,
+            &nvec, &jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_export_HyperCSR (A, &type, &nrows, &ncols,
+            &Ai_size, &jumbled, &nonempty, &nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = nvec+1 ;
+        Ah_size = nvec ;
+        Ax_size = Ai_size ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_export_HyperCSR (A, &type, &nrows, &ncols,
+            &Ai_size, &nonempty, &Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = nvec+1 ;
+        Ah_size = nvec ;
+        Ax_size = Ai_size ;
+        #endif
         fmt_string = "HCSR" ;
+    }
+    else if (fmt == GxB_BY_COL && is_sparse)
+    {
+        // standard CSC
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_CSC (A, &type, &nrows, &ncols,
+            &Ap, &Ai, &Ax, &Ap_size, &Ai_size, &Ax_size,
+            &jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_export_CSC (A, &type, &nrows, &ncols,
+            &Ai_size, &jumbled, &nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = ncols+1 ;
+        Ax_size = Ai_size ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_export_CSC (A, &type, &nrows, &ncols, &Ai_size,
+            &nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = ncols+1 ;
+        Ax_size = Ai_size ;
+        #endif
+        nvec = ncols ;
+        fmt_string = "CSC " ;
+    }
+    else if (fmt == GxB_BY_ROW && is_sparse)
+    {
+        // standard CSR
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_CSR (A, &type, &nrows, &ncols,
+            &Ap, &Ai, &Ax, &Ap_size, &Ai_size, &Ax_size, &jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_export_CSR (A, &type, &nrows, &ncols,
+            &Ai_size, &jumbled, &nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = ncols+1 ;
+        Ax_size = Ai_size ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_export_CSR (A, &type, &nrows, &ncols,
+            &Ai_size, &nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        Ap_size = ncols+1 ;
+        Ax_size = Ai_size ;
+        #endif
+        nvec = nrows ;
+        fmt_string = "CSR " ;
+    }
+    else if (fmt == GxB_BY_COL && is_bitmap)
+    {
+        // bitmap by col
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_BitmapC (A, &type, &nrows, &ncols,
+            &Ab, &Ax, &Ab_size, &Ax_size, &nvals, NULL)) ;
+        #endif
+        nvec = ncols ;
+        fmt_string = "BITMAPC" ;
+    }
+    else if (fmt == GxB_BY_ROW && is_bitmap)
+    {
+        // bitmap by row
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_BitmapR (A, &type, &nrows, &ncols,
+            &Ab, &Ax, &Ab_size, &Ax_size, &nvals, NULL)) ;
+        #endif
+        nvec = nrows ;
+        fmt_string = "BITMAPR" ;
+    }
+    else if (fmt == GxB_BY_COL && is_full)
+    {
+        // full by col
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_FullC (A, &type, &nrows, &ncols,
+            &Ax, &Ax_size, NULL)) ;
+        #endif
+        nvec = ncols ;
+        fmt_string = "FULLC" ;
+    }
+    else if (fmt == GxB_BY_ROW && is_full)
+    {
+        // full by row
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_export_FullR (A, &type, &nrows, &ncols,
+            &Ax, &Ax_size, NULL)) ;
+        #endif
+        nvec = nrows ;
+        fmt_string = "FULLC" ;
     }
     else
     {
         LAGRAPH_ERROR ("unknown", GrB_INVALID_VALUE) ;
     }
+
+    //--------------------------------------------------------------------------
+    // create the type string
+    //--------------------------------------------------------------------------
 
     LAGRAPH_OK (GxB_Type_size (&typesize, type)) ;
 
@@ -219,13 +341,14 @@ GrB_Info LAGraph_binwrite
         snprintf (typename, LEN, "GrB_FP64  ") ;
         typecode = 10 ;
     }
-    else if (type == LAGraph_Complex)
+    else if (type == LAGraph_ComplexFP64)
     {
         snprintf (typename, LEN, "USER      ") ;
         typecode = 11 ;
     }
     else
     {
+        // TODO: add GxB_FC32 and GxB_FC64
         LAGRAPH_ERROR ("Type not supported", GrB_INVALID_VALUE) ;
     }
     typename [72] = '\0' ;
@@ -291,49 +414,130 @@ GrB_Info LAGraph_binwrite
     // write the array content
     //--------------------------------------------------------------------------
 
-    FWRITE (Ap, sizeof (GrB_Index), nvec+1) ;
     if (is_hyper)
     {
-        FWRITE (Ah, sizeof (GrB_Index), nvec) ;
+        FWRITE (Ap, sizeof (GrB_Index), Ap_size) ;
+        FWRITE (Ah, sizeof (GrB_Index), Ah_size) ;
+        FWRITE (Ai, sizeof (GrB_Index), Ai_size) ;
     }
-    FWRITE (Ai, sizeof (GrB_Index), nvals) ;
-    FWRITE (Ax, typesize, nvals) ;
+    else if (is_sparse)
+    {
+        FWRITE (Ap, sizeof (GrB_Index), Ap_size) ;
+        FWRITE (Ai, sizeof (GrB_Index), Ai_size) ;
+    }
+    else if (is_bitmap)
+    {
+        FWRITE (Ab, sizeof (int8_t), Ab_size) ;
+    }
+
+    FWRITE (Ax, typesize, Ax_size) ;
     fclose (f) ;
 
     //--------------------------------------------------------------------------
     // re-import the matrix
     //--------------------------------------------------------------------------
 
-    if (fmt == GxB_BY_COL && !is_hyper)
-    {
-        // standard CSC
-        LAGRAPH_OK (GxB_Matrix_import_CSC (A, type, nrows, ncols, nvals,
-            nonempty, &Ap, &Ai, &Ax, NULL)) ;
-    }
-    else if (fmt == GxB_BY_ROW && !is_hyper)
-    {
-        // standard CSR
-        LAGRAPH_OK (GxB_Matrix_import_CSR (A, type, nrows, ncols, nvals,
-            nonempty, &Ap, &Ai, &Ax, NULL)) ;
-    }
-    else if (fmt == GxB_BY_COL && is_hyper)
+    if (fmt == GxB_BY_COL && is_hyper)
     {
         // hypersparse CSC
-        LAGRAPH_OK (GxB_Matrix_import_HyperCSC (A, type, nrows, ncols, nvals,
-            nonempty, nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSC (A, type, nrows, ncols,
+            &Ap, &Ah, &Ai, &Ax, Ap_size, Ah_size, Ai_size, Ax_size,
+            nvec,jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSC (A, type, nrows, ncols, Ai_size,
+            jumbled, nonempty, Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSC (A, type, nrows, ncols, Ai_size,
+            nonempty, Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #endif
     }
     else if (fmt == GxB_BY_ROW && is_hyper)
     {
         // hypersparse CSR
-        LAGRAPH_OK (GxB_Matrix_import_HyperCSR (A, type, nrows, ncols, nvals,
-            nonempty, nvec, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSR (A, type, nrows, ncols,
+            &Ap, &Ah, &Ai, &Ax, Ap_size, Ah_size, Ai_size, Ax_size,
+            nvec,jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSR (A, type, nrows, ncols, Ai_size,
+            jumbled, nonempty, Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_import_HyperCSR (A, type, nrows, ncols, Ai_size,
+            nonempty, Ah_size, &Ah, &Ap, &Ai, &Ax, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_COL && is_sparse)
+    {
+        // standard CSC
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_CSC (A, type, nrows, ncols,
+            &Ap, &Ai, &Ax, Ap_size, Ai_size, Ax_size, jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_import_CSC (A, type, nrows, ncols, Ai_size,
+            jumbled, nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_import_CSC (A, type, nrows, ncols, Ai_size,
+            nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_ROW && is_sparse)
+    {
+        // standard CSR
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_CSR (A, type, nrows, ncols,
+            &Ap, &Ai, &Ax, Ap_size, Ai_size, Ax_size, jumbled, NULL)) ;
+        #elif GxB_IMPLEMENTATION == GxB_VERSION (4,0,0)
+        LAGRAPH_OK (GxB_Matrix_import_CSR (A, type, nrows, ncols, Ai_size,
+            jumbled, nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        #else
+        LAGRAPH_OK (GxB_Matrix_import_CSR (A, type, nrows, ncols, Ai_size,
+            nonempty, &Ap, &Ai, &Ax, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_COL && is_bitmap)
+    {
+        // bitmap by col
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_BitmapC (A, type, nrows, ncols,
+            &Ab, &Ax, Ab_size, Ax_size, nvals, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_ROW && is_bitmap)
+    {
+        // bitmap by row
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_BitmapR (A, type, nrows, ncols,
+            &Ab, &Ax, Ab_size, Ax_size, nvals, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_COL && is_full)
+    {
+        // full by col
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_FullC (A, type, nrows, ncols,
+            &Ax, Ax_size, NULL)) ;
+        #endif
+    }
+    else if (fmt == GxB_BY_ROW && is_full)
+    {
+        // full by row
+        #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+        LAGRAPH_OK (GxB_Matrix_import_FullR (A, type, nrows, ncols,
+            &Ax, Ax_size, NULL)) ;
+        #endif
     }
     else
     {
         LAGRAPH_ERROR ("unknown", GrB_INVALID_VALUE) ;
     }
 
+    #if GxB_IMPLEMENTATION >= GxB_VERSION (4,0,1)
+    LAGRAPH_OK (GxB_set (*A, GxB_HYPER_SWITCH, hyper)) ;
+    #else
     LAGRAPH_OK (GxB_set (*A, GxB_HYPER, hyper)) ;
+    #endif
 
     return (GrB_SUCCESS) ;
 }
+

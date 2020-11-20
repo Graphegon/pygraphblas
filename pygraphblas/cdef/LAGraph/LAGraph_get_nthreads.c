@@ -133,8 +133,8 @@ int LAGraph_get_nthreads    // returns # threads to use, 1 if unknown
     GrB_Info info = GxB_get (GxB_NTHREADS, &nthreads) ;
     if (info != GrB_SUCCESS)
     {
-        fprintf (stderr, "LAGraph error:\n[%d]\n%s\nFile: %s Line: %d\n",
-            info, GrB_error ( ), __FILE__, __LINE__) ;
+        fprintf (stderr, "LAGraph error:\n[%d]\nFile: %s Line: %d\n",
+            info, __FILE__, __LINE__) ;
         return (-9999) ;
     }
     #elif defined ( _OPENMP )

@@ -111,8 +111,8 @@ GrB_Info LAGraph_xinit
     LAGraph_malloc_is_thread_safe = user_malloc_is_thread_safe ;
 
     // allocate all global objects
+    LAGRAPH_OK (LAGraph_Complex_init ( )) ;
     LAGRAPH_OK (LAGraph_alloc_global ( )) ;
-
     return (GrB_SUCCESS) ;
 
 }

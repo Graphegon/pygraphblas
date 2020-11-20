@@ -46,7 +46,7 @@
 // TODO: add GrB_Vector_Type to the GraphBLAS spec.
 
 // For both methods, if the two vectors are GrB_FP32, GrB_FP64, or
-// LAGraph_Complex, and have NaNs, then these functions will return false,
+// LAGraph_ComplexFP64, and have NaNs, then these functions will return false,
 // since NaN == NaN is false.  To check for NaN equality (like
 // isequalwithequalnans in MATLAB), use LAGraph_isall with a user-defined
 // operator f(x,y) that returns true if x and y are both NaN.
@@ -62,7 +62,7 @@ GrB_Info LAGraph_Vector_isequal    // return GrB_SUCCESS if successful
     GrB_Vector B,
     GrB_BinaryOp userop     // for A and B with arbitrary user-defined types.
                             // Ignored if A and B are of built-in types or
-                            // LAGraph_Complex.
+                            // LAGraph_ComplexFP64.
 )
 {
 
@@ -99,7 +99,7 @@ GrB_Info LAGraph_Vector_isequal    // return GrB_SUCCESS if successful
     else if (atype == GrB_UINT64) op = GrB_EQ_UINT64 ;
     else if (atype == GrB_FP32  ) op = GrB_EQ_FP32   ;
     else if (atype == GrB_FP64  ) op = GrB_EQ_FP64   ;
-    else if (atype == LAGraph_Complex) op = LAGraph_EQ_Complex ;
+    else if (atype == LAGraph_ComplexFP64) op = LAGraph_EQ_ComplexFP64 ;
     else op = userop ;
 
     // check the size, pattern, and values of A and B

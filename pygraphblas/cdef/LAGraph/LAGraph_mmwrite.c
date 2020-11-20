@@ -315,7 +315,7 @@ GrB_Info LAGraph_mmwrite
     {
         MM_type = MM_real ;
     }
-    else if (type == LAGraph_Complex)
+    else if (type == LAGraph_ComplexFP64)
     {
         MM_type = MM_complex ;
     }
@@ -370,7 +370,7 @@ GrB_Info LAGraph_mmwrite
             else if (type == GrB_INT64      ) op = LAGraph_SKEW_INT64 ;
             else if (type == GrB_FP32       ) op = LAGraph_SKEW_FP32   ;
             else if (type == GrB_FP64       ) op = LAGraph_SKEW_FP64   ;
-            else if (type == LAGraph_Complex) op = LAGraph_SKEW_Complex ;
+            else if (type == LAGraph_ComplexFP64) op = LAGraph_SKEW_ComplexFP64 ;
 
             if (op != NULL)
             {
@@ -388,7 +388,7 @@ GrB_Info LAGraph_mmwrite
 
         if (MM_type == MM_complex && MM_storage == MM_general)
         {
-            LAGRAPH_OK (LAGraph_isall (&isequal, A, AT, LAGraph_Hermitian)) ;
+            LAGRAPH_OK (LAGraph_isall (&isequal, A, AT, LAGraph_HERMITIAN_ComplexFP64)) ;
             if (isequal)
             {
                 MM_storage = MM_hermitian ;
@@ -456,7 +456,7 @@ GrB_Info LAGraph_mmwrite
     else if (type == GrB_UINT64) FPRINTF (f, "GrB_UINT64\n")
     else if (type == GrB_FP32  ) FPRINTF (f, "GrB_FP32\n")
     else if (type == GrB_FP64  ) FPRINTF (f, "GrB_FP64\n")
-    else                         FPRINTF (f, "LAGraph_Complex\n")
+    else                         FPRINTF (f, "LAGraph_ComplexFP64\n")
 
     //--------------------------------------------------------------------------
     // include any additional comments

@@ -39,6 +39,7 @@
 // Include file for LAGraph functions.  This file should not be included in
 // user applications.  See LAGraph.h instead.
 
+#define LAGRAPH_EXPERIMENTAL_ASK_BEFORE_BENCHMARKING
 // #include "LAGraph.h"
 
 #ifndef CMPLX

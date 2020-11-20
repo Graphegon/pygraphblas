@@ -43,6 +43,7 @@
 // it is more flexible and easier to use, since that format includes the matrix
 // type and size in the file itself.  See LAGraph_mmread and LAGraph_mmwrite.
 
+#define LAGRAPH_EXPERIMENTAL_ASK_BEFORE_BENCHMARKING
 // #include "LAGraph.h"
 
 #define LAGRAPH_FREE_ALL GrB_free (Chandle) ;

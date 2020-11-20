@@ -9,6 +9,8 @@ def build_ffi():
         #include <math.h>
         #include <stdint.h>
         #include <complex.h>
+
+        #define LAGRAPH_EXPERIMENTAL_ASK_BEFORE_BENCHMARKING
         """
     p = Path("pygraphblas/cdef")
     l = Path("pygraphblas/cdef/LAGraph")
@@ -48,10 +50,10 @@ def build_ffi():
         ],
     )
 
-    with open(p / "GraphBLAS-3.3.3.h") as gb_cdef:
+    with open(p / "GraphBLAS-4.0.0.h") as gb_cdef:
         ffibuilder.cdef(gb_cdef.read())
 
-    with open(p / "la_a6fcf0_cdef.h") as la_cdef:
+    with open(p / "lagraph_c2c0cf_cdef.h") as la_cdef:
         ffibuilder.cdef(la_cdef.read())
 
     with open(p / "extra.h") as ex_cdef:

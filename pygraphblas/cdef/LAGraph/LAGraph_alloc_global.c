@@ -47,34 +47,15 @@
     LAGraph_free_global ( ) ;               \
 }
 
-// a global value for returning the complex type in a Matrix Market file:
-GrB_Type LAGraph_Complex = NULL ;
-
 // binary operators to test for symmetry, skew-symmetry and Hermitian property
-GrB_BinaryOp LAGraph_EQ_Complex   = NULL ;
 GrB_BinaryOp LAGraph_SKEW_INT8    = NULL ;
 GrB_BinaryOp LAGraph_SKEW_INT16   = NULL ;
 GrB_BinaryOp LAGraph_SKEW_INT32   = NULL ;
 GrB_BinaryOp LAGraph_SKEW_INT64   = NULL ;
 GrB_BinaryOp LAGraph_SKEW_FP32    = NULL ;
 GrB_BinaryOp LAGraph_SKEW_FP64    = NULL ;
-GrB_BinaryOp LAGraph_SKEW_Complex = NULL ;
-GrB_BinaryOp LAGraph_Hermitian    = NULL ;
 GrB_BinaryOp LAGraph_LOR_UINT32   = NULL ;
 GrB_BinaryOp LAGraph_LOR_INT64    = NULL ;
-
-void LAGraph_eq_complex
-(
-    bool *z,
-    const double complex *x,
-    const double complex *y
-)
-{
-    // printf ("eq complex:\nx (%.18e,%.18e)\ny (%.18e,%.18e)\n",
-    //     creal (*x), cimag (*x), creal (*y), cimag (*y)) ;
-    (*z) = (*x) == (*y) ;
-    // printf ("result %d\n", (*z)) ;
-}
 
 void LAGraph_skew_int8
 (
@@ -136,26 +117,6 @@ void LAGraph_skew_double
     (*z) = (*x) == -(*y) ;
 }
 
-void LAGraph_skew_complex
-(
-    bool *z,
-    const double complex *x,
-    const double complex *y
-)
-{
-    (*z) = (*x) == -(*y) ;
-}
-
-void LAGraph_hermitian
-(
-    bool *z,
-    const double complex *x,
-    const double complex *y
-)
-{
-    (*z) = (*x) == conj (*y) ;
-}
-
 void LAGraph_lor_uint32
 (
     uint32_t *z,
@@ -187,7 +148,6 @@ GrB_UnaryOp LAGraph_ISONE_UINT32   = NULL ;
 GrB_UnaryOp LAGraph_ISONE_UINT64   = NULL ;
 GrB_UnaryOp LAGraph_ISONE_FP32     = NULL ;
 GrB_UnaryOp LAGraph_ISONE_FP64     = NULL ;
-GrB_UnaryOp LAGraph_ISONE_Complex  = NULL ;
 
 void LAGraph_isone_int8
 (
@@ -279,15 +239,6 @@ void LAGraph_isone_double
     (*z) = ((*x) == 1) ;
 }
 
-void LAGraph_isone_complex
-(
-    bool *z,
-    const double complex *x
-)
-{
-    (*z) = ((*x) == 1) ;
-}
-
 // unary operator to check if the entry is equal to 2
 GrB_UnaryOp LAGraph_ISTWO_UINT32 = NULL ;
 GrB_UnaryOp LAGraph_ISTWO_INT64 = NULL ;
@@ -312,21 +263,11 @@ void LAGraph_istwo_int64
 
 // unary operators that return boolean true
 GrB_UnaryOp LAGraph_TRUE_BOOL = NULL ;
-GrB_UnaryOp LAGraph_TRUE_BOOL_Complex  = NULL ;
 
 void LAGraph_true_bool
 (
     bool *z,
     const bool *x       // ignored
-)
-{
-    (*z) = true ;
-}
-
-void LAGraph_true_bool_complex
-(
-    bool *z,
-    const double complex *x     // ignored
 )
 {
     (*z) = true ;
@@ -547,18 +488,8 @@ GrB_Info LAGraph_alloc_global ( )
     GrB_Info info ;
 
     //--------------------------------------------------------------------------
-    // create the complex type for LAGraph
-    //--------------------------------------------------------------------------
-
-    LAGRAPH_OK (GrB_Type_new (&LAGraph_Complex, sizeof (double complex))) ;
-
-    //--------------------------------------------------------------------------
     // create the binary operators
     //--------------------------------------------------------------------------
-
-    LAGRAPH_OK (GrB_BinaryOp_new (&LAGraph_EQ_Complex,
-        F_BINARY (LAGraph_eq_complex),
-        GrB_BOOL, LAGraph_Complex, LAGraph_Complex)) ;
 
     LAGRAPH_OK (GrB_BinaryOp_new (&LAGraph_SKEW_INT8,
         F_BINARY (LAGraph_skew_int8),
@@ -583,14 +514,6 @@ GrB_Info LAGraph_alloc_global ( )
     LAGRAPH_OK (GrB_BinaryOp_new (&LAGraph_SKEW_FP64,
         F_BINARY (LAGraph_skew_double),
         GrB_BOOL, GrB_FP64, GrB_FP64)) ;
-
-    LAGRAPH_OK (GrB_BinaryOp_new (&LAGraph_SKEW_Complex,
-        F_BINARY (LAGraph_skew_complex),
-        GrB_BOOL, LAGraph_Complex, LAGraph_Complex)) ;
-
-    LAGRAPH_OK (GrB_BinaryOp_new (&LAGraph_Hermitian,
-        F_BINARY (LAGraph_hermitian),
-        GrB_BOOL, LAGraph_Complex, LAGraph_Complex)) ;
 
     #ifdef GxB_SUITESPARSE_GRAPHBLAS
     // use the built-in binary operator
@@ -654,10 +577,6 @@ GrB_Info LAGraph_alloc_global ( )
         F_UNARY (LAGraph_isone_double),
         GrB_BOOL, GrB_FP64)) ;
 
-    LAGRAPH_OK (GrB_UnaryOp_new (&LAGraph_ISONE_Complex,
-        F_UNARY (LAGraph_isone_complex),
-        GrB_BOOL, LAGraph_Complex)) ;
-
     //--------------------------------------------------------------------------
     // create the unary operator that checks if equal to 2
     //--------------------------------------------------------------------------
@@ -713,10 +632,6 @@ GrB_Info LAGraph_alloc_global ( )
     LAGRAPH_OK (GrB_UnaryOp_new (&LAGraph_TRUE_BOOL,
         F_UNARY (LAGraph_true_bool),
         GrB_BOOL, GrB_BOOL)) ;
-
-    LAGRAPH_OK (GrB_UnaryOp_new (&LAGraph_TRUE_BOOL_Complex,
-        F_UNARY (LAGraph_true_bool_complex),
-        GrB_BOOL, LAGraph_Complex)) ;
 
     #ifdef GxB_SUITESPARSE_GRAPHBLAS
     // use the built-in unary operator

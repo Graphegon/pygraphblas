@@ -45,6 +45,8 @@ GrB_Info LAGraph_finalize ( )
     // free the complex type and operators for LAGraph
     LAGraph_free_global ( ) ;
 
+    LAGraph_Complex_finalize ( ) ;
+
     // finalize GraphBLAS
     return (GrB_finalize ( )) ;
 }
