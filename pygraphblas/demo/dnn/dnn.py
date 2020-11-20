@@ -1,11 +1,20 @@
 from pygraphblas import FP32, binary_op
 from . import timing
-
+from pygraphblas.demo.gviz import draw_matrix
+import imageio
 
 @timing
-def dnn(W, B, Y):
-    for w, b in zip(W, B):  # for every weight, bias matrix
-        Y.mxm(w, out=Y)  # Y = Y @ w
+def render_frame(prefix, Y, i):
+    im = draw_matrix(Y, scale=2, labels=False)
+    imageio.imwrite(prefix + str(i) + '.png', im)
+
+@timing
+def dnn(W, B, Y, movie=None):
+    breakpoint()
+    for i, (w, b) in enumerate(zip(W, B)):  # for every weight, bias matrix
+        if movie is not None:
+            render_frame(movie, w, i)
+        Y = Y @ w
         with FP32.PLUS_PLUS:  # with PLUS_PLUS semiring:
             Y.mxm(b, out=Y)  # Y = Y @ B
         Y.select(">0", out=Y)  # select all >0 from Y
@@ -29,7 +38,7 @@ ReLUNeuron_semiring = ReLUNeuron.new_semiring(ReLUNeuron_monoid, ReLUNeuron.TIME
 
 @timing
 def hyperdnn(nlayers, W, B, Y):
-    breakpoint()
+    frames = []
     for i in range(nlayers):
         Y @= W
         with ReLUNeuron_semiring:

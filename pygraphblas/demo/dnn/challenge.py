@@ -66,11 +66,12 @@ def generate_bias(neurons, nlayers):
 
 
 @timing
-def run(neurons, images, layers, bias, dest):
-    hyperlayers = hypergraph(layers)
-    hyperbias = hypergraph(bias)
-    images.resize(hyperlayers.nrows, hyperlayers.ncols)
-    result = hyperdnn(len(layers), hyperlayers, hyperbias, images)
+def run(neurons, images, layers, bias, dest, movie='/dnn_demo/frames/f'):
+    # hyperlayers = hypergraph(layers)
+    # hyperbias = hypergraph(bias)
+    # images.resize(hyperlayers.nrows, hyperlayers.ncols)
+    # result = hyperdnn(len(layers), hyperlayers, hyperbias, images)
+    result = dnn(layers, bias, images, movie=movie)
     r = result.reduce_vector()
     cats = r.apply(BOOL.ONE, out=Vector.sparse(BOOL, r.size))
     truecats = load_categories(neurons, len(layers), dest)

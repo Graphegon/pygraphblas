@@ -12,3 +12,9 @@ pypng
 numpngw
 ipycytoscape
 Pillow
+matplotlib
+colorcet
+imageio
+imageio-ffmpeg
+pygifsicle
+
