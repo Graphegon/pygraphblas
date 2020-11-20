@@ -462,490 +462,490 @@ GrB_Info LAGraph_1_to_n     // create an integer vector v = 1:n
     GrB_Index n             // size of vector to create
 ) ;
 
-//------------------------------------------------------------------------------
-// user-callable algorithms
-//------------------------------------------------------------------------------
+/* //------------------------------------------------------------------------------ */
+/* // user-callable algorithms */
+/* //------------------------------------------------------------------------------ */
 
-GrB_Info LAGraph_bc     // betweeness centrality
-(
-    GrB_Vector *delta, // delta(i) is the betweeness centrality of node i
-    GrB_Matrix A,      // input graph, treated as if boolean in semiring
-    GrB_Index s        // source vertex from which to compute shortest paths
-);
+/* GrB_Info LAGraph_bc     // betweeness centrality */
+/* ( */
+/*     GrB_Vector *delta, // delta(i) is the betweeness centrality of node i */
+/*     GrB_Matrix A,      // input graph, treated as if boolean in semiring */
+/*     GrB_Index s        // source vertex from which to compute shortest paths */
+/* ); */
 
-GrB_Info LAGraph_bc2     // betweeness centrality
-(
-    GrB_Vector *centrality, // centrality(i): betweeness centrality of node i
-    GrB_Matrix A_matrix,    // input graph
-    GrB_Index source        // source vertex
-) ;
+/* GrB_Info LAGraph_bc2     // betweeness centrality */
+/* ( */
+/*     GrB_Vector *centrality, // centrality(i): betweeness centrality of node i */
+/*     GrB_Matrix A_matrix,    // input graph */
+/*     GrB_Index source        // source vertex */
+/* ) ; */
 
-GrB_Info LAGraph_bc_batch // betweeness centrality, batch algorithm
-(
-    GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i
-    const GrB_Matrix A, // input graph, treated as if boolean in semiring
-    const GrB_Index *s, // source vertices from which to compute shortest paths
-    const int32_t nsver // number of source vertices (length of s)
-);
+/* GrB_Info LAGraph_bc_batch // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A, // input graph, treated as if boolean in semiring */
+/*     const GrB_Index *s, // source vertices from which to compute shortest paths */
+/*     const int32_t nsver // number of source vertices (length of s) */
+/* ); */
 
-GrB_Info LAGraphX_bc_batch // betweeness centrality, batch algorithm
-(
-    GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i
-    const GrB_Matrix A, // input graph, treated as if boolean in semiring
-    const GrB_Index *s, // source vertices from which to compute shortest paths
-    const int32_t nsver // number of source vertices (length of s)
-);
+/* GrB_Info LAGraphX_bc_batch // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A, // input graph, treated as if boolean in semiring */
+/*     const GrB_Index *s, // source vertices from which to compute shortest paths */
+/*     const int32_t nsver // number of source vertices (length of s) */
+/* ); */
 
-GrB_Info LAGraphX_bc_batch2 // betweeness centrality, batch algorithm
-(
-    GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i
-    const GrB_Matrix A, // input graph, treated as if boolean in semiring
-    const GrB_Index *s, // source vertices from which to compute shortest paths
-    const int32_t nsver // number of source vertices (length of s)
-);
+/* GrB_Info LAGraphX_bc_batch2 // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A, // input graph, treated as if boolean in semiring */
+/*     const GrB_Index *s, // source vertices from which to compute shortest paths */
+/*     const int32_t nsver // number of source vertices (length of s) */
+/* ); */
 
-GrB_Info LAGraphX_bc_batch3 // betweeness centrality, batch algorithm
-(
-    GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i
-    const GrB_Matrix A, // input graph, treated as if boolean in semiring
-    const GrB_Matrix AT, // A'
-    const GrB_Index *s, // source vertices from which to compute shortest paths
-    const int32_t nsver, // number of source vertices (length of s)
-    double timing [3]
-);
+/* GrB_Info LAGraphX_bc_batch3 // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *delta,  // delta(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A, // input graph, treated as if boolean in semiring */
+/*     const GrB_Matrix AT, // A' */
+/*     const GrB_Index *s, // source vertices from which to compute shortest paths */
+/*     const int32_t nsver, // number of source vertices (length of s) */
+/*     double timing [3] */
+/* ); */
 
-GrB_Info LAGraph_bc_batch3 // betweeness centrality, batch algorithm
-(
-    GrB_Vector *centrality,    // centrality(i) is the betweeness centrality of node i
-    const GrB_Matrix A,        // input graph, treated as if boolean in semiring
-    const GrB_Matrix AT,       // A'
-    const GrB_Index *sources,  // source vertices from which to compute shortest paths
-    int32_t num_sources        // number of source vertices (length of s)
-) ;
+/* GrB_Info LAGraph_bc_batch3 // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *centrality,    // centrality(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A,        // input graph, treated as if boolean in semiring */
+/*     const GrB_Matrix AT,       // A' */
+/*     const GrB_Index *sources,  // source vertices from which to compute shortest paths */
+/*     int32_t num_sources        // number of source vertices (length of s) */
+/* ) ; */
 
-GrB_Info LAGraph_bc_batch4      // betweeness centrality, batch algorithm
-(
-    GrB_Vector *centrality,    // centrality(i) is the betweeness centrality of node i
-    const GrB_Matrix A_matrix, // input graph, treated as if boolean in semiring
-    const GrB_Matrix AT_matrix, // A'
-    const GrB_Index *sources,  // source vertices from which to compute shortest paths
-    int32_t num_sources        // number of source vertices (length of s)
-) ;
+/* GrB_Info LAGraph_bc_batch4      // betweeness centrality, batch algorithm */
+/* ( */
+/*     GrB_Vector *centrality,    // centrality(i) is the betweeness centrality of node i */
+/*     const GrB_Matrix A_matrix, // input graph, treated as if boolean in semiring */
+/*     const GrB_Matrix AT_matrix, // A' */
+/*     const GrB_Index *sources,  // source vertices from which to compute shortest paths */
+/*     int32_t num_sources        // number of source vertices (length of s) */
+/* ) ; */
 
-GrB_Info LAGraph_bfs_pushpull   // push-pull BFS, or push-only if AT = NULL
-(
-    GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
-    GrB_Vector *pi_output,  // pi(i) is the parent of node i in the graph.
-                            // if NULL, the parent is not computed
-    GrB_Matrix A,           // input graph, treated as if boolean in semiring
-    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
-    int64_t s,              // starting node of the BFS (s < 0: whole graph)
-    int64_t max_level,      // optional limit of # levels to search
-    bool vsparse            // if true, v is expected to be very sparse
-) ;
+/* GrB_Info LAGraph_bfs_pushpull   // push-pull BFS, or push-only if AT = NULL */
+/* ( */
+/*     GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph */
+/*     GrB_Vector *pi_output,  // pi(i) is the parent of node i in the graph. */
+/*                             // if NULL, the parent is not computed */
+/*     GrB_Matrix A,           // input graph, treated as if boolean in semiring */
+/*     GrB_Matrix AT,          // transpose of A (optional; push-only if NULL) */
+/*     int64_t s,              // starting node of the BFS (s < 0: whole graph) */
+/*     int64_t max_level,      // optional limit of # levels to search */
+/*     bool vsparse            // if true, v is expected to be very sparse */
+/* ) ; */
 
-GrB_Info LAGraph_bfs_parent // push-pull BFS, compute the tree only
-(
-    // output:
-    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i
-    // inputs:
-    GrB_Matrix A,           // input graph, any type
-    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
-    GrB_Vector Degree,      // Degree(i) is the out-degree of node i
-                            // (optional: push-only if NULL)
-    int64_t source          // starting node of the BFS
-) ;
+/* GrB_Info LAGraph_bfs_parent // push-pull BFS, compute the tree only */
+/* ( */
+/*     // output: */
+/*     GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i */
+/*     // inputs: */
+/*     GrB_Matrix A,           // input graph, any type */
+/*     GrB_Matrix AT,          // transpose of A (optional; push-only if NULL) */
+/*     GrB_Vector Degree,      // Degree(i) is the out-degree of node i */
+/*                             // (optional: push-only if NULL) */
+/*     int64_t source          // starting node of the BFS */
+/* ) ; */
 
-GrB_Info LAGraph_bfs_parent2 // push-pull BFS, compute the tree only
-(
-    // output:
-    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i
-    // inputs:
-    GrB_Matrix A,           // input graph, any type
-    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
-    GrB_Vector Degree,      // Degree(i) is the out-degree of node i
-                            // (optional: push-only if NULL)
-    int64_t source          // starting node of the BFS
-) ;
+/* GrB_Info LAGraph_bfs_parent2 // push-pull BFS, compute the tree only */
+/* ( */
+/*     // output: */
+/*     GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i */
+/*     // inputs: */
+/*     GrB_Matrix A,           // input graph, any type */
+/*     GrB_Matrix AT,          // transpose of A (optional; push-only if NULL) */
+/*     GrB_Vector Degree,      // Degree(i) is the out-degree of node i */
+/*                             // (optional: push-only if NULL) */
+/*     int64_t source          // starting node of the BFS */
+/* ) ; */
 
-GrB_Info bfs_log                // push-pull BFS, or push-only if AT = NULL
-(
-    GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
-    GrB_Vector *pi_output,  // pi(i) = p if p is the parent of node i.
-                            // if NULL, the parent is not computed.
-    GrB_Matrix A,           // input graph, treated as if boolean in semiring
-    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
-    int64_t s,              // starting node of the BFS
-    int64_t max_level,      // optional limit of # levels to search
-    bool vsparse            // if true, v is expected to be very sparse
-    , FILE *file
-)  ;
+/* GrB_Info bfs_log                // push-pull BFS, or push-only if AT = NULL */
+/* ( */
+/*     GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph */
+/*     GrB_Vector *pi_output,  // pi(i) = p if p is the parent of node i. */
+/*                             // if NULL, the parent is not computed. */
+/*     GrB_Matrix A,           // input graph, treated as if boolean in semiring */
+/*     GrB_Matrix AT,          // transpose of A (optional; push-only if NULL) */
+/*     int64_t s,              // starting node of the BFS */
+/*     int64_t max_level,      // optional limit of # levels to search */
+/*     bool vsparse            // if true, v is expected to be very sparse */
+/*     , FILE *file */
+/* )  ; */
 
-GrB_Info LAGraph_bfs_simple     // push-only BFS
-(
-    GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
-    const GrB_Matrix A,     // input graph, treated as if boolean in semiring
-    GrB_Index s             // starting node of the BFS
-) ;
+/* GrB_Info LAGraph_bfs_simple     // push-only BFS */
+/* ( */
+/*     GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph */
+/*     const GrB_Matrix A,     // input graph, treated as if boolean in semiring */
+/*     GrB_Index s             // starting node of the BFS */
+/* ) ; */
 
-GrB_Info LAGraph_cc_lacc (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_lacc ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv2 (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv2 ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv3 (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv3 ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv4 (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv4 ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv5 (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv5 ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv5a (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix *A,          // input matrix
-                            //   content remains the same, but pointer changes
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv5a ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix *A,          // input matrix */
+/*                             //   content remains the same, but pointer changes */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_fastsv5b (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix *A,          // input matrix
-                            //   content remains the same, but pointer changes
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_fastsv5b ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix *A,          // input matrix */
+/*                             //   content remains the same, but pointer changes */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_cc_boruvka (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_cc_boruvka ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_msf (
-    GrB_Matrix *result,     // output: an unsymmetrical matrix, the spanning forest
-    GrB_Matrix A,           // input matrix
-    bool sanitize           // if true, ensure A is symmetric
-) ;
+/* GrB_Info LAGraph_msf ( */
+/*     GrB_Matrix *result,     // output: an unsymmetrical matrix, the spanning forest */
+/*     GrB_Matrix A,           // input matrix */
+/*     bool sanitize           // if true, ensure A is symmetric */
+/* ) ; */
 
-GrB_Info LAGraph_scc (
-    GrB_Vector *result,     // output: array of component identifiers
-    GrB_Matrix A            // input matrix
-) ;
+/* GrB_Info LAGraph_scc ( */
+/*     GrB_Vector *result,     // output: array of component identifiers */
+/*     GrB_Matrix A            // input matrix */
+/* ) ; */
 
-// LAGraph_pagerank computes an array of structs for its result
-typedef struct
-{
-    double pagerank ;   // the pagerank of a node
-    GrB_Index page ;    // the node number itself
-}
-LAGraph_PageRank ;
+/* // LAGraph_pagerank computes an array of structs for its result */
+/* typedef struct */
+/* { */
+/*     double pagerank ;   // the pagerank of a node */
+/*     GrB_Index page ;    // the node number itself */
+/* } */
+/* LAGraph_PageRank ; */
 
-GrB_Info LAGraph_pagerank       // GrB_SUCCESS or error condition
-(
-    LAGraph_PageRank **Phandle, // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,               // binary input graph, not modified
-    int itermax,                // max number of iterations
-    double tol,                 // stop when norm (r-rnew,2) < tol
-    int *iters                  // number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank       // GrB_SUCCESS or error condition */
+/* ( */
+/*     LAGraph_PageRank **Phandle, // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,               // binary input graph, not modified */
+/*     int itermax,                // max number of iterations */
+/*     double tol,                 // stop when norm (r-rnew,2) < tol */
+/*     int *iters                  // number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank2      // second PageRank definition
-(
-    GrB_Vector *result,         // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,               // binary input graph, not modified
-    double damping_factor,      // damping factor
-    unsigned long itermax       // number of iterations
-) ;
+/* GrB_Info LAGraph_pagerank2      // second PageRank definition */
+/* ( */
+/*     GrB_Vector *result,         // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,               // binary input graph, not modified */
+/*     double damping_factor,      // damping factor */
+/*     unsigned long itermax       // number of iterations */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3a // PageRank definition
-(
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    GrB_Vector d_out,       // outbound degree of all nodes
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int *iters              // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3a // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,     // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,           // binary input graph, not modified */
+/*     GrB_Vector d_out,       // outbound degree of all nodes */
+/*     float damping,          // damping factor (typically 0.85) */
+/*     int itermax,            // maximum number of iterations */
+/*     int *iters              // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3b     // PageRank definition
-(
-    GrB_Vector *result,         // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,               // binary input graph, not modified
-    float damping_factor,       // damping factor
-    unsigned long itermax,      // maximum number of iterations
-    int *iters                  // number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3b     // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,         // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,               // binary input graph, not modified */
+/*     float damping_factor,       // damping factor */
+/*     unsigned long itermax,      // maximum number of iterations */
+/*     int *iters                  // number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3c         // PageRank definition
-(
-    GrB_Vector *result,             // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,                   // binary input graph, not modified
-    const float * d_out, // out degree of each node (GrB_FP32, size n)
-    float damping,                  // damping factor (typically 0.85)
-    int itermax,                    // maximum number of iterations
-    int* iters                      // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3c         // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,             // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,                   // binary input graph, not modified */
+/*     const float * d_out, // out degree of each node (GrB_FP32, size n) */
+/*     float damping,                  // damping factor (typically 0.85) */
+/*     int itermax,                    // maximum number of iterations */
+/*     int* iters                      // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3d // PageRank definition
-(
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    GrB_Vector d_out,       // outbound degree of all nodes (not modified)
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int *iters              // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3d // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,     // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,           // binary input graph, not modified */
+/*     GrB_Vector d_out,       // outbound degree of all nodes (not modified) */
+/*     float damping,          // damping factor (typically 0.85) */
+/*     int itermax,            // maximum number of iterations */
+/*     int *iters              // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3e // PageRank definition
-(
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    GrB_Vector d_out,       // outbound degree of all nodes (not modified)
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int *iters              // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3e // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,     // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,           // binary input graph, not modified */
+/*     GrB_Vector d_out,       // outbound degree of all nodes (not modified) */
+/*     float damping,          // damping factor (typically 0.85) */
+/*     int itermax,            // maximum number of iterations */
+/*     int *iters              // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerank3f // PageRank definition
-(
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    GrB_Vector d_out,       // outbound degree of all nodes (not modified)
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int *iters              // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerank3f // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,     // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,           // binary input graph, not modified */
+/*     GrB_Vector d_out,       // outbound degree of all nodes (not modified) */
+/*     float damping,          // damping factor (typically 0.85) */
+/*     int itermax,            // maximum number of iterations */
+/*     int *iters              // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_pagerankx4 // PageRank definition
-(
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    const float * d_out, // out degree of each node (GrB_FP32, size n)
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int *iters              // output: number of iterations taken
-) ;
+/* GrB_Info LAGraph_pagerankx4 // PageRank definition */
+/* ( */
+/*     GrB_Vector *result,     // output: array of LAGraph_PageRank structs */
+/*     GrB_Matrix A,           // binary input graph, not modified */
+/*     const float * d_out, // out degree of each node (GrB_FP32, size n) */
+/*     float damping,          // damping factor (typically 0.85) */
+/*     int itermax,            // maximum number of iterations */
+/*     int *iters              // output: number of iterations taken */
+/* ) ; */
 
-GrB_Info LAGraph_tricount   // count # of triangles
-(
-    int64_t *ntri,          // # of triangles
-    const int method,       // 1 to 6, see above
-    const int sorting,      //  0: no sort
-                            //  1: sort by degree, ascending order
-                            // -1: sort by degree, descending order
-    const int64_t *degree,  // degree of each node, may be NULL if sorting==0.
-                            // of size n, unmodified. 
-    const GrB_Matrix A_in   // input matrix, must be symmetric, no diag entries
-) ;
+/* GrB_Info LAGraph_tricount   // count # of triangles */
+/* ( */
+/*     int64_t *ntri,          // # of triangles */
+/*     const int method,       // 1 to 6, see above */
+/*     const int sorting,      //  0: no sort */
+/*                             //  1: sort by degree, ascending order */
+/*                             // -1: sort by degree, descending order */
+/*     const int64_t *degree,  // degree of each node, may be NULL if sorting==0. */
+/*                             // of size n, unmodified.  */
+/*     const GrB_Matrix A_in   // input matrix, must be symmetric, no diag entries */
+/* ) ; */
 
-GrB_Info LAGraph_ktruss         // compute the k-truss of a graph
-(
-    GrB_Matrix *Chandle,        // output k-truss subgraph, C
-    const GrB_Matrix A,         // input adjacency matrix, A, not modified
-    const uint32_t k,           // find the k-truss, where k >= 3
-    int32_t *nsteps             // # of steps taken (ignored if NULL)
-) ;
+/* GrB_Info LAGraph_ktruss         // compute the k-truss of a graph */
+/* ( */
+/*     GrB_Matrix *Chandle,        // output k-truss subgraph, C */
+/*     const GrB_Matrix A,         // input adjacency matrix, A, not modified */
+/*     const uint32_t k,           // find the k-truss, where k >= 3 */
+/*     int32_t *nsteps             // # of steps taken (ignored if NULL) */
+/* ) ; */
 
-GrB_Info LAGraph_allktruss      // compute all k-trusses of a graph
-(
-    GrB_Matrix *Cset,           // size n, output k-truss subgraphs (optional)
-    GrB_Matrix A,               // input adjacency matrix, A, not modified
-    // output statistics
-    int64_t *kmax,              // smallest k where k-truss is empty
-    int64_t *ntris,             // size n, ntris [k] is #triangles in k-truss
-    int64_t *nedges,            // size n, nedges [k] is #edges in k-truss
-    int64_t *nstepss            // size n, nstepss [k] is #steps for k-truss
-) ;
+/* GrB_Info LAGraph_allktruss      // compute all k-trusses of a graph */
+/* ( */
+/*     GrB_Matrix *Cset,           // size n, output k-truss subgraphs (optional) */
+/*     GrB_Matrix A,               // input adjacency matrix, A, not modified */
+/*     // output statistics */
+/*     int64_t *kmax,              // smallest k where k-truss is empty */
+/*     int64_t *ntris,             // size n, ntris [k] is #triangles in k-truss */
+/*     int64_t *nedges,            // size n, nedges [k] is #edges in k-truss */
+/*     int64_t *nstepss            // size n, nstepss [k] is #steps for k-truss */
+/* ) ; */
 
-GrB_Info LAGraph_BF_full
-(
-    GrB_Vector *pd,             //the pointer to the vector of distance
-    GrB_Vector *ppi,            //the pointer to the vector of parent
-    GrB_Vector *ph,             //the pointer to the vector of hops
-    const GrB_Matrix A,         //matrix for the graph
-    const GrB_Index s           //given index of the source
-) ;
+/* GrB_Info LAGraph_BF_full */
+/* ( */
+/*     GrB_Vector *pd,             //the pointer to the vector of distance */
+/*     GrB_Vector *ppi,            //the pointer to the vector of parent */
+/*     GrB_Vector *ph,             //the pointer to the vector of hops */
+/*     const GrB_Matrix A,         //matrix for the graph */
+/*     const GrB_Index s           //given index of the source */
+/* ) ; */
 
-GrB_Info LAGraph_BF_basic
-(
-    GrB_Vector *pd,             //the pointer to the vector of distance
-    const GrB_Matrix A,         //matrix for the graph
-    const GrB_Index s           //given index of the source
-) ;
+/* GrB_Info LAGraph_BF_basic */
+/* ( */
+/*     GrB_Vector *pd,             //the pointer to the vector of distance */
+/*     const GrB_Matrix A,         //matrix for the graph */
+/*     const GrB_Index s           //given index of the source */
+/* ) ; */
 
-GrB_Info LAGraph_BF_basic_pushpull
-(
-    GrB_Vector *pd,             //the pointer to the vector of distance
-    const GrB_Matrix A,         //matrix for the graph
-    const GrB_Matrix AT,        //transpose of A (optional)
-    const GrB_Index s           //given index of the source
-) ;
+/* GrB_Info LAGraph_BF_basic_pushpull */
+/* ( */
+/*     GrB_Vector *pd,             //the pointer to the vector of distance */
+/*     const GrB_Matrix A,         //matrix for the graph */
+/*     const GrB_Matrix AT,        //transpose of A (optional) */
+/*     const GrB_Index s           //given index of the source */
+/* ) ; */
 
-GrB_Info LAGraph_lcc            // compute lcc for all nodes in A
-(
-    GrB_Vector *LCC_handle,     // output vector
-    const GrB_Matrix A,         // input matrix
-    bool symmetric,             // if true, the matrix is symmetric
-    bool sanitize,              // if true, ensure A is binary
-    double t [2]                // t [0] = sanitize time, t [1] = lcc time,
-                                // in seconds
-) ;
+/* GrB_Info LAGraph_lcc            // compute lcc for all nodes in A */
+/* ( */
+/*     GrB_Vector *LCC_handle,     // output vector */
+/*     const GrB_Matrix A,         // input matrix */
+/*     bool symmetric,             // if true, the matrix is symmetric */
+/*     bool sanitize,              // if true, ensure A is binary */
+/*     double t [2]                // t [0] = sanitize time, t [1] = lcc time, */
+/*                                 // in seconds */
+/* ) ; */
 
-GrB_Info LAGraph_cdlp           // compute cdlp for all nodes in A
-(
-    GrB_Vector *CDLP_handle,    // output vector
-    const GrB_Matrix A,         // input matrix
-    bool symmetric,             // denote whether the matrix is symmetric
-    bool sanitize,              // if true, ensure A is binary
-    int itermax,                // max number of iterations,
-    double *t                   // t [0] = sanitize time, t [1] = cdlp time,
-                                // in seconds
-) ;
+/* GrB_Info LAGraph_cdlp           // compute cdlp for all nodes in A */
+/* ( */
+/*     GrB_Vector *CDLP_handle,    // output vector */
+/*     const GrB_Matrix A,         // input matrix */
+/*     bool symmetric,             // denote whether the matrix is symmetric */
+/*     bool sanitize,              // if true, ensure A is binary */
+/*     int itermax,                // max number of iterations, */
+/*     double *t                   // t [0] = sanitize time, t [1] = cdlp time, */
+/*                                 // in seconds */
+/* ) ; */
 
-GrB_Info LAGraph_dense_relabel   // relabel sparse IDs to dense row/column indices
-(
-    GrB_Matrix *Id2index_handle, // output matrix: A(id, index)=1 (unfilled if NULL)
-    GrB_Matrix *Index2id_handle, // output matrix: B(index, id)=1 (unfilled if NULL)
-    GrB_Vector *id2index_handle, // output vector: v(id)=index (unfilled if NULL)
-    const GrB_Index *ids,        // array of unique identifiers (under GxB_INDEX_MAX)
-    GrB_Index nids,              // number of identifiers
-    GrB_Index *id_dimension      // number of rows in Id2index matrix, id2index vector (unfilled if NULL)
-) ;
+/* GrB_Info LAGraph_dense_relabel   // relabel sparse IDs to dense row/column indices */
+/* ( */
+/*     GrB_Matrix *Id2index_handle, // output matrix: A(id, index)=1 (unfilled if NULL) */
+/*     GrB_Matrix *Index2id_handle, // output matrix: B(index, id)=1 (unfilled if NULL) */
+/*     GrB_Vector *id2index_handle, // output vector: v(id)=index (unfilled if NULL) */
+/*     const GrB_Index *ids,        // array of unique identifiers (under GxB_INDEX_MAX) */
+/*     GrB_Index nids,              // number of identifiers */
+/*     GrB_Index *id_dimension      // number of rows in Id2index matrix, id2index vector (unfilled if NULL) */
+/* ) ; */
 
-GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful
-(
-    // output
-    GrB_Matrix *Yhandle,    // Y, created on output
-    // input: not modified
-    GrB_Matrix *W,      // W [0..nlayers-1], each nneurons-by-nneurons
-    GrB_Matrix *Bias,   // Bias [0..nlayers-1], diagonal nneurons-by-nneurons
-    int nlayers,        // # of layers
-    GrB_Matrix Y0       // input features: nfeatures-by-nneurons
-) ;
+/* GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful */
+/* ( */
+/*     // output */
+/*     GrB_Matrix *Yhandle,    // Y, created on output */
+/*     // input: not modified */
+/*     GrB_Matrix *W,      // W [0..nlayers-1], each nneurons-by-nneurons */
+/*     GrB_Matrix *Bias,   // Bias [0..nlayers-1], diagonal nneurons-by-nneurons */
+/*     int nlayers,        // # of layers */
+/*     GrB_Matrix Y0       // input features: nfeatures-by-nneurons */
+/* ) ; */
 
-GrB_Info LAGraph_sssp // single source shortest paths
-(
-    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
-                               // path from the source vertex to vertex i
-    const GrB_Matrix graph,    // input graph, treated as if boolean in semiring
-    const GrB_Index source,    // source vertex from which to compute shortest paths
-    double delta               // delta value for delta stepping
-) ;
+/* GrB_Info LAGraph_sssp // single source shortest paths */
+/* ( */
+/*     GrB_Vector *path_length,   // path_length(i) is the length of the shortest */
+/*                                // path from the source vertex to vertex i */
+/*     const GrB_Matrix graph,    // input graph, treated as if boolean in semiring */
+/*     const GrB_Index source,    // source vertex from which to compute shortest paths */
+/*     double delta               // delta value for delta stepping */
+/* ) ; */
 
-GrB_Info LAGraph_sssp1 // single source shortest paths
-(
-    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
-                               // path from the source vertex to vertex i
-    GrB_Matrix graph,          // input graph, treated as if boolean in semiring
-    GrB_Index source,          // source vertex from which to compute shortest paths
-    int32_t delta               // delta value for delta stepping
-);
-
-
-GrB_Info LAGraph_BF_pure_c
-(
-    int32_t **pd,    // pointer to distance vector d, d(k) = shorstest distance
-                     // between s and k if k is reachable from s
-    int64_t **ppi,   // pointer to parent index vector pi, pi(k) = parent of
-                     // node k in the shortest path tree
-    const int64_t s, // given source node index
-    const int64_t n, // number of nodes
-    const int64_t nz,// number of edges
-    const int64_t *I,// row index vector
-    const int64_t *J,// column index vector
-    const int32_t *W // weight vector, W(i) = weight of edge (I(i),J(i))
-);
-
-GrB_Info LAGraph_sssp11         // single source shortest paths
-(
-    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
-                               // path from the source vertex to vertex i
-    GrB_Matrix A,              // input graph, treated as if boolean in
-                               // semiring (INT32)
-    GrB_Index source,          // source vertex from which to compute
-                               // shortest paths
-    int32_t delta,             // delta value for delta stepping
-    bool AIsAllPositive        // A boolean indicating whether the entries of
-                               // matrix A are all positive
-);
-
-GrB_Info LAGraph_sssp12         // single source shortest paths
-(
-    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
-                               // path from the source vertex to vertex i
-    GrB_Matrix A,              // input graph, treated as if boolean in
-                               // semiring (INT32)
-    GrB_Index source,          // source vertex from which to compute
-                               // shortest paths
-    int32_t delta,             // delta value for delta stepping
-    bool AIsAllPositive        // A boolean indicating whether the entries of
-                               // matrix A are all positive
-);
+/* GrB_Info LAGraph_sssp1 // single source shortest paths */
+/* ( */
+/*     GrB_Vector *path_length,   // path_length(i) is the length of the shortest */
+/*                                // path from the source vertex to vertex i */
+/*     GrB_Matrix graph,          // input graph, treated as if boolean in semiring */
+/*     GrB_Index source,          // source vertex from which to compute shortest paths */
+/*     int32_t delta               // delta value for delta stepping */
+/* ); */
 
 
-GrB_Info LAGraph_sssp12c        // single source shortest paths
-(
-    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
-                               // path from the source vertex to vertex i
-    GrB_Matrix A,              // input graph, treated as if boolean in
-                               // semiring (INT32)
-    GrB_Index source,          // source vertex from which to compute
-                               // shortest paths
-    int32_t delta,             // delta value for delta stepping
+/* GrB_Info LAGraph_BF_pure_c */
+/* ( */
+/*     int32_t **pd,    // pointer to distance vector d, d(k) = shorstest distance */
+/*                      // between s and k if k is reachable from s */
+/*     int64_t **ppi,   // pointer to parent index vector pi, pi(k) = parent of */
+/*                      // node k in the shortest path tree */
+/*     const int64_t s, // given source node index */
+/*     const int64_t n, // number of nodes */
+/*     const int64_t nz,// number of edges */
+/*     const int64_t *I,// row index vector */
+/*     const int64_t *J,// column index vector */
+/*     const int32_t *W // weight vector, W(i) = weight of edge (I(i),J(i)) */
+/* ); */
 
-    // TODO: make this an enum:
-    //      case 0: A can have negative, zero, or positive entries
-    //      case 1: A can have zero or positive entries
-    //      case 2: A only has positive entries (see FIXME below)
-    bool AIsAllPositive        // A boolean indicating whether the entries of
-                               // matrix A are all positive
-);
+/* GrB_Info LAGraph_sssp11         // single source shortest paths */
+/* ( */
+/*     GrB_Vector *path_length,   // path_length(i) is the length of the shortest */
+/*                                // path from the source vertex to vertex i */
+/*     GrB_Matrix A,              // input graph, treated as if boolean in */
+/*                                // semiring (INT32) */
+/*     GrB_Index source,          // source vertex from which to compute */
+/*                                // shortest paths */
+/*     int32_t delta,             // delta value for delta stepping */
+/*     bool AIsAllPositive        // A boolean indicating whether the entries of */
+/*                                // matrix A are all positive */
+/* ); */
+
+/* GrB_Info LAGraph_sssp12         // single source shortest paths */
+/* ( */
+/*     GrB_Vector *path_length,   // path_length(i) is the length of the shortest */
+/*                                // path from the source vertex to vertex i */
+/*     GrB_Matrix A,              // input graph, treated as if boolean in */
+/*                                // semiring (INT32) */
+/*     GrB_Index source,          // source vertex from which to compute */
+/*                                // shortest paths */
+/*     int32_t delta,             // delta value for delta stepping */
+/*     bool AIsAllPositive        // A boolean indicating whether the entries of */
+/*                                // matrix A are all positive */
+/* ); */
 
 
-GrB_Info LAGraph_bfs_both       // push-pull BFS, or push-only if AT = NULL
-(
-    GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
-    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i.
-                            // if NULL, the parent is not computed.
-    GrB_Matrix A,           // input graph, treated as if boolean in semiring
-    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
-    int64_t source,         // starting node of the BFS
-    int64_t max_level,      // optional limit of # levels to search
-    bool vsparse            // if true, v is expected to be very sparse
-    , FILE * logfile
-) ;
+/* GrB_Info LAGraph_sssp12c        // single source shortest paths */
+/* ( */
+/*     GrB_Vector *path_length,   // path_length(i) is the length of the shortest */
+/*                                // path from the source vertex to vertex i */
+/*     GrB_Matrix A,              // input graph, treated as if boolean in */
+/*                                // semiring (INT32) */
+/*     GrB_Index source,          // source vertex from which to compute */
+/*                                // shortest paths */
+/*     int32_t delta,             // delta value for delta stepping */
+
+/*     // TODO: make this an enum: */
+/*     //      case 0: A can have negative, zero, or positive entries */
+/*     //      case 1: A can have zero or positive entries */
+/*     //      case 2: A only has positive entries (see FIXME below) */
+/*     bool AIsAllPositive        // A boolean indicating whether the entries of */
+/*                                // matrix A are all positive */
+/* ); */
 
 
-GrB_Info LAGraph_Matrix_extract_keep_dimensions // extract submatrix but keep
-                                                // the dimensions of the
-                                                // original matrix
-(
-    GrB_Matrix *Chandle,         // output matrix
-    const GrB_Matrix A,          // input matrix
-    const GrB_Index *Vsparse,    // sorted list of vertex indices
-    const bool *Vdense,          // boolean array of vertices
-    GrB_Index nv                 // number of vertex indices
-) ;
+/* GrB_Info LAGraph_bfs_both       // push-pull BFS, or push-only if AT = NULL */
+/* ( */
+/*     GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph */
+/*     GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i. */
+/*                             // if NULL, the parent is not computed. */
+/*     GrB_Matrix A,           // input graph, treated as if boolean in semiring */
+/*     GrB_Matrix AT,          // transpose of A (optional; push-only if NULL) */
+/*     int64_t source,         // starting node of the BFS */
+/*     int64_t max_level,      // optional limit of # levels to search */
+/*     bool vsparse            // if true, v is expected to be very sparse */
+/*     , FILE * logfile */
+/* ) ; */
+
+
+/* GrB_Info LAGraph_Matrix_extract_keep_dimensions // extract submatrix but keep */
+/*                                                 // the dimensions of the */
+/*                                                 // original matrix */
+/* ( */
+/*     GrB_Matrix *Chandle,         // output matrix */
+/*     const GrB_Matrix A,          // input matrix */
+/*     const GrB_Index *Vsparse,    // sorted list of vertex indices */
+/*     const bool *Vdense,          // boolean array of vertices */
+/*     GrB_Index nv                 // number of vertex indices */
+/* ) ; */

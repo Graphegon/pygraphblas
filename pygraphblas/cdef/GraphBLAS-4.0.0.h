@@ -4059,13 +4059,13 @@ extern const GxB_Format_Value GxB_FORMAT_DEFAULT ;
 extern const double GxB_HYPER_DEFAULT ;
 
 // for GxB_SPARSITY can be any sum or bitwise OR of these 4 values:
-/* #define GxB_HYPERSPARSE 1   // store matrix in hypersparse form */
-/* #define GxB_SPARSE      2   // store matrix as sparse form (compressed vector) */
-/* #define GxB_BITMAP      4   // store matrix as a bitmap */
-/* #define GxB_FULL        8   // store matrix as full; all entries must be present */
+#define GxB_HYPERSPARSE ...   // store matrix in hypersparse form */
+#define GxB_SPARSE      ...   // store matrix as sparse form (compressed vector) */
+#define GxB_BITMAP      ...   // store matrix as a bitmap */
+#define GxB_FULL        ...   // store matrix as full; all entries must be present */
 
 // the default is to store the matrix in any form:
-#define GxB_AUTO_SPARSITY 15
+#define GxB_AUTO_SPARSITY ...
 
 // GxB_Matrix_Option_set (A, GxB_SPARSITY, sparsity) provides hints about
 // which data structure GraphBLAS should use for the matrix A:

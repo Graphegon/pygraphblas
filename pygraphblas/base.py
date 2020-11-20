@@ -116,7 +116,7 @@ def _check(res, raise_no_val=False):
     if res != lib.GrB_SUCCESS:
         if raise_no_val and res == lib.GrB_NO_VALUE:
             raise KeyError
-        raise _error_codes[res](ffi.string(lib.GrB_error()))
+        raise _error_codes[res]()
 
 
 def _build_range(rslice, stop_val):

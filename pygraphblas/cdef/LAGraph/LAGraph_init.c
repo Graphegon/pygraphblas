@@ -71,7 +71,7 @@ GrB_Info LAGraph_init ( )
     #if defined(GxB_SUITESPARSE_GRAPHBLAS) && !defined(NDEBUG)
     char *library_date ;
     GxB_get (GxB_LIBRARY_DATE, &library_date) ;
-    printf ("SuiteSparse:GraphBLAS %s\n", library_date) ;
+    // printf ("SuiteSparse:GraphBLAS %s\n", library_date) ;
     // printf ("glibc %s\n", gnu_get_libc_version ( )) ;
     #endif
 

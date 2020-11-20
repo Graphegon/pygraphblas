@@ -8,6 +8,7 @@ from .base import (
     NULL,
     NoValue,
     _check,
+    _error_codes,
     _get_bin_op,
     _get_select_op,
     _build_range,
@@ -33,10 +34,18 @@ class Vector:
 
     __slots__ = ("vector", "type", "_keep_alives")
 
+    def _check(self, res, raise_no_val=False):
+        if res != lib.GrB_SUCCESS:
+            if raise_no_val and res == lib.GrB_NO_VALUE:
+                raise KeyError
+
+            error_string = ffi.new('char*')
+            raise _error_codes[res](ffi.string(lib.GrB_Vector_error(error_string, self.vector)))
+
     def __init__(self, vec, typ=None):
         if typ is None:
             new_type = ffi.new("GrB_Type*")
-            _check(lib.GxB_Vector_type(new_type, vec[0]))
+            self._check(lib.GxB_Vector_type(new_type, vec[0]))
 
             typ = types.gb_type_to_type(new_type[0])
 
@@ -45,7 +54,7 @@ class Vector:
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
-        _check(lib.GrB_Vector_free(self.vector))
+        self._check(lib.GrB_Vector_free(self.vector))
 
     def __len__(self):
         return self.nvals
@@ -55,14 +64,14 @@ class Vector:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = ffi.new("%s[%s]" % (self.type.C, nvals))
-        _check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
+        self._check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
         return zip(I, X)
 
     def iseq(self, other, eq_op=None):
         if eq_op is None:
             eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         result = ffi.new("_Bool*")
-        _check(
+        self._check(
             lib.LAGraph_Vector_isequal(result, self.vector[0], other.vector[0], eq_op)
         )
         return result[0]
@@ -118,7 +127,7 @@ class Vector:
     def dup(self):
         """Create an duplicate Vector from the given argument."""
         new_vec = ffi.new("GrB_Vector*")
-        _check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
+        self._check(lib.GrB_Vector_dup(new_vec, self.vector[0]))
         return self.__class__(new_vec, self.type)
 
     @classmethod
@@ -135,7 +144,7 @@ class Vector:
         V = self.type.ffi.new(self.type.C + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
-        _check(self.type.Vector_extractTuples(I, V, n, self.vector[0]))
+        self._check(self.type.Vector_extractTuples(I, V, n, self.vector[0]))
         return [list(I), list(map(self.type.to_value, V))]
 
     def to_arrays(self):
@@ -145,14 +154,14 @@ class Vector:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
-        _check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
+        self._check(self.type.Vector_extractTuples(I, X, _nvals, self.vector[0]))
         return array("L", I), array(self.type.typecode, X)
 
     @property
     def size(self):
         """Return the size of the vector."""
         n = ffi.new("GrB_Index*")
-        _check(lib.GrB_Vector_size(n, self.vector[0]))
+        self._check(lib.GrB_Vector_size(n, self.vector[0]))
         return n[0]
 
     @property
@@ -164,14 +173,14 @@ class Vector:
     def nvals(self):
         """Return the number of values in the vector."""
         n = ffi.new("GrB_Index*")
-        _check(lib.GrB_Vector_nvals(n, self.vector[0]))
+        self._check(lib.GrB_Vector_nvals(n, self.vector[0]))
         return n[0]
 
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Vector."""
         typ = ffi.new("GrB_Type*")
-        _check(lib.GxB_Vector_type(typ, self.vector[0]))
+        self._check(lib.GxB_Vector_type(typ, self.vector[0]))
         return typ[0]
 
     def full(self, identity=None):
@@ -179,7 +188,7 @@ class Vector:
         if identity is None:
             identity = self.type.one
 
-        _check(
+        self._check(
             self.type.Vector_assignScalar(
                 B.vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
             )
@@ -248,9 +257,9 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
-        _check(
+        self._check(
             lib.GrB_eWiseAdd_Vector_BinaryOp(
                 out.vector[0],
                 mask,
@@ -293,9 +302,9 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            _check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
-        _check(
+        self._check(
             lib.GrB_eWiseMult_Vector_BinaryOp(
                 out.vector[0],
                 mask,
@@ -324,7 +333,7 @@ class Vector:
             raise TypeError("Output argument must be Vector.")
         if semiring is None:
             semiring = typ.PLUS_TIMES
-        _check(
+        self._check(
             lib.GrB_vxm(
                 out.vector[0],
                 mask,
@@ -479,10 +488,10 @@ class Vector:
         return self.apply(unaryop.ABS)
 
     def clear(self):
-        _check(lib.GrB_Vector_clear(self.vector[0]))
+        self._check(lib.GrB_Vector_clear(self.vector[0]))
 
     def resize(self, size):
-        _check(lib.GrB_Vector_resize(self.vector[0], size))
+        self._check(lib.GrB_Vector_resize(self.vector[0], size))
 
     def _get_args(self, mask=NULL, accum=NULL, mon=NULL, desc=Default):
         if mon is NULL:
@@ -508,7 +517,7 @@ class Vector:
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new("_Bool*")
-        _check(
+        self._check(
             lib.GrB_Vector_reduce_BOOL(result, accum, mon, self.vector[0], desc.desc[0])
         )
         return result[0]
@@ -520,7 +529,7 @@ class Vector:
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new("int64_t*")
-        _check(
+        self._check(
             lib.GrB_Vector_reduce_INT64(
                 result, accum, mon, self.vector[0], desc.desc[0]
             )
@@ -534,7 +543,7 @@ class Vector:
         mon = mon.get_monoid(self.type)
         mask, mon, accum, desc = self._get_args(mon=mon, **kwargs)
         result = ffi.new("double*")
-        _check(
+        self._check(
             lib.GrB_Vector_reduce_FP64(result, accum, mon, self.vector[0], desc.desc[0])
         )
         return result[0]
@@ -547,7 +556,7 @@ class Vector:
             op = op.get_unaryop(self)
 
         mask, mon, accum, desc = self._get_args(**kwargs)
-        _check(
+        self._check(
             lib.GrB_Vector_apply(
                 out.vector[0], mask, accum, op, self.vector[0], desc.desc[0]
             )
@@ -568,7 +577,7 @@ class Vector:
             first = first.scalar[0]
         else:
             f = self.type.Vector_apply_BinaryOp1st
-        _check(f(out.vector[0], mask, accum, op, first, self.vector[0], desc.desc[0]))
+        self._check(f(out.vector[0], mask, accum, op, first, self.vector[0], desc.desc[0]))
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
@@ -585,7 +594,7 @@ class Vector:
             second = second.scalar[0]
         else:
             f = self.type.Vector_apply_BinaryOp2nd
-        _check(f(out.vector[0], mask, accum, op, self.vector[0], second, desc.desc[0]))
+        self._check(f(out.vector[0], mask, accum, op, self.vector[0], second, desc.desc[0]))
         return out
 
     def select(self, op, thunk=NULL, out=None, **kwargs):
@@ -601,7 +610,7 @@ class Vector:
             thunk = thunk.scalar[0]
 
         mask, mon, accum, desc = self._get_args(**kwargs)
-        _check(
+        self._check(
             lib.GxB_Vector_select(
                 out.vector[0], mask, accum, op, self.vector[0], thunk, desc.desc[0]
             )
@@ -623,14 +632,14 @@ class Vector:
         out = ffi.new("GrB_Vector*")
         if _id is None:
             _id = ffi.new(self.type.ptr, 0)
-        _check(lib.LAGraph_Vector_to_dense(out, self.vector[0], _id))
+        self._check(lib.LAGraph_Vector_to_dense(out, self.vector[0], _id))
         return Vector(out, self.type)
 
     def __setitem__(self, index, value):
         mask, mon, accum, desc = self._get_args()
         if isinstance(index, int):
             val = self.type.from_value(value)
-            _check(self.type.Vector_setElement(self.vector[0], val, index))
+            self._check(self.type.Vector_setElement(self.vector[0], val, index))
             return
 
         if isinstance(index, slice):
@@ -645,7 +654,7 @@ class Vector:
     def assign(self, value, index=None, **kwargs):
         mask, mon, accum, desc = self._get_args(**kwargs)
         I, ni, size = _build_range(index, self.size - 1)
-        _check(
+        self._check(
             lib.GrB_Vector_assign(
                 self.vector[0], mask, accum, value.vector[0], I, ni, desc.desc[0]
             )
@@ -655,7 +664,7 @@ class Vector:
         mask, mon, accum, desc = self._get_args(**kwargs)
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
-        _check(
+        self._check(
             scalar_type.Vector_assignScalar(
                 self.vector[0], mask, accum, value, I, ni, desc.desc[0]
             )
@@ -672,11 +681,11 @@ class Vector:
             raise TypeError(
                 "__delitem__ currently only supports single element removal"
             )
-        _check(lib.GrB_Vector_removeElement(self.vector[0], index))
+        self._check(lib.GrB_Vector_removeElement(self.vector[0], index))
 
     def extract_element(self, index):
         result = self.type.ffi.new(self.type.ptr)
-        _check(
+        self._check(
             self.type.Vector_extractElement(
                 result, self.vector[0], ffi.cast("GrB_Index", index)
             )
@@ -692,7 +701,7 @@ class Vector:
         if size is None:
             size = self.size
         result = Vector.sparse(self.type, size)
-        _check(
+        self._check(
             lib.GrB_Vector_extract(
                 result.vector[0], mask, accum, self.vector[0], I, ni, desc.desc[0]
             )
@@ -713,7 +722,7 @@ class Vector:
             return default
 
     def wait(self):
-        _check(lib.GrB_Vector_wait(self.vector))
+        self._check(lib.GrB_Vector_wait(self.vector))
 
     def to_string(self, format_string="{:>%s}", width=2, empty_char=""):
         format_string = format_string % width

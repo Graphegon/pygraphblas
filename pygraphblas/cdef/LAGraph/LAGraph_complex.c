@@ -550,3 +550,13 @@ GrB_Info LAGraph_Complex_finalize ( )
     return (GrB_SUCCESS) ;
 }
 
+#undef C
+#undef X
+#undef Y
+#undef Z
+
+#undef ONE
+#undef ZERO
+#undef T
+#undef F
+#undef BOOL
