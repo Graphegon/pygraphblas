@@ -40,7 +40,7 @@ class Vector:
                 raise KeyError
 
             error_string = ffi.new('char*')
-            raise _error_codes[res](ffi.string(lib.GrB_Vector_error(error_string, self.vector)))
+            raise _error_codes[res](ffi.string(lib.GrB_Vector_error(error_string, self.vector[0])))
 
     def __init__(self, vec, typ=None):
         if typ is None:

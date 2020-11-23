@@ -289,7 +289,7 @@ typedef uint64_t GrB_Index ;
 // needed for CSC and O(nrows) space is needed for CSR.  For hypersparse
 // matrices, the time complexity does not depend on O(nrows) or O(ncols).
 
-/* #define GxB_INDEX_MAX ((GrB_Index) (1ULL << 60)) */
+#define GxB_INDEX_MAX ...
 
 //------------------------------------------------------------------------------
 // GraphBLAS error and informational codes
