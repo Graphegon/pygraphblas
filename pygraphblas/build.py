@@ -50,7 +50,7 @@ def build_ffi():
         ],
     )
 
-    with open(p / "GraphBLAS-4.0.0.h") as gb_cdef:
+    with open(p / "GraphBLAS-4.0.1.h") as gb_cdef:
         ffibuilder.cdef(gb_cdef.read())
 
     with open(p / "lagraph_c2c0cf_cdef.h") as la_cdef:
