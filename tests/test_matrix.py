@@ -1009,3 +1009,14 @@ def test_nonzero():
     assert not bool(m)
     m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     assert bool(m)
+
+def test_to_scipy_sparse():
+    v = Matrix.random(INT8, 10, 10, 4, seed=42)
+    assert len(v) == 4
+    s = v.to_scipy_sparse()
+    assert (s.data == [ 63, 105,  17,  20]).all()
+    m = v.to_numpy()
+    assert m.shape == (10,10)
+    
+    
+    

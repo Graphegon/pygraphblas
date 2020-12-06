@@ -8,3 +8,13 @@ networkx
 scipy
 py_d3
 git+https://github.com/taynaud/python-louvain.git
+pypng
+numpngw
+ipycytoscape
+Pillow
+matplotlib
+colorcet
+imageio
+imageio-ffmpeg
+pygifsicle
+

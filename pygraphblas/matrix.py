@@ -1146,3 +1146,24 @@ class Matrix:
             self.nvals,
             self.type.__name__,
         )
+
+    def to_scipy_sparse(self, format="csr"):
+        from scipy import sparse
+        rows, cols, vals = self.to_arrays()
+        s = sparse.coo_matrix((vals, (rows, cols)), shape=self.shape)
+        if format == "coo":
+            return s
+        if format not in {"bsr", "csr", "csc", "coo", "lil", "dia", "dok"}:
+            raise Exception(f"Invalid format: {format}")
+        return s.asformat(format)
+
+    def to_numpy(self):
+        s = self.to_scipy_sparse("coo")
+        return s.toarray()
+
+    def to_image(self):
+        from PIL import Image
+        im = Image.new('I', (self.nrows, self.ncols))
+        for i, j, v in self:
+            im.putpixel((j,i), 1024**2)
+        return im
