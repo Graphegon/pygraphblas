@@ -1,0 +1,30 @@
+name: pygraphblas
+channels:
+  - conda-forge
+dependencies:
+  - pygraphblas
+  - numpy
+  - cffi
+  - numba
+  - scipy
+  - pip
+  - pip:
+    - pytest
+    - pytest-cov
+    - ipdb
+    - graphviz
+    - pandas
+    - networkx
+    - py_d3
+    - git+https://github.com/taynaud/python-louvain.git
+    - pypng
+    - numpngw
+    - ipycytoscape
+    - Pillow
+    - matplotlib
+    - colorcet
+    - imageio
+    - imageio-ffmpeg
+    - pygifsicle
+
+
