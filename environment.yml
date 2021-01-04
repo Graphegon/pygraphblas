@@ -1,0 +1,5 @@
+name: pygraphblas
+channels:
+  - conda-forge
+dependencies:
+  - pygraphblas

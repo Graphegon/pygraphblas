@@ -1,6 +1,6 @@
 
 from graphviz import Digraph, Source
-from pygraphblas import Matrix, Vector, types
+from pygraphblas import Matrix, Vector, types, BOOL
 from PIL import Image, ImageDraw
 from IPython.display import display
 
@@ -36,10 +36,15 @@ def draw_graph(
     g.attr(rankdir=rankdir, ranksep="1", overlap="false", concentrate="true")
     if size is not None:
         g.attr(size=size)
+    if isinstance(label_vector, list):
+        labeler = lambda v, i: v[i]
+    else:
+        labeler = lambda v, i: v.get(i)
+        
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
-        ilabel = _str(label_vector[i], label_width) if label_vector else str(i)
-        jlabel = _str(label_vector[j], label_width) if label_vector else str(j)
+        ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i)
+        jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j)
         vlabel = _str(v, label_width) if show_weight else None
 
         g.node(str(i + ioff), width=size, height=size, label=ilabel)
@@ -116,24 +121,26 @@ def draw_op(left, op, right, result):
 
 def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow'):
     if mode is None:
-        if M.type is types.BOOL:
-            mode = 'L'
-        else:
-            mode = 'RGB'
+        mode = 'RGB'
 
     if cmap is not None:
         import matplotlib.pyplot as plt
         cmap = plt.get_cmap(cmap)
             
-    sx = (M.nrows + 1) * scale
-    sy = (M.ncols + 1) * scale
+    sx = (M.ncols + 1) * scale
+    sy = (M.nrows + 1) * scale
     im = Image.new(mode, (sx, sy), color='white')
     d = ImageDraw.Draw(im)
     for i, j, v in M:
         y = ((i + 1) * scale) + scale/2
         x = ((j + 1) * scale) + scale/2
         offset = int(scale/2)
-        d.rectangle((x-offset, y-offset, x+scale-offset, y+scale-offset), fill='black', outline='white')
+        if M.type is BOOL:
+            d.rectangle(
+                (x-offset, y-offset, x+scale-offset, y+scale-offset),
+                fill='black', outline='white')
+        else:
+            d.text(((x-offset) + scale/5, (y-offset)+scale/5), str(v), fill='black')
     if axes:
         d.line((0, scale, im.size[0], scale), fill='black')
         d.line((scale, 0, scale, im.size[1]), fill='black')

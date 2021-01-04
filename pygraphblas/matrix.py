@@ -44,8 +44,9 @@ class Matrix:
             if raise_no_val and res == lib.GrB_NO_VALUE:
                 raise KeyError
 
-            error_string = ffi.new('char*')
-            raise _error_codes[res](ffi.string(lib.GrB_Matrix_error(error_string, self.matrix[0])))
+            error_string = ffi.new('char**')
+            lib.GrB_Matrix_error(error_string, self.matrix[0])
+            raise _error_codes[res](ffi.string(error_string[0]))
 
     def __init__(self, matrix, typ=None, **options):
         if typ is None:
