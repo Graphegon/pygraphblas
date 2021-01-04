@@ -8,6 +8,7 @@ dependencies:
   - numba
   - scipy
   - pip
+  - graphviz
   - pip:
     - pytest
     - pytest-cov
