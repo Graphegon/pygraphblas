@@ -230,14 +230,14 @@ class Matrix:
     def options_set(self, hyper=None, format=None):
         if hyper:
             hyper = ffi.cast("double", hyper)
-#            self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER, hyper))
+            self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, hyper))
         if format:
             format = ffi.cast("GxB_Format_Value", format)
             self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     def options_get(self):
         hyper = ffi.new("double*")
-#        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER, hyper))
+        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, hyper))
 
         format = ffi.new("GxB_Format_Value*")
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
