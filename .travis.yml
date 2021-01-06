@@ -2,5 +2,5 @@ gitservices:
   - docker
 
 script:
-  - SS_COMPACT=1 ./docker_build.sh v4.0.1 minimal
+  - SS_COMPACT=1 ./docker_build.sh v4.0.1 $TRAVIS_BRANCH minimal $TRAVIS_BRANCH
   - ./test.sh
