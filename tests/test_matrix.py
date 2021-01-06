@@ -531,11 +531,27 @@ def test_apply():
 
 def test_get_set_options():
     v = Matrix.random(INT8, 10, 10, 10, seed=42)
-    v.options_set(hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
-    assert v.options_get() == (1.0, lib.GxB_BY_COL, True)
+    v.hyper_switch = lib.GxB_ALWAYS_HYPER
+    v.format = lib.GxB_BY_COL
+    assert v.hyper_switch == lib.GxB_ALWAYS_HYPER
+    assert v.format == lib.GxB_BY_COL
+    assert v.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert v.sparsity_status == lib.GxB_HYPERSPARSE
 
-    w = Matrix.sparse(INT8, 10, 10, hyper=lib.GxB_ALWAYS_HYPER, format=lib.GxB_BY_COL)
-    assert w.options_get() == (1.0, lib.GxB_BY_COL, True)
+    v.hyper_switch = 2.0
+    assert v.hyper_switch == 2.0
+
+    v.format = lib.GxB_BY_ROW
+    assert v.format == lib.GxB_BY_ROW
+
+    v.sparsity_control = lib.GxB_BITMAP + lib.GxB_FULL
+    assert v.sparsity_control == lib.GxB_BITMAP + lib.GxB_FULL
+
+    w = Matrix.sparse(INT8, 10, 10)
+    assert w.hyper_switch == lib.GxB_HYPER_DEFAULT
+    assert w.format == lib.GxB_BY_ROW
+    assert w.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert w.sparsity_status == lib.GxB_HYPERSPARSE
 
 
 def test_square():
@@ -1010,13 +1026,11 @@ def test_nonzero():
     m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     assert bool(m)
 
+
 def test_to_scipy_sparse():
     v = Matrix.random(INT8, 10, 10, 4, seed=42)
     assert len(v) == 4
     s = v.to_scipy_sparse()
-    assert (s.data == [ 63, 105,  17,  20]).all()
+    assert (s.data == [63, 105, 17, 20]).all()
     m = v.to_numpy()
-    assert m.shape == (10,10)
-    
-    
-    
+    assert m.shape == (10, 10)

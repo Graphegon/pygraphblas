@@ -39,7 +39,7 @@ class Vector:
             if raise_no_val and res == lib.GrB_NO_VALUE:
                 raise KeyError
 
-            error_string = ffi.new('char**')
+            error_string = ffi.new("char**")
             lib.GrB_Vector_error(error_string, self.vector[0])
             raise _error_codes[res](ffi.string(error_string[0]))
 
@@ -578,7 +578,9 @@ class Vector:
             first = first.scalar[0]
         else:
             f = self.type.Vector_apply_BinaryOp1st
-        self._check(f(out.vector[0], mask, accum, op, first, self.vector[0], desc.desc[0]))
+        self._check(
+            f(out.vector[0], mask, accum, op, first, self.vector[0], desc.desc[0])
+        )
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
@@ -595,7 +597,9 @@ class Vector:
             second = second.scalar[0]
         else:
             f = self.type.Vector_apply_BinaryOp2nd
-        self._check(f(out.vector[0], mask, accum, op, self.vector[0], second, desc.desc[0]))
+        self._check(
+            f(out.vector[0], mask, accum, op, self.vector[0], second, desc.desc[0])
+        )
         return out
 
     def select(self, op, thunk=NULL, out=None, **kwargs):

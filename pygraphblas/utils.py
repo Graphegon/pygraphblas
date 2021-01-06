@@ -4,6 +4,7 @@ from .base import (
     _check,
 )
 
+
 def get_version():
     version = ffi.new("unsigned int*")
     subversion = ffi.new("unsigned int*")
@@ -12,12 +13,12 @@ def get_version():
 
 
 def get_implementation_version():
-    return (lib.GxB_IMPLEMENTATION_MAJOR,
-            lib.GxB_IMPLEMENTATION_MINOR,
-            lib.GxB_IMPLEMENTATION_SUB)
+    return (
+        lib.GxB_IMPLEMENTATION_MAJOR,
+        lib.GxB_IMPLEMENTATION_MINOR,
+        lib.GxB_IMPLEMENTATION_SUB,
+    )
 
 
 def get_spec_version():
-    return (lib.GxB_SPEC_MAJOR,
-            lib.GxB_SPEC_MINOR,
-            lib.GxB_SPEC_SUB)
+    return (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)

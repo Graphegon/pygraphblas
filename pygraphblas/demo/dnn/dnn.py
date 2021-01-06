@@ -3,10 +3,12 @@ from . import timing
 from pygraphblas.demo.gviz import draw_matrix
 import imageio
 
+
 @timing
 def render_frame(prefix, Y, i):
     im = draw_matrix(Y, scale=2, labels=False)
-    imageio.imwrite(prefix + str(i) + '.png', im)
+    imageio.imwrite(prefix + str(i) + ".png", im)
+
 
 @timing
 def dnn(W, B, Y, movie=None):
@@ -25,7 +27,6 @@ def dnn(W, B, Y, movie=None):
 
 
 class ReLUNeuron(FP32):
-    
     @binary_op(FP32)
     def TIMES(x, y):
         result = min(x + y, 32)
@@ -33,8 +34,10 @@ class ReLUNeuron(FP32):
             return 0
         return result
 
+
 ReLUNeuron_monoid = ReLUNeuron.new_monoid(FP32.MAX, ReLUNeuron.one)
 ReLUNeuron_semiring = ReLUNeuron.new_semiring(ReLUNeuron_monoid, ReLUNeuron.TIMES)
+
 
 @timing
 def hyperdnn(nlayers, W, B, Y):

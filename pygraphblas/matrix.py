@@ -38,17 +38,16 @@ class Matrix:
 
     __slots__ = ("matrix", "type", "_funcs", "_keep_alives")
 
-
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
                 raise KeyError
 
-            error_string = ffi.new('char**')
+            error_string = ffi.new("char**")
             lib.GrB_Matrix_error(error_string, self.matrix[0])
             raise _error_codes[res](ffi.string(error_string[0]))
 
-    def __init__(self, matrix, typ=None, **options):
+    def __init__(self, matrix, typ=None):
         if typ is None:
             new_type = ffi.new("GrB_Type*")
             self._check(lib.GxB_Matrix_type(new_type, matrix[0]))
@@ -58,34 +57,32 @@ class Matrix:
         self.matrix = matrix
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
-        if options:
-            self.options_set(**options)
 
     def __del__(self):
         self._check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=0, ncols=0, **options):
+    def sparse(cls, typ, nrows=0, ncols=0):
         """Create an empty Matrix from the given type, number of rows, and
         number of columns.
 
         """
         new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
-        m = cls(new_mat, typ, **options)
+        m = cls(new_mat, typ)
         return m
 
     @classmethod
-    def dense(cls, typ, nrows=1, ncols=1, fill=None, **options):
+    def dense(cls, typ, nrows=1, ncols=1, fill=None):
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
-        m = cls.sparse(typ, nrows, ncols, **options)
+        m = cls.sparse(typ, nrows, ncols)
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
         return m
 
     @classmethod
-    def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None, **options):
+    def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
         """Create a new matrix from the given lists of row indices, column
         indices, and values.  If nrows or ncols are not provided, they
         are computed from the max values of the provides row and
@@ -100,24 +97,24 @@ class Matrix:
         # TODO use ffi and GrB_Matrix_build
         if typ is None:
             typ = types._gb_from_type(type(V[0]))
-        m = cls.sparse(typ, nrows, ncols, **options)
+        m = cls.sparse(typ, nrows, ncols)
         for i, j, v in zip(I, J, V):
             m[i, j] = v
         return m
 
     @classmethod
-    def from_mm(cls, mm_file, typ, **options):
+    def from_mm(cls, mm_file, typ):
         """Create a new matrix by reading a Matrix Market file."""
         m = ffi.new("GrB_Matrix*")
-        i = cls(m, typ, **options)
+        i = cls(m, typ)
         _check(lib.LAGraph_mmread(m, mm_file))
         return i
 
     @classmethod
-    def from_tsv(cls, tsv_file, typ, nrows, ncols, **options):
+    def from_tsv(cls, tsv_file, typ, nrows, ncols):
         """Create a new matrix by reading a tab separated value file."""
         m = ffi.new("GrB_Matrix*")
-        i = cls(m, typ, **options)
+        i = cls(m, typ)
         _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
         return i
 
@@ -141,7 +138,6 @@ class Matrix:
         make_hermitian=True,
         no_diagonal=False,
         seed=None,
-        **options
     ):
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
@@ -149,7 +145,7 @@ class Matrix:
 
         """
         result = ffi.new("GrB_Matrix*")
-        i = cls(result, typ, **options)
+        i = cls(result, typ)
         fseed = ffi.new("uint64_t*")
         if seed is None:
             seed = randint(0, sys.maxsize)
@@ -172,8 +168,8 @@ class Matrix:
         return i
 
     @classmethod
-    def identity(cls, typ, nrows, one=None, **options):
-        result = cls.sparse(typ, nrows, nrows, **options)
+    def identity(cls, typ, nrows, one=None):
+        result = cls.sparse(typ, nrows, nrows)
         if one is None:
             one = result.type.one
         for i in range(nrows):
@@ -221,31 +217,64 @@ class Matrix:
     def T(self):
         return self.transpose()
 
-    def dup(self, **options):
+    def dup(self):
         """Create an duplicate Matrix."""
         new_mat = ffi.new("GrB_Matrix*")
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
-        return self.__class__(new_mat, self.type, **options)
+        return self.__class__(new_mat, self.type)
 
-    def options_set(self, hyper=None, format=None):
-        if hyper:
-            hyper = ffi.cast("double", hyper)
-            self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, hyper))
-        if format:
-            format = ffi.cast("GxB_Format_Value", format)
-            self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
+    @property
+    def hyper_switch(self):
+        switch = ffi.new("double*")
+        self._check(
+            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+        )
+        return switch[0]
 
-    def options_get(self):
-        hyper = ffi.new("double*")
-        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, hyper))
+    @hyper_switch.setter
+    def hyper_switch(self, switch):
+        switch = ffi.cast("double", switch)
+        self._check(
+            lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+        )
 
+    @property
+    def format(self):
         format = ffi.new("GxB_Format_Value*")
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
+        return format[0]
 
-        is_hyper = ffi.new("bool*")
-        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_IS_HYPER, is_hyper))
+    @format.setter
+    def format(self, format):
+        format = ffi.cast("GxB_Format_Value", format)
+        self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
-        return (hyper[0], format[0], is_hyper[0])
+    @property
+    def sparsity_control(self):
+        sparsity = ffi.new("int*")
+        self._check(
+            lib.GxB_Matrix_Option_get(
+                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+        return sparsity[0]
+
+    @sparsity_control.setter
+    def sparsity_control(self, sparsity):
+        sparsity = ffi.cast("int", sparsity)
+        self._check(
+            lib.GxB_Matrix_Option_set(
+                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+
+    @property
+    def sparsity_status(self):
+        status = ffi.new("int*")
+        self._check(
+            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
+        )
+        return status[0]
 
     def pattern(self, typ=types.BOOL):
         """Return the pattern of the matrix, this is a boolean Matrix where
@@ -622,7 +651,9 @@ class Matrix:
         mon = mon.get_monoid(self.type)
         result = ffi.new("_Bool*")
         mask, accum, desc = self._get_args(**kwargs)
-        self._check(lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc))
+        self._check(
+            lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
+        )
         return result[0]
 
     def reduce_int(self, mon=NULL, **kwargs):
@@ -632,7 +663,9 @@ class Matrix:
         mon = mon.get_monoid(self.type)
         result = ffi.new("int64_t*")
         mask, accum, desc = self._get_args(**kwargs)
-        self._check(lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc))
+        self._check(
+            lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
+        )
         return result[0]
 
     def reduce_float(self, mon=NULL, **kwargs):
@@ -642,7 +675,9 @@ class Matrix:
         mon = mon.get_monoid(self.type)
         mask, accum, desc = self._get_args(**kwargs)
         result = ffi.new("double*")
-        self._check(lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc))
+        self._check(
+            lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
+        )
         return result[0]
 
     def reduce_vector(self, mon=NULL, out=None, **kwargs):
@@ -1150,6 +1185,7 @@ class Matrix:
 
     def to_scipy_sparse(self, format="csr"):
         from scipy import sparse
+
         rows, cols, vals = self.to_arrays()
         s = sparse.coo_matrix((vals, (rows, cols)), shape=self.shape)
         if format == "coo":
@@ -1164,7 +1200,8 @@ class Matrix:
 
     def to_image(self):
         from PIL import Image
-        im = Image.new('I', (self.nrows, self.ncols))
+
+        im = Image.new("I", (self.nrows, self.ncols))
         for i, j, v in self:
-            im.putpixel((j,i), 1024**2)
+            im.putpixel((j, i), 1024 ** 2)
         return im

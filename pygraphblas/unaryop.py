@@ -77,6 +77,7 @@ def build_unaryops():
         bo = AutoUnaryOp(name)
         setattr(this, name, bo)
 
+
 def _uop_name(name):
     return "_{0}_uop_function".format(name)
 
@@ -122,4 +123,3 @@ def unary_op(arg_type, result_type=None, boolean=False):
         return UnaryOp(func_name, arg_type.C, out[0])
 
     return inner
-        

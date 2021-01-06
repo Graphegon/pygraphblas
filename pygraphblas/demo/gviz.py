@@ -1,4 +1,3 @@
-
 from graphviz import Digraph, Source
 from pygraphblas import Matrix, Vector, types, BOOL
 from PIL import Image, ImageDraw
@@ -40,7 +39,7 @@ def draw_graph(
         labeler = lambda v, i: v[i]
     else:
         labeler = lambda v, i: v.get(i)
-        
+
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
         ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i)
@@ -50,10 +49,16 @@ def draw_graph(
         g.node(str(i + ioff), width=size, height=size, label=ilabel)
         g.node(str(j + joff), width=size, height=size, label=jlabel)
         w = str(v)
-        g.edge(str(i + ioff), str(j + joff),
-               label=vlabel, weight=w, tooltip=vlabel, len=str(0.3))
+        g.edge(
+            str(i + ioff),
+            str(j + joff),
+            label=vlabel,
+            weight=w,
+            tooltip=vlabel,
+            len=str(0.3),
+        )
     if filename is not None:
-        g.render(filename, format='png')
+        g.render(filename, format="png")
     return g
 
 
@@ -68,8 +73,14 @@ def draw_layers(M, name="", rankdir="LR", label_width=None):
                 s.node(str(si), label=_str(si, label_width), width="0.5")
                 if i < m.nrows - 1:
                     ni = si + 1
-                    s.edge(str(si), str(ni), style="invis", minlen='0', weight='1000')
-            g.edge(str(si-m.nrows+1), str(si+1), weight='10000000', style="invis", minlen='0')
+                    s.edge(str(si), str(ni), style="invis", minlen="0", weight="1000")
+            g.edge(
+                str(si - m.nrows + 1),
+                str(si + 1),
+                weight="10000000",
+                style="invis",
+                minlen="0",
+            )
 
     with g.subgraph() as s:
         s.attr(rank="same", rankdir="LR")
@@ -119,35 +130,41 @@ def draw_op(left, op, right, result):
     return g
 
 
-def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow'):
+def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow"):
     if mode is None:
-        mode = 'RGB'
+        mode = "RGB"
 
     if cmap is not None:
         import matplotlib.pyplot as plt
+
         cmap = plt.get_cmap(cmap)
-            
+
     sx = (M.ncols + 1) * scale
     sy = (M.nrows + 1) * scale
-    im = Image.new(mode, (sx, sy), color='white')
+    im = Image.new(mode, (sx, sy), color="white")
     d = ImageDraw.Draw(im)
     for i, j, v in M:
-        y = ((i + 1) * scale) + scale/2
-        x = ((j + 1) * scale) + scale/2
-        offset = int(scale/2)
+        y = ((i + 1) * scale) + scale / 2
+        x = ((j + 1) * scale) + scale / 2
+        offset = int(scale / 2)
         if M.type is BOOL:
             d.rectangle(
-                (x-offset, y-offset, x+scale-offset, y+scale-offset),
-                fill='black', outline='white')
+                (x - offset, y - offset, x + scale - offset, y + scale - offset),
+                fill="black",
+                outline="white",
+            )
         else:
-            d.text(((x-offset) + scale/5, (y-offset)+scale/5), str(v), fill='black')
+            d.text(
+                ((x - offset) + scale / 5, (y - offset) + scale / 5),
+                str(v),
+                fill="black",
+            )
     if axes:
-        d.line((0, scale, im.size[0], scale), fill='black')
-        d.line((scale, 0, scale, im.size[1]), fill='black')
+        d.line((0, scale, im.size[0], scale), fill="black")
+        d.line((scale, 0, scale, im.size[1]), fill="black")
     if labels:
         for i in range(M.ncols):
-            d.text((((i+1)*scale) + scale/5, scale/5), str(i), fill='black')
+            d.text((((i + 1) * scale) + scale / 5, scale / 5), str(i), fill="black")
         for j in range(M.nrows):
-            d.text((scale/5, ((j+1)*scale) + scale/5), str(j), fill='black')
+            d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill="black")
     return im
-

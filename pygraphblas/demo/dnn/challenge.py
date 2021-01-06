@@ -66,7 +66,7 @@ def generate_bias(neurons, nlayers):
 
 
 @timing
-def run(neurons, images, layers, bias, dest, movie='/dnn_demo/frames/f'):
+def run(neurons, images, layers, bias, dest, movie="/dnn_demo/frames/f"):
     # hyperlayers = hypergraph(layers)
     # hyperbias = hypergraph(bias)
     # images.resize(hyperlayers.nrows, hyperlayers.ncols)

@@ -46,7 +46,9 @@ def randomize(layers, damp=0.1):
         for l in layers
     ]
 
-_rowgetter = attrgetter('nrows')
+
+_rowgetter = attrgetter("nrows")
+
 
 @timing
 def hypergraph(mt, size=None):
