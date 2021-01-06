@@ -6,7 +6,7 @@ USER root
 
 RUN apt-get update && apt-get install -yq cmake make wget libpython3-dev python3-pip libreadline-dev
 
-ARG SS_RELEASE=3.3.3
+ARG SS_RELEASE=v4.0.1
 ARG SS_BURBLE=0
 ARG SS_COMPACT=0
 
