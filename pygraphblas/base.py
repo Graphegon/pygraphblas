@@ -22,12 +22,20 @@ __all__ = [
     "IndexOutOfBound",
     "Panic",
     "options_set",
+    "options_get",
 ]
 
 NULL = ffi.NULL
 
 
-def options_set(nthreads=None, chunk=None, burble=None):
+def options_set(
+    nthreads=None,
+    chunk=None,
+    burble=None,
+    hyper_switch=None,
+    bitmap_switch=None,
+    format=None,
+):
     if nthreads is not None:
         nthreads = ffi.cast("int", nthreads)
         _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
@@ -37,6 +45,39 @@ def options_set(nthreads=None, chunk=None, burble=None):
     if burble is not None:
         burble = ffi.cast("int", burble)
         _check(lib.GxB_Global_Option_set(lib.GxB_BURBLE, burble))
+    if hyper_switch is not None:
+        hyper_switch = ffi.cast("double", hyper_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_HYPER_SWITCH, hyper_switch))
+    if bitmap_switch is not None:
+        bitmap_switch = ffi.new("double[8]", bitmap_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    if format is not None:
+        format = ffi.cast("GxB_Format_Value*", format)
+        _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))
+
+
+def options_get():
+    nthreads = ffi.new("int*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
+    chunk = ffi.new("double*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_CHUNK, chunk))
+    burble = ffi.new("int*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_BURBLE, burble))
+    hyper_switch = ffi.new("double*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_HYPER_SWITCH, hyper_switch))
+    bitmap_switch = ffi.new("double[8]")
+    _check(lib.GxB_Global_Option_get(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    format = ffi.new("GxB_Format_Value*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_FORMAT, format))
+
+    return dict(
+        nthreads=nthreads[0],
+        chunk=chunk[0],
+        burble=burble[0],
+        hyper_switch=hyper_switch[0],
+        bitmap_switch=list(bitmap_switch),
+        format=format[0],
+    )
 
 
 class GraphBLASException(Exception):

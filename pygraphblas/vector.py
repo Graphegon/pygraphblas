@@ -261,7 +261,7 @@ class Vector:
             self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
         self._check(
-            lib.GrB_eWiseAdd_Vector_BinaryOp(
+            lib.GrB_Vector_eWiseAdd_BinaryOp(
                 out.vector[0],
                 mask,
                 accum,
@@ -306,7 +306,7 @@ class Vector:
             self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
         self._check(
-            lib.GrB_eWiseMult_Vector_BinaryOp(
+            lib.GrB_Vector_eWiseMult_BinaryOp(
                 out.vector[0],
                 mask,
                 accum,

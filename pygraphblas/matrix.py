@@ -381,7 +381,7 @@ class Matrix:
             out = Matrix(_out, typ)
 
         self._check(
-            lib.GrB_eWiseAdd_Matrix_BinaryOp(
+            lib.GrB_Matrix_eWiseAdd_BinaryOp(
                 out.matrix[0],
                 mask,
                 accum,
@@ -420,7 +420,7 @@ class Matrix:
             out = Matrix(_out, typ)
 
         self._check(
-            lib.GrB_eWiseMult_Matrix_BinaryOp(
+            lib.GrB_Matrix_eWiseMult_BinaryOp(
                 out.matrix[0],
                 mask,
                 accum,
