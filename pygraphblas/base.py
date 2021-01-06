@@ -23,9 +23,18 @@ __all__ = [
     "Panic",
     "options_set",
     "options_get",
+    "GxB_IMPLEMENTATION",
 ]
 
 NULL = ffi.NULL
+
+GxB_IMPLEMENTATION = (
+    lib.GxB_IMPLEMENTATION_MAJOR,
+    lib.GxB_IMPLEMENTATION_MINOR,
+    lib.GxB_IMPLEMENTATION_SUB,
+)
+
+GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
 
 
 def options_set(
