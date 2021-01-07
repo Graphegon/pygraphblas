@@ -19,7 +19,7 @@ RUN apt-get update \
 		dvisvgm \
     && rm -rf /var/lib/apt/lists/*
 
-ARG SS_RELEASE=3.3.3
+ARG SS_RELEASE=v4.0.1
 ARG SS_BURBLE=0
 ARG SS_COMPACT=0
 

@@ -32,7 +32,6 @@
 
 */
 
-// TODO: need to add an error reporting mechanism, like GrB_error.
 // TODO: need to add a GrB_Descriptor to all LAGraph functions.
 
 //------------------------------------------------------------------------------
@@ -58,7 +57,7 @@
 //      integer, and pattern formats are returned as GrB_FP64, GrB_INT64, and
 //      GrB_BOOL, respectively, but these types are modified the %GraphBLAS
 //      structured comment described below.  Complex matrices are returned
-//      using the LAGraph_Complex type (which is a GraphBLAS type corresponding
+//      using the LAGraph_ComplexFP64 type (which is a GraphBLAS type corresponding
 //      to the ANSI C11 double complex type).
 
 //      <storage> is one of: general, Hermitian, symmetric, or skew-symmetric.
@@ -80,12 +79,12 @@
 
 //      <entrytype> is one of the 11 built-in types (GrB_BOOL, GrB_INT8,
 //      GrB_INT16, GrB_INT32, GrB_INT64, GrB_UINT8, GrB_UINT16, GrB_UINT32,
-//      GrB_UINT64, GrB_FP32, GrB_FP64) or LAGraph_Complex.
+//      GrB_UINT64, GrB_FP32, GrB_FP64) or LAGraph_ComplexFP64.
 
 //      If this second line is included, it overrides the default GraphBLAS
 //      types for the Matrix Market <type> on line one of the file: real,
 //      pattern, and integer.  The Matrix Market complex <type> is not
-//      modified, and is always returned as LAGraph_Complex.
+//      modified, and is always returned as LAGraph_ComplexFP64.
 
 // Any other lines starting with "%" are treated as comments, and are ignored.
 // Comments may be interspersed throughout the file.  Blank lines are ignored.
@@ -394,7 +393,7 @@ static inline bool read_entry   // true if successful, false if failure
         double *result = (double *) x ;
         result [0] = rval ;
     }
-    else if (type == LAGraph_Complex)
+    else if (type == LAGraph_ComplexFP64)
     {
         if (!pattern && !read_double (p, &rval)) return (false) ;
         // printf ("(%g, ", rval) ;
@@ -458,7 +457,7 @@ static inline void negate_scalar
         double *value = (double *) x ;
         (*value) = - (*value) ;
     }
-    else if (type == LAGraph_Complex)
+    else if (type == LAGraph_ComplexFP64)
     {
         double complex *value = (double complex *) x ;
         (*value) = - (*value) ;
@@ -536,7 +535,7 @@ static inline GrB_Info set_value
         double *value = (double *) x ;
         return (GrB_Matrix_setElement_FP64 (A, *value, i, j)) ;
     }
-    else if (type == LAGraph_Complex)
+    else if (type == LAGraph_ComplexFP64)
     {
         return (GrB_Matrix_setElement_UDT (A, x, i, j)) ;
     }
@@ -696,7 +695,7 @@ GrB_Info LAGraph_mmread
             else if (strncmp (p, "complex", 7) == 0)
             {
                 MM_type = MM_complex ;
-                type = LAGraph_Complex ;
+                type = LAGraph_ComplexFP64 ;
                 p += 7 ;
             }
             else if (strncmp (p, "pattern", 7) == 0)
@@ -789,7 +788,7 @@ GrB_Info LAGraph_mmread
 
             // <entrytype> is one of the 11 built-in types (GrB_BOOL, GrB_INT8,
             // GrB_INT16, GrB_INT32, GrB_INT64, GrB_UINT8, GrB_UINT16,
-            // GrB_UINT32, GrB_UINT64, GrB_FP32, GrB_FP64) or LAGraph_Complex.
+            // GrB_UINT32, GrB_UINT64, GrB_FP32, GrB_FP64) or LAGraph_ComplexFP64.
 
             // printf ("for type: compare [%s]\n", p) ;
 
@@ -839,7 +838,7 @@ GrB_Info LAGraph_mmread
             }
             else if (strncmp (p, "lagraph_complex", 15) == 0)
             {
-                type = LAGraph_Complex ;
+                type = LAGraph_ComplexFP64 ;
             }
             else
             {
@@ -1003,9 +1002,7 @@ GrB_Info LAGraph_mmread
                     printf ("LAGraph_mmread: I/O error on indices\n") ;
                     return (GrB_INVALID_VALUE) ;
                 }
-                // convert from 1-based to 0-based.  If zero, the value
-                // underflows to UINT64_MAX, and will be reported as such
-                // by GrB_error ( ).  TODO: use a better error report.
+                // convert from 1-based to 0-based.
                 i-- ;
                 j-- ;
                 // printf ("got (%g,%g)\n", (double) i, (double) j) ;

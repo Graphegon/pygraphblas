@@ -49,10 +49,11 @@ class AutoUnaryOp(UnaryOp):
         return UnaryOp._auto_unaryops[self.name][operand1.gb_type]
 
 
-__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop"]
+__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop", "unary_op"]
 
 uop_re = re.compile(
     "^(GrB|GxB)_(ONE|ABS|SQRT|LOG|EXP|LOG2|SIN|COS|TAN|ACOS|ASIN|ATAN|SINH|"
+    "POSITIONI|POSITIONI1|POSITIONJ|POSITIONJ1|"
     "COSH|TANH|ACOSH|ASINH|ATANH|SIGNUM|CEIL|FLOOR|ROUND|TRUNC|EXP2|EXPM1|"
     "LOG12|LOG1P|LGAMMA|TGAMMA|ERF|ERFC|FREXPX|FREXPE|CONJ|CREAL|CIMAG|CARG|"
     "IDENTITY|AINV|MINV|LNOT|ONE|ABS|ISINF|ISNAN|ISFINITE)_"
@@ -75,3 +76,50 @@ def build_unaryops():
     for name in UnaryOp._auto_unaryops:
         bo = AutoUnaryOp(name)
         setattr(this, name, bo)
+
+
+def _uop_name(name):
+    return "_{0}_uop_function".format(name)
+
+
+def _build_uop_def(name, arg_type, result_type):
+    decl = dedent(
+        """
+    typedef void (*{0})({1}*, {1}*);
+    """.format(
+            _uop_name(name), arg_type, result_type
+        )
+    )
+    return decl
+
+
+def unary_op(arg_type, result_type=None, boolean=False):
+    if result_type is None:
+        result_type = arg_type
+
+    def inner(func):
+        func_name = func.__name__
+        sig = numba.void(
+            numba.types.CPointer(numba.boolean)
+            if boolean
+            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
+        )
+        jitfunc = jit(func, nopython=True)
+
+        @cfunc(sig, nopython=True)
+        def wrapper(z, x):
+            result = jitfunc(x[0])
+            z[0] = result
+
+        out = core_ffi.new("GrB_UnaryOp*")
+        lib.GrB_UnaryOp_new(
+            out,
+            core_ffi.cast("GxB_unary_function", wrapper.address),
+            result_type.gb_type,
+            arg_type.gb_type,
+        )
+
+        return UnaryOp(func_name, arg_type.C, out[0])
+
+    return inner

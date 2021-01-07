@@ -2,8 +2,10 @@ import pytest
 
 from pygraphblas import *
 
+pytest.mark.skip()
 
-def test_udt():
+
+def _test_udt():
     class BF(Type):
 
         members = ["double w", "uint64_t h", "uint64_t pi"]

@@ -6,29 +6,35 @@ USER root
 
 RUN apt-get update && apt-get install -yq cmake make wget libpython3-dev python3-pip libreadline-dev
 
-ARG SS_RELEASE=3.3.3
+ARG SS_RELEASE=v4.0.1
 ARG SS_BURBLE=0
 ARG SS_COMPACT=0
 
 WORKDIR /build
-RUN wget --quiet https://github.com/DrTimothyAldenDavis/GraphBLAS/archive/v$SS_RELEASE.tar.gz
-RUN tar -xf v$SS_RELEASE.tar.gz
+RUN git clone https://github.com/DrTimothyAldenDavis/GraphBLAS.git --depth 1 --branch $SS_RELEASE
 
-WORKDIR /build/GraphBLAS-$SS_RELEASE/build
-RUN cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && make JOBS=8 && make install
+WORKDIR /build/GraphBLAS/build
+RUN cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && make -j8 && make install
+RUN ldconfig
 RUN /bin/rm -Rf /build
 
 RUN conda install -y graphviz
+
+WORKDIR /build
+RUN git clone https://github.com/fcdimitr/fglt.git
+WORKDIR /build/fglt
+RUN pip install -r requirements.txt
+RUN meson build && cd build && ninja install
 
 ADD . /home/jovyan
 WORKDIR /home/jovyan
     
 RUN python setup.py develop
 RUN pip install -r notebook-requirements.txt
-RUN jupyter nbextension install rise --py --sys-prefix
-RUN jupyter nbextension enable rise --py --sys-prefix
+#RUN jupyter nbextension install rise --py --sys-prefix
+#RUN jupyter nbextension enable rise --py --sys-prefix
 RUN chown -R jovyan /home/jovyan
 
 RUN ldconfig
 USER jovyan
-RUN pytest
+# RUN pytest

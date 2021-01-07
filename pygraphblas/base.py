@@ -22,12 +22,29 @@ __all__ = [
     "IndexOutOfBound",
     "Panic",
     "options_set",
+    "options_get",
+    "GxB_IMPLEMENTATION",
 ]
 
 NULL = ffi.NULL
 
+GxB_IMPLEMENTATION = (
+    lib.GxB_IMPLEMENTATION_MAJOR,
+    lib.GxB_IMPLEMENTATION_MINOR,
+    lib.GxB_IMPLEMENTATION_SUB,
+)
 
-def options_set(nthreads=None, chunk=None, burble=None):
+GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
+
+
+def options_set(
+    nthreads=None,
+    chunk=None,
+    burble=None,
+    hyper_switch=None,
+    bitmap_switch=None,
+    format=None,
+):
     if nthreads is not None:
         nthreads = ffi.cast("int", nthreads)
         _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
@@ -37,6 +54,39 @@ def options_set(nthreads=None, chunk=None, burble=None):
     if burble is not None:
         burble = ffi.cast("int", burble)
         _check(lib.GxB_Global_Option_set(lib.GxB_BURBLE, burble))
+    if hyper_switch is not None:
+        hyper_switch = ffi.cast("double", hyper_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_HYPER_SWITCH, hyper_switch))
+    if bitmap_switch is not None:
+        bitmap_switch = ffi.new("double[8]", bitmap_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    if format is not None:
+        format = ffi.cast("GxB_Format_Value*", format)
+        _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))
+
+
+def options_get():
+    nthreads = ffi.new("int*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
+    chunk = ffi.new("double*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_CHUNK, chunk))
+    burble = ffi.new("int*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_BURBLE, burble))
+    hyper_switch = ffi.new("double*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_HYPER_SWITCH, hyper_switch))
+    bitmap_switch = ffi.new("double[8]")
+    _check(lib.GxB_Global_Option_get(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    format = ffi.new("GxB_Format_Value*")
+    _check(lib.GxB_Global_Option_get(lib.GxB_FORMAT, format))
+
+    return dict(
+        nthreads=nthreads[0],
+        chunk=chunk[0],
+        burble=burble[0],
+        hyper_switch=hyper_switch[0],
+        bitmap_switch=list(bitmap_switch),
+        format=format[0],
+    )
 
 
 class GraphBLASException(Exception):
@@ -116,7 +166,7 @@ def _check(res, raise_no_val=False):
     if res != lib.GrB_SUCCESS:
         if raise_no_val and res == lib.GrB_NO_VALUE:
             raise KeyError
-        raise _error_codes[res](ffi.string(lib.GrB_error()))
+        raise _error_codes[res]()
 
 
 def _build_range(rslice, stop_val):

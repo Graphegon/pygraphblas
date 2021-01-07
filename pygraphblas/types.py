@@ -36,7 +36,7 @@ class MetaType(type):
 
     _gb_type_map = {}
     _type_gb_map = {}
-    _name_type_map = {}
+    _gb_name_type_map = {}
 
     def __new__(meta, type_name, bases, attrs):
         if attrs.get("base", False):
@@ -61,7 +61,8 @@ class MetaType(type):
         cls = super().__new__(meta, type_name, bases, attrs)
         meta._gb_type_map[cls.gb_type] = cls
         meta._type_gb_map[cls] = cls.gb_type
-        meta._name_type_map[type_name] = cls
+        meta._gb_name_type_map[type_name] = cls
+        meta._gb_name_type_map[cls.C] = cls
 
         cls.ptr = cls.C + "*"
         cls.zero = getattr(cls, "zero", core_ffi.NULL)
@@ -127,7 +128,10 @@ class MetaType(type):
         return Semiring("PLUS", "TIMES", cls.__name__, semiring[0], udt=cls)
 
     def gb_from_name(cls, name):
-        return cls._name_type_map[name].gb_type
+        return cls._gb_name_type_map[name].gb_type
+
+    def type_from_name(cls, name):
+        return cls._gb_name_type_map[name]
 
 
 class Type(metaclass=MetaType):

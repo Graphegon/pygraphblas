@@ -39,14 +39,14 @@
 
 // SPEC: to do this in general for any user-defined types requires either (a)
 // the user to create an operator z=f(x)=1, where z is boolean and x is the
-// user type (LAGraph_TRUE_BOOL_Complex, for example), or (b)
+// user type (LAGraph_TRUE_BOOL_ComplexFP64, for example), or (b)
 // extractTuples(&I,&J,&X,A).  The latter requires X to be allocated of the
 // right size, and then freed.  SuiteSparse allows X to be NULL but this is an
 // extension to the spec. Determining the right size of X is difficult since
 // there is no GrB_Type_size (see GxB_Type_size in SuiteSparse:GraphBLAS).
 
 // As a result of these limitations, this method does not handle user-defined
-// types, other than LAGraph_Complex (this function uses option (a) above).
+// types, other than LAGraph_ComplexFP64 (this function uses option (a) above).
 
 #include "LAGraph_internal.h"
 
@@ -89,11 +89,11 @@ GrB_Info LAGraph_pattern    // return GrB_SUCCESS if successful
     LAGr_Matrix_new (C, T, nrows, ncols);
 
     // C = spones (A), typecasting to bool
-    if (type == LAGraph_Complex)
+    if (type == LAGraph_ComplexFP64)
     {
-        // the LAGraph_TRUE_BOOL_Complex operator returns boolean true,
-        // and has an input of type LAGraph_Complex (which it ignores).
-        LAGr_apply(*C, NULL, NULL, LAGraph_TRUE_BOOL_Complex, A, NULL);
+        // the LAGraph_TRUE_BOOL_ComplexFP64 operator returns boolean true,
+        // and has an input of type LAGraph_ComplexFP64 (which it ignores).
+        LAGr_apply(*C, NULL, NULL, LAGraph_TRUE_BOOL_ComplexFP64, A, NULL);
     }
     else
     {

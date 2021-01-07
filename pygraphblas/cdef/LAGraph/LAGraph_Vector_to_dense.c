@@ -111,7 +111,7 @@ GrB_Info LAGraph_Vector_to_dense
     else if (type == GrB_UINT64      ) FILL (uint64_t      , UINT64, value)
     else if (type == GrB_FP32        ) FILL (float         , FP32  , value)
     else if (type == GrB_FP64        ) FILL (double        , FP64  , value)
-    else if (type == LAGraph_Complex ) FILL (double complex, UDT   , id   )
+    else if (type == LAGraph_ComplexFP64 ) FILL (double complex, UDT   , id   )
     else
     {
         LAGRAPH_ERROR ("type not supported", GrB_INVALID_VALUE) ;
@@ -127,7 +127,7 @@ GrB_Info LAGraph_Vector_to_dense
 
     if (nvals > 0)
     {
-        if (id_is_zero && type != LAGraph_Complex)
+        if (id_is_zero && type != LAGraph_ComplexFP64)
         {
             // use v itself for the mask for built-in types, if (*id) is zero
             // u (v != 0) = v

@@ -1,6 +1,7 @@
 from pygraphblas import *
-from operator import mul, eq
+from operator import mul, eq, attrgetter
 from functools import reduce
+from . import timing
 
 
 def permutation_matrix(size):
@@ -44,3 +45,21 @@ def randomize(layers, damp=0.1):
         )
         for l in layers
     ]
+
+
+_rowgetter = attrgetter("nrows")
+
+
+@timing
+def hypergraph(mt, size=None):
+    if size is None:
+        size = sum(map(_rowgetter, mt)) + mt[-1].nrows
+    r = Matrix.sparse(FP32, size, size)
+    ioffset = 0
+    joffset = 0
+    for m in mt:
+        joffset += m.nrows
+        for c, (i, j, k) in enumerate(m):
+            r[i + ioffset, j + joffset] = k
+        ioffset += m.nrows
+    return r

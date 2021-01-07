@@ -48,7 +48,7 @@ GrB_Info LAGraph_ispattern  // return GrB_SUCCESS if successful
     GrB_Matrix A,
     GrB_UnaryOp userop      // for A with arbitrary user-defined type.
                             // Ignored if A and B are of built-in types or
-                            // LAGraph_Complex.
+                            // LAGraph_ComplexFP64.
 )
 {
 
@@ -90,7 +90,7 @@ GrB_Info LAGraph_ispattern  // return GrB_SUCCESS if successful
         else if (type == GrB_UINT64) op = LAGraph_ISONE_UINT64 ;
         else if (type == GrB_FP32  ) op = LAGraph_ISONE_FP32   ;
         else if (type == GrB_FP64  ) op = LAGraph_ISONE_FP64   ;
-        else if (type == LAGraph_Complex) op = LAGraph_ISONE_Complex ;
+        else if (type == LAGraph_ComplexFP64) op = LAGraph_ISONE_ComplexFP64 ;
         else op = userop ;
 
         if (op == NULL)

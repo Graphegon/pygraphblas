@@ -36,14 +36,56 @@
 
 // TODO: add more comments to this file.
 
-//------------------------------------------------------------------------------
-// include files and global #defines
-//------------------------------------------------------------------------------
-
 #ifndef LAGRAPH_INCLUDE
 #define LAGRAPH_INCLUDE
 
+//------------------------------------------------------------------------------
+// GraphBLAS.h and version control
+//------------------------------------------------------------------------------
+
 #include "GraphBLAS.h"
+
+//==============================================================================
+// Stable methods in Source/Algorithm and Source/Utility
+//==============================================================================
+
+// none yet
+
+//==============================================================================
+// Experimental methods: in Experimental/Algorithm and Experimental/Utility
+//==============================================================================
+
+// Do not rely on these in production.  Do not use for benchmarking, without
+// asking the LAGraph authors.  LAGraph is still under development, and you
+// might benchmark the wrong method, or a method that is intended only for
+// illustration not benchmarking.
+
+#ifdef LAGRAPH_EXPERIMENTAL_ASK_BEFORE_BENCHMARKING
+
+// the C API v1.3 now has GRB_VERSION and GRB_SUBVERSION.  If this macro
+// is not defined, assume the spec is v1.2.
+#ifndef GRB_VERSION
+#define GRB_VERSION 1
+#define GRB_SUBVERSION 2
+#endif
+
+// LAGRAPH_SPEC_VERSION: a single integer for comparing spec and version levels
+// for the GraphBLAS C API.
+#define LAGRAPH_SPEC_VERSION(major,minor,sub)       \
+    (((major)*1000ULL + (minor))*1000ULL + (sub))
+
+// LAGRAPH_SPEC: the current version of the GraphBLAS C API being used
+#define LAGRAPH_SPEC LAGRAPH_SPEC_VERSION (GRB_VERSION, GRB_SUBVERSION, 0)
+
+#if (LAGRAPH_SPEC >= LAGRAPH_SPEC_VERSION (1,3,0))
+// GrB_error has changed in the v1.3 C API Specification of GraphBLAS
+#define GRB_ERROR(string,object) GrB_error (&string, object)
+#else
+#define GRB_ERROR(string,object) (string = GrB_error ( ))
+#endif
+
+//------------------------------------------------------------------------------
+
 #include <complex.h>
 #include <ctype.h>
 
@@ -70,6 +112,14 @@
 // disable icc warnings
 //  161:  unrecognized pragma
 #pragma warning (disable: 161)
+#endif
+
+#if !defined(__cplusplus)
+  #define LA_RESTRICT restrict
+#elif defined(_MSC_BUILD) || defined(__clang__) || defined(__GNUC__) || defined(__INTEL_COMPILER)
+  #define LA_RESTRICT __restrict
+#else
+  #define LA_RESTRICT
 #endif
 
 #define LAGRAPH_RAND_MAX 32767
@@ -117,6 +167,11 @@ extern bool LAGraph_malloc_is_thread_safe ;
 #define LAGr_BinaryOp_new(...)                                              \
 {                                                                           \
     LAGRAPH_TRY_CATCH(GrB_BinaryOp_new(__VA_ARGS__));                       \
+}
+
+#define LAGr_SelectOp_new(...)                                              \
+{                                                                           \
+    LAGRAPH_TRY_CATCH(GxB_SelectOp_new(__VA_ARGS__));                       \
 }
 
 #define LAGr_Monoid_new(...)                                                \
@@ -208,11 +263,36 @@ extern bool LAGraph_malloc_is_thread_safe ;
     LAGRAPH_TRY_CATCH(GxB_Vector_export (__VA_ARGS__)) ;                    \
 }
 
+#define LAGr_Vector_import_Full(...)                                        \
+{                                                                           \
+    LAGRAPH_TRY_CATCH(GxB_Vector_import_Full (__VA_ARGS__)) ;               \
+}
+
+#define LAGr_Vector_export_Full(...)                                        \
+{                                                                           \
+    LAGRAPH_TRY_CATCH(GxB_Vector_export_Full (__VA_ARGS__)) ;               \
+}
+
+#define LAGr_Vector_import_CSC(...)                                        \
+{                                                                          \
+    LAGRAPH_TRY_CATCH(GxB_Vector_import_CSC (__VA_ARGS__)) ;               \
+}
+
+#define LAGr_Vector_export_CSC(...)                                        \
+{                                                                          \
+    LAGRAPH_TRY_CATCH(GxB_Vector_export_CSC (__VA_ARGS__)) ;               \
+}
+
 // Matrix Methods //////////////////////////////////////////////////////////////
 
 #define LAGr_Matrix_new(...)                                                \
 {                                                                           \
     LAGRAPH_TRY_CATCH(GrB_Matrix_new(__VA_ARGS__));                         \
+}
+
+#define LAGr_Matrix_type(...)                                               \
+{                                                                           \
+    LAGRAPH_TRY_CATCH(GxB_Matrix_type(__VA_ARGS__));                        \
 }
 
 #define LAGr_Matrix_dup(...)                                                \
@@ -400,8 +480,8 @@ extern bool LAGraph_malloc_is_thread_safe ;
 
 #define LAGRAPH_ERROR(message,info)                                         \
 {                                                                           \
-    fprintf (stderr, "LAGraph error: %s\n[%d]\n%s\nFile: %s Line: %d\n",    \
-        message, info, GrB_error ( ), __FILE__, __LINE__) ;                 \
+    fprintf (stderr, "LAGraph error: %s\n[%d]\nFile: %s Line: %d\n",        \
+        message, info, __FILE__, __LINE__) ;                                \
     LAGRAPH_FREE_ALL ;                                                      \
     return (info) ;                                                         \
 }
@@ -441,8 +521,6 @@ typedef struct
 {
     int nthreads ;          // # of threads to use.  If <= 0, use defaults
                             // (from omp_get_max_threads)
-
-    // TODO more can go here, like info, the GrB_error() results, etc.
 }
 LAGraph_Context ;
 
@@ -450,24 +528,133 @@ LAGraph_Context ;
 // global objects
 //------------------------------------------------------------------------------
 
-// LAGraph_Complex is a GrB_Type containing the ANSI C11 double complex
-// type.  This is required so that any arbitrary Matrix Market format
-// can be read into GraphBLAS.
-extern GrB_Type LAGraph_Complex ;
+// LAGraph_ComplexFP64 operators
+//------------------------------------------------------------------------------
+// 10 binary functions, z=f(x,y), where CxC -> C
+//------------------------------------------------------------------------------
+
+extern
+GrB_BinaryOp
+    LAGraph_FIRST_ComplexFP64           ,
+    LAGraph_SECOND_ComplexFP64          ,
+    LAGraph_MIN_ComplexFP64             ,
+    LAGraph_MAX_ComplexFP64             ,
+    LAGraph_PLUS_ComplexFP64            ,
+    LAGraph_MINUS_ComplexFP64           ,
+    LAGraph_TIMES_ComplexFP64           ,
+    LAGraph_DIV_ComplexFP64             ,
+    LAGraph_RDIV_ComplexFP64            ,
+    LAGraph_RMINUS_ComplexFP64          ,
+    LAGraph_SKEW_ComplexFP64            ,
+    LAGraph_PAIR_ComplexFP64            ,
+    LAGraph_ANY_ComplexFP64            ,
+    LAGraph_HERMITIAN_ComplexFP64       ;
+
+//------------------------------------------------------------------------------
+// 6 binary comparison functions, z = f(x,y), where CxC -> C
+//------------------------------------------------------------------------------
+
+extern
+GrB_BinaryOp
+    LAGraph_ISEQ_ComplexFP64              ,
+    LAGraph_ISNE_ComplexFP64              ,
+    LAGraph_ISGT_ComplexFP64              ,
+    LAGraph_ISLT_ComplexFP64              ,
+    LAGraph_ISGE_ComplexFP64              ,
+    LAGraph_ISLE_ComplexFP64              ;
+
+//------------------------------------------------------------------------------
+// 3 binary boolean functions, z=f(x,y), where CxC -> C
+//------------------------------------------------------------------------------
+
+extern
+GrB_BinaryOp
+    LAGraph_OR_ComplexFP64                ,
+    LAGraph_AND_ComplexFP64               ,
+    LAGraph_XOR_ComplexFP64               ;
+
+//------------------------------------------------------------------------------
+// 6 binary comparison functions, z=f(x,y), where CxC -> bool
+//------------------------------------------------------------------------------
+
+extern
+GrB_BinaryOp
+    LAGraph_EQ_ComplexFP64                ,
+    LAGraph_NE_ComplexFP64                ,
+    LAGraph_GT_ComplexFP64                ,
+    LAGraph_LT_ComplexFP64                ,
+    LAGraph_GE_ComplexFP64                ,
+    LAGraph_LE_ComplexFP64                ;
+
+//------------------------------------------------------------------------------
+// 1 binary function, z=f(x,y), where double x double -> C
+//------------------------------------------------------------------------------
+
+extern GrB_BinaryOp LAGraph_COMPLEX_ComplexFP64 ;
+
+//------------------------------------------------------------------------------
+// 5 unary functions, z=f(x) where C -> C
+//------------------------------------------------------------------------------
+
+extern
+GrB_UnaryOp
+    LAGraph_IDENTITY_ComplexFP64          ,
+    LAGraph_AINV_ComplexFP64              ,
+    LAGraph_MINV_ComplexFP64              ,
+    LAGraph_NOT_ComplexFP64               ,
+    LAGraph_CONJ_ComplexFP64              ,
+    LAGraph_ONE_ComplexFP64               ,
+    LAGraph_ISONE_ComplexFP64             ,
+    LAGraph_ABS_ComplexFP64               ,
+    LAGraph_TRUE_BOOL_ComplexFP64         ;
+
+//------------------------------------------------------------------------------
+// 4 unary functions, z=f(x) where C -> double
+//------------------------------------------------------------------------------
+
+extern 
+GrB_UnaryOp
+    LAGraph_REAL_ComplexFP64              ,
+    LAGraph_IMAG_ComplexFP64              ,
+    LAGraph_CABS_ComplexFP64              ,
+    LAGraph_ANGLE_ComplexFP64             ;
+
+//------------------------------------------------------------------------------
+// 2 unary functions, z=f(x) where double -> C
+//------------------------------------------------------------------------------
+
+extern GrB_UnaryOp
+    LAGraph_COMPLEX_REAL_ComplexFP64      ,
+    LAGraph_COMPLEX_IMAG_ComplexFP64      ;
+
+//------------------------------------------------------------------------------
+// Complex type, scalars, monoids, and semiring
+//------------------------------------------------------------------------------
+
+extern GrB_Type LAGraph_ComplexFP64 ;
+
+extern GrB_Monoid
+    LAGraph_PLUS_ComplexFP64_MONOID       ,
+    LAGraph_TIMES_ComplexFP64_MONOID      ;
+    
+extern GrB_Semiring LAGraph_PLUS_TIMES_ComplexFP64 ;
+
+extern double _Complex LAGraph_ComplexFP64_1 ;
+extern double _Complex LAGraph_ComplexFP64_0 ;
+
+GrB_Info LAGraph_Complex_init ( ) ;
+GrB_Info LAGraph_Complex_finalize ( ) ;
 
 extern GrB_BinaryOp
 
     // binary operators to test for symmetry, skew-symmetry
     // and Hermitian property
-    LAGraph_EQ_Complex          ,
     LAGraph_SKEW_INT8           ,
     LAGraph_SKEW_INT16          ,
     LAGraph_SKEW_INT32          ,
     LAGraph_SKEW_INT64          ,
     LAGraph_SKEW_FP32           ,
     LAGraph_SKEW_FP64           ,
-    LAGraph_SKEW_Complex        ,
-    LAGraph_Hermitian           ,
     LAGraph_LOR_UINT32          ,
     LAGraph_LOR_INT64           ;
 
@@ -484,7 +671,6 @@ extern GrB_UnaryOp
     LAGraph_ISONE_UINT64        ,
     LAGraph_ISONE_FP32          ,
     LAGraph_ISONE_FP64          ,
-    LAGraph_ISONE_Complex       ,
 
     // unary operators to check if the entry is equal to 2
     LAGraph_ISTWO_UINT32        ,
@@ -510,8 +696,7 @@ extern GrB_UnaryOp
     LAGraph_ONE_UINT32          ,
     LAGraph_ONE_INT64           ,
     LAGraph_ONE_FP64            ,
-    LAGraph_TRUE_BOOL           ,
-    LAGraph_TRUE_BOOL_Complex   ;
+    LAGraph_TRUE_BOOL           ;
 
 // monoids and semirings
 extern GrB_Monoid
@@ -583,7 +768,7 @@ extern GxB_SelectOp LAGraph_support ;
 
 typedef void (*LAGraph_binary_function) (void *, const void *, const void *) ;
 
-GrB_Info LAGraph_init ( void ) ;         // start LAGraph
+GrB_Info LAGraph_init ( ) ;         // start LAGraph
 
 GrB_Info LAGraph_xinit              // start LAGraph (alternative method)
 (
@@ -595,7 +780,7 @@ GrB_Info LAGraph_xinit              // start LAGraph (alternative method)
     bool user_malloc_is_thread_safe
 ) ;
 
-GrB_Info LAGraph_finalize ( void ) ;     // end LAGraph
+GrB_Info LAGraph_finalize ( ) ;     // end LAGraph
 
 GrB_Info LAGraph_mmread
 (
@@ -644,7 +829,7 @@ GrB_Info LAGraph_ispattern  // return GrB_SUCCESS if successful
     GrB_Matrix A,
     GrB_UnaryOp userop      // for A with arbitrary user-defined type.
                             // Ignored if A and B are of built-in types or
-                            // LAGraph_Complex.
+                            // LAGraph_ComplexFP64.
 ) ;
 
 GrB_Info LAGraph_pattern    // return GrB_SUCCESS if successful
@@ -661,7 +846,7 @@ GrB_Info LAGraph_isequal    // return GrB_SUCCESS if successful
     GrB_Matrix B,
     GrB_BinaryOp userop     // for A and B with arbitrary user-defined types.
                             // Ignored if A and B are of built-in types or
-                            // LAGraph_Complex.
+                            // LAGraph_ComplexFP64.
 ) ;
 
 GrB_Info LAGraph_Vector_isequal    // return GrB_SUCCESS if successful
@@ -671,7 +856,7 @@ GrB_Info LAGraph_Vector_isequal    // return GrB_SUCCESS if successful
     GrB_Vector B,
     GrB_BinaryOp userop     // for A and B with arbitrary user-defined types.
                             // Ignored if A and B are of built-in types or
-                            // LAGraph_Complex.
+                            // LAGraph_ComplexFP64.
 ) ;
 
 GrB_Info LAGraph_isall      // return GrB_SUCCESS if successful
@@ -703,21 +888,26 @@ double LAGraph_randx (uint64_t *seed) ;
 GrB_Info LAGraph_random         // create a random matrix
 (
     GrB_Matrix *A,              // handle of matrix to create
-    GrB_Type type,              // built-in type, or LAGraph_Complex
+    GrB_Type type,              // built-in type, or LAGraph_ComplexFP64
     GrB_Index nrows,            // number of rows
     GrB_Index ncols,            // number of columns
     GrB_Index nvals,            // number of values
     bool make_pattern,          // if true, A is a pattern
     bool make_symmetric,        // if true, A is symmetric
     bool make_skew_symmetric,   // if true, A is skew-symmetric
-    bool make_hermitian,        // if trur, A is hermitian
+    bool make_hermitian,        // if true, A is hermitian
     bool no_diagonal,           // if true, A has no entries on the diagonal
     uint64_t *seed              // random number seed; modified on return
 ) ;
 
-GrB_Info LAGraph_alloc_global ( void ) ;
+#define LAGr_random(...)                                \
+{                                                       \
+    LAGRAPH_TRY_CATCH (LAGraph_random (__VA_ARGS__)) ;  \
+}
 
-GrB_Info LAGraph_free_global ( void ) ;
+GrB_Info LAGraph_alloc_global ( ) ;
+
+GrB_Info LAGraph_free_global ( ) ;
 
 void *LAGraph_malloc        // wrapper for malloc
 (
@@ -864,6 +1054,30 @@ GrB_Info LAGraph_bfs_pushpull   // push-pull BFS, or push-only if AT = NULL
     bool vsparse            // if true, v is expected to be very sparse
 ) ;
 
+GrB_Info LAGraph_bfs_parent // push-pull BFS, compute the tree only
+(
+    // output:
+    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i
+    // inputs:
+    GrB_Matrix A,           // input graph, any type
+    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
+    GrB_Vector Degree,      // Degree(i) is the out-degree of node i
+                            // (optional: push-only if NULL)
+    int64_t source          // starting node of the BFS
+) ;
+
+GrB_Info LAGraph_bfs_parent2 // push-pull BFS, compute the tree only
+(
+    // output:
+    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i
+    // inputs:
+    GrB_Matrix A,           // input graph, any type
+    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
+    GrB_Vector Degree,      // Degree(i) is the out-degree of node i
+                            // (optional: push-only if NULL)
+    int64_t source          // starting node of the BFS
+) ;
+
 GrB_Info bfs_log                // push-pull BFS, or push-only if AT = NULL
 (
     GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
@@ -923,12 +1137,14 @@ GrB_Info LAGraph_cc_fastsv5 (
 GrB_Info LAGraph_cc_fastsv5a (
     GrB_Vector *result,     // output: array of component identifiers
     GrB_Matrix *A,          // input matrix
+                            //   content remains the same, but pointer changes
     bool sanitize           // if true, ensure A is symmetric
 ) ;
 
 GrB_Info LAGraph_cc_fastsv5b (
     GrB_Vector *result,     // output: array of component identifiers
     GrB_Matrix *A,          // input matrix
+                            //   content remains the same, but pointer changes
     bool sanitize           // if true, ensure A is symmetric
 ) ;
 
@@ -993,14 +1209,14 @@ GrB_Info LAGraph_pagerank3b     // PageRank definition
     int *iters                  // number of iterations taken
 ) ;
 
-GrB_Info LAGraph_pagerank3c // PageRank definition
+GrB_Info LAGraph_pagerank3c         // PageRank definition
 (
-    GrB_Vector *result,     // output: array of LAGraph_PageRank structs
-    GrB_Matrix A,           // binary input graph, not modified
-    const float *restrict d_out, // out degree of each node (GrB_FP32, size n)
-    float damping,          // damping factor (typically 0.85)
-    int itermax,            // maximum number of iterations
-    int* iters              // output: number of iterations taken
+    GrB_Vector *result,             // output: array of LAGraph_PageRank structs
+    GrB_Matrix A,                   // binary input graph, not modified
+    const float *LA_RESTRICT d_out, // out degree of each node (GrB_FP32, size n)
+    float damping,                  // damping factor (typically 0.85)
+    int itermax,                    // maximum number of iterations
+    int* iters                      // output: number of iterations taken
 ) ;
 
 GrB_Info LAGraph_pagerank3d // PageRank definition
@@ -1037,7 +1253,7 @@ GrB_Info LAGraph_pagerankx4 // PageRank definition
 (
     GrB_Vector *result,     // output: array of LAGraph_PageRank structs
     GrB_Matrix A,           // binary input graph, not modified
-    const float *restrict d_out, // out degree of each node (GrB_FP32, size n)
+    const float *LA_RESTRICT d_out, // out degree of each node (GrB_FP32, size n)
     float damping,          // damping factor (typically 0.85)
     int itermax,            // maximum number of iterations
     int *iters              // output: number of iterations taken
@@ -1047,7 +1263,12 @@ GrB_Info LAGraph_tricount   // count # of triangles
 (
     int64_t *ntri,          // # of triangles
     const int method,       // 1 to 6, see above
-    const GrB_Matrix A      // input matrix, must be symmetric, no diag entries
+    const int sorting,      //  0: no sort
+                            //  1: sort by degree, ascending order
+                            // -1: sort by degree, descending order
+    const int64_t *degree,  // degree of each node, may be NULL if sorting==0.
+                            // of size n, unmodified. 
+    const GrB_Matrix A_in   // input matrix, must be symmetric, no diag entries
 ) ;
 
 GrB_Info LAGraph_ktruss         // compute the k-truss of a graph
@@ -1112,6 +1333,16 @@ GrB_Info LAGraph_cdlp           // compute cdlp for all nodes in A
     int itermax,                // max number of iterations,
     double *t                   // t [0] = sanitize time, t [1] = cdlp time,
                                 // in seconds
+) ;
+
+GrB_Info LAGraph_dense_relabel   // relabel sparse IDs to dense row/column indices
+(
+    GrB_Matrix *Id2index_handle, // output matrix: A(id, index)=1 (unfilled if NULL)
+    GrB_Matrix *Index2id_handle, // output matrix: B(index, id)=1 (unfilled if NULL)
+    GrB_Vector *id2index_handle, // output vector: v(id)=index (unfilled if NULL)
+    const GrB_Index *ids,        // array of unique identifiers (under GxB_INDEX_MAX)
+    GrB_Index nids,              // number of identifiers
+    GrB_Index *id_dimension      // number of rows in Id2index matrix, id2index vector (unfilled if NULL)
 ) ;
 
 GrB_Info LAGraph_dnn    // returns GrB_SUCCESS if successful
@@ -1185,4 +1416,50 @@ GrB_Info LAGraph_sssp12         // single source shortest paths
 );
 
 
+GrB_Info LAGraph_sssp12c        // single source shortest paths
+(
+    GrB_Vector *path_length,   // path_length(i) is the length of the shortest
+                               // path from the source vertex to vertex i
+    GrB_Matrix A,              // input graph, treated as if boolean in
+                               // semiring (INT32)
+    GrB_Index source,          // source vertex from which to compute
+                               // shortest paths
+    int32_t delta,             // delta value for delta stepping
+
+    // TODO: make this an enum:
+    //      case 0: A can have negative, zero, or positive entries
+    //      case 1: A can have zero or positive entries
+    //      case 2: A only has positive entries (see FIXME below)
+    bool AIsAllPositive        // A boolean indicating whether the entries of
+                               // matrix A are all positive
+);
+
+
+GrB_Info LAGraph_bfs_both       // push-pull BFS, or push-only if AT = NULL
+(
+    GrB_Vector *v_output,   // v(i) is the BFS level of node i in the graph
+    GrB_Vector *pi_output,  // pi(i) = p+1 if p is the parent of node i.
+                            // if NULL, the parent is not computed.
+    GrB_Matrix A,           // input graph, treated as if boolean in semiring
+    GrB_Matrix AT,          // transpose of A (optional; push-only if NULL)
+    int64_t source,         // starting node of the BFS
+    int64_t max_level,      // optional limit of # levels to search
+    bool vsparse            // if true, v is expected to be very sparse
+    , FILE * logfile
+) ;
+
+
+GrB_Info LAGraph_Matrix_extract_keep_dimensions // extract submatrix but keep
+                                                // the dimensions of the
+                                                // original matrix
+(
+    GrB_Matrix *Chandle,         // output matrix
+    const GrB_Matrix A,          // input matrix
+    const GrB_Index *Vsparse,    // sorted list of vertex indices
+    const bool *Vdense,          // boolean array of vertices
+    GrB_Index nv                 // number of vertex indices
+) ;
+
 #endif
+#endif
+

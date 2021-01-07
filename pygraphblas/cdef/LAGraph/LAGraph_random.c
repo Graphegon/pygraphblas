@@ -48,7 +48,7 @@
 // The parameters are considered in the following order:
 
 // type: A is always returned with this type.  If the type is not
-//                  LAGraph_Complex, then make_hermitian is ignored and treated
+//                  LAGraph_ComplexFP64, then make_hermitian is ignored and treated
 //                  as if false.  If the type is unsigned, then
 //                  make_skew_symmetric is ignored and treated as if false.
 
@@ -70,7 +70,7 @@
 
 // make_hermitian:  if true, then A is Hermitian (A == -A', where A' denotes
 //                  the complex conjugate transpose).  If type is not
-//                  LAGraph_Complex, then make_hermitian is ignored and treated
+//                  LAGraph_ComplexFP64, then make_hermitian is ignored and treated
 //                  as if false.
 
 // no_diagonal:  if true, then A is returned with no entries on the diagonal.
@@ -85,7 +85,7 @@
 GrB_Info LAGraph_random         // create a random matrix
 (
     GrB_Matrix *A,              // handle of matrix to create
-    GrB_Type type,              // built-in type, or LAGraph_Complex
+    GrB_Type type,              // built-in type, or LAGraph_ComplexFP64
     GrB_Index nrows,            // number of rows
     GrB_Index ncols,            // number of columns
     GrB_Index nvals,            // number of values
@@ -143,7 +143,7 @@ GrB_Info LAGraph_random         // create a random matrix
         no_diagonal = true ;
     }
 
-    if (type != LAGraph_Complex)
+    if (type != LAGraph_ComplexFP64)
     {
         make_hermitian = false ;
     }
@@ -224,7 +224,7 @@ GrB_Info LAGraph_random         // create a random matrix
     else if (type == GrB_UINT64      ) RX (uint64_t, UINT64, 0, 1, 0, 0, 0)
     else if (type == GrB_FP32        ) RX (float   , FP32  , 0, 0, 1, 1, 0)
     else if (type == GrB_FP64        ) RX (double  , FP64  , 0, 0, 1, 1, 0)
-    else if (type == LAGraph_Complex )
+    else if (type == LAGraph_ComplexFP64 )
     {
         #undef ARG
         #undef CONJ
