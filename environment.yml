@@ -8,6 +8,7 @@ dependencies:
   - numba
   - scipy
   - pip
+  - graphviz
   - pip:
     - pytest
     - pytest-cov
@@ -26,5 +27,7 @@ dependencies:
     - imageio
     - imageio-ffmpeg
     - pygifsicle
+    - rise
+
 
 
