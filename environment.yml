@@ -2,7 +2,7 @@ name: pygraphblas
 channels:
   - conda-forge
 dependencies:
-  - graphblas
+  - pygraphblas
   - numpy
   - cffi
   - numba
