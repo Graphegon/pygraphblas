@@ -467,9 +467,9 @@ GrB_Descriptor
 GxB_SelectOp LAGraph_support = NULL ;
 #endif
 
-bool LAGraph_support_function (const GrB_Index i, const GrB_Index j,
-    const GrB_Index nrows, const GrB_Index ncols,
-    const uint32_t *x, const uint32_t *support)
+bool LAGraph_support_function (const GrB_Index i, const GrB_Index j, const uint32_t *x, const uint32_t *support) ;
+
+bool LAGraph_support_function (const GrB_Index i, const GrB_Index j, const uint32_t *x, const uint32_t *support)
 {
     return ((*x) >= (*support)) ;
 }
@@ -480,8 +480,7 @@ bool LAGraph_support_function (const GrB_Index i, const GrB_Index j,
 
 #define F_BINARY(f) ((void (*)(void *, const void *, const void *)) f)
 #define F_UNARY(f)  ((void (*)(void *, const void *)) f)
-#define F_SELECT(f) ((bool (*)(const GrB_Index, const GrB_Index,        \
-    const GrB_Index, const GrB_Index, const void *, const void *)) f)
+#define F_SELECT(f) ((bool (*)(const GrB_Index, const GrB_Index, const void *, const void *)) f)
 
 GrB_Info LAGraph_alloc_global ( )
 {
