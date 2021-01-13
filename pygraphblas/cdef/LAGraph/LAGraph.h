@@ -642,8 +642,8 @@ extern GrB_Semiring LAGraph_PLUS_TIMES_ComplexFP64 ;
 extern double _Complex LAGraph_ComplexFP64_1 ;
 extern double _Complex LAGraph_ComplexFP64_0 ;
 
-GrB_Info LAGraph_Complex_init ( ) ;
-GrB_Info LAGraph_Complex_finalize ( ) ;
+GrB_Info LAGraph_Complex_init ( void ) ;
+GrB_Info LAGraph_Complex_finalize ( void ) ;
 
 extern GrB_BinaryOp
 
@@ -768,7 +768,7 @@ extern GxB_SelectOp LAGraph_support ;
 
 typedef void (*LAGraph_binary_function) (void *, const void *, const void *) ;
 
-GrB_Info LAGraph_init ( ) ;         // start LAGraph
+GrB_Info LAGraph_init ( void ) ;         // start LAGraph
 
 GrB_Info LAGraph_xinit              // start LAGraph (alternative method)
 (
@@ -780,7 +780,7 @@ GrB_Info LAGraph_xinit              // start LAGraph (alternative method)
     bool user_malloc_is_thread_safe
 ) ;
 
-GrB_Info LAGraph_finalize ( ) ;     // end LAGraph
+GrB_Info LAGraph_finalize ( void ) ;     // end LAGraph
 
 GrB_Info LAGraph_mmread
 (
@@ -905,9 +905,9 @@ GrB_Info LAGraph_random         // create a random matrix
     LAGRAPH_TRY_CATCH (LAGraph_random (__VA_ARGS__)) ;  \
 }
 
-GrB_Info LAGraph_alloc_global ( ) ;
+GrB_Info LAGraph_alloc_global ( void ) ;
 
-GrB_Info LAGraph_free_global ( ) ;
+GrB_Info LAGraph_free_global ( void ) ;
 
 void *LAGraph_malloc        // wrapper for malloc
 (
