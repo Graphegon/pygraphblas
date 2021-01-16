@@ -26,4 +26,3 @@ from .binaryop import *
 from .unaryop import *
 from .monoid import *
 from .descriptor import *
-from .utils import *

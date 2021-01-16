@@ -1,3 +1,6 @@
+"""Tools for building CFFI wrapper around API.
+
+"""
 from cffi import FFI
 from pathlib import Path
 
