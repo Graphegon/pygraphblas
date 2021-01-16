@@ -1,5 +1,11 @@
 """Pythonic GraphBLAS type wrappers including User Defined Types.
 
+GraphBLAS has 13 built-in scalar types: Boolean, single and double precision
+floating-point (real and complex), and 8, 16, 32, and 64-bit signed and
+unsigned integers.  In addition, user-defined scalar types can be created from
+nearly any C `typedef`, as long as the entire type fits in a fixed-size
+contiguous block of memory (of arbitrary size).  All of these types can be used
+to create GraphBLAS sparse matrices, vectors, or scalars.
 """
 from .base import lib, _check, ffi
 from textwrap import dedent
