@@ -56,7 +56,6 @@
     size_t result = fread (p, s, n, f) ;                            \
     if (result != n)                                                \
     {                                                               \
-        fclose (f) ;                                                \
         LAGRAPH_ERROR ("File I/O error", GrB_INVALID_VALUE) ;       \
     }                                                               \
 }
@@ -68,7 +67,7 @@
 GrB_Info LAGraph_binread
 (
     GrB_Matrix *A,          // matrix to read from the file
-    char *filename          // file to read it from
+    FILE *f          // file to read it from
 )
 {
 
@@ -82,17 +81,10 @@ GrB_Info LAGraph_binread
     //--------------------------------------------------------------------------
 
     GrB_Info info ;
-    if (A == NULL || filename == NULL)
+    if (A == NULL || f == NULL)
     {
         // input arguments invalid
         LAGRAPH_ERROR ("LAGraph_binread: invalid inputs\n", GrB_NULL_POINTER) ;
-    }
-
-    FILE *f = fopen (filename, "r") ;
-    if (f == NULL)
-    {
-        LAGRAPH_ERROR ("LAGraph_binread: file cannot be opened",
-            GrB_INVALID_VALUE) ;
     }
 
     //--------------------------------------------------------------------------
@@ -238,7 +230,6 @@ GrB_Info LAGraph_binread
     }
 
     FREAD (Ax, typesize, Ax_size) ;
-    fclose (f) ;
 
     //--------------------------------------------------------------------------
     // import the matrix

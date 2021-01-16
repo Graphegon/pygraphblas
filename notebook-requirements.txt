@@ -17,4 +17,5 @@ colorcet
 imageio
 imageio-ffmpeg
 pygifsicle
-
+lz4
+pdoc

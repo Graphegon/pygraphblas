@@ -296,7 +296,7 @@ GrB_Info LAGraph_mmwrite
 GrB_Info LAGraph_binwrite
 (
     GrB_Matrix *A,          // matrix to write to the file
-    char *filename,         // file to write it to
+    FILE *f,         // file to write it to
     const char *comments    // comments to add to the file, up to 220 characters
                             // in length, not including the terminating null
                             // byte. Ignored if NULL.  Characters past
@@ -306,7 +306,7 @@ GrB_Info LAGraph_binwrite
 GrB_Info LAGraph_binread
 (
     GrB_Matrix *A,          // matrix to read from the file
-    char *filename          // file to read it from
+    FILE *f          // file to read it from
 ) ;
 
 GrB_Info LAGraph_tsvread        // returns GrB_SUCCESS if successful

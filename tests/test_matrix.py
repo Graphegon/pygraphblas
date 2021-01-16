@@ -331,10 +331,14 @@ def test_matrix_mm_read_write(tmp_path):
 
 def test_matrix_binfile_read_write(tmp_path):
     binfilef = tmp_path / "binfilewrite_test.binfile"
-    binfilef.touch()
+
     m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
-    m.to_binfile(bytes(binfilef))
-    n = Matrix.from_binfile(bytes(binfilef))
+    with open(binfilef, 'wb') as f:
+        m.to_binfile(f)
+        
+    with open(binfilef, 'rb') as r:
+        n = Matrix.from_binfile(r)
+
     assert n.iseq(m)
 
 

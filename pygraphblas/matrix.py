@@ -290,9 +290,9 @@ class Matrix:
         """Write this matrix to a file using the Matrix Market format."""
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
-    def to_binfile(self, filename, comments=NULL):
+    def to_binfile(self, f, comments=NULL):
         """Write this matrix using custom SuiteSparse binary format."""
-        self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
+        self._check(lib.LAGraph_binwrite(self.matrix, f, comments))
 
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists."""

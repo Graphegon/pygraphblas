@@ -6,3 +6,5 @@ pytest-cov
 setuptools
 ipython
 contextvars
+lz4
+

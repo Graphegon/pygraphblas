@@ -55,7 +55,6 @@
     size_t result = fwrite (p, s, n, f) ;                           \
     if (result != n)                                                \
     {                                                               \
-        fclose (f) ;                                                \
         LAGRAPH_ERROR ("File I/O error", GrB_INVALID_VALUE) ;       \
     }                                                               \
 }
@@ -67,7 +66,7 @@
 GrB_Info LAGraph_binwrite
 (
     GrB_Matrix *A,          // matrix to write to the file
-    char *filename,         // file to write it to
+    FILE *f,         // file to write it to
     const char *comments    // comments to add to the file, up to 220 characters
                             // in length, not including the terminating null
                             // byte. Ignored if NULL.  Characters past
@@ -84,17 +83,10 @@ GrB_Info LAGraph_binwrite
     //--------------------------------------------------------------------------
 
     GrB_Info info ;
-    if (A == NULL || *A == NULL || filename == NULL)
+    if (A == NULL || *A == NULL || f == NULL)
     {
         // input arguments invalid
         LAGRAPH_ERROR ("LAGraph_binwrite: invalid inputs\n", GrB_NULL_POINTER) ;
-    }
-
-    FILE *f = fopen (filename, "w") ;
-    if (f == NULL)
-    {
-        LAGRAPH_ERROR ("LAGraph_binwrite: file cannot be opened",
-            GrB_INVALID_VALUE) ;
     }
 
     GrB_Index ignore ;
@@ -431,7 +423,6 @@ GrB_Info LAGraph_binwrite
     }
 
     FWRITE (Ax, typesize, Ax_size) ;
-    fclose (f) ;
 
     //--------------------------------------------------------------------------
     // re-import the matrix
