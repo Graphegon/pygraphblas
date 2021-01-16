@@ -60,7 +60,40 @@ __all__ = [&#34;Matrix&#34;]
 class Matrix:
     &#34;&#34;&#34;GraphBLAS Sparse Matrix
 
-    This is a high-level wrapper around the GrB_Matrix type.
+    This is a high-level wrapper around the GrB_Matrix C type using
+    the [cffi](https://cffi.readthedocs.io/en/latest/) library.
+
+    A Matrix supports many possible operations according to the
+    GraphBLAS API.  Many of those operations have overloaded operators
+    that are listed here:
+
+    - A @ B
+
+    - v @ A
+
+    - A @ v
+
+    - v @= A
+
+    - A @= v
+
+    - A @= B
+
+    - A + B
+
+    - A += B
+
+    - A - B
+
+    - A -= B
+
+    - A * B
+
+    - A *= B
+
+    - A / B
+
+    - A /= B
 
     &#34;&#34;&#34;
 
@@ -102,6 +135,9 @@ class Matrix:
 
     @classmethod
     def dense(cls, typ, nrows=1, ncols=1, fill=None):
+        &#34;&#34;&#34;Return a dense Matrix.
+
+        &#34;&#34;&#34;
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
         if fill is None:
@@ -197,6 +233,11 @@ class Matrix:
 
     @classmethod
     def identity(cls, typ, nrows, one=None):
+        &#34;&#34;&#34;Return a new square identity Matrix of nrows with diagonal set to
+        one.
+
+        If one is None, use the default typ one value.
+        &#34;&#34;&#34;
         result = cls.sparse(typ, nrows, nrows)
         if one is None:
             one = result.type.one
@@ -206,53 +247,75 @@ class Matrix:
 
     @property
     def gb_type(self):
-        &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
+        only used if interacting with the low level API.
+
+        &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
         self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
         return new_type[0]
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape.
+
+        &#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
     def square(self):
+        &#34;&#34;&#34;True if Matrix is square, else False.
+
+        &#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix values.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
+        &#34;&#34;&#34;Returns the transpose of the Matrix.
+
+        &#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
-        &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create an duplicate Matrix.
+
+        &#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
     def hyper_switch(self):
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -261,6 +324,9 @@ class Matrix:
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
             lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -268,17 +334,26 @@ class Matrix:
 
     @property
     def format(self):
+        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
+        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
         self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
+        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -289,6 +364,9 @@ class Matrix:
 
     @sparsity_control.setter
     def sparsity_control(self, sparsity):
+        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -298,6 +376,9 @@ class Matrix:
 
     @property
     def sparsity_status(self):
+        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -315,15 +396,21 @@ class Matrix:
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
+
+        &#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=NULL):
-        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
+
+        &#34;&#34;&#34;
         self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+        &#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -347,7 +434,9 @@ class Matrix:
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, **kwargs):
-        &#34;&#34;&#34; Transpose matrix. &#34;&#34;&#34;
+        &#34;&#34;&#34;Transpose matrix.
+
+        &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -433,6 +522,16 @@ class Matrix:
         is exactly this set intersection. Entries in A but not B, or
         visa versa, do not appear in the result.
 
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
         &#34;&#34;&#34;
         if mult_op is NULL:
             mult_op = current_binop.get(binaryop.TIMES)
@@ -472,6 +571,8 @@ class Matrix:
         return not self.iseq(other)
 
     def __iter__(self):
+        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -481,6 +582,8 @@ class Matrix:
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
+        &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
+        &#34;&#34;&#34;
         if self.type.typecode is None:
             raise TypeError(&#34;This matrix has no array typecode.&#34;)
         nvals = self.nvals
@@ -493,7 +596,9 @@ class Matrix:
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -504,7 +609,9 @@ class Matrix:
 
     @property
     def cols(self):
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -515,7 +622,9 @@ class Matrix:
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of values present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -525,6 +634,8 @@ class Matrix:
         return iter(X)
 
     def __len__(self):
+        &#34;&#34;&#34; Return the number of elements in the Matrix.
+        &#34;&#34;&#34;
         return self.nvals
 
     def __and__(self, other):
@@ -1250,7 +1361,56 @@ class Matrix:
 </code></dt>
 <dd>
 <div class="desc"><p>GraphBLAS Sparse Matrix</p>
-<p>This is a high-level wrapper around the GrB_Matrix type.</p></div>
+<p>This is a high-level wrapper around the GrB_Matrix C type using
+the <a href="https://cffi.readthedocs.io/en/latest/">cffi</a> library.</p>
+<p>A Matrix supports many possible operations according to the
+GraphBLAS API.
+Many of those operations have overloaded operators
+that are listed here:</p>
+<ul>
+<li>
+<p>A @ B</p>
+</li>
+<li>
+<p>v @ A</p>
+</li>
+<li>
+<p>A @ v</p>
+</li>
+<li>
+<p>v @= A</p>
+</li>
+<li>
+<p>A @= v</p>
+</li>
+<li>
+<p>A @= B</p>
+</li>
+<li>
+<p>A + B</p>
+</li>
+<li>
+<p>A += B</p>
+</li>
+<li>
+<p>A - B</p>
+</li>
+<li>
+<p>A -= B</p>
+</li>
+<li>
+<p>A * B</p>
+</li>
+<li>
+<p>A *= B</p>
+</li>
+<li>
+<p>A / B</p>
+</li>
+<li>
+<p>A /= B</p>
+</li>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1258,7 +1418,40 @@ class Matrix:
 <pre><code class="python">class Matrix:
     &#34;&#34;&#34;GraphBLAS Sparse Matrix
 
-    This is a high-level wrapper around the GrB_Matrix type.
+    This is a high-level wrapper around the GrB_Matrix C type using
+    the [cffi](https://cffi.readthedocs.io/en/latest/) library.
+
+    A Matrix supports many possible operations according to the
+    GraphBLAS API.  Many of those operations have overloaded operators
+    that are listed here:
+
+    - A @ B
+
+    - v @ A
+
+    - A @ v
+
+    - v @= A
+
+    - A @= v
+
+    - A @= B
+
+    - A + B
+
+    - A += B
+
+    - A - B
+
+    - A -= B
+
+    - A * B
+
+    - A *= B
+
+    - A / B
+
+    - A /= B
 
     &#34;&#34;&#34;
 
@@ -1300,6 +1493,9 @@ class Matrix:
 
     @classmethod
     def dense(cls, typ, nrows=1, ncols=1, fill=None):
+        &#34;&#34;&#34;Return a dense Matrix.
+
+        &#34;&#34;&#34;
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
         if fill is None:
@@ -1395,6 +1591,11 @@ class Matrix:
 
     @classmethod
     def identity(cls, typ, nrows, one=None):
+        &#34;&#34;&#34;Return a new square identity Matrix of nrows with diagonal set to
+        one.
+
+        If one is None, use the default typ one value.
+        &#34;&#34;&#34;
         result = cls.sparse(typ, nrows, nrows)
         if one is None:
             one = result.type.one
@@ -1404,53 +1605,75 @@ class Matrix:
 
     @property
     def gb_type(self):
-        &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
+        only used if interacting with the low level API.
+
+        &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
         self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
         return new_type[0]
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape.
+
+        &#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
     def square(self):
+        &#34;&#34;&#34;True if Matrix is square, else False.
+
+        &#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix values.
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
+        &#34;&#34;&#34;Returns the transpose of the Matrix.
+
+        &#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
-        &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create an duplicate Matrix.
+
+        &#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
     def hyper_switch(self):
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -1459,6 +1682,9 @@ class Matrix:
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
             lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -1466,17 +1692,26 @@ class Matrix:
 
     @property
     def format(self):
+        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
+        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
         self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
+        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -1487,6 +1722,9 @@ class Matrix:
 
     @sparsity_control.setter
     def sparsity_control(self, sparsity):
+        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -1496,6 +1734,9 @@ class Matrix:
 
     @property
     def sparsity_status(self):
+        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+        &#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -1513,15 +1754,21 @@ class Matrix:
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
+
+        &#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=NULL):
-        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
+
+        &#34;&#34;&#34;
         self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+        &#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -1545,7 +1792,9 @@ class Matrix:
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, **kwargs):
-        &#34;&#34;&#34; Transpose matrix. &#34;&#34;&#34;
+        &#34;&#34;&#34;Transpose matrix.
+
+        &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -1631,6 +1880,16 @@ class Matrix:
         is exactly this set intersection. Entries in A but not B, or
         visa versa, do not appear in the result.
 
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
         &#34;&#34;&#34;
         if mult_op is NULL:
             mult_op = current_binop.get(binaryop.TIMES)
@@ -1670,6 +1929,8 @@ class Matrix:
         return not self.iseq(other)
 
     def __iter__(self):
+        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -1679,6 +1940,8 @@ class Matrix:
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
+        &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
+        &#34;&#34;&#34;
         if self.type.typecode is None:
             raise TypeError(&#34;This matrix has no array typecode.&#34;)
         nvals = self.nvals
@@ -1691,7 +1954,9 @@ class Matrix:
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -1702,7 +1967,9 @@ class Matrix:
 
     @property
     def cols(self):
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -1713,7 +1980,9 @@ class Matrix:
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of values present in the matrix.
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -1723,6 +1992,8 @@ class Matrix:
         return iter(X)
 
     def __len__(self):
+        &#34;&#34;&#34; Return the number of elements in the Matrix.
+        &#34;&#34;&#34;
         return self.nvals
 
     def __and__(self, other):
@@ -2438,13 +2709,16 @@ class Matrix:
 <span>def <span class="ident">dense</span></span>(<span>typ, nrows=1, ncols=1, fill=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a dense Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def dense(cls, typ, nrows=1, ncols=1, fill=None):
+    &#34;&#34;&#34;Return a dense Matrix.
+
+    &#34;&#34;&#34;
     assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
     m = cls.sparse(typ, nrows, ncols)
     if fill is None:
@@ -2545,13 +2819,20 @@ def from_tsv(cls, tsv_file, typ, nrows, ncols):
 <span>def <span class="ident">identity</span></span>(<span>typ, nrows, one=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a new square identity Matrix of nrows with diagonal set to
+one.</p>
+<p>If one is None, use the default typ one value.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def identity(cls, typ, nrows, one=None):
+    &#34;&#34;&#34;Return a new square identity Matrix of nrows with diagonal set to
+    one.
+
+    If one is None, use the default typ one value.
+    &#34;&#34;&#34;
     result = cls.sparse(typ, nrows, nrows)
     if one is None:
         one = result.type.one
@@ -2642,13 +2923,16 @@ def sparse(cls, typ, nrows=0, ncols=0):
 <dl>
 <dt id="pygraphblas.matrix.Matrix.T"><code class="name">var <span class="ident">T</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Returns the transpose of the Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def T(self):
+    &#34;&#34;&#34;Returns the transpose of the Matrix.
+
+    &#34;&#34;&#34;
     return self.transpose()</code></pre>
 </details>
 </dd>
@@ -2661,7 +2945,9 @@ def T(self):
 </summary>
 <pre><code class="python">@property
 def cols(self):
-    &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of column indexes present in the matrix.
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -2673,13 +2959,16 @@ def cols(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.format"><code class="name">var <span class="ident">format</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get Matrix format. (See SuiteSparse User Guide)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def format(self):
+    &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
+
+    &#34;&#34;&#34;
     format = ffi.new(&#34;GxB_Format_Value*&#34;)
     self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
     return format[0]</code></pre>
@@ -2687,14 +2976,19 @@ def format(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.gb_type"><code class="name">var <span class="ident">gb_type</span></code></dt>
 <dd>
-<div class="desc"><p>Return the GraphBLAS low-level type object of the Matrix.</p></div>
+<div class="desc"><p>Return the GraphBLAS low-level type object of the Matrix.
+This is
+only used if interacting with the low level API.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def gb_type(self):
-    &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
+    only used if interacting with the low level API.
+
+    &#34;&#34;&#34;
     new_type = ffi.new(&#34;GrB_Type*&#34;)
     self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
     return new_type[0]</code></pre>
@@ -2702,13 +2996,16 @@ def gb_type(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.hyper_switch"><code class="name">var <span class="ident">hyper_switch</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the hyper_switch threshold. (See SuiteSparse User Guide)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def hyper_switch(self):
+    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+    &#34;&#34;&#34;
     switch = ffi.new(&#34;double*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -2729,7 +3026,9 @@ def hyper_switch(self):
 </summary>
 <pre><code class="python">@property
 def ncols(self):
-    &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix columns.
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -2744,7 +3043,9 @@ def ncols(self):
 </summary>
 <pre><code class="python">@property
 def nrows(self):
-    &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix rows.
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -2759,7 +3060,9 @@ def nrows(self):
 </summary>
 <pre><code class="python">@property
 def nvals(self):
-    &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix values.
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -2774,7 +3077,9 @@ def nvals(self):
 </summary>
 <pre><code class="python">@property
 def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -2793,19 +3098,24 @@ def rows(self):
 </summary>
 <pre><code class="python">@property
 def shape(self):
-    &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+    &#34;&#34;&#34;Numpy-like description of matrix shape.
+
+    &#34;&#34;&#34;
     return (self.nrows, self.ncols)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.sparsity_control"><code class="name">var <span class="ident">sparsity_control</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get Matrix sparsity control. (See SuiteSparse User Guide)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def sparsity_control(self):
+    &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+    &#34;&#34;&#34;
     sparsity = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(
@@ -2817,13 +3127,16 @@ def sparsity_control(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.sparsity_status"><code class="name">var <span class="ident">sparsity_status</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set Matrix sparsity status. (See SuiteSparse User Guide)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def sparsity_status(self):
+    &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+    &#34;&#34;&#34;
     status = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -2833,13 +3146,16 @@ def sparsity_status(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.square"><code class="name">var <span class="ident">square</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>True if Matrix is square, else False.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def square(self):
+    &#34;&#34;&#34;True if Matrix is square, else False.
+
+    &#34;&#34;&#34;
     return self.nrows == self.ncols</code></pre>
 </details>
 </dd>
@@ -2856,7 +3172,9 @@ def square(self):
 </summary>
 <pre><code class="python">@property
 def vals(self):
-    &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of values present in the matrix.
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -3135,7 +3453,9 @@ values.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def dup(self):
-    &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create an duplicate Matrix.
+
+    &#34;&#34;&#34;
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
     self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
     return self.__class__(new_mat, self.type)</code></pre>
@@ -3228,7 +3548,16 @@ appear in the set intersection of the patterns of A and B.
 Other operators other than addition can be used.</p>
 <p>The pattern of the result of the element-wise multiplication
 is exactly this set intersection. Entries in A but not B, or
-visa versa, do not appear in the result.</p></div>
+visa versa, do not appear in the result.</p>
+<p>The only difference between element-wise multiplication and
+addition is the pattern of the result, and what happens to
+entries outside the intersection. With multiplication the
+pattern of T is the intersection; with addition it is the set
+union. Entries outside the set intersection are dropped for
+multiplication, and kept for addition; in both cases the
+operator is only applied to those (and only those) entries in
+the intersection. Any binary operator can be used
+interchangeably for either operation.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3244,6 +3573,16 @@ visa versa, do not appear in the result.</p></div>
     The pattern of the result of the element-wise multiplication
     is exactly this set intersection. Entries in A but not B, or
     visa versa, do not appear in the result.
+
+    The only difference between element-wise multiplication and
+    addition is the pattern of the result, and what happens to
+    entries outside the intersection. With multiplication the
+    pattern of T is the intersection; with addition it is the set
+    union. Entries outside the set intersection are dropped for
+    multiplication, and kept for addition; in both cases the
+    operator is only applied to those (and only those) entries in
+    the intersection. Any binary operator can be used
+    interchangeably for either operation.
 
     &#34;&#34;&#34;
     if mult_op is NULL:
@@ -3749,12 +4088,14 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">to_arrays</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert Matrix to tuple of three dense array objects.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_arrays(self):
+    &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
+    &#34;&#34;&#34;
     if self.type.typecode is None:
         raise TypeError(&#34;This matrix has no array typecode.&#34;)
     nvals = self.nvals
@@ -3776,7 +4117,9 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_binfile(self, filename, comments=NULL):
-    &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
+    &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
+
+    &#34;&#34;&#34;
     self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))</code></pre>
 </details>
 </dd>
@@ -3808,7 +4151,9 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_lists(self):
-    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+    &#34;&#34;&#34;
     I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -3828,7 +4173,9 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_mm(self, fileobj):
-    &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
+    &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
+
+    &#34;&#34;&#34;
     self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))</code></pre>
 </details>
 </dd>
@@ -3905,7 +4252,9 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transpose(self, cast=None, out=None, **kwargs):
-    &#34;&#34;&#34; Transpose matrix. &#34;&#34;&#34;
+    &#34;&#34;&#34;Transpose matrix.
+
+    &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)
