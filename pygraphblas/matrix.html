@@ -68,36 +68,48 @@ class Matrix:
     the [cffi](https://cffi.readthedocs.io/en/latest/) library.
 
     A Matrix supports many possible operations according to the
-    GraphBLAS API.  Many of those operations have overloaded operators
-    that are listed here:
+    GraphBLAS API.  Many of those operations have overloaded
+    operators.
 
-    - A @ B
+    - A @ B: Matrix Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - v @ A
+    - v @ A: Vector Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @ v
+    - A @ v: Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - v @= A
+    - A @= B: In-place Matrix Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @= v
+    - v @= A: In-place Vector Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @= B
+    - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - A + B
+    - A | B: Matrix Union: type default PLUS combiner
 
-    - A += B
+    - A &amp; B: Matrix Intersection: type default TIMES combiner
 
-    - A - B
+    - A |= B: In-place Matrix Union: type default PLUS combiner
 
-    - A -= B
+    - A &amp;= B: In-place Matrix Intersection: type default TIMES combiner
 
-    - A * B
+    - A + B: Matrix Element-Wise Union: type default PLUS combiner
 
-    - A *= B
+    - A += B: In-place Matrix Element-Wise Union: type default PLUS combiner
 
-    - A / B
+    - A - B: Matrix Element-Wise Union: type default MINUS combiner
 
-    - A /= B
+    - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
+
+    - A * B: Matrix Element-Wise Union: type default TIMES combiner
+
+    - A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner
+
+    - A / B: Matrix Element-Wise Union: type default DIV combiner
+
+    - A /= B: In-place Matrix Element-Wise Union: type default DIV combiner
+
+    Note that all the above operator syntax is mearly sugar over
+    various combinations of calling `mxm`, `mxv`, `vmx`, `eadd`, and
+    `emult`.
 
     &#34;&#34;&#34;
 
@@ -138,12 +150,27 @@ class Matrix:
         return m
 
     @classmethod
-    def dense(cls, typ, nrows=1, ncols=1, fill=None):
-        &#34;&#34;&#34;Return a dense Matrix.
+    def hypersparse(cls, typ):
+        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
+        2**60 cols.
 
+        &#34;&#34;&#34;
+        return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
+
+    @classmethod
+    def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
+        &#34;&#34;&#34;Return a dense Matrix nrows by ncols.
+
+        If a `fill` value is present, use that, otherwise use the
+        `zero` attribte of the given type.
+
+        If `sparsity_control` is provided it is used for the new
+        matrix (See SuiteSparse User Guide)
         &#34;&#34;&#34;
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
+        if sparsity_control is not None:
+            v.sparsity_control = sparsity_control
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
@@ -261,65 +288,49 @@ class Matrix:
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
     def square(self):
-        &#34;&#34;&#34;True if Matrix is square, else False.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
-        &#34;&#34;&#34;Returns the transpose of the Matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
-        &#34;&#34;&#34;Create an duplicate Matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
     def hyper_switch(self):
-        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -328,9 +339,7 @@ class Matrix:
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
-        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
             lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -338,26 +347,20 @@ class Matrix:
 
     @property
     def format(self):
-        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
-        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
         self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
-        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -368,9 +371,7 @@ class Matrix:
 
     @sparsity_control.setter
     def sparsity_control(self, sparsity):
-        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -380,9 +381,7 @@ class Matrix:
 
     @property
     def sparsity_status(self):
-        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -400,21 +399,15 @@ class Matrix:
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=NULL):
-        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
         self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -438,9 +431,7 @@ class Matrix:
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, **kwargs):
-        &#34;&#34;&#34;Transpose matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -575,8 +566,7 @@ class Matrix:
         return not self.iseq(other)
 
     def __iter__(self):
-        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -586,8 +576,7 @@ class Matrix:
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
-        &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.&#34;&#34;&#34;
         if self.type.typecode is None:
             raise TypeError(&#34;This matrix has no array typecode.&#34;)
         nvals = self.nvals
@@ -600,9 +589,7 @@ class Matrix:
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -613,9 +600,7 @@ class Matrix:
 
     @property
     def cols(self):
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -626,9 +611,7 @@ class Matrix:
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -638,8 +621,7 @@ class Matrix:
         return iter(X)
 
     def __len__(self):
-        &#34;&#34;&#34; Return the number of elements in the Matrix.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of elements in the Matrix.&#34;&#34;&#34;
         return self.nvals
 
     def __and__(self, other):
@@ -851,8 +833,9 @@ class Matrix:
         return out
 
     def apply_first(self, first, op, out=None, **kwargs):
-        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the first input
-        to a scalar first.
+        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+        first input to a scalar first.
+
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -867,8 +850,9 @@ class Matrix:
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
-        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the second input
-        to a scalar second.
+        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+        second input to a scalar second.
+
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -883,6 +867,23 @@ class Matrix:
         return out
 
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
+        &#34;&#34;&#34;Select elements that match the given select operation condition.
+        Can be a string mapping to following operators:
+
+            &#34;&gt;&#34;: lib.GxB_GT_THUNK
+            &#34;&lt;&#34;: lib.GxB_LT_THUNK
+            &#34;&gt;=&#34;: lib.GxB_GE_THUNK
+            &#34;&lt;=&#34;: lib.GxB_LE_THUNK
+            &#34;!=&#34;: lib.GxB_NE_THUNK
+            &#34;==&#34;: lib.GxB_EQ_THUNK
+            &#34;&gt;0&#34;: lib.GxB_GT_ZERO
+            &#34;&lt;0&#34;: lib.GxB_LT_ZERO
+            &#34;&gt;=0&#34;: lib.GxB_GE_ZERO
+            &#34;&lt;=0&#34;: lib.GxB_LE_ZERO
+            &#34;!=0&#34;: lib.GxB_NONZERO
+            &#34;==0&#34;: lib.GxB_EQ_ZERO
+
+        &#34;&#34;&#34;
         if out is NULL:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
@@ -904,21 +905,27 @@ class Matrix:
         return out
 
     def tril(self, thunk=NULL):
+        &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
     def triu(self, thunk=NULL):
+        &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=NULL):
+        &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
     def offdiag(self, thunk=NULL):
+        &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
+        &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
-    def full(self, identity=None):
+    def _full(self, identity=None):
+        &#34;&#34;&#34;&#34;&#34;&#34;
         B = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if identity is None:
             identity = self.type.one
@@ -930,7 +937,7 @@ class Matrix:
         )
         return self.eadd(B, self.type.FIRST)
 
-    def compare(self, other, op, strop):
+    def _compare(self, other, op, strop):
         C = self.__class__.sparse(types.BOOL, self.nrows, self.ncols)
         if isinstance(other, (bool, int, float, complex)):
             if op(other, 0):
@@ -942,30 +949,30 @@ class Matrix:
                 self.select(strop, other).apply(types.BOOL.ONE, out=C)
                 return C
         elif isinstance(other, Matrix):
-            A = self.full()
-            B = other.full()
+            A = self._full()
+            B = other._full()
             A.emult(B, strop, out=C)
             return C
         else:
             raise TypeError(&#34;Unknown matrix comparison type.&#34;)
 
     def __gt__(self, other):
-        return self.compare(other, operator.gt, &#34;&gt;&#34;)
+        return self._compare(other, operator.gt, &#34;&gt;&#34;)
 
     def __lt__(self, other):
-        return self.compare(other, operator.lt, &#34;&lt;&#34;)
+        return self._compare(other, operator.lt, &#34;&lt;&#34;)
 
     def __ge__(self, other):
-        return self.compare(other, operator.ge, &#34;&gt;=&#34;)
+        return self._compare(other, operator.ge, &#34;&gt;=&#34;)
 
     def __le__(self, other):
-        return self.compare(other, operator.le, &#34;&lt;=&#34;)
+        return self._compare(other, operator.le, &#34;&lt;=&#34;)
 
     def __eq__(self, other):
-        return self.compare(other, operator.eq, &#34;==&#34;)
+        return self._compare(other, operator.eq, &#34;==&#34;)
 
     def __ne__(self, other):
-        return self.compare(other, operator.ne, &#34;!=&#34;)
+        return self._compare(other, operator.ne, &#34;!=&#34;)
 
     def _get_args(self, mask=NULL, accum=NULL, desc=NULL):
         if isinstance(mask, Matrix):
@@ -1071,7 +1078,7 @@ class Matrix:
     kron = kronecker  # new v1.3 name
 
     def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a submatrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
         mask, accum, desc = self._get_args(**kwargs)
         result_nrows = self.ncols if ta else self.nrows
@@ -1095,9 +1102,7 @@ class Matrix:
         return out
 
     def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a column as subvector.
-        Use `desc=TransposeA` to slice a row.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
@@ -1113,7 +1118,7 @@ class Matrix:
         return out
 
     def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a row as subvector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = TransposeA
         if &#34;desc&#34; in kwargs:
             desc = desc | kwargs[&#34;desc&#34;]
@@ -1198,6 +1203,7 @@ class Matrix:
         )
 
     def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+        &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(**kwargs)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -1289,15 +1295,24 @@ class Matrix:
             return False
 
     def get(self, i, j, default=None):
+        &#34;&#34;&#34;Get the element at row `i` col `j` or return the default value if
+        the element is not present.
+
+        &#34;&#34;&#34;
         try:
             return self[i, j]
         except NoValue:
             return default
 
     def wait(self):
+        &#34;&#34;&#34;Wait for this Matrix to complete before allowing another thread to
+        change it.
+
+        &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_wait(self.matrix))
 
     def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
+        &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
         format_string = format_string % width
         header = (
             format_string.format(&#34;&#34;)
@@ -1327,6 +1342,7 @@ class Matrix:
         )
 
     def to_scipy_sparse(self, format=&#34;csr&#34;):
+        &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.&#34;&#34;&#34;
         from scipy import sparse
 
         rows, cols, vals = self.to_arrays()
@@ -1338,16 +1354,9 @@ class Matrix:
         return s.asformat(format)
 
     def to_numpy(self):
+        &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.&#34;&#34;&#34;
         s = self.to_scipy_sparse(&#34;coo&#34;)
-        return s.toarray()
-
-    def to_image(self):
-        from PIL import Image
-
-        im = Image.new(&#34;I&#34;, (self.nrows, self.ncols))
-        for i, j, v in self:
-            im.putpixel((j, i), 1024 ** 2)
-        return im</code></pre>
+        return s.toarray()</code></pre>
 </details>
 </section>
 <section>
@@ -1369,52 +1378,67 @@ class Matrix:
 the <a href="https://cffi.readthedocs.io/en/latest/">cffi</a> library.</p>
 <p>A Matrix supports many possible operations according to the
 GraphBLAS API.
-Many of those operations have overloaded operators
-that are listed here:</p>
+Many of those operations have overloaded
+operators.</p>
 <ul>
 <li>
-<p>A @ B</p>
+<p>A @ B: Matrix Matrix Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>v @ A</p>
+<p>v @ A: Vector Matrix Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>A @ v</p>
+<p>A @ v: Matrix Vector Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>v @= A</p>
+<p>A @= B: In-place Matrix Matrix Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>A @= v</p>
+<p>v @= A: In-place Vector Matrix Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>A @= B</p>
+<p>A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>A + B</p>
+<p>A | B: Matrix Union: type default PLUS combiner</p>
 </li>
 <li>
-<p>A += B</p>
+<p>A &amp; B: Matrix Intersection: type default TIMES combiner</p>
 </li>
 <li>
-<p>A - B</p>
+<p>A |= B: In-place Matrix Union: type default PLUS combiner</p>
 </li>
 <li>
-<p>A -= B</p>
+<p>A &amp;= B: In-place Matrix Intersection: type default TIMES combiner</p>
 </li>
 <li>
-<p>A * B</p>
+<p>A + B: Matrix Element-Wise Union: type default PLUS combiner</p>
 </li>
 <li>
-<p>A *= B</p>
+<p>A += B: In-place Matrix Element-Wise Union: type default PLUS combiner</p>
 </li>
 <li>
-<p>A / B</p>
+<p>A - B: Matrix Element-Wise Union: type default MINUS combiner</p>
 </li>
 <li>
-<p>A /= B</p>
+<p>A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner</p>
 </li>
-</ul></div>
+<li>
+<p>A * B: Matrix Element-Wise Union: type default TIMES combiner</p>
+</li>
+<li>
+<p>A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner</p>
+</li>
+<li>
+<p>A / B: Matrix Element-Wise Union: type default DIV combiner</p>
+</li>
+<li>
+<p>A /= B: In-place Matrix Element-Wise Union: type default DIV combiner</p>
+</li>
+</ul>
+<p>Note that all the above operator syntax is mearly sugar over
+various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</code>, <code>eadd</code>, and
+<code>emult</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1426,36 +1450,48 @@ that are listed here:</p>
     the [cffi](https://cffi.readthedocs.io/en/latest/) library.
 
     A Matrix supports many possible operations according to the
-    GraphBLAS API.  Many of those operations have overloaded operators
-    that are listed here:
+    GraphBLAS API.  Many of those operations have overloaded
+    operators.
 
-    - A @ B
+    - A @ B: Matrix Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - v @ A
+    - v @ A: Vector Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @ v
+    - A @ v: Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - v @= A
+    - A @= B: In-place Matrix Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @= v
+    - v @= A: In-place Vector Matrix Multiplication: type default PLUS_TIMES semiring
 
-    - A @= B
+    - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - A + B
+    - A | B: Matrix Union: type default PLUS combiner
 
-    - A += B
+    - A &amp; B: Matrix Intersection: type default TIMES combiner
 
-    - A - B
+    - A |= B: In-place Matrix Union: type default PLUS combiner
 
-    - A -= B
+    - A &amp;= B: In-place Matrix Intersection: type default TIMES combiner
 
-    - A * B
+    - A + B: Matrix Element-Wise Union: type default PLUS combiner
 
-    - A *= B
+    - A += B: In-place Matrix Element-Wise Union: type default PLUS combiner
 
-    - A / B
+    - A - B: Matrix Element-Wise Union: type default MINUS combiner
 
-    - A /= B
+    - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
+
+    - A * B: Matrix Element-Wise Union: type default TIMES combiner
+
+    - A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner
+
+    - A / B: Matrix Element-Wise Union: type default DIV combiner
+
+    - A /= B: In-place Matrix Element-Wise Union: type default DIV combiner
+
+    Note that all the above operator syntax is mearly sugar over
+    various combinations of calling `mxm`, `mxv`, `vmx`, `eadd`, and
+    `emult`.
 
     &#34;&#34;&#34;
 
@@ -1496,12 +1532,27 @@ that are listed here:</p>
         return m
 
     @classmethod
-    def dense(cls, typ, nrows=1, ncols=1, fill=None):
-        &#34;&#34;&#34;Return a dense Matrix.
+    def hypersparse(cls, typ):
+        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
+        2**60 cols.
 
+        &#34;&#34;&#34;
+        return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
+
+    @classmethod
+    def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
+        &#34;&#34;&#34;Return a dense Matrix nrows by ncols.
+
+        If a `fill` value is present, use that, otherwise use the
+        `zero` attribte of the given type.
+
+        If `sparsity_control` is provided it is used for the new
+        matrix (See SuiteSparse User Guide)
         &#34;&#34;&#34;
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
+        if sparsity_control is not None:
+            v.sparsity_control = sparsity_control
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
@@ -1619,65 +1670,49 @@ that are listed here:</p>
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
     def square(self):
-        &#34;&#34;&#34;True if Matrix is square, else False.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
-        &#34;&#34;&#34;Returns the transpose of the Matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
-        &#34;&#34;&#34;Create an duplicate Matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
     def hyper_switch(self):
-        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -1686,9 +1721,7 @@ that are listed here:</p>
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
-        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
             lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -1696,26 +1729,20 @@ that are listed here:</p>
 
     @property
     def format(self):
-        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
-        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
         self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
-        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -1726,9 +1753,7 @@ that are listed here:</p>
 
     @sparsity_control.setter
     def sparsity_control(self, sparsity):
-        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -1738,9 +1763,7 @@ that are listed here:</p>
 
     @property
     def sparsity_status(self):
-        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -1758,21 +1781,15 @@ that are listed here:</p>
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=NULL):
-        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
         self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -1796,9 +1813,7 @@ that are listed here:</p>
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, **kwargs):
-        &#34;&#34;&#34;Transpose matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -1933,8 +1948,7 @@ that are listed here:</p>
         return not self.iseq(other)
 
     def __iter__(self):
-        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -1944,8 +1958,7 @@ that are listed here:</p>
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
-        &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.&#34;&#34;&#34;
         if self.type.typecode is None:
             raise TypeError(&#34;This matrix has no array typecode.&#34;)
         nvals = self.nvals
@@ -1958,9 +1971,7 @@ that are listed here:</p>
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -1971,9 +1982,7 @@ that are listed here:</p>
 
     @property
     def cols(self):
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -1984,9 +1993,7 @@ that are listed here:</p>
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -1996,8 +2003,7 @@ that are listed here:</p>
         return iter(X)
 
     def __len__(self):
-        &#34;&#34;&#34; Return the number of elements in the Matrix.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of elements in the Matrix.&#34;&#34;&#34;
         return self.nvals
 
     def __and__(self, other):
@@ -2209,8 +2215,9 @@ that are listed here:</p>
         return out
 
     def apply_first(self, first, op, out=None, **kwargs):
-        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the first input
-        to a scalar first.
+        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+        first input to a scalar first.
+
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -2225,8 +2232,9 @@ that are listed here:</p>
         return out
 
     def apply_second(self, op, second, out=None, **kwargs):
-        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the second input
-        to a scalar second.
+        &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+        second input to a scalar second.
+
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -2241,6 +2249,23 @@ that are listed here:</p>
         return out
 
     def select(self, op, thunk=NULL, out=NULL, **kwargs):
+        &#34;&#34;&#34;Select elements that match the given select operation condition.
+        Can be a string mapping to following operators:
+
+            &#34;&gt;&#34;: lib.GxB_GT_THUNK
+            &#34;&lt;&#34;: lib.GxB_LT_THUNK
+            &#34;&gt;=&#34;: lib.GxB_GE_THUNK
+            &#34;&lt;=&#34;: lib.GxB_LE_THUNK
+            &#34;!=&#34;: lib.GxB_NE_THUNK
+            &#34;==&#34;: lib.GxB_EQ_THUNK
+            &#34;&gt;0&#34;: lib.GxB_GT_ZERO
+            &#34;&lt;0&#34;: lib.GxB_LT_ZERO
+            &#34;&gt;=0&#34;: lib.GxB_GE_ZERO
+            &#34;&lt;=0&#34;: lib.GxB_LE_ZERO
+            &#34;!=0&#34;: lib.GxB_NONZERO
+            &#34;==0&#34;: lib.GxB_EQ_ZERO
+
+        &#34;&#34;&#34;
         if out is NULL:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
@@ -2262,21 +2287,27 @@ that are listed here:</p>
         return out
 
     def tril(self, thunk=NULL):
+        &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
     def triu(self, thunk=NULL):
+        &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=NULL):
+        &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
     def offdiag(self, thunk=NULL):
+        &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
+        &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
-    def full(self, identity=None):
+    def _full(self, identity=None):
+        &#34;&#34;&#34;&#34;&#34;&#34;
         B = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if identity is None:
             identity = self.type.one
@@ -2288,7 +2319,7 @@ that are listed here:</p>
         )
         return self.eadd(B, self.type.FIRST)
 
-    def compare(self, other, op, strop):
+    def _compare(self, other, op, strop):
         C = self.__class__.sparse(types.BOOL, self.nrows, self.ncols)
         if isinstance(other, (bool, int, float, complex)):
             if op(other, 0):
@@ -2300,30 +2331,30 @@ that are listed here:</p>
                 self.select(strop, other).apply(types.BOOL.ONE, out=C)
                 return C
         elif isinstance(other, Matrix):
-            A = self.full()
-            B = other.full()
+            A = self._full()
+            B = other._full()
             A.emult(B, strop, out=C)
             return C
         else:
             raise TypeError(&#34;Unknown matrix comparison type.&#34;)
 
     def __gt__(self, other):
-        return self.compare(other, operator.gt, &#34;&gt;&#34;)
+        return self._compare(other, operator.gt, &#34;&gt;&#34;)
 
     def __lt__(self, other):
-        return self.compare(other, operator.lt, &#34;&lt;&#34;)
+        return self._compare(other, operator.lt, &#34;&lt;&#34;)
 
     def __ge__(self, other):
-        return self.compare(other, operator.ge, &#34;&gt;=&#34;)
+        return self._compare(other, operator.ge, &#34;&gt;=&#34;)
 
     def __le__(self, other):
-        return self.compare(other, operator.le, &#34;&lt;=&#34;)
+        return self._compare(other, operator.le, &#34;&lt;=&#34;)
 
     def __eq__(self, other):
-        return self.compare(other, operator.eq, &#34;==&#34;)
+        return self._compare(other, operator.eq, &#34;==&#34;)
 
     def __ne__(self, other):
-        return self.compare(other, operator.ne, &#34;!=&#34;)
+        return self._compare(other, operator.ne, &#34;!=&#34;)
 
     def _get_args(self, mask=NULL, accum=NULL, desc=NULL):
         if isinstance(mask, Matrix):
@@ -2429,7 +2460,7 @@ that are listed here:</p>
     kron = kronecker  # new v1.3 name
 
     def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a submatrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
         mask, accum, desc = self._get_args(**kwargs)
         result_nrows = self.ncols if ta else self.nrows
@@ -2453,9 +2484,7 @@ that are listed here:</p>
         return out
 
     def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a column as subvector.
-        Use `desc=TransposeA` to slice a row.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
@@ -2471,7 +2500,7 @@ that are listed here:</p>
         return out
 
     def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
-        &#34;&#34;&#34;Slice a row as subvector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = TransposeA
         if &#34;desc&#34; in kwargs:
             desc = desc | kwargs[&#34;desc&#34;]
@@ -2556,6 +2585,7 @@ that are listed here:</p>
         )
 
     def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+        &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(**kwargs)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -2647,15 +2677,24 @@ that are listed here:</p>
             return False
 
     def get(self, i, j, default=None):
+        &#34;&#34;&#34;Get the element at row `i` col `j` or return the default value if
+        the element is not present.
+
+        &#34;&#34;&#34;
         try:
             return self[i, j]
         except NoValue:
             return default
 
     def wait(self):
+        &#34;&#34;&#34;Wait for this Matrix to complete before allowing another thread to
+        change it.
+
+        &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_wait(self.matrix))
 
     def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
+        &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
         format_string = format_string % width
         header = (
             format_string.format(&#34;&#34;)
@@ -2685,6 +2724,7 @@ that are listed here:</p>
         )
 
     def to_scipy_sparse(self, format=&#34;csr&#34;):
+        &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.&#34;&#34;&#34;
         from scipy import sparse
 
         rows, cols, vals = self.to_arrays()
@@ -2696,35 +2736,39 @@ that are listed here:</p>
         return s.asformat(format)
 
     def to_numpy(self):
+        &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.&#34;&#34;&#34;
         s = self.to_scipy_sparse(&#34;coo&#34;)
-        return s.toarray()
-
-    def to_image(self):
-        from PIL import Image
-
-        im = Image.new(&#34;I&#34;, (self.nrows, self.ncols))
-        for i, j, v in self:
-            im.putpixel((j, i), 1024 ** 2)
-        return im</code></pre>
+        return s.toarray()</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
 <dt id="pygraphblas.matrix.Matrix.dense"><code class="name flex">
-<span>def <span class="ident">dense</span></span>(<span>typ, nrows=1, ncols=1, fill=None)</span>
+<span>def <span class="ident">dense</span></span>(<span>typ, nrows, ncols, fill=None, sparsity_control=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a dense Matrix.</p></div>
+<div class="desc"><p>Return a dense Matrix nrows by ncols.</p>
+<p>If a <code>fill</code> value is present, use that, otherwise use the
+<code>zero</code> attribte of the given type.</p>
+<p>If <code>sparsity_control</code> is provided it is used for the new
+matrix (See SuiteSparse User Guide)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def dense(cls, typ, nrows=1, ncols=1, fill=None):
-    &#34;&#34;&#34;Return a dense Matrix.
+def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
+    &#34;&#34;&#34;Return a dense Matrix nrows by ncols.
 
+    If a `fill` value is present, use that, otherwise use the
+    `zero` attribte of the given type.
+
+    If `sparsity_control` is provided it is used for the new
+    matrix (See SuiteSparse User Guide)
     &#34;&#34;&#34;
     assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
     m = cls.sparse(typ, nrows, ncols)
+    if sparsity_control is not None:
+        v.sparsity_control = sparsity_control
     if fill is None:
         fill = m.type.zero
     m[:, :] = fill
@@ -2817,6 +2861,25 @@ def from_tsv(cls, tsv_file, typ, nrows, ncols):
     i = cls(m, typ)
     _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
     return i</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.matrix.Matrix.hypersparse"><code class="name flex">
+<span>def <span class="ident">hypersparse</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a maximal dimension "hypersparse" Matrix with 2<strong>60 rows by
+2</strong>60 cols.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def hypersparse(cls, typ):
+    &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
+    2**60 cols.
+
+    &#34;&#34;&#34;
+    return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.identity"><code class="name flex">
@@ -2934,9 +2997,7 @@ def sparse(cls, typ, nrows=0, ncols=0):
 </summary>
 <pre><code class="python">@property
 def T(self):
-    &#34;&#34;&#34;Returns the transpose of the Matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
     return self.transpose()</code></pre>
 </details>
 </dd>
@@ -2949,9 +3010,7 @@ def T(self):
 </summary>
 <pre><code class="python">@property
 def cols(self):
-    &#34;&#34;&#34;An iterator of column indexes present in the matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -2970,9 +3029,7 @@ def cols(self):
 </summary>
 <pre><code class="python">@property
 def format(self):
-    &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
     format = ffi.new(&#34;GxB_Format_Value*&#34;)
     self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
     return format[0]</code></pre>
@@ -3007,9 +3064,7 @@ def gb_type(self):
 </summary>
 <pre><code class="python">@property
 def hyper_switch(self):
-    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
     switch = ffi.new(&#34;double*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -3030,9 +3085,7 @@ def hyper_switch(self):
 </summary>
 <pre><code class="python">@property
 def ncols(self):
-    &#34;&#34;&#34;Return the number of Matrix columns.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3047,9 +3100,7 @@ def ncols(self):
 </summary>
 <pre><code class="python">@property
 def nrows(self):
-    &#34;&#34;&#34;Return the number of Matrix rows.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3064,9 +3115,7 @@ def nrows(self):
 </summary>
 <pre><code class="python">@property
 def nvals(self):
-    &#34;&#34;&#34;Return the number of Matrix values.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3081,9 +3130,7 @@ def nvals(self):
 </summary>
 <pre><code class="python">@property
 def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -3102,9 +3149,7 @@ def rows(self):
 </summary>
 <pre><code class="python">@property
 def shape(self):
-    &#34;&#34;&#34;Numpy-like description of matrix shape.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
     return (self.nrows, self.ncols)</code></pre>
 </details>
 </dd>
@@ -3117,9 +3162,7 @@ def shape(self):
 </summary>
 <pre><code class="python">@property
 def sparsity_control(self):
-    &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
     sparsity = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(
@@ -3138,9 +3181,7 @@ def sparsity_control(self):
 </summary>
 <pre><code class="python">@property
 def sparsity_status(self):
-    &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
     status = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -3157,9 +3198,7 @@ def sparsity_status(self):
 </summary>
 <pre><code class="python">@property
 def square(self):
-    &#34;&#34;&#34;True if Matrix is square, else False.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
     return self.nrows == self.ncols</code></pre>
 </details>
 </dd>
@@ -3176,9 +3215,7 @@ def square(self):
 </summary>
 <pre><code class="python">@property
 def vals(self):
-    &#34;&#34;&#34;An iterator of values present in the matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -3217,15 +3254,16 @@ def vals(self):
 <span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the first input
-to a scalar first.</p></div>
+<div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
+first input to a scalar first.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def apply_first(self, first, op, out=None, **kwargs):
-    &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the first input
-    to a scalar first.
+    &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+    first input to a scalar first.
+
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -3244,15 +3282,16 @@ to a scalar first.</p></div>
 <span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the second input
-to a scalar second.</p></div>
+<div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
+second input to a scalar second.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def apply_second(self, op, second, out=None, **kwargs):
-    &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the second input
-    to a scalar second.
+    &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
+    second input to a scalar second.
+
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -3342,12 +3381,13 @@ to a scalar second.</p></div>
 <span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Assign a scalar to the Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+    &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(**kwargs)
     if row_slice:
         I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -3405,45 +3445,17 @@ values.</p></div>
     self._check(lib.GrB_Matrix_clear(self.matrix[0]))</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.matrix.Matrix.compare"><code class="name flex">
-<span>def <span class="ident">compare</span></span>(<span>self, other, op, strop)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def compare(self, other, op, strop):
-    C = self.__class__.sparse(types.BOOL, self.nrows, self.ncols)
-    if isinstance(other, (bool, int, float, complex)):
-        if op(other, 0):
-            B = self.__class__.dup(self)
-            B[:, :] = other
-            self.emult(B, strop, out=C)
-            return C
-        else:
-            self.select(strop, other).apply(types.BOOL.ONE, out=C)
-            return C
-    elif isinstance(other, Matrix):
-        A = self.full()
-        B = other.full()
-        A.emult(B, strop, out=C)
-        return C
-    else:
-        raise TypeError(&#34;Unknown matrix comparison type.&#34;)</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.matrix.Matrix.diag"><code class="name flex">
 <span>def <span class="ident">diag</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select the diagonal Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def diag(self, thunk=NULL):
+    &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_DIAG, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -3457,9 +3469,7 @@ values.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def dup(self):
-    &#34;&#34;&#34;Create an duplicate Matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
     self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
     return self.__class__(new_mat, self.type)</code></pre>
@@ -3620,16 +3630,13 @@ interchangeably for either operation.</p></div>
 <span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Slice a column as subvector.
-Use <code>desc=TransposeA</code> to slice a row.</p></div>
+<div class="desc"><p>Extract a column Vector.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
-    &#34;&#34;&#34;Slice a column as subvector.
-    Use `desc=TransposeA` to slice a row.
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
     if out is None:
         out = Vector.sparse(self.type, stop_val)
@@ -3649,13 +3656,13 @@ Use <code>desc=TransposeA</code> to slice a row.</p></div>
 <span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Slice a submatrix.</p></div>
+<div class="desc"><p>Extract a submatrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
-    &#34;&#34;&#34;Slice a submatrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
     ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
     mask, accum, desc = self._get_args(**kwargs)
     result_nrows = self.ncols if ta else self.nrows
@@ -3683,51 +3690,34 @@ Use <code>desc=TransposeA</code> to slice a row.</p></div>
 <span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Slice a row as subvector.</p></div>
+<div class="desc"><p>Extract a row Vector.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
-    &#34;&#34;&#34;Slice a row as subvector.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
     desc = TransposeA
     if &#34;desc&#34; in kwargs:
         desc = desc | kwargs[&#34;desc&#34;]
     return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.matrix.Matrix.full"><code class="name flex">
-<span>def <span class="ident">full</span></span>(<span>self, identity=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def full(self, identity=None):
-    B = self.__class__.sparse(self.type, self.nrows, self.ncols)
-    if identity is None:
-        identity = self.type.one
-
-    self._check(
-        self.type.Matrix_assignScalar(
-            B.matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
-        )
-    )
-    return self.eadd(B, self.type.FIRST)</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.matrix.Matrix.get"><code class="name flex">
 <span>def <span class="ident">get</span></span>(<span>self, i, j, default=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the element at row <code>i</code> col <code>j</code> or return the default value if
+the element is not present.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self, i, j, default=None):
+    &#34;&#34;&#34;Get the element at row `i` col `j` or return the default value if
+    the element is not present.
+
+    &#34;&#34;&#34;
     try:
         return self[i, j]
     except NoValue:
@@ -3904,12 +3894,13 @@ Use <code>desc=TransposeA</code> to slice a row.</p></div>
 <span>def <span class="ident">nonzero</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select the non-zero Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def nonzero(self):
+    &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_NONZERO)</code></pre>
 </details>
 </dd>
@@ -3917,12 +3908,13 @@ Use <code>desc=TransposeA</code> to slice a row.</p></div>
 <span>def <span class="ident">offdiag</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select the off-diagonal Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def offdiag(self, thunk=NULL):
+    &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_OFFDIAG, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -4061,12 +4053,43 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">select</span></span>(<span>self, op, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;, out=&lt;cdata &#x27;void *&#x27; NULL&gt;, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select elements that match the given select operation condition.
+Can be a string mapping to following operators:</p>
+<pre><code>"&gt;": lib.GxB_GT_THUNK
+"&lt;": lib.GxB_LT_THUNK
+"&gt;=": lib.GxB_GE_THUNK
+"&lt;=": lib.GxB_LE_THUNK
+"!=": lib.GxB_NE_THUNK
+"==": lib.GxB_EQ_THUNK
+"&gt;0": lib.GxB_GT_ZERO
+"&lt;0": lib.GxB_LT_ZERO
+"&gt;=0": lib.GxB_GE_ZERO
+"&lt;=0": lib.GxB_LE_ZERO
+"!=0": lib.GxB_NONZERO
+"==0": lib.GxB_EQ_ZERO
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select(self, op, thunk=NULL, out=NULL, **kwargs):
+    &#34;&#34;&#34;Select elements that match the given select operation condition.
+    Can be a string mapping to following operators:
+
+        &#34;&gt;&#34;: lib.GxB_GT_THUNK
+        &#34;&lt;&#34;: lib.GxB_LT_THUNK
+        &#34;&gt;=&#34;: lib.GxB_GE_THUNK
+        &#34;&lt;=&#34;: lib.GxB_LE_THUNK
+        &#34;!=&#34;: lib.GxB_NE_THUNK
+        &#34;==&#34;: lib.GxB_EQ_THUNK
+        &#34;&gt;0&#34;: lib.GxB_GT_ZERO
+        &#34;&lt;0&#34;: lib.GxB_LT_ZERO
+        &#34;&gt;=0&#34;: lib.GxB_GE_ZERO
+        &#34;&lt;=0&#34;: lib.GxB_LE_ZERO
+        &#34;!=0&#34;: lib.GxB_NONZERO
+        &#34;==0&#34;: lib.GxB_EQ_ZERO
+
+    &#34;&#34;&#34;
     if out is NULL:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, str):
@@ -4098,8 +4121,7 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_arrays(self):
-    &#34;&#34;&#34; Convert Matrix to tuple of three dense array objects.
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.&#34;&#34;&#34;
     if self.type.typecode is None:
         raise TypeError(&#34;This matrix has no array typecode.&#34;)
     nvals = self.nvals
@@ -4121,28 +4143,8 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_binfile(self, filename, comments=NULL):
-    &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
     self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))</code></pre>
-</details>
-</dd>
-<dt id="pygraphblas.matrix.Matrix.to_image"><code class="name flex">
-<span>def <span class="ident">to_image</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def to_image(self):
-    from PIL import Image
-
-    im = Image.new(&#34;I&#34;, (self.nrows, self.ncols))
-    for i, j, v in self:
-        im.putpixel((j, i), 1024 ** 2)
-    return im</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.to_lists"><code class="name flex">
@@ -4155,9 +4157,7 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_lists(self):
-    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
     I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -4177,9 +4177,7 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_mm(self, fileobj):
-    &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
     self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))</code></pre>
 </details>
 </dd>
@@ -4187,12 +4185,13 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">to_numpy</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a dense numpy matrix of this Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_numpy(self):
+    &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.&#34;&#34;&#34;
     s = self.to_scipy_sparse(&#34;coo&#34;)
     return s.toarray()</code></pre>
 </details>
@@ -4201,12 +4200,13 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">to_scipy_sparse</span></span>(<span>self, format='csr')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a scipy sparse matrix of this Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_scipy_sparse(self, format=&#34;csr&#34;):
+    &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.&#34;&#34;&#34;
     from scipy import sparse
 
     rows, cols, vals = self.to_arrays()
@@ -4222,12 +4222,13 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=3, empty_char='')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a string representation of the Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
+    &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
     format_string = format_string % width
     header = (
         format_string.format(&#34;&#34;)
@@ -4256,9 +4257,7 @@ outside the resized matrix are deleted.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transpose(self, cast=None, out=None, **kwargs):
-    &#34;&#34;&#34;Transpose matrix.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)
@@ -4281,12 +4280,13 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">tril</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select the lower triangular Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def tril(self, thunk=NULL):
+    &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_TRIL, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -4294,12 +4294,13 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">triu</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select the upper triangular Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def triu(self, thunk=NULL):
+    &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_TRIU, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -4307,12 +4308,17 @@ outside the resized matrix are deleted.</p></div>
 <span>def <span class="ident">wait</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Wait for this Matrix to complete before allowing another thread to
+change it.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wait(self):
+    &#34;&#34;&#34;Wait for this Matrix to complete before allowing another thread to
+    change it.
+
+    &#34;&#34;&#34;
     self._check(lib.GrB_Matrix_wait(self.matrix))</code></pre>
 </details>
 </dd>
@@ -4348,7 +4354,6 @@ outside the resized matrix are deleted.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.cast" href="#pygraphblas.matrix.Matrix.cast">cast</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.clear" href="#pygraphblas.matrix.Matrix.clear">clear</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.cols" href="#pygraphblas.matrix.Matrix.cols">cols</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.compare" href="#pygraphblas.matrix.Matrix.compare">compare</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.dense" href="#pygraphblas.matrix.Matrix.dense">dense</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.diag" href="#pygraphblas.matrix.Matrix.diag">diag</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.dup" href="#pygraphblas.matrix.Matrix.dup">dup</a></code></li>
@@ -4362,10 +4367,10 @@ outside the resized matrix are deleted.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.from_lists" href="#pygraphblas.matrix.Matrix.from_lists">from_lists</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.from_mm" href="#pygraphblas.matrix.Matrix.from_mm">from_mm</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.from_tsv" href="#pygraphblas.matrix.Matrix.from_tsv">from_tsv</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.full" href="#pygraphblas.matrix.Matrix.full">full</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.gb_type" href="#pygraphblas.matrix.Matrix.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.get" href="#pygraphblas.matrix.Matrix.get">get</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.hyper_switch" href="#pygraphblas.matrix.Matrix.hyper_switch">hyper_switch</a></code></li>
+<li><code><a title="pygraphblas.matrix.Matrix.hypersparse" href="#pygraphblas.matrix.Matrix.hypersparse">hypersparse</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.identity" href="#pygraphblas.matrix.Matrix.identity">identity</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Matrix.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.isne" href="#pygraphblas.matrix.Matrix.isne">isne</a></code></li>
@@ -4395,7 +4400,6 @@ outside the resized matrix are deleted.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.square" href="#pygraphblas.matrix.Matrix.square">square</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.to_arrays" href="#pygraphblas.matrix.Matrix.to_arrays">to_arrays</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.to_binfile" href="#pygraphblas.matrix.Matrix.to_binfile">to_binfile</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.to_image" href="#pygraphblas.matrix.Matrix.to_image">to_image</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.to_lists" href="#pygraphblas.matrix.Matrix.to_lists">to_lists</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.to_mm" href="#pygraphblas.matrix.Matrix.to_mm">to_mm</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.to_numpy" href="#pygraphblas.matrix.Matrix.to_numpy">to_numpy</a></code></li>

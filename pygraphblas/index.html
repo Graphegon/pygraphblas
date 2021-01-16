@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>pygraphblas API documentation</title>
-<meta name="description" content="pygraphblas is a Python binding for [The
-GraphBLAS](http://graphblas.org) API provided by
-…" />
+<meta name="description" content="pygraphblas is a python extension that bridges [The GraphBLAS
+API](http://graphblas.org) with the [Python](https://python.org)
+programming language …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -24,16 +24,64 @@ GraphBLAS](http://graphblas.org) API provided by
 <h1 class="title">Package <code>pygraphblas</code></h1>
 </header>
 <section id="section-intro">
-<p>pygraphblas is a Python binding for <a href="http://graphblas.org">The
-GraphBLAS</a> API provided by
-<a href="https://github.com/DrTimothyAldenDavis/GraphBLAS">SuiteSparse::GraphBLAS</a></p>
+<p>pygraphblas is a python extension that bridges <a href="http://graphblas.org">The GraphBLAS
+API</a> with the <a href="https://python.org">Python</a>
+programming language.
+It uses the
+<a href="https://cffi.readthedocs.io/en/latest/">CFFI</a> library to wrap the low
+level GraphBLAS API and provides high level Matrix and Vector Python
+types that make GraphBLAS simple and easy.</p>
+<p>GraphBLAS is a sparse linear algebra API optimized for processing
+graphs encoded as sparse matrices and vectors.
+In addition to common
+real/integer matrix algebra operations, GraphBLAS supports over a
+thousand different <a href="https://en.wikipedia.org/wiki/Semiring">Semiring</a>
+algebra operations, that can be used as basic building blocks to
+implement a wide variety of graph algorithms. See
+<a href="https://en.wikipedia.org/wiki/Semiring#Applications">Applications</a>
+from Wikipedia for some specific examples.</p>
+<p>pygraphblas leverages the expertise in the field of sparse matrix
+programming by <a href="http://graphblas.org">The GraphBLAS Forum</a> and uses
+the
+<a href="http://faculty.cse.tamu.edu/davis/GraphBLAS.html">SuiteSparse:GraphBLAS</a>
+API implementation. SuiteSparse:GraphBLAS is brought to us by the work
+of <a href="http://faculty.cse.tamu.edu/davis/welcome.html">Dr. Tim Davis</a>,
+professor in the Department of Computer Science and Engineering at
+Texas A&amp;M University.
+<a href="http://faculty.cse.tamu.edu/davis/news.html">News and
+information</a> can provide
+you with a lot more background information.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;pygraphblas is a Python binding for [The
-GraphBLAS](http://graphblas.org) API provided by
-[SuiteSparse::GraphBLAS](https://github.com/DrTimothyAldenDavis/GraphBLAS)
+<pre><code class="python">&#34;&#34;&#34;
+pygraphblas is a python extension that bridges [The GraphBLAS
+API](http://graphblas.org) with the [Python](https://python.org)
+programming language.  It uses the
+[CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
+level GraphBLAS API and provides high level Matrix and Vector Python
+types that make GraphBLAS simple and easy.
+
+GraphBLAS is a sparse linear algebra API optimized for processing
+graphs encoded as sparse matrices and vectors.  In addition to common
+real/integer matrix algebra operations, GraphBLAS supports over a
+thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
+algebra operations, that can be used as basic building blocks to
+implement a wide variety of graph algorithms. See
+[Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
+from Wikipedia for some specific examples.
+
+pygraphblas leverages the expertise in the field of sparse matrix
+programming by [The GraphBLAS Forum](http://graphblas.org) and uses
+the
+[SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
+API implementation. SuiteSparse:GraphBLAS is brought to us by the work
+of [Dr. Tim Davis](http://faculty.cse.tamu.edu/davis/welcome.html),
+professor in the Department of Computer Science and Engineering at
+Texas A&amp;M University.  [News and
+information](http://faculty.cse.tamu.edu/davis/news.html) can provide
+you with a lot more background information.
 
 &#34;&#34;&#34;
 from .base import *
@@ -87,7 +135,7 @@ level library import.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.monoid" href="monoid.html">pygraphblas.monoid</a></code></dt>
 <dd>
-<div class="desc"><p>Contains all automatically generated Monoids from CFFI.</p></div>
+<div class="desc"><p>Contains all automatically generated Monoids from CFFI …</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.scalar" href="scalar.html">pygraphblas.scalar</a></code></dt>
 <dd>
@@ -95,11 +143,11 @@ level library import.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.semiring" href="semiring.html">pygraphblas.semiring</a></code></dt>
 <dd>
-<div class="desc"><p>Contains all automatically generated Semirings from CFFI.</p></div>
+<div class="desc"><p>Contains all automatically generated Semirings from CFFI …</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.types" href="types.html">pygraphblas.types</a></code></dt>
 <dd>
-<div class="desc"><p>Pythonic GraphBLAS type wrappers including User Defined Types.</p></div>
+<div class="desc"><p>Pythonic GraphBLAS type wrappers including User Defined Types …</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.unaryop" href="unaryop.html">pygraphblas.unaryop</a></code></dt>
 <dd>
@@ -107,7 +155,7 @@ level library import.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.vector" href="vector.html">pygraphblas.vector</a></code></dt>
 <dd>
-<div class="desc"><p>GraphBLAS Vectors.</p></div>
+<div class="desc"><p>GraphBLAS Sparse Vectors.</p></div>
 </dd>
 </dl>
 </section>
