@@ -2,6 +2,7 @@ import pytest
 
 from pygraphblas import *
 
+
 def test_options_set():
     opts = options_get()
 

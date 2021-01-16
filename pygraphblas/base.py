@@ -44,6 +44,7 @@ GxB_IMPLEMENTATION = (
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
+
 def options_set(
     nthreads=None,
     chunk=None,
@@ -76,8 +77,7 @@ def options_set(
 
 
 def options_get():
-    """Get global library options.  See SuiteSparse User Guide.
-    """
+    """Get global library options.  See SuiteSparse User Guide."""
     nthreads = ffi.new("int*")
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new("double*")

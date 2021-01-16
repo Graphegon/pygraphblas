@@ -19,8 +19,7 @@ current_uop = contextvars.ContextVar("current_uop")
 
 
 class UnaryOp:
-    """Wrapper around GrB_UnaryOpl
-    """
+    """Wrapper around GrB_UnaryOpl"""
 
     _auto_unaryops = defaultdict(dict)
 
