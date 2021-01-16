@@ -6,6 +6,9 @@
 pygraphblas is a Python wrapper around the
 [GraphBLAS](http://graphblas.org) API.
 
+Check out the [API
+Documentation](https://michelp.github.io/pygraphblas/pygraphblas/index.html)
+
 ## Installation
 
 pygraphblas requires the
