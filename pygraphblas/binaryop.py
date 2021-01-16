@@ -1,3 +1,7 @@
+"""Contains all automatically generated BinaryOps from CFFI.
+
+"""
+
 import sys
 import re
 import contextvars
@@ -13,6 +17,8 @@ current_binop = contextvars.ContextVar("current_binop")
 
 
 class BinaryOp:
+    """Wrapper around GrB_BinaryOp.
+    """
 
     _auto_binaryops = defaultdict(dict)
 

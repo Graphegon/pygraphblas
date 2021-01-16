@@ -1,3 +1,6 @@
+"""Pythonic GraphBLAS type wrappers including User Defined Types.
+
+"""
 from .base import lib, _check, ffi
 from textwrap import dedent
 from operator import methodcaller, itemgetter

@@ -1,3 +1,6 @@
+"""GraphBLAS Scalar (SuiteSparse Only)
+
+"""
 from .base import (
     lib,
     ffi,

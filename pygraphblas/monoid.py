@@ -1,3 +1,7 @@
+"""Contains all automatically generated Monoids from CFFI.
+
+"""
+
 import os
 import sys
 import re

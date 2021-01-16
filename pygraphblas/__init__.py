@@ -1,3 +1,8 @@
+"""pygraphblas is a Python binding for [The
+GraphBLAS](http://graphblas.org) API provided by
+[SuiteSparse::GraphBLAS](https://github.com/DrTimothyAldenDavis/GraphBLAS)
+
+"""
 from .base import *
 
 lib.LAGraph_init()

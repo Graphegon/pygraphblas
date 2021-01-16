@@ -1,3 +1,6 @@
+"""Contains all automatically generated Descriptors from CFFI.
+
+"""
 import contextvars
 from .base import lib, ffi, _check
 
