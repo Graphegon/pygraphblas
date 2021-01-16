@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/michelp/pygraphblas.svg?branch=master)](https://travis-ci.org/michelp/pygraphblas)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/michelp/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb)
+[![Build Status](https://travis-ci.org/Graphegon/pygraphblas.svg?branch=master)](https://travis-ci.org/Graphegon/pygraphblas)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Graphegon/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb)
 <br />
 # pygraphblas
 
