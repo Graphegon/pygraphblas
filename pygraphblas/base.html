@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>pygraphblas.base API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Base module containing some utility functions, exceptions and low
+level library import." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +23,18 @@
 <h1 class="title">Module <code>pygraphblas.base</code></h1>
 </header>
 <section id="section-intro">
+<p>Base module containing some utility functions, exceptions and low
+level library import.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from _pygraphblas import lib, ffi
+<pre><code class="python">&#34;&#34;&#34;Base module containing some utility functions, exceptions and low
+level library import.
+
+&#34;&#34;&#34;
+
+from _pygraphblas import lib, ffi
 from numba import njit
 
 __all__ = [
@@ -61,9 +69,10 @@ GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MINOR,
     lib.GxB_IMPLEMENTATION_SUB,
 )
+&#34;&#34;&#34; Returns a tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
-
+&#34;&#34;&#34; Returns a tuple containing GxB_SPEC (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
 def options_set(
     nthreads=None,
@@ -73,6 +82,9 @@ def options_set(
     bitmap_switch=None,
     format=None,
 ):
+    &#34;&#34;&#34;
+    Set global library options.  See SuiteSparse User Guide.
+    &#34;&#34;&#34;
     if nthreads is not None:
         nthreads = ffi.cast(&#34;int&#34;, nthreads)
         _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
@@ -94,6 +106,8 @@ def options_set(
 
 
 def options_get():
+    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
+    &#34;&#34;&#34;
     nthreads = ffi.new(&#34;int*&#34;)
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new(&#34;double*&#34;)
@@ -271,6 +285,13 @@ def _get_bin_op(op, funcs):
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="pygraphblas.base.GxB_IMPLEMENTATION"><code class="name">var <span class="ident">GxB_IMPLEMENTATION</span></code></dt>
+<dd>
+<div class="desc"><p>Returns a tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
@@ -279,12 +300,15 @@ def _get_bin_op(op, funcs):
 <span>def <span class="ident">options_get</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get global library options.
+See SuiteSparse User Guide.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def options_get():
+    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
+    &#34;&#34;&#34;
     nthreads = ffi.new(&#34;int*&#34;)
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new(&#34;double*&#34;)
@@ -312,7 +336,8 @@ def _get_bin_op(op, funcs):
 <span>def <span class="ident">options_set</span></span>(<span>nthreads=None, chunk=None, burble=None, hyper_switch=None, bitmap_switch=None, format=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set global library options.
+See SuiteSparse User Guide.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -325,6 +350,9 @@ def _get_bin_op(op, funcs):
     bitmap_switch=None,
     format=None,
 ):
+    &#34;&#34;&#34;
+    Set global library options.  See SuiteSparse User Guide.
+    &#34;&#34;&#34;
     if nthreads is not None:
         nthreads = ffi.cast(&#34;int&#34;, nthreads)
         _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
@@ -657,6 +685,11 @@ def _get_bin_op(op, funcs):
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="pygraphblas" href="index.html">pygraphblas</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="pygraphblas.base.GxB_IMPLEMENTATION" href="#pygraphblas.base.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
