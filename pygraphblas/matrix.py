@@ -32,7 +32,8 @@ __all__ = ["Matrix"]
 class Matrix:
     """GraphBLAS Sparse Matrix
 
-    This is a high-level wrapper around the GrB_Matrix type.
+    This is a high-level wrapper around the GrB_Matrix C type using
+    the [cffi](https://cffi.readthedocs.io/en/latest/) library.
 
     A Matrix supports many possible operations according to the
     GraphBLAS API.  Many of those operations have overloaded operators
@@ -43,8 +44,6 @@ class Matrix:
     - v @ A
 
     - A @ v
-
-    - A @ B
 
     - v @= A
 
@@ -108,6 +107,9 @@ class Matrix:
 
     @classmethod
     def dense(cls, typ, nrows=1, ncols=1, fill=None):
+        """Return a dense Matrix.
+
+        """
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
         m = cls.sparse(typ, nrows, ncols)
         if fill is None:
