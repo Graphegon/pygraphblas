@@ -30,7 +30,6 @@ __all__ = [
     "options_get",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
-    "get_version",
 ]
 
 NULL = ffi.NULL
@@ -40,16 +39,10 @@ GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MINOR,
     lib.GxB_IMPLEMENTATION_SUB,
 )
-""" Returns a tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
+""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
-""" Returns a tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
-
-def get_version():
-    version = ffi.new("unsigned int*")
-    subversion = ffi.new("unsigned int*")
-    _check(lib.GrB_getVersion(version, subversion))
-    return (version[0], subversion[0])
+""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 def options_set(
     nthreads=None,
