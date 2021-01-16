@@ -1,4 +1,4 @@
-"""GraphBLAS Matrices.
+"""GraphBLAS Vectors.
 
 """
 import operator
