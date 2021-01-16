@@ -955,7 +955,7 @@ class Matrix:
         """
         return self.select(lib.GxB_NONZERO)
 
-    def _fullself, identity=None):
+    def _full(self, identity=None):
         """
         """
         B = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -981,8 +981,8 @@ class Matrix:
                 self.select(strop, other).apply(types.BOOL.ONE, out=C)
                 return C
         elif isinstance(other, Matrix):
-            A = self._full)
-            B = other._full)
+            A = self._full()
+            B = other._full()
             A.emult(B, strop, out=C)
             return C
         else:
