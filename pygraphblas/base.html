@@ -60,6 +60,8 @@ __all__ = [
     &#34;options_set&#34;,
     &#34;options_get&#34;,
     &#34;GxB_IMPLEMENTATION&#34;,
+    &#34;GxB_SPEC&#34;,
+    &#34;get_version&#34;,
 ]
 
 NULL = ffi.NULL
@@ -73,6 +75,12 @@ GxB_IMPLEMENTATION = (
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
 &#34;&#34;&#34; Returns a tuple containing GxB_SPEC (MAJOR, MINOR, SUB) &#34;&#34;&#34;
+
+def get_version():
+    version = ffi.new(&#34;unsigned int*&#34;)
+    subversion = ffi.new(&#34;unsigned int*&#34;)
+    _check(lib.GrB_getVersion(version, subversion))
+    return (version[0], subversion[0])
 
 def options_set(
     nthreads=None,
@@ -291,11 +299,31 @@ def _get_bin_op(op, funcs):
 <dd>
 <div class="desc"><p>Returns a tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
 </dd>
+<dt id="pygraphblas.base.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
+<dd>
+<div class="desc"><p>Returns a tuple containing GxB_SPEC (MAJOR, MINOR, SUB)</p></div>
+</dd>
 </dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pygraphblas.base.get_version"><code class="name flex">
+<span>def <span class="ident">get_version</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_version():
+    version = ffi.new(&#34;unsigned int*&#34;)
+    subversion = ffi.new(&#34;unsigned int*&#34;)
+    _check(lib.GrB_getVersion(version, subversion))
+    return (version[0], subversion[0])</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.base.options_get"><code class="name flex">
 <span>def <span class="ident">options_get</span></span>(<span>)</span>
 </code></dt>
@@ -690,10 +718,12 @@ See SuiteSparse User Guide.</p></div>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
 <li><code><a title="pygraphblas.base.GxB_IMPLEMENTATION" href="#pygraphblas.base.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
+<li><code><a title="pygraphblas.base.GxB_SPEC" href="#pygraphblas.base.GxB_SPEC">GxB_SPEC</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="pygraphblas.base.get_version" href="#pygraphblas.base.get_version">get_version</a></code></li>
 <li><code><a title="pygraphblas.base.options_get" href="#pygraphblas.base.options_get">options_get</a></code></li>
 <li><code><a title="pygraphblas.base.options_set" href="#pygraphblas.base.options_set">options_set</a></code></li>
 </ul>
