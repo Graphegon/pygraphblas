@@ -8,6 +8,9 @@ current_desc = contextvars.ContextVar("current_desc")
 
 
 class Descriptor:
+    """Wrapper class around pre-defined GraphBLAS Descriptors.
+
+    """
 
     __slots__ = ("field", "value", "desc", "token")
 
