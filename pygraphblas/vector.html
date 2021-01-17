@@ -120,6 +120,14 @@ class Vector:
         return cls(new_vec, typ)
 
     @classmethod
+    def maximal(cls, typ):
+        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Vector with
+        lib.GxB_INDEX_MAX (`2**60`) size.
+
+        &#34;&#34;&#34;
+        return cls.sparse(typ, lib.GxB_INDEX_MAX)
+
+    @classmethod
     def from_lists(cls, I, V, size=None, typ=None):
         &#34;&#34;&#34;Create a new vector from the given lists of indices and values.  If
         size is not provided, it is computed from the max values of
@@ -858,6 +866,14 @@ class Vector:
         new_vec = ffi.new(&#34;GrB_Vector*&#34;)
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
+
+    @classmethod
+    def maximal(cls, typ):
+        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Vector with
+        lib.GxB_INDEX_MAX (`2**60`) size.
+
+        &#34;&#34;&#34;
+        return cls.sparse(typ, lib.GxB_INDEX_MAX)
 
     @classmethod
     def from_lists(cls, I, V, size=None, typ=None):
@@ -1605,6 +1621,25 @@ def from_lists(cls, I, V, size=None, typ=None):
     for i, v in zip(I, V):
         m[i] = v
     return m</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.vector.Vector.maximal"><code class="name flex">
+<span>def <span class="ident">maximal</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a maximal dimension "hypersparse" Vector with
+lib.GxB_INDEX_MAX (<code>2**60</code>) size.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def maximal(cls, typ):
+    &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Vector with
+    lib.GxB_INDEX_MAX (`2**60`) size.
+
+    &#34;&#34;&#34;
+    return cls.sparse(typ, lib.GxB_INDEX_MAX)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.vector.Vector.sparse"><code class="name flex">
@@ -2425,6 +2460,7 @@ every present value in this vector is set to True.</p></div>
 <li><code><a title="pygraphblas.vector.Vector.get" href="#pygraphblas.vector.Vector.get">get</a></code></li>
 <li><code><a title="pygraphblas.vector.Vector.iseq" href="#pygraphblas.vector.Vector.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.vector.Vector.isne" href="#pygraphblas.vector.Vector.isne">isne</a></code></li>
+<li><code><a title="pygraphblas.vector.Vector.maximal" href="#pygraphblas.vector.Vector.maximal">maximal</a></code></li>
 <li><code><a title="pygraphblas.vector.Vector.nonzero" href="#pygraphblas.vector.Vector.nonzero">nonzero</a></code></li>
 <li><code><a title="pygraphblas.vector.Vector.nvals" href="#pygraphblas.vector.Vector.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.vector.Vector.pattern" href="#pygraphblas.vector.Vector.pattern">pattern</a></code></li>

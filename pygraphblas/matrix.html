@@ -150,12 +150,12 @@ class Matrix:
         return m
 
     @classmethod
-    def hypersparse(cls, typ):
-        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
-        2**60 cols.
+    def maximal(cls, typ):
+        &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
+        lib.GxB_INDEX_MAX (`2**60`) rows and cols.
 
         &#34;&#34;&#34;
-        return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
+        return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
 
     @classmethod
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
@@ -1532,12 +1532,12 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         return m
 
     @classmethod
-    def hypersparse(cls, typ):
-        &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
-        2**60 cols.
+    def maximal(cls, typ):
+        &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
+        lib.GxB_INDEX_MAX (`2**60`) rows and cols.
 
         &#34;&#34;&#34;
-        return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
+        return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
 
     @classmethod
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
@@ -2863,25 +2863,6 @@ def from_tsv(cls, tsv_file, typ, nrows, ncols):
     return i</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.matrix.Matrix.hypersparse"><code class="name flex">
-<span>def <span class="ident">hypersparse</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return a maximal dimension "hypersparse" Matrix with 2<strong>60 rows by
-2</strong>60 cols.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def hypersparse(cls, typ):
-    &#34;&#34;&#34;Return a maximal dimension &#34;hypersparse&#34; Matrix with 2**60 rows by
-    2**60 cols.
-
-    &#34;&#34;&#34;
-    return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.matrix.Matrix.identity"><code class="name flex">
 <span>def <span class="ident">identity</span></span>(<span>typ, nrows, one=None)</span>
 </code></dt>
@@ -2906,6 +2887,25 @@ def identity(cls, typ, nrows, one=None):
     for i in range(nrows):
         result[i, i] = one
     return result</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.matrix.Matrix.maximal"><code class="name flex">
+<span>def <span class="ident">maximal</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a square, maximal dimension "hypersparse" Matrix with
+lib.GxB_INDEX_MAX (<code>2**60</code>) rows and cols.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def maximal(cls, typ):
+    &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
+    lib.GxB_INDEX_MAX (`2**60`) rows and cols.
+
+    &#34;&#34;&#34;
+    return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.random"><code class="name flex">
@@ -4370,13 +4370,13 @@ change it.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.gb_type" href="#pygraphblas.matrix.Matrix.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.get" href="#pygraphblas.matrix.Matrix.get">get</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.hyper_switch" href="#pygraphblas.matrix.Matrix.hyper_switch">hyper_switch</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.hypersparse" href="#pygraphblas.matrix.Matrix.hypersparse">hypersparse</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.identity" href="#pygraphblas.matrix.Matrix.identity">identity</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Matrix.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.isne" href="#pygraphblas.matrix.Matrix.isne">isne</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.kron" href="#pygraphblas.matrix.Matrix.kron">kron</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.kronecker" href="#pygraphblas.matrix.Matrix.kronecker">kronecker</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.matrix" href="#pygraphblas.matrix.Matrix.matrix">matrix</a></code></li>
+<li><code><a title="pygraphblas.matrix.Matrix.maximal" href="#pygraphblas.matrix.Matrix.maximal">maximal</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">mxm</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.mxv" href="#pygraphblas.matrix.Matrix.mxv">mxv</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.ncols" href="#pygraphblas.matrix.Matrix.ncols">ncols</a></code></li>
