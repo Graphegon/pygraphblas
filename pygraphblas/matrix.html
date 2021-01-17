@@ -73,40 +73,23 @@ class Matrix:
 
     Operator | Description | Default
     --- | --- | ---
-    A @ B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-
-    v @ A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
-
-    A @ v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
-
+    A @  B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
+    v @  A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
+    A @  v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
     A @= B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-
     v @= A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring
-
     A @= v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring
-
-    A | B | Matrix Union | type default SECOND combiner
-
+    A |  B | Matrix Union | type default SECOND combiner
     A |= B | In-place Matrix Union | type default SECOND combiner
-
-    A &amp; B | Matrix Intersection | type default SECOND combiner
-
+    A &amp;  B | Matrix Intersection | type default SECOND combiner
     A &amp;= B | In-place Matrix Intersection | type default SECOND combiner
-
-    A + B | Matrix Element-Wise Union | type default PLUS combiner
-
+    A +  B | Matrix Element-Wise Union | type default PLUS combiner
     A += B | In-place Matrix Element-Wise Union | type default PLUS combiner
-
-    A - B | Matrix Element-Wise Union | type default MINUS combiner
-
+    A -  B | Matrix Element-Wise Union | type default MINUS combiner
     A -= B | In-place Matrix Element-Wise Union | type default MINUS combiner
-
-    A * B | Matrix Element-Wise Intersection | type default TIMES combiner
-
+    A *  B | Matrix Element-Wise Intersection | type default TIMES combiner
     A *= B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
-
-    A / B | Matrix Element-Wise Intersection | type default DIV combiner
-
+    A /  B | Matrix Element-Wise Intersection | type default DIV combiner
     A /= B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
@@ -1390,29 +1373,105 @@ operators.</p>
 </thead>
 <tbody>
 <tr>
-<td>A @ B</td>
+<td>A @
+B</td>
 <td>Matrix Matrix Multiplication</td>
 <td>type default PLUS_TIMES semiring</td>
 </tr>
+<tr>
+<td>v @
+A</td>
+<td>Vector Matrix Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>A @
+v</td>
+<td>Matrix Vector Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>A @= B</td>
+<td>In-place Matrix Matrix Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>v @= A</td>
+<td>In-place Vector Matrix Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>A @= v</td>
+<td>In-place Matrix Vector Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>A</td>
+<td>B</td>
+<td>Matrix Union</td>
+</tr>
+<tr>
+<td>A</td>
+<td>= B</td>
+<td>In-place Matrix Union</td>
+</tr>
+<tr>
+<td>A &amp;
+B</td>
+<td>Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A &amp;= B</td>
+<td>In-place Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A +
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A += B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A -
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>A -= B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>A *
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A *= B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A /
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+<tr>
+<td>A /= B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
 </tbody>
 </table>
-<p>v @ A | Vector Matrix Multiplication | type default PLUS_TIMES semiring</p>
-<p>A @ v | Matrix Vector Multiplication | type default PLUS_TIMES semiring</p>
-<p>A @= B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring</p>
-<p>v @= A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring</p>
-<p>A @= v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring</p>
-<p>A | B | Matrix Union | type default SECOND combiner</p>
-<p>A |= B | In-place Matrix Union | type default SECOND combiner</p>
-<p>A &amp; B | Matrix Intersection | type default SECOND combiner</p>
-<p>A &amp;= B | In-place Matrix Intersection | type default SECOND combiner</p>
-<p>A + B | Matrix Element-Wise Union | type default PLUS combiner</p>
-<p>A += B | In-place Matrix Element-Wise Union | type default PLUS combiner</p>
-<p>A - B | Matrix Element-Wise Union | type default MINUS combiner</p>
-<p>A -= B | In-place Matrix Element-Wise Union | type default MINUS combiner</p>
-<p>A * B | Matrix Element-Wise Intersection | type default TIMES combiner</p>
-<p>A *= B | In-place Matrix Element-Wise Intersection | type default TIMES combiner</p>
-<p>A / B | Matrix Element-Wise Intersection | type default DIV combiner</p>
-<p>A /= B | In-place Matrix Element-Wise Intersection | type default DIV combiner</p>
 <p>Note that all the above operator syntax is mearly sugar over
 various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">Matrix.mxm()</a></code>, <code><a title="pygraphblas.matrix.Matrix.mxv" href="#pygraphblas.matrix.Matrix.mxv">Matrix.mxv()</a></code>,
 <code>Vector.vxm</code>, <code><a title="pygraphblas.matrix.Matrix.eadd" href="#pygraphblas.matrix.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.matrix.Matrix.emult" href="#pygraphblas.matrix.Matrix.emult">Matrix.emult()</a></code>.</p></div>
@@ -1432,40 +1491,23 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     Operator | Description | Default
     --- | --- | ---
-    A @ B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-
-    v @ A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
-
-    A @ v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
-
+    A @  B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
+    v @  A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
+    A @  v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
     A @= B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-
     v @= A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring
-
     A @= v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring
-
-    A | B | Matrix Union | type default SECOND combiner
-
+    A |  B | Matrix Union | type default SECOND combiner
     A |= B | In-place Matrix Union | type default SECOND combiner
-
-    A &amp; B | Matrix Intersection | type default SECOND combiner
-
+    A &amp;  B | Matrix Intersection | type default SECOND combiner
     A &amp;= B | In-place Matrix Intersection | type default SECOND combiner
-
-    A + B | Matrix Element-Wise Union | type default PLUS combiner
-
+    A +  B | Matrix Element-Wise Union | type default PLUS combiner
     A += B | In-place Matrix Element-Wise Union | type default PLUS combiner
-
-    A - B | Matrix Element-Wise Union | type default MINUS combiner
-
+    A -  B | Matrix Element-Wise Union | type default MINUS combiner
     A -= B | In-place Matrix Element-Wise Union | type default MINUS combiner
-
-    A * B | Matrix Element-Wise Intersection | type default TIMES combiner
-
+    A *  B | Matrix Element-Wise Intersection | type default TIMES combiner
     A *= B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
-
-    A / B | Matrix Element-Wise Intersection | type default DIV combiner
-
+    A /  B | Matrix Element-Wise Intersection | type default DIV combiner
     A /= B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
