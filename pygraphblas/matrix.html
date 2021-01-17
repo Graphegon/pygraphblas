@@ -150,9 +150,9 @@ class Matrix:
         return m
 
     @classmethod
-    def maximal(cls, typ):
-        &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
-        lib.GxB_INDEX_MAX (`2**60`) rows and cols.
+    def assoc(cls, typ):
+        &#34;&#34;&#34;Returns a square, maximal dimension &#34;hypersparse&#34; Associative Array
+        Matrix with lib.GxB_INDEX_MAX (`2**60`) rows and cols.
 
         &#34;&#34;&#34;
         return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
@@ -402,9 +402,11 @@ class Matrix:
         &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
-    def to_binfile(self, filename, comments=NULL):
+    def to_binfile(self, filename, comments=&#34;&#34;):
         &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
-        self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
+        self._check(
+            lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+        )
 
     def to_lists(self):
         &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
@@ -430,12 +432,12 @@ class Matrix:
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
-    def transpose(self, cast=None, out=None, **kwargs):
+    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
-                if TransposeA in kwargs.get(&#34;desc&#34;, ())
+                if TransposeA in desc
                 else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -445,7 +447,7 @@ class Matrix:
                 typ = self.type
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
         return out
 
@@ -456,7 +458,16 @@ class Matrix:
         &#34;&#34;&#34;
         return self.transpose(cast, out, desc=TransposeA)
 
-    def eadd(self, other, add_op=NULL, cast=None, out=None, **kwargs):
+    def eadd(
+        self,
+        other,
+        add_op=None,
+        cast=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Element-wise addition with other matrix.
 
         Element-wise addition applies a binary operator element-wise
@@ -479,13 +490,13 @@ class Matrix:
         interchangeably for either operation.
 
         &#34;&#34;&#34;
-        if add_op is NULL:
+        if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
         add_op = add_op.get_binaryop(self.type, other.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -505,7 +516,16 @@ class Matrix:
         )
         return out
 
-    def emult(self, other, mult_op=NULL, cast=None, out=None, **kwargs):
+    def emult(
+        self,
+        other,
+        mult_op=None,
+        cast=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Element-wise multiplication with other matrix.
 
         Element-wise multiplication applies a binary operator
@@ -528,13 +548,13 @@ class Matrix:
         interchangeably for either operation.
 
         &#34;&#34;&#34;
-        if mult_op is NULL:
+        if mult_op is None:
             mult_op = current_binop.get(binaryop.TIMES)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
         mult_op = mult_op.get_binaryop(self.type, other.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -625,130 +645,76 @@ class Matrix:
         return self.nvals
 
     def __and__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.emult(other, mask=mask, accum=accum, desc=desc)
+        return self.emult(other)
 
     def __iand__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.emult(other, mask=mask, accum=accum, desc=desc, out=self)
+        return self.emult(other, out=self)
 
     def __or__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+        return self.eadd(other)
 
     def __ior__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.eadd(other, mask=mask, accum=accum, desc=desc, out=self)
+        return self.eadd(other, out=self)
 
     def __add__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.PLUS, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.PLUS, other)
+        return self.eadd(other)
 
     def __radd__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.PLUS, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(self, mask=mask, accum=accum, desc=desc)
+            return self.apply_first(other, self.type.PLUS)
+        return other.eadd(self)
 
     def __iadd__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.PLUS, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, out=self, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.PLUS, other, out=self)
+        return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.MINUS, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(
-            other, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.MINUS, other)
+        return self.eadd(other, add_op=self.type.MINUS)
 
     def __rsub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.MINUS, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_first(other, self.type.MINUS)
+        return other.eadd(self, add_op=self.type.MINUS)
 
     def __isub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.MINUS, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.MINUS, other, out=self)
+        return other.eadd(self, out=self, add_op=self.type.MINUS)
 
     def __mul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.TIMES, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(
-            other, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.TIMES, other)
+        return self.eadd(other, add_op=self.type.TIMES)
 
     def __rmul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.TIMES, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_first(other, self.type.TIMES)
+        return other.eadd(self, add_op=self.type.TIMES)
 
     def __imul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.TIMES, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.TIMES, other)
+        return other.eadd(self, out=self, add_op=self.type.TIMES)
 
     def __truediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.DIV, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.DIV, other)
+        return self.eadd(other, add_op=self.type.DIV)
 
     def __rtruediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.DIV, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
+            return self.apply_first(other, self.type.DIV)
+        return other.eadd(self, add_op=self.type.DIV)
 
     def __itruediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.DIV, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.DIV, other)
+        return other.eadd(self, out=self, add_op=self.type.DIV)
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -769,50 +735,50 @@ class Matrix:
             result.mxm(self, out=result)
         return result
 
-    def reduce_bool(self, mon=NULL, **kwargs):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a boolean.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
         result = ffi.new(&#34;_Bool*&#34;)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_int(self, mon=NULL, **kwargs):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
         result = ffi.new(&#34;int64_t*&#34;)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_float(self, mon=NULL, **kwargs):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_vector(self, mon=NULL, out=None, **kwargs):
+    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
         mon = mon.get_monoid(self.type)
         if out is None:
             out = Vector.sparse(self.type, self.nrows)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_Monoid(
                 out.vector[0], mask, accum, mon, self.matrix[0], desc
@@ -820,19 +786,19 @@ class Matrix:
         )
         return out
 
-    def apply(self, op, out=None, **kwargs):
+    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply Unary op to matrix elements.&#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.get_unaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
         )
         return out
 
-    def apply_first(self, first, op, out=None, **kwargs):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
 
@@ -841,7 +807,7 @@ class Matrix:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
         else:
@@ -849,7 +815,7 @@ class Matrix:
         self._check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
         return out
 
-    def apply_second(self, op, second, out=None, **kwargs):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
@@ -858,7 +824,7 @@ class Matrix:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
                 out.matrix[0], mask, accum, op, self.matrix[0], second, desc
@@ -866,7 +832,7 @@ class Matrix:
         )
         return out
 
-    def select(self, op, thunk=NULL, out=NULL, **kwargs):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
@@ -884,18 +850,20 @@ class Matrix:
             &#34;==0&#34;: lib.GxB_EQ_ZERO
 
         &#34;&#34;&#34;
-        if out is NULL:
+        if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
             op = _get_select_op(op)
 
+        if thunk is None:
+            thunk = NULL
         if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self.matrix] = thunk
             thunk = thunk.scalar[0]
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GxB_Matrix_select(
@@ -904,19 +872,19 @@ class Matrix:
         )
         return out
 
-    def tril(self, thunk=NULL):
+    def tril(self, thunk=None):
         &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
-    def triu(self, thunk=NULL):
+    def triu(self, thunk=None):
         &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
-    def diag(self, thunk=NULL):
+    def diag(self, thunk=None):
         &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
-    def offdiag(self, thunk=NULL):
+    def offdiag(self, thunk=None):
         &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
@@ -974,27 +942,37 @@ class Matrix:
     def __ne__(self, other):
         return self._compare(other, operator.ne, &#34;!=&#34;)
 
-    def _get_args(self, mask=NULL, accum=NULL, desc=NULL):
+    def _get_args(self, mask=None, accum=None, desc=Default):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         elif isinstance(mask, Vector):
             mask = mask.vector[0]
-        if accum is NULL:
+        else:
+            mask = NULL
+        if accum is None:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self.type)
-        if desc is NULL:
+        if desc is None or desc == Default:
             desc = current_desc.get(Default)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(self, other, cast=None, out=None, semiring=None, **kwargs):
+    def mxm(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
 
-        mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
@@ -1002,6 +980,7 @@ class Matrix:
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
                 out.matrix[0],
@@ -1015,19 +994,26 @@ class Matrix:
         )
         return out
 
-    def mxv(self, other, cast=None, out=None, semiring=None, **kwargs):
+    def mxv(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
 
-        mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = (
-                self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
-            )
+            new_dimension = self.ncols if TransposeA in desc else self.nrows
             out = Vector.sparse(typ, new_dimension)
 
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
@@ -1055,15 +1041,17 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=NULL, cast=None, out=None, **kwargs):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
             out = self.__class__.sparse(
                 typ, self.nrows * other.nrows, self.ncols * other.ncols
             )
-        if op is NULL:
+        if op is None:
             op = typ.TIMES
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type, other.type)
@@ -1077,10 +1065,12 @@ class Matrix:
 
     kron = kronecker  # new v1.3 name
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
-        ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
-        mask, accum, desc = self._get_args(**kwargs)
+        ta = TransposeA in desc
+        mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
 
@@ -1101,13 +1091,15 @@ class Matrix:
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+        stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         I, ni, size = _build_range(row_slice, stop_val)
 
         self._check(
@@ -1117,12 +1109,14 @@ class Matrix:
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
-        desc = TransposeA
-        if &#34;desc&#34; in kwargs:
-            desc = desc | kwargs[&#34;desc&#34;]
-        return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)
+        desc = desc | TransposeA
+        return self.extract_col(
+            row_index, col_slice, out, desc=desc, mask=None, accum=None
+        )
 
     def __getitem__(self, index):
         if isinstance(index, int):
@@ -1161,11 +1155,13 @@ class Matrix:
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, **kwargs):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+        stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GrB_Col_assign(
@@ -1173,19 +1169,23 @@ class Matrix:
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, **kwargs):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
-        stop_val = self.nrows if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.ncols
+        stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Row_assign(
                 self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -1194,7 +1194,7 @@ class Matrix:
         if jsize is None:
             jsize = self.ncols
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GrB_Matrix_assign(
@@ -1202,9 +1202,11 @@ class Matrix:
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
         else:
@@ -1532,9 +1534,9 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         return m
 
     @classmethod
-    def maximal(cls, typ):
-        &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
-        lib.GxB_INDEX_MAX (`2**60`) rows and cols.
+    def assoc(cls, typ):
+        &#34;&#34;&#34;Returns a square, maximal dimension &#34;hypersparse&#34; Associative Array
+        Matrix with lib.GxB_INDEX_MAX (`2**60`) rows and cols.
 
         &#34;&#34;&#34;
         return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
@@ -1784,9 +1786,11 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
-    def to_binfile(self, filename, comments=NULL):
+    def to_binfile(self, filename, comments=&#34;&#34;):
         &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
-        self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))
+        self._check(
+            lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+        )
 
     def to_lists(self):
         &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
@@ -1812,12 +1816,12 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
-    def transpose(self, cast=None, out=None, **kwargs):
+    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
-                if TransposeA in kwargs.get(&#34;desc&#34;, ())
+                if TransposeA in desc
                 else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -1827,7 +1831,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
                 typ = self.type
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
         return out
 
@@ -1838,7 +1842,16 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         &#34;&#34;&#34;
         return self.transpose(cast, out, desc=TransposeA)
 
-    def eadd(self, other, add_op=NULL, cast=None, out=None, **kwargs):
+    def eadd(
+        self,
+        other,
+        add_op=None,
+        cast=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Element-wise addition with other matrix.
 
         Element-wise addition applies a binary operator element-wise
@@ -1861,13 +1874,13 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         interchangeably for either operation.
 
         &#34;&#34;&#34;
-        if add_op is NULL:
+        if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
         add_op = add_op.get_binaryop(self.type, other.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -1887,7 +1900,16 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def emult(self, other, mult_op=NULL, cast=None, out=None, **kwargs):
+    def emult(
+        self,
+        other,
+        mult_op=None,
+        cast=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Element-wise multiplication with other matrix.
 
         Element-wise multiplication applies a binary operator
@@ -1910,13 +1932,13 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         interchangeably for either operation.
 
         &#34;&#34;&#34;
-        if mult_op is NULL:
+        if mult_op is None:
             mult_op = current_binop.get(binaryop.TIMES)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
         mult_op = mult_op.get_binaryop(self.type, other.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -2007,130 +2029,76 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         return self.nvals
 
     def __and__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.emult(other, mask=mask, accum=accum, desc=desc)
+        return self.emult(other)
 
     def __iand__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.emult(other, mask=mask, accum=accum, desc=desc, out=self)
+        return self.emult(other, out=self)
 
     def __or__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+        return self.eadd(other)
 
     def __ior__(self, other):
-        mask, accum, desc = self._get_args()
-        return self.eadd(other, mask=mask, accum=accum, desc=desc, out=self)
+        return self.eadd(other, out=self)
 
     def __add__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.PLUS, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.PLUS, other)
+        return self.eadd(other)
 
     def __radd__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.PLUS, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(self, mask=mask, accum=accum, desc=desc)
+            return self.apply_first(other, self.type.PLUS)
+        return other.eadd(self)
 
     def __iadd__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.PLUS, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, out=self, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.PLUS, other, out=self)
+        return self.eadd(other, out=self)
 
     def __sub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.MINUS, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(
-            other, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.MINUS, other)
+        return self.eadd(other, add_op=self.type.MINUS)
 
     def __rsub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.MINUS, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_first(other, self.type.MINUS)
+        return other.eadd(self, add_op=self.type.MINUS)
 
     def __isub__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.MINUS, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.MINUS, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.MINUS, other, out=self)
+        return other.eadd(self, out=self, add_op=self.type.MINUS)
 
     def __mul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.TIMES, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(
-            other, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.TIMES, other)
+        return self.eadd(other, add_op=self.type.TIMES)
 
     def __rmul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.TIMES, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_first(other, self.type.TIMES)
+        return other.eadd(self, add_op=self.type.TIMES)
 
     def __imul__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.TIMES, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.TIMES, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.TIMES, other)
+        return other.eadd(self, out=self, add_op=self.type.TIMES)
 
     def __truediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.DIV, other, mask=mask, accum=accum, desc=desc
-            )
-        return self.eadd(other, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
+            return self.apply_second(self.type.DIV, other)
+        return self.eadd(other, add_op=self.type.DIV)
 
     def __rtruediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_first(
-                other, self.type.DIV, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc)
+            return self.apply_first(other, self.type.DIV)
+        return other.eadd(self, add_op=self.type.DIV)
 
     def __itruediv__(self, other):
-        mask, accum, desc = self._get_args()
         if not isinstance(other, Matrix):
-            return self.apply_second(
-                self.type.DIV, other, out=self, mask=mask, accum=accum, desc=desc
-            )
-        return other.eadd(
-            self, out=self, add_op=self.type.DIV, mask=mask, accum=accum, desc=desc
-        )
+            return self.apply_second(self.type.DIV, other)
+        return other.eadd(self, out=self, add_op=self.type.DIV)
 
     def __invert__(self):
         return self.apply(unaryop.MINV)
@@ -2151,50 +2119,50 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             result.mxm(self, out=result)
         return result
 
-    def reduce_bool(self, mon=NULL, **kwargs):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a boolean.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
         result = ffi.new(&#34;_Bool*&#34;)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_int(self, mon=NULL, **kwargs):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
         result = ffi.new(&#34;int64_t*&#34;)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_float(self, mon=NULL, **kwargs):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
         )
         return result[0]
 
-    def reduce_vector(self, mon=NULL, out=None, **kwargs):
+    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
-        if mon is NULL:
+        if mon is None:
             mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
         mon = mon.get_monoid(self.type)
         if out is None:
             out = Vector.sparse(self.type, self.nrows)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_Monoid(
                 out.vector[0], mask, accum, mon, self.matrix[0], desc
@@ -2202,19 +2170,19 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def apply(self, op, out=None, **kwargs):
+    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply Unary op to matrix elements.&#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
             op = op.get_unaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
         )
         return out
 
-    def apply_first(self, first, op, out=None, **kwargs):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
 
@@ -2223,7 +2191,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
         else:
@@ -2231,7 +2199,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         self._check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
         return out
 
-    def apply_second(self, op, second, out=None, **kwargs):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
@@ -2240,7 +2208,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
                 out.matrix[0], mask, accum, op, self.matrix[0], second, desc
@@ -2248,7 +2216,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def select(self, op, thunk=NULL, out=NULL, **kwargs):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
@@ -2266,18 +2234,20 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             &#34;==0&#34;: lib.GxB_EQ_ZERO
 
         &#34;&#34;&#34;
-        if out is NULL:
+        if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
             op = _get_select_op(op)
 
+        if thunk is None:
+            thunk = NULL
         if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self.matrix] = thunk
             thunk = thunk.scalar[0]
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GxB_Matrix_select(
@@ -2286,19 +2256,19 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def tril(self, thunk=NULL):
+    def tril(self, thunk=None):
         &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
-    def triu(self, thunk=NULL):
+    def triu(self, thunk=None):
         &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
-    def diag(self, thunk=NULL):
+    def diag(self, thunk=None):
         &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
-    def offdiag(self, thunk=NULL):
+    def offdiag(self, thunk=None):
         &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
@@ -2356,27 +2326,37 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
     def __ne__(self, other):
         return self._compare(other, operator.ne, &#34;!=&#34;)
 
-    def _get_args(self, mask=NULL, accum=NULL, desc=NULL):
+    def _get_args(self, mask=None, accum=None, desc=Default):
         if isinstance(mask, Matrix):
             mask = mask.matrix[0]
         elif isinstance(mask, Vector):
             mask = mask.vector[0]
-        if accum is NULL:
+        else:
+            mask = NULL
+        if accum is None:
             accum = current_accum.get(NULL)
         if isinstance(accum, BinaryOp):
             accum = accum.get_binaryop(self.type)
-        if desc is NULL:
+        if desc is None or desc == Default:
             desc = current_desc.get(Default)
         if isinstance(desc, Descriptor):
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(self, other, cast=None, out=None, semiring=None, **kwargs):
+    def mxm(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
 
-        mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
@@ -2384,6 +2364,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
                 out.matrix[0],
@@ -2397,19 +2378,26 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def mxv(self, other, cast=None, out=None, semiring=None, **kwargs):
+    def mxv(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
 
-        mask, accum, desc = self._get_args(**kwargs)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = (
-                self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
-            )
+            new_dimension = self.ncols if TransposeA in desc else self.nrows
             out = Vector.sparse(typ, new_dimension)
 
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if semiring is None:
             semiring = typ.PLUS_TIMES
 
@@ -2437,15 +2425,17 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=NULL, cast=None, out=None, **kwargs):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
             out = self.__class__.sparse(
                 typ, self.nrows * other.nrows, self.ncols * other.ncols
             )
-        if op is NULL:
+        if op is None:
             op = typ.TIMES
         if isinstance(op, BinaryOp):
             op = op.get_binaryop(self.type, other.type)
@@ -2459,10 +2449,12 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
 
     kron = kronecker  # new v1.3 name
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
-        ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
-        mask, accum, desc = self._get_args(**kwargs)
+        ta = TransposeA in desc
+        mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
 
@@ -2483,13 +2475,15 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+        stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         I, ni, size = _build_range(row_slice, stop_val)
 
         self._check(
@@ -2499,12 +2493,14 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
-        desc = TransposeA
-        if &#34;desc&#34; in kwargs:
-            desc = desc | kwargs[&#34;desc&#34;]
-        return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)
+        desc = desc | TransposeA
+        return self.extract_col(
+            row_index, col_slice, out, desc=desc, mask=None, accum=None
+        )
 
     def __getitem__(self, index):
         if isinstance(index, int):
@@ -2543,11 +2539,13 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, **kwargs):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+        stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GrB_Col_assign(
@@ -2555,19 +2553,23 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, **kwargs):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
-        stop_val = self.nrows if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.ncols
+        stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Row_assign(
                 self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -2576,7 +2578,7 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         if jsize is None:
             jsize = self.ncols
 
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GrB_Matrix_assign(
@@ -2584,9 +2586,11 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
-        mask, accum, desc = self._get_args(**kwargs)
+        mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
         else:
@@ -2742,6 +2746,25 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
 </details>
 <h3>Static methods</h3>
 <dl>
+<dt id="pygraphblas.matrix.Matrix.assoc"><code class="name flex">
+<span>def <span class="ident">assoc</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a square, maximal dimension "hypersparse" Associative Array
+Matrix with lib.GxB_INDEX_MAX (<code>2**60</code>) rows and cols.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def assoc(cls, typ):
+    &#34;&#34;&#34;Returns a square, maximal dimension &#34;hypersparse&#34; Associative Array
+    Matrix with lib.GxB_INDEX_MAX (`2**60`) rows and cols.
+
+    &#34;&#34;&#34;
+    return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.matrix.Matrix.dense"><code class="name flex">
 <span>def <span class="ident">dense</span></span>(<span>typ, nrows, ncols, fill=None, sparsity_control=None)</span>
 </code></dt>
@@ -2887,25 +2910,6 @@ def identity(cls, typ, nrows, one=None):
     for i in range(nrows):
         result[i, i] = one
     return result</code></pre>
-</details>
-</dd>
-<dt id="pygraphblas.matrix.Matrix.maximal"><code class="name flex">
-<span>def <span class="ident">maximal</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return a square, maximal dimension "hypersparse" Matrix with
-lib.GxB_INDEX_MAX (<code>2**60</code>) rows and cols.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def maximal(cls, typ):
-    &#34;&#34;&#34;Return a square, maximal dimension &#34;hypersparse&#34; Matrix with
-    lib.GxB_INDEX_MAX (`2**60`) rows and cols.
-
-    &#34;&#34;&#34;
-    return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.random"><code class="name flex">
@@ -3229,7 +3233,7 @@ def vals(self):
 <h3>Methods</h3>
 <dl>
 <dt id="pygraphblas.matrix.Matrix.apply"><code class="name flex">
-<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, **kwargs)</span>
+<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply Unary op to matrix elements.</p></div>
@@ -3237,13 +3241,13 @@ def vals(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply(self, op, out=None, **kwargs):
+<pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply Unary op to matrix elements.&#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, UnaryOp):
         op = op.get_unaryop(self.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
     )
@@ -3251,7 +3255,7 @@ def vals(self):
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.apply_first"><code class="name flex">
-<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, **kwargs)</span>
+<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -3260,7 +3264,7 @@ first input to a scalar first.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_first(self, first, op, out=None, **kwargs):
+<pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     first input to a scalar first.
 
@@ -3269,7 +3273,7 @@ first input to a scalar first.</p></div>
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, BinaryOp):
         op = op.get_binaryop(self.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(first, Scalar):
         f = lib.GxB_Matrix_apply_BinaryOp1st
     else:
@@ -3279,7 +3283,7 @@ first input to a scalar first.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.apply_second"><code class="name flex">
-<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, **kwargs)</span>
+<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -3288,7 +3292,7 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_second(self, op, second, out=None, **kwargs):
+<pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     second input to a scalar second.
 
@@ -3297,7 +3301,7 @@ second input to a scalar second.</p></div>
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, BinaryOp):
         op = op.get_binaryop(self.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         self.type.Matrix_apply_BinaryOp2nd(
             out.matrix[0], mask, accum, op, self.matrix[0], second, desc
@@ -3307,7 +3311,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_col"><code class="name flex">
-<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, **kwargs)</span>
+<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a column.</p></div>
@@ -3315,11 +3319,13 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_col(self, col_index, value, row_slice=None, **kwargs):
+<pre><code class="python">def assign_col(
+    self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
-    stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+    stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
 
     self._check(
         lib.GrB_Col_assign(
@@ -3329,7 +3335,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_matrix"><code class="name flex">
-<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, **kwargs)</span>
+<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a submatrix.</p></div>
@@ -3337,7 +3343,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_matrix(self, value, rindex=None, cindex=None, **kwargs):
+<pre><code class="python">def assign_matrix(
+    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
     I, ni, isize = _build_range(rindex, self.nrows - 1)
     J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -3346,7 +3354,7 @@ second input to a scalar second.</p></div>
     if jsize is None:
         jsize = self.ncols
 
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
 
     self._check(
         lib.GrB_Matrix_assign(
@@ -3356,7 +3364,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_row"><code class="name flex">
-<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, **kwargs)</span>
+<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a row.</p></div>
@@ -3364,12 +3372,14 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_row(self, row_index, value, col_slice=None, **kwargs):
+<pre><code class="python">def assign_row(
+    self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
-    stop_val = self.nrows if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.ncols
+    stop_val = self.nrows if TransposeA in desc else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
 
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Row_assign(
             self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
@@ -3378,7 +3388,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_scalar"><code class="name flex">
-<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, **kwargs)</span>
+<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a scalar to the Matrix.</p></div>
@@ -3386,9 +3396,11 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_scalar(self, value, row_slice=None, col_slice=None, **kwargs):
+<pre><code class="python">def assign_scalar(
+    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     if row_slice:
         I, ni, isize = _build_range(row_slice, self.nrows - 1)
     else:
@@ -3446,7 +3458,7 @@ values.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.diag"><code class="name flex">
-<span>def <span class="ident">diag</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
+<span>def <span class="ident">diag</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the diagonal Matrix.</p></div>
@@ -3454,7 +3466,7 @@ values.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def diag(self, thunk=NULL):
+<pre><code class="python">def diag(self, thunk=None):
     &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_DIAG, thunk=thunk)</code></pre>
 </details>
@@ -3476,7 +3488,7 @@ values.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.eadd"><code class="name flex">
-<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=&lt;cdata &#x27;void *&#x27; NULL&gt;, cast=None, out=None, **kwargs)</span>
+<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise addition with other matrix.</p>
@@ -3501,7 +3513,16 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def eadd(self, other, add_op=NULL, cast=None, out=None, **kwargs):
+<pre><code class="python">def eadd(
+    self,
+    other,
+    add_op=None,
+    cast=None,
+    out=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Element-wise addition with other matrix.
 
     Element-wise addition applies a binary operator element-wise
@@ -3524,13 +3545,13 @@ interchangeably for either operation.</p></div>
     interchangeably for either operation.
 
     &#34;&#34;&#34;
-    if add_op is NULL:
+    if add_op is None:
         add_op = current_binop.get(binaryop.PLUS)
     elif isinstance(add_op, str):
         add_op = _get_bin_op(add_op, self.type)
 
     add_op = add_op.get_binaryop(self.type, other.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     if out is None:
         typ = cast or types.promote(self.type, other.type)
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -3552,7 +3573,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.emult"><code class="name flex">
-<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=&lt;cdata &#x27;void *&#x27; NULL&gt;, cast=None, out=None, **kwargs)</span>
+<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise multiplication with other matrix.</p>
@@ -3576,7 +3597,16 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def emult(self, other, mult_op=NULL, cast=None, out=None, **kwargs):
+<pre><code class="python">def emult(
+    self,
+    other,
+    mult_op=None,
+    cast=None,
+    out=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Element-wise multiplication with other matrix.
 
     Element-wise multiplication applies a binary operator
@@ -3599,13 +3629,13 @@ interchangeably for either operation.</p></div>
     interchangeably for either operation.
 
     &#34;&#34;&#34;
-    if mult_op is NULL:
+    if mult_op is None:
         mult_op = current_binop.get(binaryop.TIMES)
     elif isinstance(mult_op, str):
         mult_op = _get_bin_op(mult_op, self.type)
 
     mult_op = mult_op.get_binaryop(self.type, other.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     if out is None:
         typ = cast or types.promote(self.type, other.type)
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -3627,7 +3657,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_col"><code class="name flex">
-<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, **kwargs)</span>
+<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a column Vector.</p></div>
@@ -3635,13 +3665,15 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_col(self, col_index, row_slice=None, out=None, **kwargs):
+<pre><code class="python">def extract_col(
+    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
-    stop_val = self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
+    stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
         out = Vector.sparse(self.type, stop_val)
 
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     I, ni, size = _build_range(row_slice, stop_val)
 
     self._check(
@@ -3653,7 +3685,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_matrix"><code class="name flex">
-<span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, **kwargs)</span>
+<span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a submatrix.</p></div>
@@ -3661,10 +3693,12 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_matrix(self, rindex=None, cindex=None, out=None, **kwargs):
+<pre><code class="python">def extract_matrix(
+    self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
-    ta = TransposeA in kwargs.get(&#34;desc&#34;, ())
-    mask, accum, desc = self._get_args(**kwargs)
+    ta = TransposeA in desc
+    mask, accum, desc = self._get_args(mask, accum, desc)
     result_nrows = self.ncols if ta else self.nrows
     result_ncols = self.nrows if ta else self.ncols
 
@@ -3687,7 +3721,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_row"><code class="name flex">
-<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, **kwargs)</span>
+<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a row Vector.</p></div>
@@ -3695,12 +3729,14 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_row(self, row_index, col_slice=None, out=None, **kwargs):
+<pre><code class="python">def extract_row(
+    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
-    desc = TransposeA
-    if &#34;desc&#34; in kwargs:
-        desc = desc | kwargs[&#34;desc&#34;]
-    return self.extract_col(row_index, col_slice, out, desc=desc, **kwargs)</code></pre>
+    desc = desc | TransposeA
+    return self.extract_col(
+        row_index, col_slice, out, desc=desc, mask=None, accum=None
+    )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.get"><code class="name flex">
@@ -3756,7 +3792,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.kron"><code class="name flex">
-<span>def <span class="ident">kron</span></span>(<span>self, other, op=&lt;cdata &#x27;void *&#x27; NULL&gt;, cast=None, out=None, **kwargs)</span>
+<span>def <span class="ident">kron</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Kronecker product.</p></div>
@@ -3764,15 +3800,17 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(self, other, op=NULL, cast=None, out=None, **kwargs):
+<pre><code class="python">def kronecker(
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
         out = self.__class__.sparse(
             typ, self.nrows * other.nrows, self.ncols * other.ncols
         )
-    if op is NULL:
+    if op is None:
         op = typ.TIMES
     if isinstance(op, BinaryOp):
         op = op.get_binaryop(self.type, other.type)
@@ -3786,7 +3824,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.kronecker"><code class="name flex">
-<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=&lt;cdata &#x27;void *&#x27; NULL&gt;, cast=None, out=None, **kwargs)</span>
+<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Kronecker product.</p></div>
@@ -3794,15 +3832,17 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(self, other, op=NULL, cast=None, out=None, **kwargs):
+<pre><code class="python">def kronecker(
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
         out = self.__class__.sparse(
             typ, self.nrows * other.nrows, self.ncols * other.ncols
         )
-    if op is NULL:
+    if op is None:
         op = typ.TIMES
     if isinstance(op, BinaryOp):
         op = op.get_binaryop(self.type, other.type)
@@ -3816,7 +3856,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.mxm"><code class="name flex">
-<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, **kwargs)</span>
+<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-matrix multiply.</p></div>
@@ -3824,12 +3864,20 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxm(self, other, cast=None, out=None, semiring=None, **kwargs):
+<pre><code class="python">def mxm(
+    self,
+    other,
+    cast=None,
+    out=None,
+    semiring=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
 
-    mask, accum, desc = self._get_args(**kwargs)
     typ = cast or types.promote(self.type, other.type, semiring)
     if out is None:
         out = self.__class__.sparse(typ, self.nrows, other.ncols)
@@ -3837,6 +3885,7 @@ the element is not present.</p></div>
     if semiring is None:
         semiring = typ.PLUS_TIMES
 
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_mxm(
             out.matrix[0],
@@ -3852,7 +3901,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.mxv"><code class="name flex">
-<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, **kwargs)</span>
+<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-vector multiply.</p></div>
@@ -3860,19 +3909,26 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxv(self, other, cast=None, out=None, semiring=None, **kwargs):
+<pre><code class="python">def mxv(
+    self,
+    other,
+    cast=None,
+    out=None,
+    semiring=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
 
-    mask, accum, desc = self._get_args(**kwargs)
     typ = cast or types.promote(self.type, other.type, semiring)
     if out is None:
-        new_dimension = (
-            self.ncols if TransposeA in kwargs.get(&#34;desc&#34;, ()) else self.nrows
-        )
+        new_dimension = self.ncols if TransposeA in desc else self.nrows
         out = Vector.sparse(typ, new_dimension)
 
+    mask, accum, desc = self._get_args(mask, accum, desc)
     if semiring is None:
         semiring = typ.PLUS_TIMES
 
@@ -3905,7 +3961,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.offdiag"><code class="name flex">
-<span>def <span class="ident">offdiag</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
+<span>def <span class="ident">offdiag</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the off-diagonal Matrix.</p></div>
@@ -3913,7 +3969,7 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def offdiag(self, thunk=NULL):
+<pre><code class="python">def offdiag(self, thunk=None):
     &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_OFFDIAG, thunk=thunk)</code></pre>
 </details>
@@ -3940,7 +3996,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_bool"><code class="name flex">
-<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=&lt;cdata &#x27;void *&#x27; NULL&gt;, **kwargs)</span>
+<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a boolean.</p></div>
@@ -3948,13 +4004,13 @@ every present value in this matrix is set to True.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_bool(self, mon=NULL, **kwargs):
+<pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Reduce matrix to a boolean.&#34;&#34;&#34;
-    if mon is NULL:
+    if mon is None:
         mon = current_monoid.get(types.BOOL.LOR_MONOID)
     mon = mon.get_monoid(self.type)
     result = ffi.new(&#34;_Bool*&#34;)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
     )
@@ -3962,7 +4018,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_float"><code class="name flex">
-<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=&lt;cdata &#x27;void *&#x27; NULL&gt;, **kwargs)</span>
+<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an float.</p></div>
@@ -3970,12 +4026,12 @@ every present value in this matrix is set to True.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_float(self, mon=NULL, **kwargs):
+<pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
-    if mon is NULL:
+    if mon is None:
         mon = current_monoid.get(self.type.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;double*&#34;)
     self._check(
         lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
@@ -3984,7 +4040,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_int"><code class="name flex">
-<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=&lt;cdata &#x27;void *&#x27; NULL&gt;, **kwargs)</span>
+<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an integer.</p></div>
@@ -3992,13 +4048,13 @@ every present value in this matrix is set to True.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_int(self, mon=NULL, **kwargs):
+<pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
-    if mon is NULL:
+    if mon is None:
         mon = current_monoid.get(types.INT64.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
     result = ffi.new(&#34;int64_t*&#34;)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
     )
@@ -4006,7 +4062,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_vector"><code class="name flex">
-<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=&lt;cdata &#x27;void *&#x27; NULL&gt;, out=None, **kwargs)</span>
+<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a vector.</p></div>
@@ -4014,14 +4070,14 @@ every present value in this matrix is set to True.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_vector(self, mon=NULL, out=None, **kwargs):
+<pre><code class="python">def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
-    if mon is NULL:
+    if mon is None:
         mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
     mon = mon.get_monoid(self.type)
     if out is None:
         out = Vector.sparse(self.type, self.nrows)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_reduce_Monoid(
             out.vector[0], mask, accum, mon, self.matrix[0], desc
@@ -4050,7 +4106,7 @@ outside the resized matrix are deleted.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self, op, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;, out=&lt;cdata &#x27;void *&#x27; NULL&gt;, **kwargs)</span>
+<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select elements that match the given select operation condition.
@@ -4072,7 +4128,7 @@ Can be a string mapping to following operators:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, op, thunk=NULL, out=NULL, **kwargs):
+<pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Select elements that match the given select operation condition.
     Can be a string mapping to following operators:
 
@@ -4090,18 +4146,20 @@ Can be a string mapping to following operators:</p>
         &#34;==0&#34;: lib.GxB_EQ_ZERO
 
     &#34;&#34;&#34;
-    if out is NULL:
+    if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, str):
         op = _get_select_op(op)
 
+    if thunk is None:
+        thunk = NULL
     if isinstance(thunk, (bool, int, float, complex)):
         thunk = Scalar.from_value(thunk)
     if isinstance(thunk, Scalar):
         self._keep_alives[self.matrix] = thunk
         thunk = thunk.scalar[0]
 
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
 
     self._check(
         lib.GxB_Matrix_select(
@@ -4134,7 +4192,7 @@ Can be a string mapping to following operators:</p>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.to_binfile"><code class="name flex">
-<span>def <span class="ident">to_binfile</span></span>(<span>self, filename, comments=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
+<span>def <span class="ident">to_binfile</span></span>(<span>self, filename, comments='')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Write this matrix using custom SuiteSparse binary format.</p></div>
@@ -4142,9 +4200,11 @@ Can be a string mapping to following operators:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_binfile(self, filename, comments=NULL):
+<pre><code class="python">def to_binfile(self, filename, comments=&#34;&#34;):
     &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
-    self._check(lib.LAGraph_binwrite(self.matrix, filename, comments))</code></pre>
+    self._check(
+        lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+    )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.to_lists"><code class="name flex">
@@ -4248,7 +4308,7 @@ Can be a string mapping to following operators:</p>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.transpose"><code class="name flex">
-<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, **kwargs)</span>
+<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Transpose matrix.</p></div>
@@ -4256,12 +4316,12 @@ Can be a string mapping to following operators:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transpose(self, cast=None, out=None, **kwargs):
+<pre><code class="python">def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)
-            if TransposeA in kwargs.get(&#34;desc&#34;, ())
+            if TransposeA in desc
             else (self.ncols, self.nrows)
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -4271,13 +4331,13 @@ Can be a string mapping to following operators:</p>
             typ = self.type
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
         out = self.__class__(_out, typ)
-    mask, accum, desc = self._get_args(**kwargs)
+    mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.tril"><code class="name flex">
-<span>def <span class="ident">tril</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
+<span>def <span class="ident">tril</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the lower triangular Matrix.</p></div>
@@ -4285,13 +4345,13 @@ Can be a string mapping to following operators:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def tril(self, thunk=NULL):
+<pre><code class="python">def tril(self, thunk=None):
     &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_TRIL, thunk=thunk)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.triu"><code class="name flex">
-<span>def <span class="ident">triu</span></span>(<span>self, thunk=&lt;cdata &#x27;void *&#x27; NULL&gt;)</span>
+<span>def <span class="ident">triu</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the upper triangular Matrix.</p></div>
@@ -4299,7 +4359,7 @@ Can be a string mapping to following operators:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def triu(self, thunk=NULL):
+<pre><code class="python">def triu(self, thunk=None):
     &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
     return self.select(lib.GxB_TRIU, thunk=thunk)</code></pre>
 </details>
@@ -4351,6 +4411,7 @@ change it.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.assign_matrix" href="#pygraphblas.matrix.Matrix.assign_matrix">assign_matrix</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.assign_row" href="#pygraphblas.matrix.Matrix.assign_row">assign_row</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.assign_scalar" href="#pygraphblas.matrix.Matrix.assign_scalar">assign_scalar</a></code></li>
+<li><code><a title="pygraphblas.matrix.Matrix.assoc" href="#pygraphblas.matrix.Matrix.assoc">assoc</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.cast" href="#pygraphblas.matrix.Matrix.cast">cast</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.clear" href="#pygraphblas.matrix.Matrix.clear">clear</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.cols" href="#pygraphblas.matrix.Matrix.cols">cols</a></code></li>
@@ -4376,7 +4437,6 @@ change it.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.kron" href="#pygraphblas.matrix.Matrix.kron">kron</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.kronecker" href="#pygraphblas.matrix.Matrix.kronecker">kronecker</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.matrix" href="#pygraphblas.matrix.Matrix.matrix">matrix</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.maximal" href="#pygraphblas.matrix.Matrix.maximal">maximal</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">mxm</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.mxv" href="#pygraphblas.matrix.Matrix.mxv">mxv</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.ncols" href="#pygraphblas.matrix.Matrix.ncols">ncols</a></code></li>

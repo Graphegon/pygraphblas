@@ -37,9 +37,7 @@ current_desc = contextvars.ContextVar(&#34;current_desc&#34;)
 
 
 class Descriptor:
-    &#34;&#34;&#34;Wrapper class around pre-defined GraphBLAS Descriptors.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Wrapper class around pre-defined GraphBLAS Descriptors.&#34;&#34;&#34;
 
     __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;desc&#34;, &#34;token&#34;)
 
@@ -77,6 +75,12 @@ class Descriptor:
         val = ffi.new(&#34;GrB_Desc_Value*&#34;)
         _check(lib.GxB_Desc_get(self.desc[0], field, val))
         return val[0]
+
+    def __eq__(self, other):
+        for f in (lib.GrB_INP0, lib.GrB_INP1, lib.GrB_MASK, lib.GrB_OUTP):
+            if self[f] != other[f]:
+                return False
+        return True
 
 
 # three sets of descriptor names here
