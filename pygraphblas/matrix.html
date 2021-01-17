@@ -1063,8 +1063,6 @@ class Matrix:
         )
         return out
 
-    kron = kronecker  # new v1.3 name
-
     def extract_matrix(
         self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
     ):
@@ -2447,8 +2445,6 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         )
         return out
 
-    kron = kronecker  # new v1.3 name
-
     def extract_matrix(
         self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
     ):
@@ -3233,7 +3229,7 @@ def vals(self):
 <h3>Methods</h3>
 <dl>
 <dt id="pygraphblas.matrix.Matrix.apply"><code class="name flex">
-<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply Unary op to matrix elements.</p></div>
@@ -3255,7 +3251,7 @@ def vals(self):
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.apply_first"><code class="name flex">
-<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -3283,7 +3279,7 @@ first input to a scalar first.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.apply_second"><code class="name flex">
-<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -3311,7 +3307,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_col"><code class="name flex">
-<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a column.</p></div>
@@ -3335,7 +3331,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_matrix"><code class="name flex">
-<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a submatrix.</p></div>
@@ -3364,7 +3360,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_row"><code class="name flex">
-<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a row.</p></div>
@@ -3388,7 +3384,7 @@ second input to a scalar second.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.assign_scalar"><code class="name flex">
-<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a scalar to the Matrix.</p></div>
@@ -3488,7 +3484,7 @@ values.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.eadd"><code class="name flex">
-<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise addition with other matrix.</p>
@@ -3573,7 +3569,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.emult"><code class="name flex">
-<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise multiplication with other matrix.</p>
@@ -3657,7 +3653,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_col"><code class="name flex">
-<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a column Vector.</p></div>
@@ -3685,7 +3681,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_matrix"><code class="name flex">
-<span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a submatrix.</p></div>
@@ -3721,7 +3717,7 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.extract_row"><code class="name flex">
-<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a row Vector.</p></div>
@@ -3791,40 +3787,8 @@ the element is not present.</p></div>
     return not self.iseq(other)</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.matrix.Matrix.kron"><code class="name flex">
-<span>def <span class="ident">kron</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Kronecker product.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def kronecker(
-    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-):
-    &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
-    mask, accum, desc = self._get_args(mask, accum, desc)
-    typ = cast or types.promote(self.type, other.type)
-    if out is None:
-        out = self.__class__.sparse(
-            typ, self.nrows * other.nrows, self.ncols * other.ncols
-        )
-    if op is None:
-        op = typ.TIMES
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self.type, other.type)
-
-    self._check(
-        lib.GrB_Matrix_kronecker_BinaryOp(
-            out.matrix[0], mask, accum, op, self.matrix[0], other.matrix[0], desc
-        )
-    )
-    return out</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.matrix.Matrix.kronecker"><code class="name flex">
-<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Kronecker product.</p></div>
@@ -3856,7 +3820,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.mxm"><code class="name flex">
-<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-matrix multiply.</p></div>
@@ -3901,7 +3865,7 @@ the element is not present.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.mxv"><code class="name flex">
-<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-vector multiply.</p></div>
@@ -3996,7 +3960,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_bool"><code class="name flex">
-<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a boolean.</p></div>
@@ -4018,7 +3982,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_float"><code class="name flex">
-<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an float.</p></div>
@@ -4040,7 +4004,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_int"><code class="name flex">
-<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an integer.</p></div>
@@ -4062,7 +4026,7 @@ every present value in this matrix is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.reduce_vector"><code class="name flex">
-<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a vector.</p></div>
@@ -4106,7 +4070,7 @@ outside the resized matrix are deleted.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select elements that match the given select operation condition.
@@ -4308,7 +4272,7 @@ Can be a string mapping to following operators:</p>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.transpose"><code class="name flex">
-<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;pygraphblas.descriptor.Descriptor object&gt;)</span>
+<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Transpose matrix.</p></div>
@@ -4434,7 +4398,6 @@ change it.</p></div>
 <li><code><a title="pygraphblas.matrix.Matrix.identity" href="#pygraphblas.matrix.Matrix.identity">identity</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Matrix.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.isne" href="#pygraphblas.matrix.Matrix.isne">isne</a></code></li>
-<li><code><a title="pygraphblas.matrix.Matrix.kron" href="#pygraphblas.matrix.Matrix.kron">kron</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.kronecker" href="#pygraphblas.matrix.Matrix.kronecker">kronecker</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.matrix" href="#pygraphblas.matrix.Matrix.matrix">matrix</a></code></li>
 <li><code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">mxm</a></code></li>
