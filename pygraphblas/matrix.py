@@ -23,14 +23,14 @@ from . import types, binaryop, monoid, unaryop, semiring as _semiring
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import Semiring, current_semiring
-from .binaryop import BinaryOp, current_accum, current_binop
+from .binaryop import BinaryOp, current_accum, current_binop, SECOND
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
 
 __all__ = ["Matrix"]
-
+__pdoc__ = {'Matrix.__init__': False}
 
 class Matrix:
     """GraphBLAS Sparse Matrix
@@ -54,13 +54,13 @@ class Matrix:
 
     - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - A | B: Matrix Union: type default PLUS combiner
+    - A | B: Matrix Union: type default SECOND combiner
 
-    - A & B: Matrix Intersection: type default TIMES combiner
+    - A |= B: In-place Matrix Union: type default SECOND combiner
 
-    - A |= B: In-place Matrix Union: type default PLUS combiner
+    - A & B: Matrix Intersection: type default SECOND combiner
 
-    - A &= B: In-place Matrix Intersection: type default TIMES combiner
+    - A &= B: In-place Matrix Intersection: type default SECOND combiner
 
     - A + B: Matrix Element-Wise Union: type default PLUS combiner
 
@@ -70,17 +70,17 @@ class Matrix:
 
     - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
 
-    - A * B: Matrix Element-Wise Union: type default TIMES combiner
+    - A * B: Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner
+    - A *= B: In-place Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A / B: Matrix Element-Wise Union: type default DIV combiner
+    - A / B: Matrix Element-Wise Intersection: type default DIV combiner
 
-    - A /= B: In-place Matrix Element-Wise Union: type default DIV combiner
+    - A /= B: In-place Matrix Element-Wise Intersection: type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
-    various combinations of calling `mxm`, `mxv`, `vmx`, `eadd`, and
-    `emult`.
+    various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
+    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     """
 
@@ -616,16 +616,16 @@ class Matrix:
         return self.nvals
 
     def __and__(self, other):
-        return self.emult(other)
+        return self.emult(other, SECOND)
 
     def __iand__(self, other):
-        return self.emult(other, out=self)
+        return self.emult(other, SECOND, out=self)
 
     def __or__(self, other):
-        return self.eadd(other)
+        return self.eadd(other, SECOND)
 
     def __ior__(self, other):
-        return self.eadd(other, out=self)
+        return self.eadd(other, SECOND, out=self)
 
     def __add__(self, other):
         if not isinstance(other, Matrix):
