@@ -333,8 +333,9 @@ def test_matrix_binfile_read_write(tmp_path):
     binfilef = tmp_path / "binfilewrite_test.binfile"
     binfilef.touch()
     m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
-    m.to_binfile(binfilef)
-    n = Matrix.from_binfile(binfilef)
+    bbf = bytes(binfilef)
+    m.to_binfile(bbf)
+    n = Matrix.from_binfile(bbf)
     assert n.iseq(m)
 
 
