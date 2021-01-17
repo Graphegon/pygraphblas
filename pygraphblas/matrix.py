@@ -1044,7 +1044,6 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
-p
         I, ni, isize = _build_range(rindex, result_nrows - 1)
         J, nj, jsize = _build_range(cindex, result_ncols - 1)
         if isize is None:
