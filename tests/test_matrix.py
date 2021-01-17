@@ -127,6 +127,7 @@ def test_matrix_eadd():
     assert sum1.iseq(addition_ref)
     sum1 = v + w
     assert sum1.iseq(addition_ref)
+    sum1 = v.eadd(w, v.type.SECOND)
     sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
@@ -136,10 +137,6 @@ def test_matrix_eadd():
     prod_ref = Matrix.from_lists(I, I, [0, 1, 4, 9, 16, 25, 36, 49, 64, 81])
     prod_ref[0, 1] = 1
     prod_ref[1, 0] = 1
-
-    with binaryop.TIMES:
-        prod4 = v | w
-        assert prod4.iseq(prod_ref)
 
     prod5 = v.eadd(w, "*")
     assert prod5.iseq(prod_ref)
@@ -174,6 +171,7 @@ def test_matrix_emult():
 
     mult1 = v.emult(w)
     assert mult1.iseq(Matrix.from_lists(I, I, [v * v for v in V]))
+    mult1 = v.emult(w, v.type.SECOND)
     mult2 = v & w
     assert mult2.iseq(mult1)
     mult3 = v.dup()

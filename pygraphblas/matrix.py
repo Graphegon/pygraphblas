@@ -23,7 +23,7 @@ from . import types, binaryop, monoid, unaryop, semiring as _semiring
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import Semiring, current_semiring
-from .binaryop import BinaryOp, current_accum, current_binop, SECOND
+from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
@@ -616,16 +616,16 @@ class Matrix:
         return self.nvals
 
     def __and__(self, other):
-        return self.emult(other, SECOND)
+        return self.emult(other, self.type.SECOND)
 
     def __iand__(self, other):
-        return self.emult(other, SECOND, out=self)
+        return self.emult(other, self.type.SECOND, out=self)
 
     def __or__(self, other):
-        return self.eadd(other, SECOND)
+        return self.eadd(other, self.type.SECOND)
 
     def __ior__(self, other):
-        return self.eadd(other, SECOND, out=self)
+        return self.eadd(other, self.type.SECOND, out=self)
 
     def __add__(self, other):
         if not isinstance(other, Matrix):
