@@ -181,14 +181,15 @@ def _check(res, raise_no_val=False):
         raise _error_codes[res]()
 
 
+_all_slice = slice(None, None, None)
+
+
 def _build_range(rslice, stop_val):
     # if already a list, return it and its length
     if isinstance(rslice, list):
         return rslice, len(rslice), len(rslice)
 
-    if rslice is None or (
-        rslice.start is None and rslice.stop is None and rslice.step is None
-    ):
+    if rslice is None or rslice == _all_slice:
         return lib.GrB_ALL, 0, None
 
     start = rslice.start

@@ -8,9 +8,7 @@ current_desc = contextvars.ContextVar("current_desc")
 
 
 class Descriptor:
-    """Wrapper class around pre-defined GraphBLAS Descriptors.
-
-    """
+    """Wrapper class around pre-defined GraphBLAS Descriptors."""
 
     __slots__ = ("field", "value", "desc", "token")
 
@@ -48,6 +46,12 @@ class Descriptor:
         val = ffi.new("GrB_Desc_Value*")
         _check(lib.GxB_Desc_get(self.desc[0], field, val))
         return val[0]
+
+    def __eq__(self, other):
+        for f in (lib.GrB_INP0, lib.GrB_INP1, lib.GrB_MASK, lib.GrB_OUTP):
+            if self[f] != other[f]:
+                return False
+        return True
 
 
 # three sets of descriptor names here
