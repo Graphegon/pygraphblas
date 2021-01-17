@@ -42,46 +42,43 @@ class Matrix:
     GraphBLAS API.  Many of those operations have overloaded
     operators.
 
-    Column 1 | Column 2 | Column 3
+    Operator | Description | Default
     --- | --- | ---
-    **Things** | _Don't_ | [Need](http://makeuseof.com)
-    To | *__Look__* | `Pretty`
+    A @ B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
 
-    - A @ B: Matrix Matrix Multiplication: type default PLUS_TIMES semiring
+    v @ A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
 
-    - v @ A: Vector Matrix Multiplication: type default PLUS_TIMES semiring
+    A @ v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
 
-    - A @ v: Matrix Vector Multiplication: type default PLUS_TIMES semiring
+    A @= B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring
 
-    - A @= B: In-place Matrix Matrix Multiplication: type default PLUS_TIMES semiring
+    v @= A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring
 
-    - v @= A: In-place Vector Matrix Multiplication: type default PLUS_TIMES semiring
+    A @= v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring
 
-    - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
+    A | B | Matrix Union | type default SECOND combiner
 
-    - A | B: Matrix Union: type default SECOND combiner
+    A |= B | In-place Matrix Union | type default SECOND combiner
 
-    - A |= B: In-place Matrix Union: type default SECOND combiner
+    A & B | Matrix Intersection | type default SECOND combiner
 
-    - A & B: Matrix Intersection: type default SECOND combiner
+    A &= B | In-place Matrix Intersection | type default SECOND combiner
 
-    - A &= B: In-place Matrix Intersection: type default SECOND combiner
+    A + B | Matrix Element-Wise Union | type default PLUS combiner
 
-    - A + B: Matrix Element-Wise Union: type default PLUS combiner
+    A += B | In-place Matrix Element-Wise Union | type default PLUS combiner
 
-    - A += B: In-place Matrix Element-Wise Union: type default PLUS combiner
+    A - B | Matrix Element-Wise Union | type default MINUS combiner
 
-    - A - B: Matrix Element-Wise Union: type default MINUS combiner
+    A -= B | In-place Matrix Element-Wise Union | type default MINUS combiner
 
-    - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
+    A * B | Matrix Element-Wise Intersection | type default TIMES combiner
 
-    - A * B: Matrix Element-Wise Intersection: type default TIMES combiner
+    A *= B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
 
-    - A *= B: In-place Matrix Element-Wise Intersection: type default TIMES combiner
+    A / B | Matrix Element-Wise Intersection | type default DIV combiner
 
-    - A / B: Matrix Element-Wise Intersection: type default DIV combiner
-
-    - A /= B: In-place Matrix Element-Wise Intersection: type default DIV combiner
+    A /= B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
@@ -1047,7 +1044,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
-
+p
         I, ni, isize = _build_range(rindex, result_nrows - 1)
         J, nj, jsize = _build_range(cindex, result_ncols - 1)
         if isize is None:
