@@ -10,15 +10,16 @@ current_desc = contextvars.ContextVar("current_desc")
 class Descriptor:
     """Wrapper class around pre-defined GraphBLAS Descriptors."""
 
-    __slots__ = ("field", "value", "desc", "token")
+    __slots__ = ("field", "value", "desc", "token", "name")
 
-    def __init__(self, field, value):
+    def __init__(self, field, value, name=None):
         self.field = field
         self.value = value
         self.desc = ffi.new("GrB_Descriptor*")
         _check(lib.GrB_Descriptor_new(self.desc))
         self[field] = value
         self.token = None
+        self.name = name
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -32,7 +33,7 @@ class Descriptor:
             _check(lib.GrB_Descriptor_free(self.desc))
 
     def __or__(self, other):
-        d = Descriptor(self.field, self.value)
+        d = Descriptor(self.field, self.value, self.name + "|" + other.name)
         d[other.field] = other.value
         return d
 
@@ -53,21 +54,24 @@ class Descriptor:
                 return False
         return True
 
+    def __repr__(self):
+        return f"<Descriptor {self.name}>"
+
 
 # three sets of descriptor names here
 # lagraph_name = new_name = VerboseName
 
-oooo = Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT)
-otoo = T1 = TransposeB = Descriptor(lib.GrB_INP1, lib.GrB_TRAN)
-tooo = T0 = TransposeA = Descriptor(lib.GrB_INP0, lib.GrB_TRAN)
+oooo = Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT, "Default")
+otoo = T1 = TransposeB = Descriptor(lib.GrB_INP1, lib.GrB_TRAN, "T1")
+tooo = T0 = TransposeA = Descriptor(lib.GrB_INP0, lib.GrB_TRAN, "T0")
 ttoo = T0T1 = TransposeATransposeB = T0 | T1
 
-ooco = C = ComplementMask = Descriptor(lib.GrB_MASK, lib.GrB_COMP)
+ooco = C = ComplementMask = Descriptor(lib.GrB_MASK, lib.GrB_COMP, "C")
 otco = CT1 = TransposeBComplementMask = C | T1
 toco = CT0 = TransposeAComplementMask = C | T0
 ttco = CT0T1 = TransposeATransposeBComplementMask = C | T0 | T1
 
-ooor = R = Replace = Descriptor(lib.GrB_OUTP, lib.GrB_REPLACE)
+ooor = R = Replace = Descriptor(lib.GrB_OUTP, lib.GrB_REPLACE, "R")
 toor = RT0 = TransposeAReplace = R | T0
 otor = RT1 = TransposeBReplace = R | T1
 ttor = RT0T1 = R | T0 | T1
@@ -80,7 +84,7 @@ ttcr = RCT0T1 = R | C | T0 | T1
 # STRUCTURAL is new so it doesnt have an lagraph naming scheme or
 # verbose names due to their silly length.
 
-oosoo = S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE)
+oosoo = S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, "S")
 otsoo = ST1 = S | T1
 tosoo = ST0 = S | T0
 ttsoo = ST0T1 = S | T0 | T1

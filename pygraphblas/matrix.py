@@ -1034,8 +1034,6 @@ class Matrix:
         )
         return out
 
-    kron = kronecker  # new v1.3 name
-
     def extract_matrix(
         self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
     ):

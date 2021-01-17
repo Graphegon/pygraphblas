@@ -500,11 +500,11 @@ def test_matrix_assign():
         m[""] = n
 
 
-def test_kron():
+def test_kronecker():
     n = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
 
-    o = n.kron(m)
+    o = n.kronecker(m)
     assert o.iseq(
         Matrix.from_lists(
             [0, 1, 2, 3, 4, 5, 6, 7, 8],
