@@ -59,7 +59,7 @@ from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
 
 __all__ = [&#34;Matrix&#34;]
-
+__pdoc__ = {&#39;Matrix.__init__&#39;: False}
 
 class Matrix:
     &#34;&#34;&#34;GraphBLAS Sparse Matrix
@@ -83,13 +83,13 @@ class Matrix:
 
     - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - A | B: Matrix Union: type default PLUS combiner
+    - A | B: Matrix Union: type default SECOND combiner
 
-    - A &amp; B: Matrix Intersection: type default TIMES combiner
+    - A |= B: In-place Matrix Union: type default SECOND combiner
 
-    - A |= B: In-place Matrix Union: type default PLUS combiner
+    - A &amp; B: Matrix Intersection: type default SECOND combiner
 
-    - A &amp;= B: In-place Matrix Intersection: type default TIMES combiner
+    - A &amp;= B: In-place Matrix Intersection: type default SECOND combiner
 
     - A + B: Matrix Element-Wise Union: type default PLUS combiner
 
@@ -99,17 +99,17 @@ class Matrix:
 
     - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
 
-    - A * B: Matrix Element-Wise Union: type default TIMES combiner
+    - A * B: Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner
+    - A *= B: In-place Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A / B: Matrix Element-Wise Union: type default DIV combiner
+    - A / B: Matrix Element-Wise Intersection: type default DIV combiner
 
-    - A /= B: In-place Matrix Element-Wise Union: type default DIV combiner
+    - A /= B: In-place Matrix Element-Wise Intersection: type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
-    various combinations of calling `mxm`, `mxv`, `vmx`, `eadd`, and
-    `emult`.
+    various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
+    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     &#34;&#34;&#34;
 
@@ -645,16 +645,16 @@ class Matrix:
         return self.nvals
 
     def __and__(self, other):
-        return self.emult(other)
+        return self.emult(other, self.type.SECOND)
 
     def __iand__(self, other):
-        return self.emult(other, out=self)
+        return self.emult(other, self.type.SECOND, out=self)
 
     def __or__(self, other):
-        return self.eadd(other)
+        return self.eadd(other, self.type.SECOND)
 
     def __ior__(self, other):
-        return self.eadd(other, out=self)
+        return self.eadd(other, self.type.SECOND, out=self)
 
     def __add__(self, other):
         if not isinstance(other, Matrix):
@@ -1370,7 +1370,6 @@ class Matrix:
 <dl>
 <dt id="pygraphblas.matrix.Matrix"><code class="flex name class">
 <span>class <span class="ident">Matrix</span></span>
-<span>(</span><span>matrix, typ=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>GraphBLAS Sparse Matrix</p>
@@ -1400,16 +1399,16 @@ operators.</p>
 <p>A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring</p>
 </li>
 <li>
-<p>A | B: Matrix Union: type default PLUS combiner</p>
+<p>A | B: Matrix Union: type default SECOND combiner</p>
 </li>
 <li>
-<p>A &amp; B: Matrix Intersection: type default TIMES combiner</p>
+<p>A |= B: In-place Matrix Union: type default SECOND combiner</p>
 </li>
 <li>
-<p>A |= B: In-place Matrix Union: type default PLUS combiner</p>
+<p>A &amp; B: Matrix Intersection: type default SECOND combiner</p>
 </li>
 <li>
-<p>A &amp;= B: In-place Matrix Intersection: type default TIMES combiner</p>
+<p>A &amp;= B: In-place Matrix Intersection: type default SECOND combiner</p>
 </li>
 <li>
 <p>A + B: Matrix Element-Wise Union: type default PLUS combiner</p>
@@ -1424,21 +1423,21 @@ operators.</p>
 <p>A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner</p>
 </li>
 <li>
-<p>A * B: Matrix Element-Wise Union: type default TIMES combiner</p>
+<p>A * B: Matrix Element-Wise Intersection: type default TIMES combiner</p>
 </li>
 <li>
-<p>A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner</p>
+<p>A *= B: In-place Matrix Element-Wise Intersection: type default TIMES combiner</p>
 </li>
 <li>
-<p>A / B: Matrix Element-Wise Union: type default DIV combiner</p>
+<p>A / B: Matrix Element-Wise Intersection: type default DIV combiner</p>
 </li>
 <li>
-<p>A /= B: In-place Matrix Element-Wise Union: type default DIV combiner</p>
+<p>A /= B: In-place Matrix Element-Wise Intersection: type default DIV combiner</p>
 </li>
 </ul>
 <p>Note that all the above operator syntax is mearly sugar over
-various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</code>, <code>eadd</code>, and
-<code>emult</code>.</p></div>
+various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">Matrix.mxm()</a></code>, <code><a title="pygraphblas.matrix.Matrix.mxv" href="#pygraphblas.matrix.Matrix.mxv">Matrix.mxv()</a></code>,
+<code>Vector.vxm</code>, <code><a title="pygraphblas.matrix.Matrix.eadd" href="#pygraphblas.matrix.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.matrix.Matrix.emult" href="#pygraphblas.matrix.Matrix.emult">Matrix.emult()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1465,13 +1464,13 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
 
     - A @= v: In-place Matrix Vector Multiplication: type default PLUS_TIMES semiring
 
-    - A | B: Matrix Union: type default PLUS combiner
+    - A | B: Matrix Union: type default SECOND combiner
 
-    - A &amp; B: Matrix Intersection: type default TIMES combiner
+    - A |= B: In-place Matrix Union: type default SECOND combiner
 
-    - A |= B: In-place Matrix Union: type default PLUS combiner
+    - A &amp; B: Matrix Intersection: type default SECOND combiner
 
-    - A &amp;= B: In-place Matrix Intersection: type default TIMES combiner
+    - A &amp;= B: In-place Matrix Intersection: type default SECOND combiner
 
     - A + B: Matrix Element-Wise Union: type default PLUS combiner
 
@@ -1481,17 +1480,17 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
 
     - A -= B: In-place Matrix Element-Wise Union: type default MINUS combiner
 
-    - A * B: Matrix Element-Wise Union: type default TIMES combiner
+    - A * B: Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A *= B: In-place Matrix Element-Wise Union: type default TIMES combiner
+    - A *= B: In-place Matrix Element-Wise Intersection: type default TIMES combiner
 
-    - A / B: Matrix Element-Wise Union: type default DIV combiner
+    - A / B: Matrix Element-Wise Intersection: type default DIV combiner
 
-    - A /= B: In-place Matrix Element-Wise Union: type default DIV combiner
+    - A /= B: In-place Matrix Element-Wise Intersection: type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
-    various combinations of calling `mxm`, `mxv`, `vmx`, `eadd`, and
-    `emult`.
+    various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
+    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     &#34;&#34;&#34;
 
@@ -2027,16 +2026,16 @@ various combinations of calling <code>mxm</code>, <code>mxv</code>, <code>vmx</c
         return self.nvals
 
     def __and__(self, other):
-        return self.emult(other)
+        return self.emult(other, self.type.SECOND)
 
     def __iand__(self, other):
-        return self.emult(other, out=self)
+        return self.emult(other, self.type.SECOND, out=self)
 
     def __or__(self, other):
-        return self.eadd(other)
+        return self.eadd(other, self.type.SECOND)
 
     def __ior__(self, other):
-        return self.eadd(other, out=self)
+        return self.eadd(other, self.type.SECOND, out=self)
 
     def __add__(self, other):
         if not isinstance(other, Matrix):
