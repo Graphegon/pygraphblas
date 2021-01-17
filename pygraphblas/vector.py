@@ -91,6 +91,14 @@ class Vector:
         return cls(new_vec, typ)
 
     @classmethod
+    def maximal(cls, typ):
+        """Return a maximal dimension "hypersparse" Vector with
+        lib.GxB_INDEX_MAX (`2**60`) size.
+
+        """
+        return cls.sparse(typ, lib.GxB_INDEX_MAX)
+
+    @classmethod
     def from_lists(cls, I, V, size=None, typ=None):
         """Create a new vector from the given lists of indices and values.  If
         size is not provided, it is computed from the max values of

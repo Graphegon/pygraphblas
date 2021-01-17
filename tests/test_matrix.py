@@ -1035,3 +1035,8 @@ def test_to_scipy_sparse():
     assert (s.data == [63, 105, 17, 20]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
+
+def test_maximal_matrix():
+    m = Matrix.maximal(UINT8)
+    assert m.nrows == lib.GxB_INDEX_MAX
+    assert m.ncols == lib.GxB_INDEX_MAX

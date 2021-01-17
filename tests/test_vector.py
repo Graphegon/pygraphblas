@@ -516,3 +516,8 @@ def test_str_and_repr():
 def test_nonzero():
     m = Vector.from_lists([0, 1], [0, 2])
     assert m.nonzero().iseq(Vector.from_lists([1], [2]))
+
+
+def test_maximal_vector():
+    m = Vector.maximal(UINT8)
+    assert m.size == lib.GxB_INDEX_MAX

@@ -121,12 +121,12 @@ class Matrix:
         return m
 
     @classmethod
-    def hypersparse(cls, typ):
-        """Return a maximal dimension "hypersparse" Matrix with 2**60 rows by
-        2**60 cols.
+    def maximal(cls, typ):
+        """Return a square, maximal dimension "hypersparse" Matrix with
+        lib.GxB_INDEX_MAX (`2**60`) rows and cols.
 
         """
-        return cls.sparse(lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
+        return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
 
     @classmethod
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
