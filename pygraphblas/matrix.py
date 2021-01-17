@@ -42,6 +42,11 @@ class Matrix:
     GraphBLAS API.  Many of those operations have overloaded
     operators.
 
+    Column 1 | Column 2 | Column 3
+    --- | --- | ---
+    **Things** | _Don't_ | [Need](http://makeuseof.com)
+    To | *__Look__* | `Pretty`
+
     - A @ B: Matrix Matrix Multiplication: type default PLUS_TIMES semiring
 
     - v @ A: Vector Matrix Multiplication: type default PLUS_TIMES semiring
