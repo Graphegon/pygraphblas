@@ -1,3 +1,23 @@
+"""Contains all automatically generated Monoids from CFFI.
+
+The scalar addition of conventional matrix multiplication is replaced
+with a *monoid*.  A monoid is an associative and commutative binary
+operator `z=f(x,y)` where all three domains are the same (the
+types of `x`, `y`, and `z`), and where the operator has
+an identity value `id` such that `f(x,id)=f(id,x)=x`.
+Performing matrix multiplication with a semiring uses a monoid in
+place of the `add` operator, scalar addition being just one of many
+possible monoids.  The identity value of addition is zero, since
+$x+0=0+x=x$.  GraphBLAS includes many built-in operators suitable for
+use as a monoid: min (with an identity value of positive infinity),
+max (whose identity is negative infinity), add (identity is zero),
+multiply (with an identity of one), four logical operators: AND, OR,
+exclusive-OR, and Boolean equality (XNOR), four bitwise operators
+(AND, OR, XOR, and XNOR), and the ANY operator.  User-created monoids
+can be defined with any associative and commutative operator that has
+an identity value.
+"""
+
 import os
 import sys
 import re

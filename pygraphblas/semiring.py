@@ -1,3 +1,16 @@
+"""Contains all automatically generated Semirings from CFFI.
+
+This documentation does not show all the semirings in this module
+because of the sheer number of them (over 1700).  Please see the
+SuiteSparse User Guide for more information on the semirings usable in
+The GraphBLAS.
+
+All the standard and extension semirings that comes with SuiteSparse
+are represented by objects in this module.  For example
+`pygraphblas.semiring.PLUS_TIMES_INT64`.
+
+"""
+
 import sys
 import re
 import contextvars

@@ -29,7 +29,7 @@ then
     trap 'rm -rf "$TMPDIR"' EXIT
     
     cd $TMPDIR
-    git clone --branch $BRANCH https://github.com/michelp/pygraphblas.git
+    git clone --branch $BRANCH https://github.com/Graphegon/pygraphblas.git
     cd pygraphblas
 fi
 

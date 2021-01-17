@@ -1,3 +1,32 @@
+"""
+pygraphblas is a python extension that bridges [The GraphBLAS
+API](http://graphblas.org) with the [Python](https://python.org)
+programming language.  It uses the
+[CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
+level GraphBLAS API and provides high level Matrix and Vector Python
+types that make GraphBLAS simple and easy.
+
+GraphBLAS is a sparse linear algebra API optimized for processing
+graphs encoded as sparse matrices and vectors.  In addition to common
+real/integer matrix algebra operations, GraphBLAS supports over a
+thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
+algebra operations, that can be used as basic building blocks to
+implement a wide variety of graph algorithms. See
+[Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
+from Wikipedia for some specific examples.
+
+pygraphblas leverages the expertise in the field of sparse matrix
+programming by [The GraphBLAS Forum](http://graphblas.org) and uses
+the
+[SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
+API implementation. SuiteSparse:GraphBLAS is brought to us by the work
+of [Dr. Tim Davis](http://faculty.cse.tamu.edu/davis/welcome.html),
+professor in the Department of Computer Science and Engineering at
+Texas A&M University.  [News and
+information](http://faculty.cse.tamu.edu/davis/news.html) can provide
+you with a lot more background information.
+
+"""
 from .base import *
 
 lib.LAGraph_init()
@@ -21,4 +50,3 @@ from .binaryop import *
 from .unaryop import *
 from .monoid import *
 from .descriptor import *
-from .utils import *

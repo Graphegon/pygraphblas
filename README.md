@@ -1,10 +1,13 @@
-[![Build Status](https://travis-ci.org/michelp/pygraphblas.svg?branch=master)](https://travis-ci.org/michelp/pygraphblas)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/michelp/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb)
+![Tests](https://github.com/Graphegon/pygraphblas/workflows/Tests/badge.svg)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Graphegon/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb)
 <br />
 # pygraphblas
 
 pygraphblas is a Python wrapper around the
 [GraphBLAS](http://graphblas.org) API.
+
+Check out the [API
+Documentation](https://michelp.github.io/pygraphblas/pygraphblas/index.html)
 
 ## Installation
 

@@ -21,7 +21,7 @@ cd ..
 
 python3 -m virtualenv --python=python3 venv
 
-git clone https://github.com/michelp/pygraphblas.git --depth 1 --branch michelp/${SS_RELEASE}
+git clone https://github.com/Graphegon/pygraphblas.git --depth 1 --branch Graphegon/${SS_RELEASE}
 cd pygraphblas
 
 cat  <<'EOF' >> libpatch.diff

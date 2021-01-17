@@ -1,3 +1,7 @@
+"""Contains all automatically generated UnaryOps from CFFI.
+
+"""
+
 import re, sys
 from itertools import chain
 from textwrap import dedent
@@ -15,6 +19,7 @@ current_uop = contextvars.ContextVar("current_uop")
 
 
 class UnaryOp:
+    """Wrapper around GrB_UnaryOpl"""
 
     _auto_unaryops = defaultdict(dict)
 

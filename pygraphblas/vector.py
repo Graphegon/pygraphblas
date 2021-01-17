@@ -1,3 +1,6 @@
+"""GraphBLAS Sparse Vectors.
+
+"""
 import operator
 import weakref
 from array import array

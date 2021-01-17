@@ -30,7 +30,7 @@ def test_matrix_create():
     assert m.ncols == 10
     assert m.nvals == 0
     assert len(m) == 0
-    m = Matrix.dense(INT8)
+    m = Matrix.dense(INT8, 1, 1)
     assert m.nrows == 1
     assert m.ncols == 1
     assert m.nvals == 1
@@ -333,8 +333,9 @@ def test_matrix_binfile_read_write(tmp_path):
     binfilef = tmp_path / "binfilewrite_test.binfile"
     binfilef.touch()
     m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
-    m.to_binfile(bytes(binfilef))
-    n = Matrix.from_binfile(bytes(binfilef))
+    bbf = bytes(binfilef)
+    m.to_binfile(bbf)
+    n = Matrix.from_binfile(bbf)
     assert n.iseq(m)
 
 

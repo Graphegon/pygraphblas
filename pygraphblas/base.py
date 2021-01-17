@@ -1,3 +1,8 @@
+"""Base module containing some utility functions, exceptions and low
+level library import.
+
+"""
+
 from _pygraphblas import lib, ffi
 from numba import njit
 
@@ -24,6 +29,7 @@ __all__ = [
     "options_set",
     "options_get",
     "GxB_IMPLEMENTATION",
+    "GxB_SPEC",
 ]
 
 NULL = ffi.NULL
@@ -33,8 +39,10 @@ GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MINOR,
     lib.GxB_IMPLEMENTATION_SUB,
 )
+""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
+""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
 def options_set(
@@ -45,6 +53,9 @@ def options_set(
     bitmap_switch=None,
     format=None,
 ):
+    """
+    Set global library options.  See SuiteSparse User Guide.
+    """
     if nthreads is not None:
         nthreads = ffi.cast("int", nthreads)
         _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
@@ -66,6 +77,7 @@ def options_set(
 
 
 def options_get():
+    """Get global library options.  See SuiteSparse User Guide."""
     nthreads = ffi.new("int*")
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new("double*")

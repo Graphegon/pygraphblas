@@ -1,3 +1,6 @@
+"""Contains all automatically generated Descriptors from CFFI.
+
+"""
 import contextvars
 from .base import lib, ffi, _check
 
@@ -5,6 +8,9 @@ current_desc = contextvars.ContextVar("current_desc")
 
 
 class Descriptor:
+    """Wrapper class around pre-defined GraphBLAS Descriptors.
+
+    """
 
     __slots__ = ("field", "value", "desc", "token")
 
