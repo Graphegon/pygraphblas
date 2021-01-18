@@ -46,7 +46,7 @@ from .base import (
     _build_range,
     _get_select_op,
     _get_bin_op,
-    GxB_INDEX_MAX
+    GxB_INDEX_MAX,
 )
 
 from . import types, binaryop, monoid, unaryop, semiring as _semiring
@@ -96,7 +96,7 @@ class Matrix:
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     &#34;&#34;&#34;
 
@@ -286,7 +286,7 @@ class Matrix:
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
@@ -296,14 +296,14 @@ class Matrix:
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
-        &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Returns the transpose of the Matrix.  See `Matrix.transpose`.&#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
@@ -373,8 +373,9 @@ class Matrix:
         return status[0]
 
     def pattern(self, typ=types.BOOL):
-        &#34;&#34;&#34;Return the pattern of the matrix, this is a boolean Matrix where
-        every present value in this matrix is set to True.
+        &#34;&#34;&#34;Return the pattern of the matrix where every present value in this
+        matrix is set to identity value for the provided type which
+        defaults to BOOL.
 
         &#34;&#34;&#34;
 
@@ -417,7 +418,7 @@ class Matrix:
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -1482,7 +1483,7 @@ B</td>
 </table>
 <p>Note that all the above operator syntax is mearly sugar over
 various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" href="#pygraphblas.matrix.Matrix.mxm">Matrix.mxm()</a></code>, <code><a title="pygraphblas.matrix.Matrix.mxv" href="#pygraphblas.matrix.Matrix.mxv">Matrix.mxv()</a></code>,
-<code>Vector.vxm</code>, <code><a title="pygraphblas.matrix.Matrix.eadd" href="#pygraphblas.matrix.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.matrix.Matrix.emult" href="#pygraphblas.matrix.Matrix.emult">Matrix.emult()</a></code>.</p></div>
+<code><a title="pygraphblas.vector.Vector.vxm" href="vector.html#pygraphblas.vector.Vector.vxm">Vector.vxm()</a></code>, <code><a title="pygraphblas.matrix.Matrix.eadd" href="#pygraphblas.matrix.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.matrix.Matrix.emult" href="#pygraphblas.matrix.Matrix.emult">Matrix.emult()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1520,7 +1521,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     &#34;&#34;&#34;
 
@@ -1710,7 +1711,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
@@ -1720,14 +1721,14 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
         return n[0]
 
     @property
     def T(self):
-        &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Returns the transpose of the Matrix.  See `Matrix.transpose`.&#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
@@ -1797,8 +1798,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return status[0]
 
     def pattern(self, typ=types.BOOL):
-        &#34;&#34;&#34;Return the pattern of the matrix, this is a boolean Matrix where
-        every present value in this matrix is set to True.
+        &#34;&#34;&#34;Return the pattern of the matrix where every present value in this
+        matrix is set to identity value for the provided type which
+        defaults to BOOL.
 
         &#34;&#34;&#34;
 
@@ -1841,7 +1843,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -3004,14 +3006,15 @@ def sparse(cls, typ, nrows=None, ncols=None):
 <dl>
 <dt id="pygraphblas.matrix.Matrix.T"><code class="name">var <span class="ident">T</span></code></dt>
 <dd>
-<div class="desc"><p>Returns the transpose of the Matrix.</p></div>
+<div class="desc"><p>Returns the transpose of the Matrix.
+See <code><a title="pygraphblas.matrix.Matrix.transpose" href="#pygraphblas.matrix.Matrix.transpose">Matrix.transpose()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def T(self):
-    &#34;&#34;&#34;Returns the transpose of the Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Returns the transpose of the Matrix.  See `Matrix.transpose`.&#34;&#34;&#34;
     return self.transpose()</code></pre>
 </details>
 </dd>
@@ -3122,14 +3125,14 @@ def nrows(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.nvals"><code class="name">var <span class="ident">nvals</span></code></dt>
 <dd>
-<div class="desc"><p>Return the number of Matrix values.</p></div>
+<div class="desc"><p>Return the number of values stored in the Matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def nvals(self):
-    &#34;&#34;&#34;Return the number of Matrix values.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3156,14 +3159,14 @@ def rows(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.shape"><code class="name">var <span class="ident">shape</span></code></dt>
 <dd>
-<div class="desc"><p>Numpy-like description of matrix shape.</p></div>
+<div class="desc"><p>Numpy-like description of matrix shape as 2-tuple (nrows, ncols).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def shape(self):
-    &#34;&#34;&#34;Numpy-like description of matrix shape.&#34;&#34;&#34;
+    &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
     return (self.nrows, self.ncols)</code></pre>
 </details>
 </dd>
@@ -3955,15 +3958,17 @@ the element is not present.</p></div>
 <span>def <span class="ident">pattern</span></span>(<span>self, typ=pygraphblas.types.BOOL)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return the pattern of the matrix, this is a boolean Matrix where
-every present value in this matrix is set to True.</p></div>
+<div class="desc"><p>Return the pattern of the matrix where every present value in this
+matrix is set to identity value for the provided type which
+defaults to BOOL.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pattern(self, typ=types.BOOL):
-    &#34;&#34;&#34;Return the pattern of the matrix, this is a boolean Matrix where
-    every present value in this matrix is set to True.
+    &#34;&#34;&#34;Return the pattern of the matrix where every present value in this
+    matrix is set to identity value for the provided type which
+    defaults to BOOL.
 
     &#34;&#34;&#34;
 
@@ -4288,13 +4293,13 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Transpose matrix.</p></div>
+<div class="desc"><p>Return Transpose of this matrix.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Transpose matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)

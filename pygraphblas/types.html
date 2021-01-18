@@ -490,10 +490,7 @@ def promote(left, right, semiring=None):
     for t in _promotion_order:
         if left == t or right == t:
             return t
-    raise TypeError(
-        &#34;inconvertable types %s and %s&#34;
-        % (repr(left), repr(right) )
-    )</code></pre>
+    raise TypeError(&#34;inconvertable types %s and %s&#34; % (repr(left), repr(right)))</code></pre>
 </details>
 </section>
 <section>
@@ -578,10 +575,7 @@ infered from the operands and possible semiring.</p></div>
     for t in _promotion_order:
         if left == t or right == t:
             return t
-    raise TypeError(
-        &#34;inconvertable types %s and %s&#34;
-        % (repr(left), repr(right) )
-    )</code></pre>
+    raise TypeError(&#34;inconvertable types %s and %s&#34; % (repr(left), repr(right)))</code></pre>
 </details>
 </dd>
 </dl>
