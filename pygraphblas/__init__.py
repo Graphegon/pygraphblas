@@ -1,5 +1,4 @@
-"""
-pygraphblas is a python extension that bridges [The GraphBLAS
+"""pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
@@ -12,14 +11,26 @@ a matrix and vice versa.
 
 ![Adjacency Matrix](../AdjacencyMatrix.png)
 
-GraphBLAS is a sparse linear algebra API optimized for processing
-graphs encoded as sparse matrices and vectors.  In addition to common
-real/integer matrix algebra operations, GraphBLAS supports over a
-thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
-algebra operations, that can be used as basic building blocks to
-implement a wide variety of graph algorithms. See
+GraphBLAS is a sparse [Linear
+Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
+for processing graphs encoded as sparse matrices and vectors.  In
+addition to common real/integer matrix algebra operations, GraphBLAS
+supports over a thousand different
+[Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
+that can be used as basic building blocks to implement a wide variety
+of graph algorithms. See
 [Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
 from Wikipedia for some specific examples.
+
+The core operation of Linear Algebra is [Matrix
+Multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication).
+In this GraphBLAS duality, this is an operation along the edges of a
+graph from nodes to their adjacenct neighbors, taking one step in a
+[Breadth First
+Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
+graph:
+
+![Adjacency Matrix](../AdjacencyMatrixBFS.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses

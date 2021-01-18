@@ -37,8 +37,6 @@ __pdoc__ = {"Matrix.__init__": False}
 class Matrix:
     """GraphBLAS Sparse Matrix
 
-    >>> assert False
-
     This is a high-level wrapper around the GrB_Matrix C type using
     the [cffi](https://cffi.readthedocs.io/en/latest/) library.
 
