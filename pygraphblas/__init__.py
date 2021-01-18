@@ -111,6 +111,12 @@ __all__ = [
 GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
 
+GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
+""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
+
+GxB_SPEC = GxB_SPEC
+""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
+
 __pdoc__ = {
     "base": False,
     "build": False,
