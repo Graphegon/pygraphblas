@@ -44,24 +44,24 @@ class Matrix:
 
     Operator | Description | Default
     --- | --- | ---
-    A @  B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-    v @  A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
-    A @  v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
-    A @= B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring
-    v @= A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring
-    A @= v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring
-    A |  B | Matrix Union | type default SECOND combiner
-    A |= B | In-place Matrix Union | type default SECOND combiner
-    A &  B | Matrix Intersection | type default SECOND combiner
-    A &= B | In-place Matrix Intersection | type default SECOND combiner
-    A +  B | Matrix Element-Wise Union | type default PLUS combiner
-    A += B | In-place Matrix Element-Wise Union | type default PLUS combiner
-    A -  B | Matrix Element-Wise Union | type default MINUS combiner
-    A -= B | In-place Matrix Element-Wise Union | type default MINUS combiner
-    A *  B | Matrix Element-Wise Intersection | type default TIMES combiner
-    A *= B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
-    A /  B | Matrix Element-Wise Intersection | type default DIV combiner
-    A /= B | In-place Matrix Element-Wise Intersection | type default DIV combiner
+    A @   B | Matrix Matrix Multiplication | type default PLUS_TIMES semiring
+    v @   A | Vector Matrix Multiplication | type default PLUS_TIMES semiring
+    A @   v | Matrix Vector Multiplication | type default PLUS_TIMES semiring
+    A @=  B | In-place Matrix Matrix Multiplication | type default PLUS_TIMES semiring
+    v @=  A | In-place Vector Matrix Multiplication | type default PLUS_TIMES semiring
+    A @=  v | In-place Matrix Vector Multiplication | type default PLUS_TIMES semiring
+    A \|  B | Matrix Union | type default SECOND combiner
+    A \|= B | In-place Matrix Union | type default SECOND combiner
+    A &   B | Matrix Intersection | type default SECOND combiner
+    A &=  B | In-place Matrix Intersection | type default SECOND combiner
+    A +   B | Matrix Element-Wise Union | type default PLUS combiner
+    A +=  B | In-place Matrix Element-Wise Union | type default PLUS combiner
+    A -   B | Matrix Element-Wise Union | type default MINUS combiner
+    A -=  B | In-place Matrix Element-Wise Union | type default MINUS combiner
+    A *   B | Matrix Element-Wise Intersection | type default TIMES combiner
+    A *=  B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
+    A /   B | Matrix Element-Wise Intersection | type default DIV combiner
+    A /=  B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
@@ -95,23 +95,17 @@ class Matrix:
         self._check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=0, ncols=0):
-        """Create an empty Matrix from the given type, number of rows, and
-        number of columns.
+    def sparse(cls, typ, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+        """Create an empty sparse Matrix from the given type.  The dimensions
+        can be specified with `nrows` and `ncols`.  If no dimensions
+        are specified, they default to
+        `pygraphblas.lib.GxB_INDEX_MAX`.
 
         """
         new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
         m = cls(new_mat, typ)
         return m
-
-    @classmethod
-    def assoc(cls, typ):
-        """Returns a square, maximal dimension "hypersparse" Associative Array
-        Matrix with lib.GxB_INDEX_MAX (`2**60`) rows and cols.
-
-        """
-        return cls.sparse(typ, lib.GxB_INDEX_MAX, lib.GxB_INDEX_MAX)
 
     @classmethod
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):

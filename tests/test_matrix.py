@@ -22,8 +22,8 @@ def test_matrix_init_without_type():
 
 def test_matrix_create():
     m = Matrix.sparse(INT8)
-    assert m.nrows == 0
-    assert m.ncols == 0
+    assert m.nrows == lib.GxB_INDEX_MAX
+    assert m.ncols == lib.GxB_INDEX_MAX
     assert m.nvals == 0
     m = Matrix.sparse(INT8, 10, 10)
     assert m.nrows == 10
@@ -1034,8 +1034,3 @@ def test_to_scipy_sparse():
     m = v.to_numpy()
     assert m.shape == (10, 10)
 
-
-def test_maximal_matrix():
-    m = Matrix.assoc(UINT8)
-    assert m.nrows == lib.GxB_INDEX_MAX
-    assert m.ncols == lib.GxB_INDEX_MAX

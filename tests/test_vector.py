@@ -21,7 +21,7 @@ def test_vector_init_without_type():
 
 def test_vector_create_sparse():
     m = Vector.sparse(INT64)
-    assert m.size == 0
+    assert m.size == lib.GxB_INDEX_MAX
     assert m.nvals == 0
     m = Vector.sparse(INT64, 10)
     assert m.size == 10
@@ -517,7 +517,3 @@ def test_nonzero():
     m = Vector.from_lists([0, 1], [0, 2])
     assert m.nonzero().iseq(Vector.from_lists([1], [2]))
 
-
-def test_maximal_vector():
-    m = Vector.maximal(UINT8)
-    assert m.size == lib.GxB_INDEX_MAX

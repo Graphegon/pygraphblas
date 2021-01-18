@@ -84,8 +84,11 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def sparse(cls, typ, size=0):
-        """Create an empty Vector from the given type and size."""
+    def sparse(cls, typ, size=lib.GxB_INDEX_MAX):
+        """Create an empty Vector from the given type.  If `size` is not
+        specified it defaults to `pygraphblas.lib.GxB_INDEX_MAX`.
+
+        """
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
