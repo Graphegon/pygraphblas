@@ -1,6 +1,3 @@
-"""GraphBLAS Matrices.
-
-"""
 import sys
 import weakref
 import operator
