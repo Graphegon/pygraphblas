@@ -1,6 +1,1 @@
-BRANCH=$(git symbolic-ref --short HEAD)
-git checkout gh-pages
-./pdoc.sh
-git commit -a -m "Generate docs"
-git push origin gh-pages
-git checkout $BRANCH
+docker run --rm -v `pwd`/docs:/docs -w /pygraphblas -it graphblas/pygraphblas-minimal:test pdoc --html --template-dir /docs/templates -f -o /docs pygraphblas

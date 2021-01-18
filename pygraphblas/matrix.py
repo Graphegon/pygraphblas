@@ -24,7 +24,7 @@ from . import types, binaryop, monoid, unaryop, semiring as _semiring
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import Semiring, current_semiring
-from .binaryop import BinaryOp, current_accum, current_binop
+from .binaryop import BinaryOp, current_accum, current_binop, SECOND
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
@@ -529,6 +529,12 @@ class Matrix:
             )
         )
         return out
+
+    def union(self, other):
+        pass
+
+    def intersection(self, other):
+        pass
 
     def iseq(self, other):
         """Compare two matrices for equality."""
