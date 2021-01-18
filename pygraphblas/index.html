@@ -175,6 +175,12 @@ __all__ = [
     &#34;descriptor&#34;,
 ]
 
+ffi = ffi  # global assign hack to fool pdoc
+&#34;&#34;&#34; CFFI C Foreign Function Interface. &#34;&#34;&#34;
+
+lib = lib
+&#34;&#34;&#34; Raw interface to SuiteSparse library. &#34;&#34;&#34;
+
 GxB_INDEX_MAX = GxB_INDEX_MAX
 &#34;&#34;&#34;Maximum key size for SuiteSparse, defaults to `2**60`.&#34;&#34;&#34;
 
@@ -245,6 +251,14 @@ __pdoc__ = {
 <dt id="pygraphblas.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
 <dd>
 <div class="desc"><p>Tuple containing GxB_SPEC (MAJOR, MINOR, SUB)</p></div>
+</dd>
+<dt id="pygraphblas.ffi"><code class="name">var <span class="ident">ffi</span></code></dt>
+<dd>
+<div class="desc"><p>CFFI C Foreign Function Interface.</p></div>
+</dd>
+<dt id="pygraphblas.lib"><code class="name">var <span class="ident">lib</span></code></dt>
+<dd>
+<div class="desc"><p>Raw interface to SuiteSparse library.</p></div>
 </dd>
 </dl>
 </section>
@@ -16126,6 +16140,8 @@ outside the resized vector are deleted.</p></div>
 <li><code><a title="pygraphblas.GxB_IMPLEMENTATION" href="#pygraphblas.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
 <li><code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code></li>
 <li><code><a title="pygraphblas.GxB_SPEC" href="#pygraphblas.GxB_SPEC">GxB_SPEC</a></code></li>
+<li><code><a title="pygraphblas.ffi" href="#pygraphblas.ffi">ffi</a></code></li>
+<li><code><a title="pygraphblas.lib" href="#pygraphblas.lib">lib</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
