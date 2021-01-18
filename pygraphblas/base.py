@@ -6,6 +6,13 @@ level library import.
 from _pygraphblas import lib, ffi
 from numba import njit
 
+ffi = ffi  # global assign hack to fool pdoc
+""" CFFI C Foreign Function Interface. """
+
+lib = lib
+""" Raw interface to SuiteSparse library. """
+
+
 __all__ = [
     "lib",
     "ffi",
