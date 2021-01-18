@@ -1,3 +1,6 @@
+"""High level wrapper around GraphBLAS Vectors.
+
+"""
 import operator
 import weakref
 from array import array

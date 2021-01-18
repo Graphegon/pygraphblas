@@ -1,4 +1,5 @@
-"""pygraphblas is a python extension that bridges [The GraphBLAS
+"""
+pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
