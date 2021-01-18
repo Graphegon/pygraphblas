@@ -337,7 +337,7 @@
       <ul>
       % for c in classes:
         <li>
-        <h4><code>${link(c)}</code></h4>
+        <code>${link(c)}</code>
         ## <%
         ##     members = c.functions(sort=sort_identifiers) + c.methods(sort=sort_identifiers)
         ##     if list_class_variables_in_index:
