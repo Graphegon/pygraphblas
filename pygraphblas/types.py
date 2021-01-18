@@ -397,22 +397,6 @@ def binop(boolean=False):
     return inner
 
 
-_promotion_order = (
-    FC64,
-    FC32,
-    FP64,
-    FP32,
-    INT64,
-    UINT64,
-    INT32,
-    UINT32,
-    INT16,
-    UINT16,
-    INT8,
-    UINT8,
-)
-
-
 def get_add(sring):
     monoid = ffi.new("GrB_Monoid*")
     _check(lib.GxB_Semiring_add(monoid, sring))
@@ -431,7 +415,27 @@ def get_ztype(bop):
     return gb_type_to_type(typ[0])
 
 
+_promotion_order = (
+    FC64,
+    FC32,
+    FP64,
+    FP32,
+    INT64,
+    UINT64,
+    INT32,
+    UINT32,
+    INT16,
+    UINT16,
+    INT8,
+    UINT8,
+)
+
+
 def promote(left, right, semiring=None):
+    """Do type promotion, determine the result type of an operation
+    infered from the operands and possible semiring.
+
+    """
     from .semiring import AutoSemiring
 
     if semiring is not None and not isinstance(semiring, AutoSemiring):
@@ -449,12 +453,4 @@ def promote(left, right, semiring=None):
     for t in _promotion_order:
         if left == t or right == t:
             return t
-    raise TypeError(
-        "inconvertable types %s and %s"
-        % (
-            repr(
-                left,
-            ),
-            repr(right),
-        )
-    )
+    raise TypeError("inconvertable types %s and %s" % (repr(left), repr(right)))

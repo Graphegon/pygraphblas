@@ -22,8 +22,8 @@ def test_matrix_init_without_type():
 
 def test_matrix_create():
     m = Matrix.sparse(INT8)
-    assert m.nrows == 0
-    assert m.ncols == 0
+    assert m.nrows == lib.GxB_INDEX_MAX
+    assert m.ncols == lib.GxB_INDEX_MAX
     assert m.nvals == 0
     m = Matrix.sparse(INT8, 10, 10)
     assert m.nrows == 10
@@ -127,6 +127,7 @@ def test_matrix_eadd():
     assert sum1.iseq(addition_ref)
     sum1 = v + w
     assert sum1.iseq(addition_ref)
+    sum1 = v.eadd(w, v.type.SECOND)
     sum2 = v | w
     assert sum1.iseq(sum2)
     sum3 = v.dup()
@@ -136,10 +137,6 @@ def test_matrix_eadd():
     prod_ref = Matrix.from_lists(I, I, [0, 1, 4, 9, 16, 25, 36, 49, 64, 81])
     prod_ref[0, 1] = 1
     prod_ref[1, 0] = 1
-
-    with binaryop.TIMES:
-        prod4 = v | w
-        assert prod4.iseq(prod_ref)
 
     prod5 = v.eadd(w, "*")
     assert prod5.iseq(prod_ref)
@@ -174,6 +171,7 @@ def test_matrix_emult():
 
     mult1 = v.emult(w)
     assert mult1.iseq(Matrix.from_lists(I, I, [v * v for v in V]))
+    mult1 = v.emult(w, v.type.SECOND)
     mult2 = v & w
     assert mult2.iseq(mult1)
     mult3 = v.dup()
@@ -500,11 +498,11 @@ def test_matrix_assign():
         m[""] = n
 
 
-def test_kron():
+def test_kronecker():
     n = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
     m = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))
 
-    o = n.kron(m)
+    o = n.kronecker(m)
     assert o.iseq(
         Matrix.from_lists(
             [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -1035,8 +1033,3 @@ def test_to_scipy_sparse():
     assert (s.data == [63, 105, 17, 20]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
-
-def test_maximal_matrix():
-    m = Matrix.maximal(UINT8)
-    assert m.nrows == lib.GxB_INDEX_MAX
-    assert m.ncols == lib.GxB_INDEX_MAX
