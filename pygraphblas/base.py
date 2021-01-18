@@ -41,11 +41,8 @@ GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MINOR,
     lib.GxB_IMPLEMENTATION_SUB,
 )
-""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
-""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
-
 
 def options_set(
     nthreads=None,
