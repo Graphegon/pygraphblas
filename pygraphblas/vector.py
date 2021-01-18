@@ -27,6 +27,7 @@ from . import descriptor
 from .descriptor import Descriptor, Default, TransposeB
 
 __all__ = ["Vector"]
+__pdoc__ = {"Vector.__init__": False}
 
 
 class Vector:
