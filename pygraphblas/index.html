@@ -38,15 +38,25 @@ graph and a matrix.
 As illustrated here, a graph can be expressed as
 a matrix and vice versa.</p>
 <p><img alt="Adjacency Matrix" src="../AdjacencyMatrix.png"></p>
-<p>GraphBLAS is a sparse linear algebra API optimized for processing
-graphs encoded as sparse matrices and vectors.
-In addition to common
-real/integer matrix algebra operations, GraphBLAS supports over a
-thousand different <a href="https://en.wikipedia.org/wiki/Semiring">Semiring</a>
-algebra operations, that can be used as basic building blocks to
-implement a wide variety of graph algorithms. See
+<p>GraphBLAS is a sparse <a href="https://en.wikipedia.org/wiki/Linear_algebra">Linear
+Algebra</a> API optimized
+for processing graphs encoded as sparse matrices and vectors.
+In
+addition to common real/integer matrix algebra operations, GraphBLAS
+supports over a thousand different
+<a href="https://en.wikipedia.org/wiki/Semiring">Semiring</a> algebra operations,
+that can be used as basic building blocks to implement a wide variety
+of graph algorithms. See
 <a href="https://en.wikipedia.org/wiki/Semiring#Applications">Applications</a>
 from Wikipedia for some specific examples.</p>
+<p>The core operation of Linear Algebra is <a href="https://en.wikipedia.org/wiki/Matrix_multiplication">Matrix
+Multiplication</a>.
+In this GraphBLAS duality, this is an operation along the edges of a
+graph from nodes to their adjacenct neighbors, taking one step in a
+<a href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth First
+Search</a> across the
+graph:</p>
+<p><img alt="Adjacency Matrix" src="../AdjacencyMatrixBFS.png"></p>
 <p>pygraphblas leverages the expertise in the field of sparse matrix
 programming by <a href="http://graphblas.org">The GraphBLAS Forum</a> and uses
 the
@@ -75,14 +85,26 @@ a matrix and vice versa.
 
 ![Adjacency Matrix](../AdjacencyMatrix.png)
 
-GraphBLAS is a sparse linear algebra API optimized for processing
-graphs encoded as sparse matrices and vectors.  In addition to common
-real/integer matrix algebra operations, GraphBLAS supports over a
-thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
-algebra operations, that can be used as basic building blocks to
-implement a wide variety of graph algorithms. See
+GraphBLAS is a sparse [Linear
+Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
+for processing graphs encoded as sparse matrices and vectors.  In
+addition to common real/integer matrix algebra operations, GraphBLAS
+supports over a thousand different
+[Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
+that can be used as basic building blocks to implement a wide variety
+of graph algorithms. See
 [Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
 from Wikipedia for some specific examples.
+
+The core operation of Linear Algebra is [Matrix
+Multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication).
+In this GraphBLAS duality, this is an operation along the edges of a
+graph from nodes to their adjacenct neighbors, taking one step in a
+[Breadth First
+Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
+graph:
+
+![Adjacency Matrix](../AdjacencyMatrixBFS.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
@@ -209,7 +231,7 @@ __pdoc__ = {
 </dd>
 <dt><code class="name"><a title="pygraphblas.matrix" href="matrix.html">pygraphblas.matrix</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>High level wrapper around GraphBLAS Matrices.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.monoid" href="monoid.html">pygraphblas.monoid</a></code></dt>
 <dd>
@@ -233,7 +255,7 @@ __pdoc__ = {
 </dd>
 <dt><code class="name"><a title="pygraphblas.vector" href="vector.html">pygraphblas.vector</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>High level wrapper around GraphBLAS Vectors.</p></div>
 </dd>
 </dl>
 </section>
