@@ -1033,4 +1033,3 @@ def test_to_scipy_sparse():
     assert (s.data == [63, 105, 17, 20]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
-

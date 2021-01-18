@@ -30,7 +30,8 @@ from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
 
 __all__ = ["Matrix"]
-__pdoc__ = {'Matrix.__init__': False}
+__pdoc__ = {"Matrix.__init__": False}
+
 
 class Matrix:
     """GraphBLAS Sparse Matrix
