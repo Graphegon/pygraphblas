@@ -112,5 +112,5 @@ __all__ = [
 __pdoc__ = {
     "base": False,
     "build": False,
-    "pygraphblas.GxB_INDEX_MAX": "Maximum key size for SuiteSparse, defaults to `2**60`."
+    "GxB_INDEX_MAX": "Maximum key size for SuiteSparse, defaults to `2**60`."
     }
