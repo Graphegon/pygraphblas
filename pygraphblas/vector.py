@@ -175,11 +175,6 @@ class Vector:
         return n[0]
 
     @property
-    def shape(self):
-        """Numpy-like description of vector shape."""
-        return (self.size,)
-
-    @property
     def nvals(self):
         """Return the number of values in the vector."""
         n = ffi.new("GrB_Index*")

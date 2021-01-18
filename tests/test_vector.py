@@ -25,7 +25,6 @@ def test_vector_create_sparse():
     assert m.nvals == 0
     m = Vector.sparse(INT64, 10)
     assert m.size == 10
-    assert m.shape == (10,)
 
 
 def test_vector_gb_type():
