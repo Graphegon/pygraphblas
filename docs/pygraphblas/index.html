@@ -36,8 +36,8 @@ types that make GraphBLAS simple and easy.</p>
 <p>The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.
 As illustrated here, a graph can be expressed as
-a matrix and vice versa.</p>
-<p><img alt="Adjacency Matrix" src="../AdjacencyMatrix.png"></p>
+a matrix and vice versa:</p>
+<p><img alt="Adjacency Matrix" src="../imgs/AdjacencyMatrix.png"></p>
 <p>GraphBLAS is a sparse <a href="https://en.wikipedia.org/wiki/Linear_algebra">Linear
 Algebra</a> API optimized
 for processing graphs encoded as sparse matrices and vectors.
@@ -56,7 +56,7 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth First
 Search</a> across the
 graph:</p>
-<p><img alt="Adjacency Matrix" src="../AdjacencyMatrixBFS.png"></p>
+<p><img alt="Adjacency Matrix" src="../imgs/AdjacencyMatrixBFS.png"></p>
 <p>pygraphblas leverages the expertise in the field of sparse matrix
 programming by <a href="http://graphblas.org">The GraphBLAS Forum</a> and uses
 the
@@ -72,7 +72,8 @@ you with a lot more background information.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;pygraphblas is a python extension that bridges [The GraphBLAS
+<pre><code class="python">&#34;&#34;&#34;
+pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
@@ -81,9 +82,9 @@ types that make GraphBLAS simple and easy.
 
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
-a matrix and vice versa.
+a matrix and vice versa:
 
-![Adjacency Matrix](../AdjacencyMatrix.png)
+![Adjacency Matrix](../imgs/AdjacencyMatrix.png)
 
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
@@ -104,7 +105,7 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
-![Adjacency Matrix](../AdjacencyMatrixBFS.png)
+![Adjacency Matrix](../imgs/AdjacencyMatrixBFS.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
@@ -231,7 +232,7 @@ __pdoc__ = {
 </dd>
 <dt><code class="name"><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.matrix" href="matrix.html">pygraphblas.matrix</a></code></dt>
 <dd>
