@@ -434,22 +434,6 @@ def binop(boolean=False):
     return inner
 
 
-_promotion_order = (
-    FC64,
-    FC32,
-    FP64,
-    FP32,
-    INT64,
-    UINT64,
-    INT32,
-    UINT32,
-    INT16,
-    UINT16,
-    INT8,
-    UINT8,
-)
-
-
 def get_add(sring):
     monoid = ffi.new(&#34;GrB_Monoid*&#34;)
     _check(lib.GxB_Semiring_add(monoid, sring))
@@ -468,7 +452,27 @@ def get_ztype(bop):
     return gb_type_to_type(typ[0])
 
 
+_promotion_order = (
+    FC64,
+    FC32,
+    FP64,
+    FP32,
+    INT64,
+    UINT64,
+    INT32,
+    UINT32,
+    INT16,
+    UINT16,
+    INT8,
+    UINT8,
+)
+
+
 def promote(left, right, semiring=None):
+    &#34;&#34;&#34;Do type promotion, determine the result type of an operation
+    infered from the operands and possible semiring.
+
+    &#34;&#34;&#34;
     from .semiring import AutoSemiring
 
     if semiring is not None and not isinstance(semiring, AutoSemiring):
@@ -488,12 +492,7 @@ def promote(left, right, semiring=None):
             return t
     raise TypeError(
         &#34;inconvertable types %s and %s&#34;
-        % (
-            repr(
-                left,
-            ),
-            repr(right),
-        )
+        % (repr(left), repr(right) )
     )</code></pre>
 </details>
 </section>
@@ -551,12 +550,17 @@ def promote(left, right, semiring=None):
 <span>def <span class="ident">promote</span></span>(<span>left, right, semiring=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Do type promotion, determine the result type of an operation
+infered from the operands and possible semiring.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def promote(left, right, semiring=None):
+    &#34;&#34;&#34;Do type promotion, determine the result type of an operation
+    infered from the operands and possible semiring.
+
+    &#34;&#34;&#34;
     from .semiring import AutoSemiring
 
     if semiring is not None and not isinstance(semiring, AutoSemiring):
@@ -576,12 +580,7 @@ def promote(left, right, semiring=None):
             return t
     raise TypeError(
         &#34;inconvertable types %s and %s&#34;
-        % (
-            repr(
-                left,
-            ),
-            repr(right),
-        )
+        % (repr(left), repr(right) )
     )</code></pre>
 </details>
 </dd>

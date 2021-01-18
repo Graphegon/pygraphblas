@@ -46,6 +46,7 @@ from .base import (
     _build_range,
     _get_select_op,
     _get_bin_op,
+    GxB_INDEX_MAX
 )
 
 from . import types, binaryop, monoid, unaryop, semiring as _semiring
@@ -125,13 +126,16 @@ class Matrix:
         self._check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+    def sparse(cls, typ, nrows=None, ncols=None):
         &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to
-        `pygraphblas.lib.GxB_INDEX_MAX`.
+        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
         &#34;&#34;&#34;
+        if nrows is None:
+            nrows = GxB_INDEX_MAX
+        if ncols is None:
+            ncols = GxB_INDEX_MAX
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
         m = cls(new_mat, typ)
@@ -1546,13 +1550,16 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         self._check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+    def sparse(cls, typ, nrows=None, ncols=None):
         &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to
-        `pygraphblas.lib.GxB_INDEX_MAX`.
+        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
         &#34;&#34;&#34;
+        if nrows is None:
+            nrows = GxB_INDEX_MAX
+        if ncols is None:
+            ncols = GxB_INDEX_MAX
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
         m = cls(new_mat, typ)
@@ -2963,27 +2970,29 @@ def random(
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.sparse"><code class="name flex">
-<span>def <span class="ident">sparse</span></span>(<span>typ, nrows=1152921504606846976, ncols=1152921504606846976)</span>
+<span>def <span class="ident">sparse</span></span>(<span>typ, nrows=None, ncols=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create an empty sparse Matrix from the given type.
 The dimensions
 can be specified with <code>nrows</code> and <code>ncols</code>.
 If no dimensions
-are specified, they default to
-<code>pygraphblas.lib.GxB_INDEX_MAX</code>.</p></div>
+are specified, they default to <code>pygraphblas.GxB_INDEX_MAX</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def sparse(cls, typ, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+def sparse(cls, typ, nrows=None, ncols=None):
     &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
     can be specified with `nrows` and `ncols`.  If no dimensions
-    are specified, they default to
-    `pygraphblas.lib.GxB_INDEX_MAX`.
+    are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
     &#34;&#34;&#34;
+    if nrows is None:
+        nrows = GxB_INDEX_MAX
+    if ncols is None:
+        ncols = GxB_INDEX_MAX
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
     _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
     m = cls(new_mat, typ)

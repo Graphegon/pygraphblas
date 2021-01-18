@@ -61,9 +61,12 @@ __all__ = [
     &#34;options_get&#34;,
     &#34;GxB_IMPLEMENTATION&#34;,
     &#34;GxB_SPEC&#34;,
+    &#34;GxB_INDEX_MAX&#34;,
 ]
 
 NULL = ffi.NULL
+GxB_INDEX_MAX = lib.GxB_INDEX_MAX
+&#34;&#34;&#34;Maximum key size for SuiteSparse, defaults to `2**60`. &#34;&#34;&#34;
 
 GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MAJOR,
@@ -292,6 +295,10 @@ def _get_bin_op(op, funcs):
 <dt id="pygraphblas.base.GxB_IMPLEMENTATION"><code class="name">var <span class="ident">GxB_IMPLEMENTATION</span></code></dt>
 <dd>
 <div class="desc"><p>Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
+</dd>
+<dt id="pygraphblas.base.GxB_INDEX_MAX"><code class="name">var <span class="ident">GxB_INDEX_MAX</span></code></dt>
+<dd>
+<div class="desc"><p>Maximum key size for SuiteSparse, defaults to <code>2**60</code>.</p></div>
 </dd>
 <dt id="pygraphblas.base.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
 <dd>
@@ -695,6 +702,7 @@ See SuiteSparse User Guide.</p></div>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
 <li><code><a title="pygraphblas.base.GxB_IMPLEMENTATION" href="#pygraphblas.base.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
+<li><code><a title="pygraphblas.base.GxB_INDEX_MAX" href="#pygraphblas.base.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code></li>
 <li><code><a title="pygraphblas.base.GxB_SPEC" href="#pygraphblas.base.GxB_SPEC">GxB_SPEC</a></code></li>
 </ul>
 </li>
