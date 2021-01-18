@@ -173,7 +173,7 @@
 
   <section>
     % if classes:
-    <h2 class="section-title" id="header-classes">Classes</h2>
+    <h2 class="section-title" id="header-classes">Types</h2>
     <dl>
     % for c in classes:
       <%
@@ -333,7 +333,7 @@
     % endif
 
     % if classes:
-    <li><h3><a href="#header-classes">Classes</a></h3>
+    <li><h3><a href="#header-classes">Types</a></h3>
       <ul>
       % for c in classes:
         <li>
