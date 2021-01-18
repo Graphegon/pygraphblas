@@ -6,7 +6,7 @@ programming language.  It uses the
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.
 
-![Adjacency Matrix](AdjacencyMatrix.png)
+![Adjacency Matrix](/pygraphblas/docs/AdjacencyMatrix.png)
 
 GraphBLAS is a sparse linear algebra API optimized for processing
 graphs encoded as sparse matrices and vectors.  In addition to common
