@@ -17,7 +17,7 @@ from .base import (
     _build_range,
     _get_select_op,
     _get_bin_op,
-    GxB_INDEX_MAX
+    GxB_INDEX_MAX,
 )
 
 from . import types, binaryop, monoid, unaryop, semiring as _semiring
@@ -67,7 +67,7 @@ class Matrix:
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     """
 
@@ -274,24 +274,18 @@ class Matrix:
 
     @property
     def T(self):
-        """Returns the transpose of the Matrix.  See `Matrix.transpose`.
-
-        """
+        """Returns the transpose of the Matrix.  See `Matrix.transpose`."""
         return self.transpose()
 
     def dup(self):
-        """Create an duplicate Matrix.
-
-        """
+        """Create an duplicate Matrix."""
         new_mat = ffi.new("GrB_Matrix*")
         self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
     def hyper_switch(self):
-        """Get the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        """
+        """Get the hyper_switch threshold. (See SuiteSparse User Guide)"""
         switch = ffi.new("double*")
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -300,9 +294,7 @@ class Matrix:
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
-        """Set the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        """
+        """Set the hyper_switch threshold. (See SuiteSparse User Guide)"""
         switch = ffi.cast("double", switch)
         self._check(
             lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -310,26 +302,20 @@ class Matrix:
 
     @property
     def format(self):
-        """Get Matrix format. (See SuiteSparse User Guide)
-
-        """
+        """Get Matrix format. (See SuiteSparse User Guide)"""
         format = ffi.new("GxB_Format_Value*")
         self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
-        """Set Matrix format. (See SuiteSparse User Guide)
-
-        """
+        """Set Matrix format. (See SuiteSparse User Guide)"""
         format = ffi.cast("GxB_Format_Value", format)
         self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
-        """Get Matrix sparsity control. (See SuiteSparse User Guide)
-
-        """
+        """Get Matrix sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.new("int*")
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -340,9 +326,7 @@ class Matrix:
 
     @sparsity_control.setter
     def sparsity_control(self, sparsity):
-        """Set Matrix sparsity control. (See SuiteSparse User Guide)
-
-        """
+        """Set Matrix sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.cast("int", sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -352,9 +336,7 @@ class Matrix:
 
     @property
     def sparsity_status(self):
-        """Set Matrix sparsity status. (See SuiteSparse User Guide)
-
-        """
+        """Set Matrix sparsity status. (See SuiteSparse User Guide)"""
         status = ffi.new("int*")
         self._check(
             lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -373,23 +355,17 @@ class Matrix:
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
-        """Write this matrix to a file using the Matrix Market format.
-
-        """
+        """Write this matrix to a file using the Matrix Market format."""
         self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=""):
-        """Write this matrix using custom SuiteSparse binary format.
-
-        """
+        """Write this matrix using custom SuiteSparse binary format."""
         self._check(
             lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, "utf8"))
         )
 
     def to_lists(self):
-        """Extract the rows, columns and values of the Matrix as 3 lists.
-
-        """
+        """Extract the rows, columns and values of the Matrix as 3 lists."""
         I = ffi.new("GrB_Index[%s]" % self.nvals)
         J = ffi.new("GrB_Index[%s]" % self.nvals)
         V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
@@ -413,9 +389,7 @@ class Matrix:
         self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-        """Return Transpose of this matrix.
-
-        """
+        """Return Transpose of this matrix."""
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
