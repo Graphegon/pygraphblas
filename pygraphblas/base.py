@@ -30,9 +30,12 @@ __all__ = [
     "options_get",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
+    "GxB_INDEX_MAX",
 ]
 
 NULL = ffi.NULL
+GxB_INDEX_MAX = lib.GxB_INDEX_MAX
+"""Maximum key size for SuiteSparse, defaults to `2**60`. """
 
 GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MAJOR,

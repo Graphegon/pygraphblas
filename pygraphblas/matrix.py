@@ -17,6 +17,7 @@ from .base import (
     _build_range,
     _get_select_op,
     _get_bin_op,
+    GxB_INDEX_MAX
 )
 
 from . import types, binaryop, monoid, unaryop, semiring as _semiring
@@ -96,13 +97,16 @@ class Matrix:
         self._check(lib.GrB_Matrix_free(self.matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+    def sparse(cls, typ, nrows=None, ncols=None):
         """Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to
-        `pygraphblas.lib.GxB_INDEX_MAX`.
+        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
         """
+        if nrows is None:
+            nrows = GxB_INDEX_MAX
+        if ncols is None:
+            ncols = GxB_INDEX_MAX
         new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
         m = cls(new_mat, typ)

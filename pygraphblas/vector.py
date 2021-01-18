@@ -15,6 +15,7 @@ from .base import (
     _get_bin_op,
     _get_select_op,
     _build_range,
+    GxB_INDEX_MAX,
 )
 from . import binaryop, unaryop, monoid, semiring as sring, types
 from .scalar import Scalar
@@ -84,22 +85,16 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def sparse(cls, typ, size=lib.GxB_INDEX_MAX):
+    def sparse(cls, typ, size=None):
         """Create an empty Vector from the given type.  If `size` is not
-        specified it defaults to `pygraphblas.lib.GxB_INDEX_MAX`.
+        specified it defaults to `pygraphblas.GxB_INDEX_MAX`.
 
         """
+        if size is None:
+            size = GxB_INDEX_MAX
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
-
-    @classmethod
-    def maximal(cls, typ):
-        """Return a maximal dimension "hypersparse" Vector with
-        lib.GxB_INDEX_MAX (`2**60`) size.
-
-        """
-        return cls.sparse(typ, lib.GxB_INDEX_MAX)
 
     @classmethod
     def from_lists(cls, I, V, size=None, typ=None):
