@@ -1,10 +1,13 @@
-"""
-pygraphblas is a python extension that bridges [The GraphBLAS
+"""pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.
+
+The core idea of the GraphBLAS is the mathematical duality between a
+graph and a matrix.  As illustrated here, a graph can be expressed as
+a matrix and vice versa.
 
 ![Adjacency Matrix](../AdjacencyMatrix.png)
 
