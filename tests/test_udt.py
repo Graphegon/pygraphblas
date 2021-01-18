@@ -1,6 +1,7 @@
 import pytest
 
 from pygraphblas import *
+from pygraphblas.binaryop import binary_op
 
 pytest.mark.skip()
 

@@ -29,7 +29,15 @@ information](http://faculty.cse.tamu.edu/davis/news.html) can provide
 you with a lot more background information.
 
 """
-from .base import *
+from .base import (
+    lib,
+    ffi,
+    GxB_INDEX_MAX,
+    GxB_IMPLEMENTATION,
+    GxB_SPEC,
+    options_get,
+    options_set,
+)
 
 lib.LAGraph_init()
 
@@ -46,9 +54,56 @@ build_binaryops()
 build_unaryops()
 build_monoids()
 
-from .types import *
-from .semiring import *
-from .binaryop import *
-from .unaryop import *
-from .monoid import *
-from .descriptor import *
+from .types import (
+    FP64,
+    FP32,
+    FC64,
+    FC32,
+    INT64,
+    INT32,
+    INT16,
+    INT8,
+    UINT64,
+    UINT32,
+    UINT16,
+    UINT8,
+    BOOL,
+)
+
+from . import semiring
+from . import binaryop
+from . import unaryop
+from . import monoid
+from . import descriptor
+
+__all__ = [
+    "lib",
+    "ffi",
+    "GxB_INDEX_MAX",
+    "GxB_IMPLEMENTATION",
+    "GxB_SPEC",
+    "options_set",
+    "options_get",
+    "Matrix",
+    "Vector",
+    "Scalar",
+    "FP64",
+    "FP32",
+    "FC64",
+    "FC32",
+    "INT64",
+    "INT32",
+    "INT16",
+    "INT8",
+    "UINT64",
+    "UINT32",
+    "UINT16",
+    "UINT8",
+    "BOOL",
+    "monoid",
+    "unaryop",
+    "binaryop",
+    "semiring",
+    "types",
+    "descriptor",
+]

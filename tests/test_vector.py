@@ -260,7 +260,7 @@ def test_vxm():
 
     assert (v @ m).iseq(o)
 
-    assert v.vxm(m.transpose(), desc=TransposeB).iseq(o)
+    assert v.vxm(m.transpose(), desc=descriptor.TransposeB).iseq(o)
 
     with semiring.PLUS_PLUS:
         o = v.vxm(m)
