@@ -107,3 +107,9 @@ __all__ = [
     "types",
     "descriptor",
 ]
+
+
+__pdoc__ = {
+    "base": False,
+    "build": False,
+    }
