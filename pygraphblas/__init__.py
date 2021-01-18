@@ -111,6 +111,12 @@ __all__ = [
     "descriptor",
 ]
 
+ffi = ffi  # global assign hack to fool pdoc
+""" CFFI C Foreign Function Interface. """
+
+lib = lib
+""" Raw interface to SuiteSparse library. """
+
 GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
 
