@@ -38,14 +38,14 @@ Open up the URL printed on your terminal screen, typically something
 liker `http://127.0.0.1:8888/tree/pygraphblas/demo` and see the
 following Notebooks:
 
- - [Introduction to GraphBLAS with Python](./pygraphblas/demo/Introduction-to-GraphBLAS-with-Python.ipynb)
- - [PageRank](./pygraphblas/demo/PageRank.ipynb)
- - [Betweeness Centrality](./pygraphblas/demo/BetweenessCentrality.ipynb)
- - [K-Truss Subgraphs](./pygraphblas/demo/K-Truss.ipynb)
- - [Triangle Counting](./pygraphblas/demo/Triangle-Counting.ipynb)
- - [RadiX-Net Topologies](./pygraphblas/demo/RadiX-Net-with-pygraphblas.ipynb)
- - [User Defined Types](./pygraphblas/demo/User-Defined-Types.ipynb)
- - [Log Semiring Type](./pygraphblas/demo/Log-Semiring.ipynb)
+ - [Introduction to GraphBLAS with Python](./demo/Introduction-to-GraphBLAS-with-Python.ipynb)
+ - [PageRank](./demo/PageRank.ipynb)
+ - [Betweeness Centrality](./demo/BetweenessCentrality.ipynb)
+ - [K-Truss Subgraphs](./demo/K-Truss.ipynb)
+ - [Triangle Counting](./demo/Triangle-Counting.ipynb)
+ - [RadiX-Net Topologies](./demo/RadiX-Net-with-pygraphblas.ipynb)
+ - [User Defined Types](./demo/User-Defined-Types.ipynb)
+ - [Log Semiring Type](./demo/Log-Semiring.ipynb)
 
 # Tests
 
