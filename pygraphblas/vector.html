@@ -113,8 +113,11 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def sparse(cls, typ, size=0):
-        &#34;&#34;&#34;Create an empty Vector from the given type and size.&#34;&#34;&#34;
+    def sparse(cls, typ, size=lib.GxB_INDEX_MAX):
+        &#34;&#34;&#34;Create an empty Vector from the given type.  If `size` is not
+        specified it defaults to `pygraphblas.lib.GxB_INDEX_MAX`.
+
+        &#34;&#34;&#34;
         new_vec = ffi.new(&#34;GrB_Vector*&#34;)
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
@@ -861,8 +864,11 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def sparse(cls, typ, size=0):
-        &#34;&#34;&#34;Create an empty Vector from the given type and size.&#34;&#34;&#34;
+    def sparse(cls, typ, size=lib.GxB_INDEX_MAX):
+        &#34;&#34;&#34;Create an empty Vector from the given type.  If `size` is not
+        specified it defaults to `pygraphblas.lib.GxB_INDEX_MAX`.
+
+        &#34;&#34;&#34;
         new_vec = ffi.new(&#34;GrB_Vector*&#34;)
         _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
         return cls(new_vec, typ)
@@ -1643,17 +1649,22 @@ def maximal(cls, typ):
 </details>
 </dd>
 <dt id="pygraphblas.vector.Vector.sparse"><code class="name flex">
-<span>def <span class="ident">sparse</span></span>(<span>typ, size=0)</span>
+<span>def <span class="ident">sparse</span></span>(<span>typ, size=1152921504606846976)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create an empty Vector from the given type and size.</p></div>
+<div class="desc"><p>Create an empty Vector from the given type.
+If <code>size</code> is not
+specified it defaults to <code>pygraphblas.lib.GxB_INDEX_MAX</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def sparse(cls, typ, size=0):
-    &#34;&#34;&#34;Create an empty Vector from the given type and size.&#34;&#34;&#34;
+def sparse(cls, typ, size=lib.GxB_INDEX_MAX):
+    &#34;&#34;&#34;Create an empty Vector from the given type.  If `size` is not
+    specified it defaults to `pygraphblas.lib.GxB_INDEX_MAX`.
+
+    &#34;&#34;&#34;
     new_vec = ffi.new(&#34;GrB_Vector*&#34;)
     _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
     return cls(new_vec, typ)</code></pre>
