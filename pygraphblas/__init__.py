@@ -9,7 +9,7 @@ The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
 a matrix and vice versa.
 
-![Adjacency Matrix](../AdjacencyMatrix.png)
+![Adjacency Matrix](../imgs/AdjacencyMatrix.png)
 
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
@@ -30,7 +30,7 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
-![Adjacency Matrix](../AdjacencyMatrixBFS.png)
+![Adjacency Matrix](../imgs/AdjacencyMatrixBFS.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses

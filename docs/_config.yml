@@ -1,4 +1,4 @@
 theme: jekyll-theme-minimal
 title: pygraphblas
 description: pygraphblas is a Python interface to The GraphBLAS API.
-logo: Logo.png
+logo: imgs/Logo.png
