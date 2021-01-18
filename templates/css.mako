@@ -56,6 +56,7 @@
 
   h1, h2, h3, h4, h5 {
     font-weight: 300;
+	text-align: center;
   }
   h1 {
     font-size: 2.5em;
