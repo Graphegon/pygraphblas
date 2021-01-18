@@ -108,9 +108,10 @@ __all__ = [
     "descriptor",
 ]
 
+GxB_INDEX_MAX = GxB_INDEX_MAX
+"""Maximum key size for SuiteSparse, defaults to `2**60`."""
 
 __pdoc__ = {
     "base": False,
     "build": False,
-    "GxB_INDEX_MAX": "Maximum key size for SuiteSparse, defaults to `2**60`."
     }
