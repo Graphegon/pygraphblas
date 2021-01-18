@@ -35,18 +35,14 @@ __all__ = [
 
 NULL = ffi.NULL
 GxB_INDEX_MAX = lib.GxB_INDEX_MAX
-"""Maximum key size for SuiteSparse, defaults to `2**60`. """
 
 GxB_IMPLEMENTATION = (
     lib.GxB_IMPLEMENTATION_MAJOR,
     lib.GxB_IMPLEMENTATION_MINOR,
     lib.GxB_IMPLEMENTATION_SUB,
 )
-""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
-""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
-
 
 def options_set(
     nthreads=None,

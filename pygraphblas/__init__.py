@@ -1,21 +1,36 @@
-"""
-pygraphblas is a python extension that bridges [The GraphBLAS
+"""pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.
 
+The core idea of the GraphBLAS is the mathematical duality between a
+graph and a matrix.  As illustrated here, a graph can be expressed as
+a matrix and vice versa.
+
 ![Adjacency Matrix](../AdjacencyMatrix.png)
 
-GraphBLAS is a sparse linear algebra API optimized for processing
-graphs encoded as sparse matrices and vectors.  In addition to common
-real/integer matrix algebra operations, GraphBLAS supports over a
-thousand different [Semiring](https://en.wikipedia.org/wiki/Semiring)
-algebra operations, that can be used as basic building blocks to
-implement a wide variety of graph algorithms. See
+GraphBLAS is a sparse [Linear
+Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
+for processing graphs encoded as sparse matrices and vectors.  In
+addition to common real/integer matrix algebra operations, GraphBLAS
+supports over a thousand different
+[Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
+that can be used as basic building blocks to implement a wide variety
+of graph algorithms. See
 [Applications](https://en.wikipedia.org/wiki/Semiring#Applications)
 from Wikipedia for some specific examples.
+
+The core operation of Linear Algebra is [Matrix
+Multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication).
+In this GraphBLAS duality, this is an operation along the edges of a
+graph from nodes to their adjacenct neighbors, taking one step in a
+[Breadth First
+Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
+graph:
+
+![Adjacency Matrix](../AdjacencyMatrixBFS.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
@@ -29,7 +44,15 @@ information](http://faculty.cse.tamu.edu/davis/news.html) can provide
 you with a lot more background information.
 
 """
-from .base import *
+from .base import (
+    lib,
+    ffi,
+    GxB_INDEX_MAX,
+    GxB_IMPLEMENTATION,
+    GxB_SPEC,
+    options_get,
+    options_set,
+)
 
 lib.LAGraph_init()
 
@@ -46,9 +69,76 @@ build_binaryops()
 build_unaryops()
 build_monoids()
 
-from .types import *
-from .semiring import *
-from .binaryop import *
-from .unaryop import *
-from .monoid import *
-from .descriptor import *
+from .types import (
+    FP64,
+    FP32,
+    FC64,
+    FC32,
+    INT64,
+    INT32,
+    INT16,
+    INT8,
+    UINT64,
+    UINT32,
+    UINT16,
+    UINT8,
+    BOOL,
+)
+
+from . import semiring
+from . import binaryop
+from . import unaryop
+from . import monoid
+from . import descriptor
+
+__all__ = [
+    "lib",
+    "ffi",
+    "GxB_INDEX_MAX",
+    "GxB_IMPLEMENTATION",
+    "GxB_SPEC",
+    "options_set",
+    "options_get",
+    "Matrix",
+    "Vector",
+    "Scalar",
+    "FP64",
+    "FP32",
+    "FC64",
+    "FC32",
+    "INT64",
+    "INT32",
+    "INT16",
+    "INT8",
+    "UINT64",
+    "UINT32",
+    "UINT16",
+    "UINT8",
+    "BOOL",
+    "monoid",
+    "unaryop",
+    "binaryop",
+    "semiring",
+    "types",
+    "descriptor",
+]
+
+ffi = ffi  # global assign hack to fool pdoc
+""" CFFI C Foreign Function Interface. """
+
+lib = lib
+""" Raw interface to SuiteSparse library. """
+
+GxB_INDEX_MAX = GxB_INDEX_MAX
+"""Maximum key size for SuiteSparse, defaults to `2**60`."""
+
+GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
+""" Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
+
+GxB_SPEC = GxB_SPEC
+""" Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
+
+__pdoc__ = {
+    "base": False,
+    "build": False,
+    }

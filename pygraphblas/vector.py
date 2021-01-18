@@ -1,4 +1,4 @@
-"""GraphBLAS Sparse Vectors.
+"""High level wrapper around GraphBLAS Vectors.
 
 """
 import operator

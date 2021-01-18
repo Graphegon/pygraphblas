@@ -9,14 +9,14 @@ All of these types can be used to create GraphBLAS sparse matrices,
 vectors, or scalars.
 
 """
-from .base import lib, _check, ffi
+from .base import lib, _check, ffi as core_ffi
 from textwrap import dedent
 from operator import methodcaller, itemgetter
 from functools import partial
 import numba
 from numba import cfunc, jit, carray
 from numba.core.typing import cffi_utils as cffi_support
-from pygraphblas import lib, ffi as core_ffi
+
 from cffi import FFI
 
 __all__ = [
@@ -398,19 +398,19 @@ def binop(boolean=False):
 
 
 def get_add(sring):
-    monoid = ffi.new("GrB_Monoid*")
+    monoid = core_ffi.new("GrB_Monoid*")
     _check(lib.GxB_Semiring_add(monoid, sring))
     return monoid[0]
 
 
 def get_binaryop(moid):
-    op = ffi.new("GrB_BinaryOp*")
+    op = core_ffi.new("GrB_BinaryOp*")
     _check(lib.GxB_Monoid_operator(op, moid))
     return op[0]
 
 
 def get_ztype(bop):
-    typ = ffi.new("GrB_Type*")
+    typ = core_ffi.new("GrB_Type*")
     _check(lib.GxB_BinaryOp_ztype(typ, bop))
     return gb_type_to_type(typ[0])
 

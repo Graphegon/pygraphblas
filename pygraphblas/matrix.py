@@ -1,4 +1,4 @@
-"""GraphBLAS Matrices.
+"""High level wrapper around GraphBLAS Matrices.
 
 """
 import sys
