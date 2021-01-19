@@ -65,7 +65,6 @@ def draw_graph(
 
 def doc_graph(name, *args, **kwargs):
     g = draw_graph(*args, **kwargs)
-    return f"![{name}]({name})"
 
 def draw_layers(M, name="", rankdir="LR", label_width=None):
     g = Digraph(name)
