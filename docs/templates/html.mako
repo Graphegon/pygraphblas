@@ -326,7 +326,7 @@
     </li>
     % endif
 
-    % if functions and module.supermodule:
+    % if functions:
     <li><h3><a href="#header-functions">Functions</a></h3>
       ${show_column_list(functions)}
     </li>
@@ -348,7 +348,7 @@
             if sort_identifiers:
               members = sorted(members)
         %>
-        % if members:
+        % if members and module.supermodule:
           ${show_column_list(members)}
         % endif
         </li>
