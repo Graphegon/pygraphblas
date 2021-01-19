@@ -96,7 +96,6 @@ def draw_graph(
 
 def doc_graph(name, *args, **kwargs):
     g = draw_graph(*args, **kwargs)
-    return f&#34;![{name}]({name})&#34;
 
 def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
     g = Digraph(name)
@@ -226,8 +225,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def doc_graph(name, *args, **kwargs):
-    g = draw_graph(*args, **kwargs)
-    return f&#34;![{name}]({name})&#34;</code></pre>
+    g = draw_graph(*args, **kwargs)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw"><code class="name flex">
