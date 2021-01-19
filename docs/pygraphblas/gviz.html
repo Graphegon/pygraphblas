@@ -94,7 +94,7 @@ def draw_graph(
         g.render(filename, format=&#34;png&#34;)
     return g
 
-def doc_graph(name, *args, **kwargs):
+def doc_graph(*args, **kwargs):
     g = draw_graph(*args, **kwargs)
 
 def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
@@ -216,7 +216,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="pygraphblas.gviz.doc_graph"><code class="name flex">
-<span>def <span class="ident">doc_graph</span></span>(<span>name, *args, **kwargs)</span>
+<span>def <span class="ident">doc_graph</span></span>(<span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -224,7 +224,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def doc_graph(name, *args, **kwargs):
+<pre><code class="python">def doc_graph(*args, **kwargs):
     g = draw_graph(*args, **kwargs)</code></pre>
 </details>
 </dd>

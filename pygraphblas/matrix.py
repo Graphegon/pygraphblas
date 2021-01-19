@@ -195,9 +195,9 @@ class Matrix:
         matrix will hold.
 
         >>> M = Matrix.random(types.UINT8, 3, 3, 6)
-        >>> doc_graph('pygraphblas/imgs/Matrix_random.png', M, filename='/docs/imgs/Matrix_random')
+        >>> doc_graph(M, filename='/docs/imgs/Matrix_random')
 
-        ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
+        ![Matrix_random.png](../imgs/Matrix_random.png)
 
         """
         result = ffi.new("GrB_Matrix*")
