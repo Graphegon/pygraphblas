@@ -18,6 +18,7 @@ programming language …" />
 <script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
 <h1>pygraphblas API Reference</h1>
 <h2> ~| <a href="http://graphblas.org">graphblas.org</a> | <a href="https://github.com/Graphegon/pygraphblas">Github</a> | <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse::GraphBLAS User Guide</a> |~</h2>
+<h2> ~| <img src="https://github.com/Graphegon/pygraphblas/workflows/Tests/badge.svg"/> | <a href="https://mybinder.org/v2/gh/Graphegon/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb"><img src="https://mybinder.org/badge_logo.svg"/></a> |~</h2>
 </head>
 <body>
 <main>
@@ -223,7 +224,7 @@ def run_doctests():
     import sys, doctest
     this = sys.modules[__name__]
     for mod in (this, matrix):
-        doctest.testmod(mod)</code></pre>
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
 </details>
 </section>
 <section>
@@ -7807,6 +7808,25 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         can be specified with `nrows` and `ncols`.  If no dimensions
         are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
+        &gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
+        True
+        &gt;&gt;&gt; m.ncols == lib.GxB_INDEX_MAX
+        True
+        &gt;&gt;&gt; m.nvals == 0
+        True
+
+        Optional row and column dimension bounds can be provided to
+        the method:
+
+        &gt;&gt;&gt; m = Matrix.sparse(types.UINT8, 10, 10)
+        &gt;&gt;&gt; m.nrows == 10
+        True
+        &gt;&gt;&gt; m.ncols == 10
+        True
+        &gt;&gt;&gt; m.nvals == 0
+        True
+
         &#34;&#34;&#34;
         if nrows is None:
             nrows = GxB_INDEX_MAX
@@ -7821,11 +7841,32 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
         &#34;&#34;&#34;Return a dense Matrix nrows by ncols.
 
+        If `sparsity_control` is provided it is used for the new
+        matrix (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; m.nrows == 3
+        True
+        &gt;&gt;&gt; m.ncols == 3
+        True
+        &gt;&gt;&gt; m.nvals == 9
+        True
+        &gt;&gt;&gt; for i, j, v in m:
+        ...     assert v == 0
+
         If a `fill` value is present, use that, otherwise use the
         `zero` attribte of the given type.
 
-        If `sparsity_control` is provided it is used for the new
-        matrix (See SuiteSparse User Guide)
+        &gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3, fill=1)
+        &gt;&gt;&gt; m.nrows == 3
+        True
+        &gt;&gt;&gt; m.ncols == 3
+        True
+        &gt;&gt;&gt; m.nvals == 9
+        True
+        &gt;&gt;&gt; for i, j, v in m:
+        ...     assert v == 1
+
         &#34;&#34;&#34;
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
@@ -7903,7 +7944,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+        ...                   make_symmetric=True, no_diagonal=True, seed=42)
         &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
@@ -8730,9 +8772,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def kronecker(self, other, op=None, cast=None, out=None,
+                  mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -8752,9 +8793,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_matrix(
-        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_matrix(self, rindex=None, cindex=None, out=None,
+                       mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -8777,9 +8817,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_col(
-        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_col(self, col_index, row_slice=None, out=None,
+                    mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -8795,9 +8834,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_row(
-        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_row(self, row_index, col_slice=None, out=None,
+                    mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = desc | TransposeA
         return self.extract_col(
@@ -8841,9 +8879,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(
-        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_col(self, col_index, value, row_slice=None, mask=None,
+                   accum=None, desc=Default):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -8855,9 +8892,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_row(
-        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_row(self, row_index, value, col_slice=None, mask=None,
+                   accum=None, desc=Default):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -8869,9 +8905,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_matrix(
-        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_matrix(self, value, rindex=None, cindex=None,
+                      mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -8888,9 +8923,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_scalar(
-        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_scalar(self, value, row_slice=None, col_slice=None,
+                      mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
@@ -9053,10 +9087,30 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 </code></dt>
 <dd>
 <div class="desc"><p>Return a dense Matrix nrows by ncols.</p>
+<p>If <code>sparsity_control</code> is provided it is used for the new
+matrix (See SuiteSparse User Guide)</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3)
+&gt;&gt;&gt; m.nrows == 3
+True
+&gt;&gt;&gt; m.ncols == 3
+True
+&gt;&gt;&gt; m.nvals == 9
+True
+&gt;&gt;&gt; for i, j, v in m:
+...     assert v == 0
+</code></pre>
 <p>If a <code>fill</code> value is present, use that, otherwise use the
 <code>zero</code> attribte of the given type.</p>
-<p>If <code>sparsity_control</code> is provided it is used for the new
-matrix (See SuiteSparse User Guide)</p></div>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3, fill=1)
+&gt;&gt;&gt; m.nrows == 3
+True
+&gt;&gt;&gt; m.ncols == 3
+True
+&gt;&gt;&gt; m.nvals == 9
+True
+&gt;&gt;&gt; for i, j, v in m:
+...     assert v == 1
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9065,11 +9119,32 @@ matrix (See SuiteSparse User Guide)</p></div>
 def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
     &#34;&#34;&#34;Return a dense Matrix nrows by ncols.
 
+    If `sparsity_control` is provided it is used for the new
+    matrix (See SuiteSparse User Guide)
+
+    &gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3)
+    &gt;&gt;&gt; m.nrows == 3
+    True
+    &gt;&gt;&gt; m.ncols == 3
+    True
+    &gt;&gt;&gt; m.nvals == 9
+    True
+    &gt;&gt;&gt; for i, j, v in m:
+    ...     assert v == 0
+
     If a `fill` value is present, use that, otherwise use the
     `zero` attribte of the given type.
 
-    If `sparsity_control` is provided it is used for the new
-    matrix (See SuiteSparse User Guide)
+    &gt;&gt;&gt; m = Matrix.dense(types.UINT8, 3, 3, fill=1)
+    &gt;&gt;&gt; m.nrows == 3
+    True
+    &gt;&gt;&gt; m.ncols == 3
+    True
+    &gt;&gt;&gt; m.nvals == 9
+    True
+    &gt;&gt;&gt; for i, j, v in m:
+    ...     assert v == 1
+
     &#34;&#34;&#34;
     assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
     m = cls.sparse(typ, nrows, ncols)
@@ -9212,7 +9287,8 @@ def identity(cls, typ, nrows, one=None):
 columns and values.
 Other flags set additional properties the
 matrix will hold.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+...                   make_symmetric=True, no_diagonal=True, seed=42)
 &gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
 <p><img alt="Matrix_random.png" src="../imgs/Matrix_random.png"></p></div>
@@ -9238,7 +9314,8 @@ def random(
     columns and values.  Other flags set additional properties the
     matrix will hold.
 
-    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+    ...                   make_symmetric=True, no_diagonal=True, seed=42)
     &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
     ![Matrix_random.png](../imgs/Matrix_random.png)
@@ -9276,7 +9353,25 @@ def random(
 The dimensions
 can be specified with <code>nrows</code> and <code>ncols</code>.
 If no dimensions
-are specified, they default to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p></div>
+are specified, they default to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
+True
+&gt;&gt;&gt; m.ncols == lib.GxB_INDEX_MAX
+True
+&gt;&gt;&gt; m.nvals == 0
+True
+</code></pre>
+<p>Optional row and column dimension bounds can be provided to
+the method:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.sparse(types.UINT8, 10, 10)
+&gt;&gt;&gt; m.nrows == 10
+True
+&gt;&gt;&gt; m.ncols == 10
+True
+&gt;&gt;&gt; m.nvals == 0
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9286,6 +9381,25 @@ def sparse(cls, typ, nrows=None, ncols=None):
     &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
     can be specified with `nrows` and `ncols`.  If no dimensions
     are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
+
+    &gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
+    True
+    &gt;&gt;&gt; m.ncols == lib.GxB_INDEX_MAX
+    True
+    &gt;&gt;&gt; m.nvals == 0
+    True
+
+    Optional row and column dimension bounds can be provided to
+    the method:
+
+    &gt;&gt;&gt; m = Matrix.sparse(types.UINT8, 10, 10)
+    &gt;&gt;&gt; m.nrows == 10
+    True
+    &gt;&gt;&gt; m.ncols == 10
+    True
+    &gt;&gt;&gt; m.nvals == 0
+    True
 
     &#34;&#34;&#34;
     if nrows is None:
@@ -9655,9 +9769,8 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_col(
-    self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def assign_col(self, col_index, value, row_slice=None, mask=None,
+               accum=None, desc=Default):
     &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
@@ -9679,9 +9792,8 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_matrix(
-    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def assign_matrix(self, value, rindex=None, cindex=None,
+                  mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
     I, ni, isize = _build_range(rindex, self.nrows - 1)
     J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -9708,9 +9820,8 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_row(
-    self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def assign_row(self, row_index, value, col_slice=None, mask=None,
+               accum=None, desc=Default):
     &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
     stop_val = self.nrows if TransposeA in desc else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
@@ -9732,9 +9843,8 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_scalar(
-    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def assign_scalar(self, value, row_slice=None, col_slice=None,
+                  mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     if row_slice:
@@ -10001,9 +10111,8 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_col(
-    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def extract_col(self, col_index, row_slice=None, out=None,
+                mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
@@ -10029,9 +10138,8 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_matrix(
-    self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def extract_matrix(self, rindex=None, cindex=None, out=None,
+                   mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
     ta = TransposeA in desc
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -10064,9 +10172,8 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_row(
-    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def extract_row(self, row_index, col_slice=None, out=None,
+                mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
     desc = desc | TransposeA
     return self.extract_col(
@@ -10135,9 +10242,8 @@ the element is not present.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(
-    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-):
+<pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
+              mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
