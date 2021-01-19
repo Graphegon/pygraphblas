@@ -7843,6 +7843,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         are computed from the max values of the provides row and
         column indices lists.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        &gt;&gt;&gt; doc_graph(M, &#39;/docs/imgs/Matrix_from_lists&#39;)
+
+        ![Matrix_lists.png](../imgs/Matrix_lists.png)
+
         &#34;&#34;&#34;
         assert len(I) == len(J) == len(V)
         if not nrows:
@@ -7898,7 +7903,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6, make_symmetric=True, no_diagonal=True, seed=42)
         &gt;&gt;&gt; doc_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
@@ -9083,7 +9088,11 @@ def from_binfile(cls, bin_file):
 indices, and values.
 If nrows or ncols are not provided, they
 are computed from the max values of the provides row and
-column indices lists.</p></div>
+column indices lists.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+&gt;&gt;&gt; doc_graph(M, '/docs/imgs/Matrix_from_lists')
+</code></pre>
+<p><img alt="Matrix_lists.png" src="../imgs/Matrix_lists.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9094,6 +9103,11 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
     indices, and values.  If nrows or ncols are not provided, they
     are computed from the max values of the provides row and
     column indices lists.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+    &gt;&gt;&gt; doc_graph(M, &#39;/docs/imgs/Matrix_from_lists&#39;)
+
+    ![Matrix_lists.png](../imgs/Matrix_lists.png)
 
     &#34;&#34;&#34;
     assert len(I) == len(J) == len(V)
@@ -9180,7 +9194,7 @@ def identity(cls, typ, nrows, one=None):
 columns and values.
 Other flags set additional properties the
 matrix will hold.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6, make_symmetric=True, no_diagonal=True, seed=42)
 &gt;&gt;&gt; doc_graph(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
 <p><img alt="Matrix_random.png" src="../imgs/Matrix_random.png"></p></div>
@@ -9206,7 +9220,7 @@ def random(
     columns and values.  Other flags set additional properties the
     matrix will hold.
 
-    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6, make_symmetric=True, no_diagonal=True, seed=42)
     &gt;&gt;&gt; doc_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
     ![Matrix_random.png](../imgs/Matrix_random.png)

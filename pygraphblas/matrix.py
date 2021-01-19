@@ -139,6 +139,11 @@ class Matrix:
         are computed from the max values of the provides row and
         column indices lists.
 
+        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> doc_graph(M, '/docs/imgs/Matrix_from_lists')
+
+        ![Matrix_lists.png](../imgs/Matrix_lists.png)
+
         """
         assert len(I) == len(J) == len(V)
         if not nrows:
@@ -194,7 +199,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        >>> M = Matrix.random(types.UINT8, 3, 3, 6)
+        >>> M = Matrix.random(types.UINT8, 3, 3, 6, make_symmetric=True, no_diagonal=True, seed=42)
         >>> doc_graph(M, filename='/docs/imgs/Matrix_random')
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
