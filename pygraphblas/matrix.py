@@ -29,6 +29,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
+from .gviz import doc_graph
 
 __all__ = ["Matrix"]
 __pdoc__ = {"Matrix.__init__": False}
@@ -192,6 +193,10 @@ class Matrix:
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
+
+        >>> M = Matrix.random(types.UINT8, 3, 3, 6)
+        >>> doc_graph('pygraphblas/imgs/Matrix_random.png', M, filename='/docs/imgs/Matrix_random')
+        '![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)'
 
         """
         result = ffi.new("GrB_Matrix*")

@@ -216,7 +216,14 @@ GxB_SPEC = GxB_SPEC
 __pdoc__ = {
     &#34;base&#34;: False,
     &#34;build&#34;: False,
-    }</code></pre>
+    }
+
+
+def run_doctests():
+    import sys, doctest
+    this = sys.modules[__name__]
+    for mod in (this, matrix):
+        doctest.testmod(mod)</code></pre>
 </details>
 </section>
 <section>
@@ -7891,6 +7898,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+        &gt;&gt;&gt; doc_graph(&#39;pygraphblas/imgs/Matrix_random.png&#39;, M, filename=&#39;docs/imgs/Matrix_random.png&#39;)
+        ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
+
         &#34;&#34;&#34;
         result = ffi.new(&#34;GrB_Matrix*&#34;)
         i = cls(result, typ)
@@ -9167,7 +9178,11 @@ def identity(cls, typ, nrows, one=None):
 <div class="desc"><p>Create a new random Matrix of the given type, number of rows,
 columns and values.
 Other flags set additional properties the
-matrix will hold.</p></div>
+matrix will hold.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+&gt;&gt;&gt; doc_graph('pygraphblas/imgs/Matrix_random.png', M, filename='docs/imgs/Matrix_random.png')
+![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9189,6 +9204,10 @@ def random(
     &#34;&#34;&#34;Create a new random Matrix of the given type, number of rows,
     columns and values.  Other flags set additional properties the
     matrix will hold.
+
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+    &gt;&gt;&gt; doc_graph(&#39;pygraphblas/imgs/Matrix_random.png&#39;, M, filename=&#39;docs/imgs/Matrix_random.png&#39;)
+    ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
 
     &#34;&#34;&#34;
     result = ffi.new(&#34;GrB_Matrix*&#34;)

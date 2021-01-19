@@ -33,7 +33,6 @@
 
 &#34;&#34;&#34;
 from graphviz import Digraph, Source
-from pygraphblas import Matrix, Vector, types, BOOL
 from PIL import Image, ImageDraw
 from IPython.display import display
 
@@ -95,6 +94,9 @@ def draw_graph(
         g.render(filename, format=&#34;png&#34;)
     return g
 
+def doc_graph(name, *args, **kwargs):
+    g = draw_graph(*args, **kwargs)
+    return f&#34;![{name}]({name})&#34;
 
 def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
     g = Digraph(name)
@@ -134,6 +136,7 @@ def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
 
 
 def draw(obj, name=&#34;&#34;, **kws):
+    from pygraphblas import Matrix, Vector
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
@@ -141,6 +144,7 @@ def draw(obj, name=&#34;&#34;, **kws):
 
 
 def draw_op(left, op, right, result):
+    from pygraphblas import Matrix, Vector
     ioff = 0
     joff = 0
 
@@ -165,6 +169,7 @@ def draw_op(left, op, right, result):
 
 
 def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
+    from pygraphblas import BOOL
     if mode is None:
         mode = &#34;RGB&#34;
 
@@ -211,6 +216,20 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pygraphblas.gviz.doc_graph"><code class="name flex">
+<span>def <span class="ident">doc_graph</span></span>(<span>name, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def doc_graph(name, *args, **kwargs):
+    g = draw_graph(*args, **kwargs)
+    return f&#34;![{name}]({name})&#34;</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.gviz.draw"><code class="name flex">
 <span>def <span class="ident">draw</span></span>(<span>obj, name='', **kws)</span>
 </code></dt>
@@ -221,6 +240,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw(obj, name=&#34;&#34;, **kws):
+    from pygraphblas import Matrix, Vector
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
@@ -338,6 +358,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
+    from pygraphblas import BOOL
     if mode is None:
         mode = &#34;RGB&#34;
 
@@ -387,6 +408,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw_op(left, op, right, result):
+    from pygraphblas import Matrix, Vector
     ioff = 0
     joff = 0
 
@@ -445,6 +467,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
+<li><code><a title="pygraphblas.gviz.doc_graph" href="#pygraphblas.gviz.doc_graph">doc_graph</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw" href="#pygraphblas.gviz.draw">draw</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_graph" href="#pygraphblas.gviz.draw_graph">draw_graph</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_layers" href="#pygraphblas.gviz.draw_layers">draw_layers</a></code></li>

@@ -143,3 +143,11 @@ __pdoc__ = {
     "base": False,
     "build": False,
     }
+
+
+def run_doctests():
+    import sys, doctest
+    this = sys.modules[__name__]
+    for mod in (this, matrix):
+        doctest.testmod(mod)
+

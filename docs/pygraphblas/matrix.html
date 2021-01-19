@@ -60,6 +60,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
+from .gviz import doc_graph
 
 __all__ = [&#34;Matrix&#34;]
 __pdoc__ = {&#34;Matrix.__init__&#34;: False}
@@ -223,6 +224,10 @@ class Matrix:
         &#34;&#34;&#34;Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
+
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+        &gt;&gt;&gt; doc_graph(&#39;pygraphblas/imgs/Matrix_random.png&#39;, M, filename=&#39;docs/imgs/Matrix_random.png&#39;)
+        ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
 
         &#34;&#34;&#34;
         result = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -1649,6 +1654,10 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+        &gt;&gt;&gt; doc_graph(&#39;pygraphblas/imgs/Matrix_random.png&#39;, M, filename=&#39;docs/imgs/Matrix_random.png&#39;)
+        ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
+
         &#34;&#34;&#34;
         result = ffi.new(&#34;GrB_Matrix*&#34;)
         i = cls(result, typ)
@@ -2925,7 +2934,11 @@ def identity(cls, typ, nrows, one=None):
 <div class="desc"><p>Create a new random Matrix of the given type, number of rows,
 columns and values.
 Other flags set additional properties the
-matrix will hold.</p></div>
+matrix will hold.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+&gt;&gt;&gt; doc_graph('pygraphblas/imgs/Matrix_random.png', M, filename='docs/imgs/Matrix_random.png')
+![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2947,6 +2960,10 @@ def random(
     &#34;&#34;&#34;Create a new random Matrix of the given type, number of rows,
     columns and values.  Other flags set additional properties the
     matrix will hold.
+
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 3, 3, 6)
+    &gt;&gt;&gt; doc_graph(&#39;pygraphblas/imgs/Matrix_random.png&#39;, M, filename=&#39;docs/imgs/Matrix_random.png&#39;)
+    ![pygraphblas/imgs/Matrix_random.png](pygraphblas/imgs/Matrix_random.png)
 
     &#34;&#34;&#34;
     result = ffi.new(&#34;GrB_Matrix*&#34;)
