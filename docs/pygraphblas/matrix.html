@@ -103,7 +103,7 @@ class Matrix:
 
     &#34;&#34;&#34;
 
-    __slots__ = (&#34;matrix&#34;, &#34;type&#34;, &#34;_funcs&#34;, &#34;_keep_alives&#34;)
+    __slots__ = (&#34;_matrix&#34;, &#34;type&#34;, &#34;_funcs&#34;, &#34;_keep_alives&#34;)
 
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
@@ -111,7 +111,7 @@ class Matrix:
                 raise KeyError
 
             error_string = ffi.new(&#34;char**&#34;)
-            lib.GrB_Matrix_error(error_string, self.matrix[0])
+            lib.GrB_Matrix_error(error_string, self._matrix[0])
             raise _error_codes[res](ffi.string(error_string[0]))
 
     def __init__(self, matrix, typ=None):
@@ -121,12 +121,12 @@ class Matrix:
 
             typ = types.gb_type_to_type(new_type[0])
 
-        self.matrix = matrix
+        self._matrix = matrix
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
-        self._check(lib.GrB_Matrix_free(self.matrix))
+        self._check(lib.GrB_Matrix_free(self._matrix))
 
     @classmethod
     def sparse(cls, typ, nrows=None, ncols=None):
@@ -280,7 +280,7 @@ class Matrix:
 
         &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
-        self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
+        self._check(lib.GxB_Matrix_type(new_type, self._matrix[0]))
         return new_type[0]
 
     @property
@@ -293,7 +293,7 @@ class Matrix:
 
         &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_nrows(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -306,7 +306,7 @@ class Matrix:
 
         &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_ncols(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -329,7 +329,7 @@ class Matrix:
     def nvals(self):
         &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -340,7 +340,7 @@ class Matrix:
     def dup(self):
         &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
-        self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
+        self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
@@ -348,7 +348,7 @@ class Matrix:
         &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+            lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
         )
         return switch[0]
 
@@ -357,21 +357,21 @@ class Matrix:
         &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
-            lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+            lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
         )
 
     @property
     def format(self):
         &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
-        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
+        self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
         &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
-        self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
+        self._check(lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
@@ -379,7 +379,7 @@ class Matrix:
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
-                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+                self._matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
             )
         )
         return sparsity[0]
@@ -390,7 +390,7 @@ class Matrix:
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
-                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+                self._matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
             )
         )
 
@@ -399,7 +399,7 @@ class Matrix:
         &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
-            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
+            lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)
         )
         return status[0]
 
@@ -411,17 +411,17 @@ class Matrix:
         &#34;&#34;&#34;
 
         r = ffi.new(&#34;GrB_Matrix*&#34;)
-        self._check(lib.LAGraph_pattern(r, self.matrix[0], typ.gb_type))
+        self._check(lib.LAGraph_pattern(r, self._matrix[0], typ.gb_type))
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
         &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
-        self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
+        self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=&#34;&#34;):
         &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
         self._check(
-            lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+            lib.LAGraph_binwrite(self._matrix, filename, bytes(comments, &#34;utf8&#34;))
         )
 
     def to_lists(self):
@@ -431,7 +431,7 @@ class Matrix:
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
         n = ffi.new(&#34;GrB_Index*&#34;)
         n[0] = self.nvals
-        self._check(self.type.Matrix_extractTuples(I, J, V, n, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, V, n, self._matrix[0]))
         return [list(I), list(J), list(map(self.type.to_value, V))]
 
     def clear(self):
@@ -439,14 +439,14 @@ class Matrix:
         values.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_clear(self.matrix[0]))
+        self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
     def resize(self, nrows, ncols):
         &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
+        self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
@@ -464,7 +464,7 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
+        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
         return out
 
     def cast(self, cast, out=None):
@@ -521,12 +521,12 @@ class Matrix:
 
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 add_op,
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -579,12 +579,12 @@ class Matrix:
 
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 mult_op,
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -594,7 +594,7 @@ class Matrix:
         &#34;&#34;&#34;Compare two matrices for equality.&#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
+        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
@@ -608,7 +608,7 @@ class Matrix:
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
@@ -620,7 +620,7 @@ class Matrix:
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return array(&#34;L&#34;, I), array(&#34;L&#34;, J), array(self.type.typecode, X)
 
     @property
@@ -631,7 +631,7 @@ class Matrix:
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = NULL
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(I)
 
     @property
@@ -642,7 +642,7 @@ class Matrix:
         I = NULL
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(J)
 
     @property
@@ -653,7 +653,7 @@ class Matrix:
         I = NULL
         J = NULL
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
 
     def __len__(self):
@@ -759,7 +759,7 @@ class Matrix:
         result = ffi.new(&#34;_Bool*&#34;)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -771,7 +771,7 @@ class Matrix:
         result = ffi.new(&#34;int64_t*&#34;)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_INT64(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -783,7 +783,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_FP64(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -797,7 +797,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_Monoid(
-                out.vector[0], mask, accum, mon, self.matrix[0], desc
+                out._vector[0], mask, accum, mon, self._matrix[0], desc
             )
         )
         return out
@@ -810,7 +810,7 @@ class Matrix:
             op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
+            lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
         )
         return out
 
@@ -828,7 +828,7 @@ class Matrix:
             f = lib.GxB_Matrix_apply_BinaryOp1st
         else:
             f = self.type.Matrix_apply_BinaryOp1st
-        self._check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
+        self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
         return out
 
     def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
@@ -843,7 +843,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
-                out.matrix[0], mask, accum, op, self.matrix[0], second, desc
+                out._matrix[0], mask, accum, op, self._matrix[0], second, desc
             )
         )
         return out
@@ -876,14 +876,14 @@ class Matrix:
         if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
-            self._keep_alives[self.matrix] = thunk
+            self._keep_alives[self._matrix] = thunk
             thunk = thunk.scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GxB_Matrix_select(
-                out.matrix[0], mask, accum, op, self.matrix[0], thunk, desc
+                out._matrix[0], mask, accum, op, self._matrix[0], thunk, desc
             )
         )
         return out
@@ -916,7 +916,7 @@ class Matrix:
 
         self._check(
             self.type.Matrix_assignScalar(
-                B.matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
+                B._matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -960,9 +960,9 @@ class Matrix:
 
     def _get_args(self, mask=None, accum=None, desc=Default):
         if isinstance(mask, Matrix):
-            mask = mask.matrix[0]
+            mask = mask._matrix[0]
         elif isinstance(mask, Vector):
-            mask = mask.vector[0]
+            mask = mask._vector[0]
         else:
             mask = NULL
         if accum is None:
@@ -999,12 +999,12 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 semiring.get_semiring(typ),
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -1035,12 +1035,12 @@ class Matrix:
 
         self._check(
             lib.GrB_mxv(
-                out.vector[0],
+                out._vector[0],
                 mask,
                 accum,
                 semiring.get_semiring(typ),
-                self.matrix[0],
-                other.vector[0],
+                self._matrix[0],
+                other._vector[0],
                 desc,
             )
         )
@@ -1074,7 +1074,7 @@ class Matrix:
 
         self._check(
             lib.GrB_Matrix_kronecker_BinaryOp(
-                out.matrix[0], mask, accum, op, self.matrix[0], other.matrix[0], desc
+                out._matrix[0], mask, accum, op, self._matrix[0], other._matrix[0], desc
             )
         )
         return out
@@ -1099,7 +1099,7 @@ class Matrix:
 
         self._check(
             lib.GrB_Matrix_extract(
-                out.matrix[0], mask, accum, self.matrix[0], I, ni, J, nj, desc
+                out._matrix[0], mask, accum, self._matrix[0], I, ni, J, nj, desc
             )
         )
         return out
@@ -1117,7 +1117,7 @@ class Matrix:
 
         self._check(
             lib.GrB_Col_extract(
-                out.vector[0], mask, accum, self.matrix[0], I, ni, col_index, desc
+                out._vector[0], mask, accum, self._matrix[0], I, ni, col_index, desc
             )
         )
         return out
@@ -1152,7 +1152,7 @@ class Matrix:
             result = self.type.ffi.new(self.type.ptr)
             self._check(
                 self.type.Matrix_extractElement(
-                    result, self.matrix[0], index[0], index[1]
+                    result, self._matrix[0], index[0], index[1]
                 )
             )
             return self.type.to_value(result[0])
@@ -1178,7 +1178,7 @@ class Matrix:
 
         self._check(
             lib.GrB_Col_assign(
-                self.matrix[0], mask, accum, value.vector[0], I, ni, col_index, desc
+                self._matrix[0], mask, accum, value._vector[0], I, ni, col_index, desc
             )
         )
 
@@ -1192,7 +1192,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Row_assign(
-                self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
+                self._matrix[0], mask, accum, value._vector[0], row_index, I, ni, desc
             )
         )
 
@@ -1211,7 +1211,7 @@ class Matrix:
 
         self._check(
             lib.GrB_Matrix_assign(
-                self.matrix[0], mask, accum, value.matrix[0], I, ni, J, nj, desc
+                self._matrix[0], mask, accum, value._matrix[0], I, ni, J, nj, desc
             )
         )
 
@@ -1233,7 +1233,7 @@ class Matrix:
         scalar_type = types._gb_from_type(type(value))
         self._check(
             scalar_type.Matrix_assignScalar(
-                self.matrix[0], mask, accum, value, I, ni, J, nj, desc
+                self._matrix[0], mask, accum, value, I, ni, J, nj, desc
             )
         )
 
@@ -1269,7 +1269,7 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             val = self.type.from_value(value)
-            self._check(self.type.Matrix_setElement(self.matrix[0], val, i0, i1))
+            self._check(self.type.Matrix_setElement(self._matrix[0], val, i0, i1))
             return
 
         if isinstance(i0, int) and isinstance(i1, slice):
@@ -1300,7 +1300,7 @@ class Matrix:
             raise TypeError(
                 &#34;__delitem__ currently only supports single element removal&#34;
             )
-        self._check(lib.GrB_Matrix_removeElement(self.matrix[0], index[0], index[1]))
+        self._check(lib.GrB_Matrix_removeElement(self._matrix[0], index[0], index[1]))
 
     def __contains__(self, index):
         try:
@@ -1324,7 +1324,7 @@ class Matrix:
         change it.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_wait(self.matrix))
+        self._check(lib.GrB_Matrix_wait(self._matrix))
 
     def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
         &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
@@ -1556,7 +1556,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     &#34;&#34;&#34;
 
-    __slots__ = (&#34;matrix&#34;, &#34;type&#34;, &#34;_funcs&#34;, &#34;_keep_alives&#34;)
+    __slots__ = (&#34;_matrix&#34;, &#34;type&#34;, &#34;_funcs&#34;, &#34;_keep_alives&#34;)
 
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
@@ -1564,7 +1564,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
                 raise KeyError
 
             error_string = ffi.new(&#34;char**&#34;)
-            lib.GrB_Matrix_error(error_string, self.matrix[0])
+            lib.GrB_Matrix_error(error_string, self._matrix[0])
             raise _error_codes[res](ffi.string(error_string[0]))
 
     def __init__(self, matrix, typ=None):
@@ -1574,12 +1574,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
             typ = types.gb_type_to_type(new_type[0])
 
-        self.matrix = matrix
+        self._matrix = matrix
         self.type = typ
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
-        self._check(lib.GrB_Matrix_free(self.matrix))
+        self._check(lib.GrB_Matrix_free(self._matrix))
 
     @classmethod
     def sparse(cls, typ, nrows=None, ncols=None):
@@ -1733,7 +1733,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
-        self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
+        self._check(lib.GxB_Matrix_type(new_type, self._matrix[0]))
         return new_type[0]
 
     @property
@@ -1746,7 +1746,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_nrows(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -1759,7 +1759,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_ncols(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -1782,7 +1782,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def nvals(self):
         &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
+        self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -1793,7 +1793,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def dup(self):
         &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
-        self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
+        self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
 
     @property
@@ -1801,7 +1801,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+            lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
         )
         return switch[0]
 
@@ -1810,21 +1810,21 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
-            lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+            lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
         )
 
     @property
     def format(self):
         &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
-        self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
+        self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
         &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
-        self._check(lib.GxB_Matrix_Option_set(self.matrix[0], lib.GxB_FORMAT, format))
+        self._check(lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity_control(self):
@@ -1832,7 +1832,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
-                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+                self._matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
             )
         )
         return sparsity[0]
@@ -1843,7 +1843,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
-                self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+                self._matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
             )
         )
 
@@ -1852,7 +1852,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
-            lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
+            lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)
         )
         return status[0]
 
@@ -1864,17 +1864,17 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;
 
         r = ffi.new(&#34;GrB_Matrix*&#34;)
-        self._check(lib.LAGraph_pattern(r, self.matrix[0], typ.gb_type))
+        self._check(lib.LAGraph_pattern(r, self._matrix[0], typ.gb_type))
         return Matrix(r, typ)
 
     def to_mm(self, fileobj):
         &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
-        self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))
+        self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))
 
     def to_binfile(self, filename, comments=&#34;&#34;):
         &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
         self._check(
-            lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+            lib.LAGraph_binwrite(self._matrix, filename, bytes(comments, &#34;utf8&#34;))
         )
 
     def to_lists(self):
@@ -1884,7 +1884,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
         n = ffi.new(&#34;GrB_Index*&#34;)
         n[0] = self.nvals
-        self._check(self.type.Matrix_extractTuples(I, J, V, n, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, V, n, self._matrix[0]))
         return [list(I), list(J), list(map(self.type.to_value, V))]
 
     def clear(self):
@@ -1892,14 +1892,14 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         values.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_clear(self.matrix[0]))
+        self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
     def resize(self, nrows, ncols):
         &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))
+        self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
@@ -1917,7 +1917,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
+        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
         return out
 
     def cast(self, cast, out=None):
@@ -1974,12 +1974,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 add_op,
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -2032,12 +2032,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 mult_op,
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -2047,7 +2047,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;Compare two matrices for equality.&#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
+        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
@@ -2061,7 +2061,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
@@ -2073,7 +2073,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return array(&#34;L&#34;, I), array(&#34;L&#34;, J), array(self.type.typecode, X)
 
     @property
@@ -2084,7 +2084,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         J = NULL
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(I)
 
     @property
@@ -2095,7 +2095,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         I = NULL
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(J)
 
     @property
@@ -2106,7 +2106,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         I = NULL
         J = NULL
         X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
 
     def __len__(self):
@@ -2212,7 +2212,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         result = ffi.new(&#34;_Bool*&#34;)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -2224,7 +2224,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         result = ffi.new(&#34;int64_t*&#34;)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_INT64(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -2236,7 +2236,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
+            lib.GrB_Matrix_reduce_FP64(result, accum, mon, self._matrix[0], desc)
         )
         return result[0]
 
@@ -2250,7 +2250,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_reduce_Monoid(
-                out.vector[0], mask, accum, mon, self.matrix[0], desc
+                out._vector[0], mask, accum, mon, self._matrix[0], desc
             )
         )
         return out
@@ -2263,7 +2263,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
+            lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
         )
         return out
 
@@ -2281,7 +2281,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             f = lib.GxB_Matrix_apply_BinaryOp1st
         else:
             f = self.type.Matrix_apply_BinaryOp1st
-        self._check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
+        self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
         return out
 
     def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
@@ -2296,7 +2296,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
-                out.matrix[0], mask, accum, op, self.matrix[0], second, desc
+                out._matrix[0], mask, accum, op, self._matrix[0], second, desc
             )
         )
         return out
@@ -2329,14 +2329,14 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         if isinstance(thunk, (bool, int, float, complex)):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
-            self._keep_alives[self.matrix] = thunk
+            self._keep_alives[self._matrix] = thunk
             thunk = thunk.scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
         self._check(
             lib.GxB_Matrix_select(
-                out.matrix[0], mask, accum, op, self.matrix[0], thunk, desc
+                out._matrix[0], mask, accum, op, self._matrix[0], thunk, desc
             )
         )
         return out
@@ -2369,7 +2369,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             self.type.Matrix_assignScalar(
-                B.matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
+                B._matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -2413,9 +2413,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     def _get_args(self, mask=None, accum=None, desc=Default):
         if isinstance(mask, Matrix):
-            mask = mask.matrix[0]
+            mask = mask._matrix[0]
         elif isinstance(mask, Vector):
-            mask = mask.vector[0]
+            mask = mask._vector[0]
         else:
             mask = NULL
         if accum is None:
@@ -2452,12 +2452,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
-                out.matrix[0],
+                out._matrix[0],
                 mask,
                 accum,
                 semiring.get_semiring(typ),
-                self.matrix[0],
-                other.matrix[0],
+                self._matrix[0],
+                other._matrix[0],
                 desc,
             )
         )
@@ -2488,12 +2488,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_mxv(
-                out.vector[0],
+                out._vector[0],
                 mask,
                 accum,
                 semiring.get_semiring(typ),
-                self.matrix[0],
-                other.vector[0],
+                self._matrix[0],
+                other._vector[0],
                 desc,
             )
         )
@@ -2527,7 +2527,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Matrix_kronecker_BinaryOp(
-                out.matrix[0], mask, accum, op, self.matrix[0], other.matrix[0], desc
+                out._matrix[0], mask, accum, op, self._matrix[0], other._matrix[0], desc
             )
         )
         return out
@@ -2552,7 +2552,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Matrix_extract(
-                out.matrix[0], mask, accum, self.matrix[0], I, ni, J, nj, desc
+                out._matrix[0], mask, accum, self._matrix[0], I, ni, J, nj, desc
             )
         )
         return out
@@ -2570,7 +2570,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Col_extract(
-                out.vector[0], mask, accum, self.matrix[0], I, ni, col_index, desc
+                out._vector[0], mask, accum, self._matrix[0], I, ni, col_index, desc
             )
         )
         return out
@@ -2605,7 +2605,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             result = self.type.ffi.new(self.type.ptr)
             self._check(
                 self.type.Matrix_extractElement(
-                    result, self.matrix[0], index[0], index[1]
+                    result, self._matrix[0], index[0], index[1]
                 )
             )
             return self.type.to_value(result[0])
@@ -2631,7 +2631,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Col_assign(
-                self.matrix[0], mask, accum, value.vector[0], I, ni, col_index, desc
+                self._matrix[0], mask, accum, value._vector[0], I, ni, col_index, desc
             )
         )
 
@@ -2645,7 +2645,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Row_assign(
-                self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
+                self._matrix[0], mask, accum, value._vector[0], row_index, I, ni, desc
             )
         )
 
@@ -2664,7 +2664,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._check(
             lib.GrB_Matrix_assign(
-                self.matrix[0], mask, accum, value.matrix[0], I, ni, J, nj, desc
+                self._matrix[0], mask, accum, value._matrix[0], I, ni, J, nj, desc
             )
         )
 
@@ -2686,7 +2686,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         scalar_type = types._gb_from_type(type(value))
         self._check(
             scalar_type.Matrix_assignScalar(
-                self.matrix[0], mask, accum, value, I, ni, J, nj, desc
+                self._matrix[0], mask, accum, value, I, ni, J, nj, desc
             )
         )
 
@@ -2722,7 +2722,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             val = self.type.from_value(value)
-            self._check(self.type.Matrix_setElement(self.matrix[0], val, i0, i1))
+            self._check(self.type.Matrix_setElement(self._matrix[0], val, i0, i1))
             return
 
         if isinstance(i0, int) and isinstance(i1, slice):
@@ -2753,7 +2753,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             raise TypeError(
                 &#34;__delitem__ currently only supports single element removal&#34;
             )
-        self._check(lib.GrB_Matrix_removeElement(self.matrix[0], index[0], index[1]))
+        self._check(lib.GrB_Matrix_removeElement(self._matrix[0], index[0], index[1]))
 
     def __contains__(self, index):
         try:
@@ -2777,7 +2777,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         change it.
 
         &#34;&#34;&#34;
-        self._check(lib.GrB_Matrix_wait(self.matrix))
+        self._check(lib.GrB_Matrix_wait(self._matrix))
 
     def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
         &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
@@ -3110,7 +3110,7 @@ def cols(self):
     I = NULL
     J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     X = NULL
-    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
     return iter(J)</code></pre>
 </details>
 </dd>
@@ -3125,7 +3125,7 @@ def cols(self):
 def format(self):
     &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
     format = ffi.new(&#34;GxB_Format_Value*&#34;)
-    self._check(lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_FORMAT, format))
+    self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
     return format[0]</code></pre>
 </details>
 </dd>
@@ -3145,7 +3145,7 @@ def gb_type(self):
 
     &#34;&#34;&#34;
     new_type = ffi.new(&#34;GrB_Type*&#34;)
-    self._check(lib.GxB_Matrix_type(new_type, self.matrix[0]))
+    self._check(lib.GxB_Matrix_type(new_type, self._matrix[0]))
     return new_type[0]</code></pre>
 </details>
 </dd>
@@ -3161,14 +3161,10 @@ def hyper_switch(self):
     &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
     switch = ffi.new(&#34;double*&#34;)
     self._check(
-        lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_HYPER_SWITCH, switch)
+        lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
     )
     return switch[0]</code></pre>
 </details>
-</dd>
-<dt id="pygraphblas.matrix.Matrix.matrix"><code class="name">var <span class="ident">matrix</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.ncols"><code class="name">var <span class="ident">ncols</span></code></dt>
 <dd>
@@ -3191,7 +3187,7 @@ def ncols(self):
 
     &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
-    self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
+    self._check(lib.GrB_Matrix_ncols(n, self._matrix[0]))
     return n[0]</code></pre>
 </details>
 </dd>
@@ -3216,7 +3212,7 @@ def nrows(self):
 
     &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
-    self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
+    self._check(lib.GrB_Matrix_nrows(n, self._matrix[0]))
     return n[0]</code></pre>
 </details>
 </dd>
@@ -3231,7 +3227,7 @@ def nrows(self):
 def nvals(self):
     &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
-    self._check(lib.GrB_Matrix_nvals(n, self.matrix[0]))
+    self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
     return n[0]</code></pre>
 </details>
 </dd>
@@ -3250,7 +3246,7 @@ def rows(self):
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     J = NULL
     X = NULL
-    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
     return iter(I)</code></pre>
 </details>
 </dd>
@@ -3290,7 +3286,7 @@ def sparsity_control(self):
     sparsity = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(
-            self.matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            self._matrix[0], lib.GxB_SPARSITY_CONTROL, sparsity
         )
     )
     return sparsity[0]</code></pre>
@@ -3308,7 +3304,7 @@ def sparsity_status(self):
     &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
     status = ffi.new(&#34;int*&#34;)
     self._check(
-        lib.GxB_Matrix_Option_get(self.matrix[0], lib.GxB_SPARSITY_STATUS, status)
+        lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)
     )
     return status[0]</code></pre>
 </details>
@@ -3345,7 +3341,7 @@ def vals(self):
     I = NULL
     J = NULL
     X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
     return iter(X)</code></pre>
 </details>
 </dd>
@@ -3369,7 +3365,7 @@ def vals(self):
         op = op.get_unaryop(self.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
-        lib.GrB_Matrix_apply(out.matrix[0], mask, accum, op, self.matrix[0], desc)
+        lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
     )
     return out</code></pre>
 </details>
@@ -3398,7 +3394,7 @@ first input to a scalar first.</p></div>
         f = lib.GxB_Matrix_apply_BinaryOp1st
     else:
         f = self.type.Matrix_apply_BinaryOp1st
-    self._check(f(out.matrix[0], mask, accum, op, first, self.matrix[0], desc))
+    self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
     return out</code></pre>
 </details>
 </dd>
@@ -3424,7 +3420,7 @@ second input to a scalar second.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         self.type.Matrix_apply_BinaryOp2nd(
-            out.matrix[0], mask, accum, op, self.matrix[0], second, desc
+            out._matrix[0], mask, accum, op, self._matrix[0], second, desc
         )
     )
     return out</code></pre>
@@ -3449,7 +3445,7 @@ second input to a scalar second.</p></div>
 
     self._check(
         lib.GrB_Col_assign(
-            self.matrix[0], mask, accum, value.vector[0], I, ni, col_index, desc
+            self._matrix[0], mask, accum, value._vector[0], I, ni, col_index, desc
         )
     )</code></pre>
 </details>
@@ -3478,7 +3474,7 @@ second input to a scalar second.</p></div>
 
     self._check(
         lib.GrB_Matrix_assign(
-            self.matrix[0], mask, accum, value.matrix[0], I, ni, J, nj, desc
+            self._matrix[0], mask, accum, value._matrix[0], I, ni, J, nj, desc
         )
     )</code></pre>
 </details>
@@ -3502,7 +3498,7 @@ second input to a scalar second.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Row_assign(
-            self.matrix[0], mask, accum, value.vector[0], row_index, I, ni, desc
+            self._matrix[0], mask, accum, value._vector[0], row_index, I, ni, desc
         )
     )</code></pre>
 </details>
@@ -3534,7 +3530,7 @@ second input to a scalar second.</p></div>
     scalar_type = types._gb_from_type(type(value))
     self._check(
         scalar_type.Matrix_assignScalar(
-            self.matrix[0], mask, accum, value, I, ni, J, nj, desc
+            self._matrix[0], mask, accum, value, I, ni, J, nj, desc
         )
     )</code></pre>
 </details>
@@ -3574,7 +3570,7 @@ values.</p></div>
     values.
 
     &#34;&#34;&#34;
-    self._check(lib.GrB_Matrix_clear(self.matrix[0]))</code></pre>
+    self._check(lib.GrB_Matrix_clear(self._matrix[0]))</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.diag"><code class="name flex">
@@ -3603,7 +3599,7 @@ values.</p></div>
 <pre><code class="python">def dup(self):
     &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
-    self._check(lib.GrB_Matrix_dup(new_mat, self.matrix[0]))
+    self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
     return self.__class__(new_mat, self.type)</code></pre>
 </details>
 </dd>
@@ -3680,12 +3676,12 @@ interchangeably for either operation.</p></div>
 
     self._check(
         lib.GrB_Matrix_eWiseAdd_BinaryOp(
-            out.matrix[0],
+            out._matrix[0],
             mask,
             accum,
             add_op,
-            self.matrix[0],
-            other.matrix[0],
+            self._matrix[0],
+            other._matrix[0],
             desc,
         )
     )
@@ -3764,12 +3760,12 @@ interchangeably for either operation.</p></div>
 
     self._check(
         lib.GrB_Matrix_eWiseMult_BinaryOp(
-            out.matrix[0],
+            out._matrix[0],
             mask,
             accum,
             mult_op,
-            self.matrix[0],
-            other.matrix[0],
+            self._matrix[0],
+            other._matrix[0],
             desc,
         )
     )
@@ -3798,7 +3794,7 @@ interchangeably for either operation.</p></div>
 
     self._check(
         lib.GrB_Col_extract(
-            out.vector[0], mask, accum, self.matrix[0], I, ni, col_index, desc
+            out._vector[0], mask, accum, self._matrix[0], I, ni, col_index, desc
         )
     )
     return out</code></pre>
@@ -3833,7 +3829,7 @@ interchangeably for either operation.</p></div>
 
     self._check(
         lib.GrB_Matrix_extract(
-            out.matrix[0], mask, accum, self.matrix[0], I, ni, J, nj, desc
+            out._matrix[0], mask, accum, self._matrix[0], I, ni, J, nj, desc
         )
     )
     return out</code></pre>
@@ -3892,7 +3888,7 @@ the element is not present.</p></div>
     &#34;&#34;&#34;Compare two matrices for equality.&#34;&#34;&#34;
     result = ffi.new(&#34;_Bool*&#34;)
     eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-    self._check(lib.LAGraph_isequal(result, self.matrix[0], other.matrix[0], eq_op))
+    self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
     return result[0]</code></pre>
 </details>
 </dd>
@@ -3936,7 +3932,7 @@ the element is not present.</p></div>
 
     self._check(
         lib.GrB_Matrix_kronecker_BinaryOp(
-            out.matrix[0], mask, accum, op, self.matrix[0], other.matrix[0], desc
+            out._matrix[0], mask, accum, op, self._matrix[0], other._matrix[0], desc
         )
     )
     return out</code></pre>
@@ -3975,12 +3971,12 @@ the element is not present.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_mxm(
-            out.matrix[0],
+            out._matrix[0],
             mask,
             accum,
             semiring.get_semiring(typ),
-            self.matrix[0],
-            other.matrix[0],
+            self._matrix[0],
+            other._matrix[0],
             desc,
         )
     )
@@ -4021,12 +4017,12 @@ the element is not present.</p></div>
 
     self._check(
         lib.GrB_mxv(
-            out.vector[0],
+            out._vector[0],
             mask,
             accum,
             semiring.get_semiring(typ),
-            self.matrix[0],
-            other.vector[0],
+            self._matrix[0],
+            other._vector[0],
             desc,
         )
     )
@@ -4080,7 +4076,7 @@ defaults to BOOL.</p></div>
     &#34;&#34;&#34;
 
     r = ffi.new(&#34;GrB_Matrix*&#34;)
-    self._check(lib.LAGraph_pattern(r, self.matrix[0], typ.gb_type))
+    self._check(lib.LAGraph_pattern(r, self._matrix[0], typ.gb_type))
     return Matrix(r, typ)</code></pre>
 </details>
 </dd>
@@ -4101,7 +4097,7 @@ defaults to BOOL.</p></div>
     result = ffi.new(&#34;_Bool*&#34;)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
-        lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self.matrix[0], desc)
+        lib.GrB_Matrix_reduce_BOOL(result, accum, mon, self._matrix[0], desc)
     )
     return result[0]</code></pre>
 </details>
@@ -4123,7 +4119,7 @@ defaults to BOOL.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;double*&#34;)
     self._check(
-        lib.GrB_Matrix_reduce_FP64(result, accum, mon, self.matrix[0], desc)
+        lib.GrB_Matrix_reduce_FP64(result, accum, mon, self._matrix[0], desc)
     )
     return result[0]</code></pre>
 </details>
@@ -4145,7 +4141,7 @@ defaults to BOOL.</p></div>
     result = ffi.new(&#34;int64_t*&#34;)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
-        lib.GrB_Matrix_reduce_INT64(result, accum, mon, self.matrix[0], desc)
+        lib.GrB_Matrix_reduce_INT64(result, accum, mon, self._matrix[0], desc)
     )
     return result[0]</code></pre>
 </details>
@@ -4169,7 +4165,7 @@ defaults to BOOL.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_reduce_Monoid(
-            out.vector[0], mask, accum, mon, self.matrix[0], desc
+            out._vector[0], mask, accum, mon, self._matrix[0], desc
         )
     )
     return out</code></pre>
@@ -4191,7 +4187,7 @@ outside the resized matrix are deleted.</p></div>
     outside the resized matrix are deleted.
 
     &#34;&#34;&#34;
-    self._check(lib.GrB_Matrix_resize(self.matrix[0], nrows, ncols))</code></pre>
+    self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.select"><code class="name flex">
@@ -4245,14 +4241,14 @@ Can be a string mapping to following operators:</p>
     if isinstance(thunk, (bool, int, float, complex)):
         thunk = Scalar.from_value(thunk)
     if isinstance(thunk, Scalar):
-        self._keep_alives[self.matrix] = thunk
+        self._keep_alives[self._matrix] = thunk
         thunk = thunk.scalar[0]
 
     mask, accum, desc = self._get_args(mask, accum, desc)
 
     self._check(
         lib.GxB_Matrix_select(
-            out.matrix[0], mask, accum, op, self.matrix[0], thunk, desc
+            out._matrix[0], mask, accum, op, self._matrix[0], thunk, desc
         )
     )
     return out</code></pre>
@@ -4276,7 +4272,7 @@ Can be a string mapping to following operators:</p>
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     X = self.type.ffi.new(&#34;%s[%s]&#34; % (self.type.C, nvals))
-    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self.matrix[0]))
+    self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
     return array(&#34;L&#34;, I), array(&#34;L&#34;, J), array(self.type.typecode, X)</code></pre>
 </details>
 </dd>
@@ -4292,7 +4288,7 @@ Can be a string mapping to following operators:</p>
 <pre><code class="python">def to_binfile(self, filename, comments=&#34;&#34;):
     &#34;&#34;&#34;Write this matrix using custom SuiteSparse binary format.&#34;&#34;&#34;
     self._check(
-        lib.LAGraph_binwrite(self.matrix, filename, bytes(comments, &#34;utf8&#34;))
+        lib.LAGraph_binwrite(self._matrix, filename, bytes(comments, &#34;utf8&#34;))
     )</code></pre>
 </details>
 </dd>
@@ -4312,7 +4308,7 @@ Can be a string mapping to following operators:</p>
     V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
     n = ffi.new(&#34;GrB_Index*&#34;)
     n[0] = self.nvals
-    self._check(self.type.Matrix_extractTuples(I, J, V, n, self.matrix[0]))
+    self._check(self.type.Matrix_extractTuples(I, J, V, n, self._matrix[0]))
     return [list(I), list(J), list(map(self.type.to_value, V))]</code></pre>
 </details>
 </dd>
@@ -4327,7 +4323,7 @@ Can be a string mapping to following operators:</p>
 </summary>
 <pre><code class="python">def to_mm(self, fileobj):
     &#34;&#34;&#34;Write this matrix to a file using the Matrix Market format.&#34;&#34;&#34;
-    self._check(lib.LAGraph_mmwrite(self.matrix[0], fileobj))</code></pre>
+    self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.to_numpy"><code class="name flex">
@@ -4421,7 +4417,7 @@ Can be a string mapping to following operators:</p>
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
         out = self.__class__(_out, typ)
     mask, accum, desc = self._get_args(mask, accum, desc)
-    self._check(lib.GrB_transpose(out.matrix[0], mask, accum, self.matrix[0], desc))
+    self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
     return out</code></pre>
 </details>
 </dd>
@@ -4468,7 +4464,7 @@ change it.</p></div>
     change it.
 
     &#34;&#34;&#34;
-    self._check(lib.GrB_Matrix_wait(self.matrix))</code></pre>
+    self._check(lib.GrB_Matrix_wait(self._matrix))</code></pre>
 </details>
 </dd>
 </dl>

@@ -14,7 +14,7 @@ def test_matrix_init_without_type():
 
     # get a raw Matrix pointer and wrap it without knowing its type
     new_mx = ffi.new("GrB_Matrix*")
-    _check(lib.GrB_Matrix_dup(new_mx, mx.matrix[0]))
+    _check(lib.GrB_Matrix_dup(new_mx, mx._matrix[0]))
     mx2 = Matrix(new_mx)
 
     assert mx.type == mx2.type
