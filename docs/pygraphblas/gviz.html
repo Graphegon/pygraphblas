@@ -95,6 +95,7 @@ def draw_graph(
         g.render(filename, format=&#34;png&#34;)
     return g
 
+
 def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep=&#34;1&#34;)
@@ -134,6 +135,7 @@ def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
 
 def draw(obj, name=&#34;&#34;, **kws):
     from pygraphblas import Matrix, Vector
+
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
@@ -142,6 +144,7 @@ def draw(obj, name=&#34;&#34;, **kws):
 
 def draw_op(left, op, right, result):
     from pygraphblas import Matrix, Vector
+
     ioff = 0
     joff = 0
 
@@ -167,6 +170,7 @@ def draw_op(left, op, right, result):
 
 def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
     from pygraphblas import BOOL
+
     if mode is None:
         mode = &#34;RGB&#34;
 
@@ -224,6 +228,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </summary>
 <pre><code class="python">def draw(obj, name=&#34;&#34;, **kws):
     from pygraphblas import Matrix, Vector
+
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
@@ -342,6 +347,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </summary>
 <pre><code class="python">def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
     from pygraphblas import BOOL
+
     if mode is None:
         mode = &#34;RGB&#34;
 
@@ -392,6 +398,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </summary>
 <pre><code class="python">def draw_op(left, op, right, result):
     from pygraphblas import Matrix, Vector
+
     ioff = 0
     joff = 0
 

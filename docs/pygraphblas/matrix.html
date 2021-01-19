@@ -271,7 +271,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
@@ -558,7 +558,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+        self._check(
+            lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+        )
         return out
 
     def cast(self, cast, out=None):
@@ -690,7 +692,7 @@ class Matrix:
         return out
 
     def iseq(self, other):
-        &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+        &#34;&#34;&#34;Compare two matrices for equality returning True or False.
 
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
@@ -708,13 +710,13 @@ class Matrix:
         &#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+        self._check(
+            lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+        )
         return result[0]
 
     def isne(self, other):
-        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.&#34;&#34;&#34;
         return not self.iseq(other)
 
     def __iter__(self):
@@ -1211,8 +1213,9 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -1232,8 +1235,9 @@ class Matrix:
         )
         return out
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None,
-                       mask=None, accum=None, desc=Default):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1256,8 +1260,9 @@ class Matrix:
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -1273,8 +1278,9 @@ class Matrix:
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = desc | TransposeA
         return self.extract_col(
@@ -1318,8 +1324,9 @@ class Matrix:
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -1331,8 +1338,9 @@ class Matrix:
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -1344,8 +1352,9 @@ class Matrix:
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -1362,8 +1371,9 @@ class Matrix:
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
@@ -1869,7 +1879,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
@@ -2156,7 +2166,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+        self._check(
+            lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+        )
         return out
 
     def cast(self, cast, out=None):
@@ -2288,7 +2300,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return out
 
     def iseq(self, other):
-        &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+        &#34;&#34;&#34;Compare two matrices for equality returning True or False.
 
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
@@ -2306,13 +2318,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+        self._check(
+            lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+        )
         return result[0]
 
     def isne(self, other):
-        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.&#34;&#34;&#34;
         return not self.iseq(other)
 
     def __iter__(self):
@@ -2809,8 +2821,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -2830,8 +2843,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
         return out
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None,
-                       mask=None, accum=None, desc=Default):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -2854,8 +2868,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -2871,8 +2886,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = desc | TransposeA
         return self.extract_col(
@@ -2916,8 +2932,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -2929,8 +2946,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -2942,8 +2960,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -2960,8 +2979,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
@@ -3324,7 +3344,7 @@ def identity(cls, typ, nrows, one=None):
 columns and values.
 Other flags set additional properties the
 matrix will hold.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
 ...                   make_symmetric=True, no_diagonal=True, seed=42)
 &gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
@@ -3351,7 +3371,7 @@ def random(
     columns and values.  Other flags set additional properties the
     matrix will hold.
 
-    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
     ...                   make_symmetric=True, no_diagonal=True, seed=42)
     &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
@@ -3390,7 +3410,7 @@ def random(
 The dimensions
 can be specified with <code>nrows</code> and <code>ncols</code>.
 If no dimensions
-are specified, they default to <code><a title="pygraphblas.GxB_INDEX_MAX" href="index.html#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p>
+are specified, they default to <code>pygraphblas.GxB_INDEX_MAX</code>.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
 &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
 True
@@ -3847,8 +3867,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_col(self, col_index, value, row_slice=None, mask=None,
-               accum=None, desc=Default):
+<pre><code class="python">def assign_col(
+    self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
@@ -3870,8 +3891,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_matrix(self, value, rindex=None, cindex=None,
-                  mask=None, accum=None, desc=Default):
+<pre><code class="python">def assign_matrix(
+    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
     I, ni, isize = _build_range(rindex, self.nrows - 1)
     J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -3898,8 +3920,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_row(self, row_index, value, col_slice=None, mask=None,
-               accum=None, desc=Default):
+<pre><code class="python">def assign_row(
+    self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
     stop_val = self.nrows if TransposeA in desc else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
@@ -3921,8 +3944,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_scalar(self, value, row_slice=None, col_slice=None,
-                  mask=None, accum=None, desc=Default):
+<pre><code class="python">def assign_scalar(
+    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     if row_slice:
@@ -4231,8 +4255,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_col(self, col_index, row_slice=None, out=None,
-                mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_col(
+    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
@@ -4258,8 +4283,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_matrix(self, rindex=None, cindex=None, out=None,
-                   mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_matrix(
+    self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
     ta = TransposeA in desc
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -4292,8 +4318,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_row(self, row_index, col_slice=None, out=None,
-                mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_row(
+    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
     desc = desc | TransposeA
     return self.extract_col(
@@ -4326,8 +4353,7 @@ the element is not present.</p></div>
 <span>def <span class="ident">iseq</span></span>(<span>self, other)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two matrices for equality returning True or False.
-</p>
+<div class="desc"><p>Compare two matrices for equality returning True or False.</p>
 <p>Not to be confused with <code>==</code> which will return a matrix of
 BOOL values comparing <em>elements</em> for equality.</p>
 <p>Uses code from LAGraph_isequal.</p>
@@ -4344,7 +4370,7 @@ False
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def iseq(self, other):
-    &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+    &#34;&#34;&#34;Compare two matrices for equality returning True or False.
 
     Not to be confused with `==` which will return a matrix of
     BOOL values comparing *elements* for equality.
@@ -4362,7 +4388,9 @@ False
     &#34;&#34;&#34;
     result = ffi.new(&#34;_Bool*&#34;)
     eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-    self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+    self._check(
+        lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+    )
     return result[0]</code></pre>
 </details>
 </dd>
@@ -4377,9 +4405,7 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isne(self, other):
-    &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.&#34;&#34;&#34;
     return not self.iseq(other)</code></pre>
 </details>
 </dd>
@@ -4392,8 +4418,9 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
-              mask=None, accum=None, desc=Default):
+<pre><code class="python">def kronecker(
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
@@ -4959,7 +4986,9 @@ Guide</a></p>
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
         out = self.__class__(_out, typ)
     mask, accum, desc = self._get_args(mask, accum, desc)
-    self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+    self._check(
+        lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+    )
     return out</code></pre>
 </details>
 </dd>

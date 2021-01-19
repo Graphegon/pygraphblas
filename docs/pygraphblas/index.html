@@ -34,6 +34,30 @@ It uses the
 <a href="https://cffi.readthedocs.io/en/latest/">CFFI</a> library to wrap the low
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.</p>
+<p>See the <a href="https://github.com/Graphegon/pygraphblas">Github README</a> for
+details on how to install pygraphblas. Once installed, the library can
+be imported for use:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>from pygraphblas import *</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>pygraphblas uses the SuiteSparse::GraphBLAS library for its
+implementation.
+The implementation and GraphBLAS spec can be
+inspected with:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>IMPLEMENTATION
+(4, 0, &hellip;)
+SPEC
+(1, 3, 0)</p>
+</blockquote>
+</blockquote>
+</blockquote>
 <p>The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.
 As illustrated here, a graph can be expressed as
@@ -73,13 +97,27 @@ you with a lot more background information.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-pygraphblas is a python extension that bridges [The GraphBLAS
+<pre><code class="python">&#34;&#34;&#34;pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.
+
+See the [Github README](https://github.com/Graphegon/pygraphblas) for
+details on how to install pygraphblas. Once installed, the library can
+be imported for use:
+
+   &gt;&gt;&gt; from pygraphblas import *
+
+pygraphblas uses the SuiteSparse::GraphBLAS library for its
+implementation.  The implementation and GraphBLAS spec can be
+inspected with:
+
+   &gt;&gt;&gt; IMPLEMENTATION
+   (4, 0, ...)
+   &gt;&gt;&gt; SPEC
+   (1, 3, 0)
 
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
@@ -205,23 +243,24 @@ ffi = ffi  # global assign hack to fool pdoc
 lib = lib
 &#34;&#34;&#34; Raw interface to SuiteSparse library. For internal low-level use only.  &#34;&#34;&#34;
 
-GxB_INDEX_MAX = GxB_INDEX_MAX
+INDEX_MAX = GxB_INDEX_MAX
 &#34;&#34;&#34;Maximum key size for SuiteSparse, defaults to `2**60`.&#34;&#34;&#34;
 
-GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
+IMPLEMENTATION = GxB_IMPLEMENTATION
 &#34;&#34;&#34; Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
-GxB_SPEC = GxB_SPEC
+SPEC = GxB_SPEC
 &#34;&#34;&#34; Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
 __pdoc__ = {
     &#34;base&#34;: False,
     &#34;build&#34;: False,
-    }
+}
 
 
 def run_doctests():
     import sys, doctest
+
     this = sys.modules[__name__]
     for mod in (this, matrix, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
@@ -275,18 +314,6 @@ def run_doctests():
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="pygraphblas.GxB_IMPLEMENTATION"><code class="name">var <span class="ident">GxB_IMPLEMENTATION</span></code></dt>
-<dd>
-<div class="desc"><p>Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
-</dd>
-<dt id="pygraphblas.GxB_INDEX_MAX"><code class="name">var <span class="ident">GxB_INDEX_MAX</span></code></dt>
-<dd>
-<div class="desc"><p>Maximum key size for SuiteSparse, defaults to <code>2**60</code>.</p></div>
-</dd>
-<dt id="pygraphblas.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
-<dd>
-<div class="desc"><p>Tuple containing GxB_SPEC (MAJOR, MINOR, SUB)</p></div>
-</dd>
 <dt id="pygraphblas.ffi"><code class="name">var <span class="ident">ffi</span></code></dt>
 <dd>
 <div class="desc"><p>CFFI C Foreign Function Interface.
@@ -348,60 +375,65 @@ See SuiteSparse User Guide.</p>
 <span>def <span class="ident">options_set</span></span>(<span>nthreads=None, chunk=None, burble=None, hyper_switch=None, bitmap_switch=None, format=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set global library options.
-</p>
+<div class="desc"><p>Set global library options.</p>
 <p>This options are passed directly to SuiteSparse so see the
 SuiteSparse User Guide for details.</p>
 <ul>
 <li>
-<p>'nthreads': Globals number of threads to use.</p>
+<p><code>nthreads</code>: Globals number of threads to use.</p>
 </li>
 <li>
-<p>'chunk': Chunk size for dividing parallel work.</p>
+<p><code>chunk</code>: Chunk size for dividing parallel work.</p>
 </li>
 <li>
-<p>'burble': Switch to enable "burble" debug output.
+<p><code>burble</code>: Switch to enable "burble" debug output.
 SuiteSparse
 must be compiled with burble turned on.</p>
 </li>
 <li>
-<p>'hyper_switch': Controls the hypersparsity of the internal data
+<p><code>hyper_switch</code>: Controls the hypersparsity of the internal data
 structure for a matrix.
 The parameter is typically in the range
 0 to 1.</p>
 </li>
 <li>
-<p>'bitmap_switch': Controls when to switch to bitmap format.</p>
+<p><code>bitmap_switch</code>: Controls when to switch to bitmap format.</p>
 </li>
 <li>
-<p>'format': Default global matrix data format.</p>
+<p><code>format</code>: Default global matrix data format.</p>
 </li>
 </ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def options_set(nthreads=None, chunk=None, burble=None,
-                hyper_switch=None, bitmap_switch=None, format=None):
-    &#34;&#34;&#34;Set global library options.  
+<pre><code class="python">def options_set(
+    nthreads=None,
+    chunk=None,
+    burble=None,
+    hyper_switch=None,
+    bitmap_switch=None,
+    format=None,
+):
+    &#34;&#34;&#34;Set global library options.
 
     This options are passed directly to SuiteSparse so see the
     SuiteSparse User Guide for details.
 
-    - &#39;nthreads&#39;: Globals number of threads to use.
+    - `nthreads`: Globals number of threads to use.
 
-    - &#39;chunk&#39;: Chunk size for dividing parallel work.
+    - `chunk`: Chunk size for dividing parallel work.
 
-    - &#39;burble&#39;: Switch to enable &#34;burble&#34; debug output.  SuiteSparse
+    - `burble`: Switch to enable &#34;burble&#34; debug output.  SuiteSparse
       must be compiled with burble turned on.
 
-    - &#39;hyper_switch&#39;: Controls the hypersparsity of the internal data
+    - `hyper_switch`: Controls the hypersparsity of the internal data
       structure for a matrix.  The parameter is typically in the range
       0 to 1.
 
-    - &#39;bitmap_switch&#39;: Controls when to switch to bitmap format.
+    - `bitmap_switch`: Controls when to switch to bitmap format.
 
-    - &#39;format&#39;: Default global matrix data format.
+    - `format`: Default global matrix data format.
 
     &#34;&#34;&#34;
     if nthreads is not None:
@@ -7992,7 +8024,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
@@ -8279,7 +8311,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+        self._check(
+            lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+        )
         return out
 
     def cast(self, cast, out=None):
@@ -8411,7 +8445,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def iseq(self, other):
-        &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+        &#34;&#34;&#34;Compare two matrices for equality returning True or False.
 
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
@@ -8429,13 +8463,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+        self._check(
+            lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+        )
         return result[0]
 
     def isne(self, other):
-        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.&#34;&#34;&#34;
         return not self.iseq(other)
 
     def __iter__(self):
@@ -8932,8 +8966,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -8953,8 +8988,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None,
-                       mask=None, accum=None, desc=Default):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -8977,8 +9013,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -8994,8 +9031,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
         desc = desc | TransposeA
         return self.extract_col(
@@ -9039,8 +9077,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -9052,8 +9091,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -9065,8 +9105,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -9083,8 +9124,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
@@ -9447,7 +9489,7 @@ def identity(cls, typ, nrows, one=None):
 columns and values.
 Other flags set additional properties the
 matrix will hold.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
 ...                   make_symmetric=True, no_diagonal=True, seed=42)
 &gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
@@ -9474,7 +9516,7 @@ def random(
     columns and values.  Other flags set additional properties the
     matrix will hold.
 
-    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, 
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
     ...                   make_symmetric=True, no_diagonal=True, seed=42)
     &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
@@ -9513,7 +9555,7 @@ def random(
 The dimensions
 can be specified with <code>nrows</code> and <code>ncols</code>.
 If no dimensions
-are specified, they default to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p>
+are specified, they default to <code>pygraphblas.GxB_INDEX_MAX</code>.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
 &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
 True
@@ -9970,8 +10012,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_col(self, col_index, value, row_slice=None, mask=None,
-               accum=None, desc=Default):
+<pre><code class="python">def assign_col(
+    self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
@@ -9993,8 +10036,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_matrix(self, value, rindex=None, cindex=None,
-                  mask=None, accum=None, desc=Default):
+<pre><code class="python">def assign_matrix(
+    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a submatrix.&#34;&#34;&#34;
     I, ni, isize = _build_range(rindex, self.nrows - 1)
     J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -10021,8 +10065,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_row(self, row_index, value, col_slice=None, mask=None,
-               accum=None, desc=Default):
+<pre><code class="python">def assign_row(
+    self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a vector to a row.&#34;&#34;&#34;
     stop_val = self.nrows if TransposeA in desc else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
@@ -10044,8 +10089,9 @@ second input to a scalar second.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_scalar(self, value, row_slice=None, col_slice=None,
-                  mask=None, accum=None, desc=Default):
+<pre><code class="python">def assign_scalar(
+    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     if row_slice:
@@ -10354,8 +10400,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_col(self, col_index, row_slice=None, out=None,
-                mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_col(
+    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
@@ -10381,8 +10428,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_matrix(self, rindex=None, cindex=None, out=None,
-                   mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_matrix(
+    self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
     ta = TransposeA in desc
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -10415,8 +10463,9 @@ interchangeably for either operation.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_row(self, row_index, col_slice=None, out=None,
-                mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract_row(
+    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
     desc = desc | TransposeA
     return self.extract_col(
@@ -10449,8 +10498,7 @@ the element is not present.</p></div>
 <span>def <span class="ident">iseq</span></span>(<span>self, other)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two matrices for equality returning True or False.
-</p>
+<div class="desc"><p>Compare two matrices for equality returning True or False.</p>
 <p>Not to be confused with <code>==</code> which will return a matrix of
 BOOL values comparing <em>elements</em> for equality.</p>
 <p>Uses code from LAGraph_isequal.</p>
@@ -10467,7 +10515,7 @@ False
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def iseq(self, other):
-    &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+    &#34;&#34;&#34;Compare two matrices for equality returning True or False.
 
     Not to be confused with `==` which will return a matrix of
     BOOL values comparing *elements* for equality.
@@ -10485,7 +10533,9 @@ False
     &#34;&#34;&#34;
     result = ffi.new(&#34;_Bool*&#34;)
     eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-    self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+    self._check(
+        lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+    )
     return result[0]</code></pre>
 </details>
 </dd>
@@ -10500,9 +10550,7 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isne(self, other):
-    &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.&#34;&#34;&#34;
     return not self.iseq(other)</code></pre>
 </details>
 </dd>
@@ -10515,8 +10563,9 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
-              mask=None, accum=None, desc=Default):
+<pre><code class="python">def kronecker(
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+):
     &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
@@ -11082,7 +11131,9 @@ Guide</a></p>
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
         out = self.__class__(_out, typ)
     mask, accum, desc = self._get_args(mask, accum, desc)
-    self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+    self._check(
+        lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+    )
     return out</code></pre>
 </details>
 </dd>
@@ -15565,7 +15616,9 @@ def nvals(self):
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;_Bool*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_BOOL(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -15591,7 +15644,9 @@ def nvals(self):
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_FP64(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -15906,7 +15961,7 @@ def from_lists(cls, I, V, size=None, typ=None):
 <dd>
 <div class="desc"><p>Create an empty Vector from the given type.
 If <code>size</code> is not
-specified it defaults to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p></div>
+specified it defaults to <code>pygraphblas.GxB_INDEX_MAX</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -16416,7 +16471,9 @@ every present value in this vector is set to True.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;_Bool*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+        lib.GrB_Vector_reduce_BOOL(
+            result, accum, mon, self._vector[0], desc.desc[0]
+        )
     )
     return result[0]</code></pre>
 </details>
@@ -16438,7 +16495,9 @@ every present value in this vector is set to True.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;double*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+        lib.GrB_Vector_reduce_FP64(
+            result, accum, mon, self._vector[0], desc.desc[0]
+        )
     )
     return result[0]</code></pre>
 </details>
@@ -16685,9 +16744,6 @@ outside the resized vector are deleted.</p></div>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
-<li><code><a title="pygraphblas.GxB_IMPLEMENTATION" href="#pygraphblas.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
-<li><code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code></li>
-<li><code><a title="pygraphblas.GxB_SPEC" href="#pygraphblas.GxB_SPEC">GxB_SPEC</a></code></li>
 <li><code><a title="pygraphblas.ffi" href="#pygraphblas.ffi">ffi</a></code></li>
 <li><code><a title="pygraphblas.lib" href="#pygraphblas.lib">lib</a></code></li>
 </ul>

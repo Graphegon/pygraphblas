@@ -529,7 +529,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;_Bool*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_BOOL(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -555,7 +557,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_FP64(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -1253,7 +1257,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;_Bool*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_BOOL(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -1279,7 +1285,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_FP64(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -1594,7 +1602,7 @@ def from_lists(cls, I, V, size=None, typ=None):
 <dd>
 <div class="desc"><p>Create an empty Vector from the given type.
 If <code>size</code> is not
-specified it defaults to <code><a title="pygraphblas.GxB_INDEX_MAX" href="index.html#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p></div>
+specified it defaults to <code>pygraphblas.GxB_INDEX_MAX</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2104,7 +2112,9 @@ every present value in this vector is set to True.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;_Bool*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+        lib.GrB_Vector_reduce_BOOL(
+            result, accum, mon, self._vector[0], desc.desc[0]
+        )
     )
     return result[0]</code></pre>
 </details>
@@ -2126,7 +2136,9 @@ every present value in this vector is set to True.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;double*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+        lib.GrB_Vector_reduce_FP64(
+            result, accum, mon, self._vector[0], desc.desc[0]
+        )
     )
     return result[0]</code></pre>
 </details>
