@@ -94,9 +94,6 @@ def draw_graph(
         g.render(filename, format=&#34;png&#34;)
     return g
 
-def doc_graph(*args, **kwargs):
-    g = draw_graph(*args, **kwargs)
-
 def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep=&#34;1&#34;)
@@ -215,19 +212,6 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pygraphblas.gviz.doc_graph"><code class="name flex">
-<span>def <span class="ident">doc_graph</span></span>(<span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def doc_graph(*args, **kwargs):
-    g = draw_graph(*args, **kwargs)</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.gviz.draw"><code class="name flex">
 <span>def <span class="ident">draw</span></span>(<span>obj, name='', **kws)</span>
 </code></dt>
@@ -465,7 +449,6 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="pygraphblas.gviz.doc_graph" href="#pygraphblas.gviz.doc_graph">doc_graph</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw" href="#pygraphblas.gviz.draw">draw</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_graph" href="#pygraphblas.gviz.draw_graph">draw_graph</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_layers" href="#pygraphblas.gviz.draw_layers">draw_layers</a></code></li>

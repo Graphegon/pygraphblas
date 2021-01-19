@@ -60,7 +60,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
-from .gviz import doc_graph
+from .gviz import draw_graph as draw
 
 __all__ = [&#34;Matrix&#34;]
 __pdoc__ = {&#34;Matrix.__init__&#34;: False}
@@ -171,7 +171,7 @@ class Matrix:
         column indices lists.
 
         &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        &gt;&gt;&gt; doc_graph(M, &#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -231,7 +231,7 @@ class Matrix:
         matrix will hold.
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; doc_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -1624,7 +1624,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         column indices lists.
 
         &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        &gt;&gt;&gt; doc_graph(M, &#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -1684,7 +1684,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         matrix will hold.
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; doc_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -2888,7 +2888,7 @@ If nrows or ncols are not provided, they
 are computed from the max values of the provides row and
 column indices lists.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-&gt;&gt;&gt; doc_graph(M, '/docs/imgs/Matrix_from_lists')
+&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_from_lists')
 </code></pre>
 <p><img alt="Matrix_from_lists.png" src="../imgs/Matrix_from_lists.png"></p></div>
 <details class="source">
@@ -2903,7 +2903,7 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
     column indices lists.
 
     &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-    &gt;&gt;&gt; doc_graph(M, &#39;/docs/imgs/Matrix_from_lists&#39;)
+    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
     ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -2993,7 +2993,7 @@ columns and values.
 Other flags set additional properties the
 matrix will hold.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
-&gt;&gt;&gt; doc_graph(M, filename='/docs/imgs/Matrix_random')
+&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
 <p><img alt="Matrix_random.png" src="../imgs/Matrix_random.png"></p></div>
 <details class="source">
@@ -3019,7 +3019,7 @@ def random(
     matrix will hold.
 
     &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
-    &gt;&gt;&gt; doc_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
     ![Matrix_random.png](../imgs/Matrix_random.png)
 

@@ -29,7 +29,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
-from .gviz import doc_graph
+from .gviz import draw_graph as draw
 
 __all__ = ["Matrix"]
 __pdoc__ = {"Matrix.__init__": False}
@@ -140,7 +140,7 @@ class Matrix:
         column indices lists.
 
         >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        >>> doc_graph(M, filename='/docs/imgs/Matrix_from_lists')
+        >>> g = draw(M, filename='/docs/imgs/Matrix_from_lists')
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -200,7 +200,7 @@ class Matrix:
         matrix will hold.
 
         >>> M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
-        >>> doc_graph(M, filename='/docs/imgs/Matrix_random')
+        >>> g = draw(M, filename='/docs/imgs/Matrix_random')
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 

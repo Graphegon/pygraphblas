@@ -63,9 +63,6 @@ def draw_graph(
         g.render(filename, format="png")
     return g
 
-def doc_graph(*args, **kwargs):
-    g = draw_graph(*args, **kwargs)
-
 def draw_layers(M, name="", rankdir="LR", label_width=None):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep="1")
