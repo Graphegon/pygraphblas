@@ -256,7 +256,7 @@ class Matrix:
     def nrows(self):
         """Return the number of Matrix rows.
 
-        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.nrows
         3
 
@@ -269,7 +269,7 @@ class Matrix:
     def ncols(self):
         """Return the number of Matrix columns.
 
-        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.ncols
         3
 
@@ -282,7 +282,7 @@ class Matrix:
     def shape(self):
         """Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
 
-        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.shape
         (3,3)
 
