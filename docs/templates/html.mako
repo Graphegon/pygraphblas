@@ -326,7 +326,7 @@
     </li>
     % endif
 
-    % if functions:
+    % if functions and module.supermodule:
     <li><h3><a href="#header-functions">Functions</a></h3>
       ${show_column_list(functions)}
     </li>
