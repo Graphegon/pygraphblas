@@ -101,7 +101,7 @@ class Matrix:
     def sparse(cls, typ, nrows=None, ncols=None):
         """Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
+        are specified, they default to `GxB_INDEX_MAX`.
 
         >>> m = Matrix.sparse(types.UINT8)
         >>> m.nrows == lib.GxB_INDEX_MAX

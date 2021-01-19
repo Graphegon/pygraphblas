@@ -133,7 +133,7 @@ class Matrix:
     def sparse(cls, typ, nrows=None, ncols=None):
         &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
+        are specified, they default to `GxB_INDEX_MAX`.
 
         &gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
         &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
@@ -1741,7 +1741,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def sparse(cls, typ, nrows=None, ncols=None):
         &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
-        are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
+        are specified, they default to `GxB_INDEX_MAX`.
 
         &gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
         &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
@@ -3410,7 +3410,7 @@ def random(
 The dimensions
 can be specified with <code>nrows</code> and <code>ncols</code>.
 If no dimensions
-are specified, they default to <code>pygraphblas.GxB_INDEX_MAX</code>.</p>
+are specified, they default to <code>GxB_INDEX_MAX</code>.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
 &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX
 True
@@ -3437,7 +3437,7 @@ True
 def sparse(cls, typ, nrows=None, ncols=None):
     &#34;&#34;&#34;Create an empty sparse Matrix from the given type.  The dimensions
     can be specified with `nrows` and `ncols`.  If no dimensions
-    are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
+    are specified, they default to `GxB_INDEX_MAX`.
 
     &gt;&gt;&gt; m = Matrix.sparse(types.UINT8)
     &gt;&gt;&gt; m.nrows == lib.GxB_INDEX_MAX

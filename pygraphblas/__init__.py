@@ -11,15 +11,6 @@ be imported for use:
 
    >>> from pygraphblas import *
 
-pygraphblas uses the SuiteSparse::GraphBLAS library for its
-implementation.  The implementation and GraphBLAS spec can be
-inspected with:
-
-   >>> IMPLEMENTATION
-   (4, 0, ...)
-   >>> SPEC
-   (1, 3, 0)
-
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
 a matrix and vice versa:
@@ -144,13 +135,13 @@ ffi = ffi  # global assign hack to fool pdoc
 lib = lib
 """ Raw interface to SuiteSparse library. For internal low-level use only.  """
 
-INDEX_MAX = GxB_INDEX_MAX
+GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
 
-IMPLEMENTATION = GxB_IMPLEMENTATION
+GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
 """ Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
-SPEC = GxB_SPEC
+GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 __pdoc__ = {
