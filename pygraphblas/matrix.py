@@ -103,6 +103,25 @@ class Matrix:
         can be specified with `nrows` and `ncols`.  If no dimensions
         are specified, they default to `pygraphblas.GxB_INDEX_MAX`.
 
+        >>> m = Matrix.sparse(types.UINT8)
+        >>> m.nrows == lib.GxB_INDEX_MAX
+        True
+        >>> m.ncols == lib.GxB_INDEX_MAX
+        True
+        >>> m.nvals == 0
+        True
+
+        Optional row and column dimension bounds can be provided to
+        the method:
+
+        >>> m = Matrix.sparse(types.UINT8, 10, 10)
+        >>> m.nrows == 10
+        True
+        >>> m.ncols == 10
+        True
+        >>> m.nvals == 0
+        True
+
         """
         if nrows is None:
             nrows = GxB_INDEX_MAX
@@ -117,11 +136,32 @@ class Matrix:
     def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
         """Return a dense Matrix nrows by ncols.
 
+        If `sparsity_control` is provided it is used for the new
+        matrix (See SuiteSparse User Guide)
+
+        >>> m = Matrix.dense(types.UINT8, 3, 3)
+        >>> m.nrows == 3
+        True
+        >>> m.ncols == 3
+        True
+        >>> m.nvals == 9
+        True
+        >>> for i, j, v in m:
+        ...     assert v == 0
+
         If a `fill` value is present, use that, otherwise use the
         `zero` attribte of the given type.
 
-        If `sparsity_control` is provided it is used for the new
-        matrix (See SuiteSparse User Guide)
+        >>> m = Matrix.dense(types.UINT8, 3, 3, fill=1)
+        >>> m.nrows == 3
+        True
+        >>> m.ncols == 3
+        True
+        >>> m.nvals == 9
+        True
+        >>> for i, j, v in m:
+        ...     assert v == 1
+
         """
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
         m = cls.sparse(typ, nrows, ncols)
@@ -199,7 +239,8 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        >>> M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
+        >>> M = Matrix.random(types.UINT8, 5, 5, 20, 
+        ...                   make_symmetric=True, no_diagonal=True, seed=42)
         >>> g = draw(M, filename='/docs/imgs/Matrix_random')
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
@@ -1026,9 +1067,8 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def kronecker(self, other, op=None, cast=None, out=None,
+                  mask=None, accum=None, desc=Default):
         """Kronecker product."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -1048,9 +1088,8 @@ class Matrix:
         )
         return out
 
-    def extract_matrix(
-        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_matrix(self, rindex=None, cindex=None, out=None,
+                       mask=None, accum=None, desc=Default):
         """Extract a submatrix."""
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1073,9 +1112,8 @@ class Matrix:
         )
         return out
 
-    def extract_col(
-        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_col(self, col_index, row_slice=None, out=None,
+                    mask=None, accum=None, desc=Default):
         """Extract a column Vector."""
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -1091,9 +1129,8 @@ class Matrix:
         )
         return out
 
-    def extract_row(
-        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
-    ):
+    def extract_row(self, row_index, col_slice=None, out=None,
+                    mask=None, accum=None, desc=Default):
         """Extract a row Vector."""
         desc = desc | TransposeA
         return self.extract_col(
@@ -1137,9 +1174,8 @@ class Matrix:
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(
-        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_col(self, col_index, value, row_slice=None, mask=None,
+                   accum=None, desc=Default):
         """Assign a vector to a column."""
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -1151,9 +1187,8 @@ class Matrix:
             )
         )
 
-    def assign_row(
-        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_row(self, row_index, value, col_slice=None, mask=None,
+                   accum=None, desc=Default):
         """Assign a vector to a row."""
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -1165,9 +1200,8 @@ class Matrix:
             )
         )
 
-    def assign_matrix(
-        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_matrix(self, value, rindex=None, cindex=None,
+                      mask=None, accum=None, desc=Default):
         """Assign a submatrix."""
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -1184,9 +1218,8 @@ class Matrix:
             )
         )
 
-    def assign_scalar(
-        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
-    ):
+    def assign_scalar(self, value, row_slice=None, col_slice=None,
+                      mask=None, accum=None, desc=Default):
         """Assign a scalar to the Matrix."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:

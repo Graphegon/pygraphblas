@@ -149,5 +149,5 @@ def run_doctests():
     import sys, doctest
     this = sys.modules[__name__]
     for mod in (this, matrix):
-        doctest.testmod(mod)
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
 
