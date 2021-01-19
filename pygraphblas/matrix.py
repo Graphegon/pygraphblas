@@ -140,7 +140,7 @@ class Matrix:
         column indices lists.
 
         >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        >>> doc_graph(M, '/docs/imgs/Matrix_from_lists')
+        >>> doc_graph(M, filename='/docs/imgs/Matrix_from_lists')
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
