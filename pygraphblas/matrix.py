@@ -199,7 +199,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        >>> M = Matrix.random(types.UINT8, 3, 3, 6, make_symmetric=True, no_diagonal=True, seed=42)
+        >>> M = Matrix.random(types.UINT8, 5, 5, 20, make_symmetric=True, no_diagonal=True, seed=42)
         >>> doc_graph(M, filename='/docs/imgs/Matrix_random')
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
