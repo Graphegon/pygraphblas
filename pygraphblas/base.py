@@ -44,16 +44,28 @@ GxB_IMPLEMENTATION = (
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
 
-def options_set(
-    nthreads=None,
-    chunk=None,
-    burble=None,
-    hyper_switch=None,
-    bitmap_switch=None,
-    format=None,
-):
-    """
-    Set global library options.  See SuiteSparse User Guide.
+def options_set(nthreads=None, chunk=None, burble=None,
+                hyper_switch=None, bitmap_switch=None, format=None):
+    """Set global library options.  
+
+    This options are passed directly to SuiteSparse so see the
+    SuiteSparse User Guide for details.
+
+    - 'nthreads': Globals number of threads to use.
+
+    - 'chunk': Chunk size for dividing parallel work.
+
+    - 'burble': Switch to enable "burble" debug output.  SuiteSparse
+      must be compiled with burble turned on.
+
+    - 'hyper_switch': Controls the hypersparsity of the internal data
+      structure for a matrix.  The parameter is typically in the range
+      0 to 1.
+
+    - 'bitmap_switch': Controls when to switch to bitmap format.
+
+    - 'format': Default global matrix data format.
+
     """
     if nthreads is not None:
         nthreads = ffi.cast("int", nthreads)
@@ -76,7 +88,12 @@ def options_set(
 
 
 def options_get():
-    """Get global library options.  See SuiteSparse User Guide."""
+    """Get global library options.  See SuiteSparse User Guide.
+
+    >>> sorted(list(options_get().keys()))
+    ['bitmap_switch', 'burble', 'chunk', 'format', 'hyper_switch', 'nthreads']
+
+    """
     nthreads = ffi.new("int*")
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new("double*")

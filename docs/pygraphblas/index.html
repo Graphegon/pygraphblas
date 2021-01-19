@@ -200,10 +200,10 @@ __all__ = [
 ]
 
 ffi = ffi  # global assign hack to fool pdoc
-&#34;&#34;&#34; CFFI C Foreign Function Interface. &#34;&#34;&#34;
+&#34;&#34;&#34; CFFI C Foreign Function Interface.  For internal low-level use only. &#34;&#34;&#34;
 
 lib = lib
-&#34;&#34;&#34; Raw interface to SuiteSparse library. &#34;&#34;&#34;
+&#34;&#34;&#34; Raw interface to SuiteSparse library. For internal low-level use only.  &#34;&#34;&#34;
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
 &#34;&#34;&#34;Maximum key size for SuiteSparse, defaults to `2**60`.&#34;&#34;&#34;
@@ -223,7 +223,7 @@ __pdoc__ = {
 def run_doctests():
     import sys, doctest
     this = sys.modules[__name__]
-    for mod in (this, matrix):
+    for mod in (this, matrix, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
 </details>
 </section>
@@ -289,11 +289,12 @@ def run_doctests():
 </dd>
 <dt id="pygraphblas.ffi"><code class="name">var <span class="ident">ffi</span></code></dt>
 <dd>
-<div class="desc"><p>CFFI C Foreign Function Interface.</p></div>
+<div class="desc"><p>CFFI C Foreign Function Interface.
+For internal low-level use only.</p></div>
 </dd>
 <dt id="pygraphblas.lib"><code class="name">var <span class="ident">lib</span></code></dt>
 <dd>
-<div class="desc"><p>Raw interface to SuiteSparse library.</p></div>
+<div class="desc"><p>Raw interface to SuiteSparse library. For internal low-level use only.</p></div>
 </dd>
 </dl>
 </section>
@@ -305,13 +306,21 @@ def run_doctests():
 </code></dt>
 <dd>
 <div class="desc"><p>Get global library options.
-See SuiteSparse User Guide.</p></div>
+See SuiteSparse User Guide.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; sorted(list(options_get().keys()))
+['bitmap_switch', 'burble', 'chunk', 'format', 'hyper_switch', 'nthreads']
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def options_get():
-    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
+
+    &gt;&gt;&gt; sorted(list(options_get().keys()))
+    [&#39;bitmap_switch&#39;, &#39;burble&#39;, &#39;chunk&#39;, &#39;format&#39;, &#39;hyper_switch&#39;, &#39;nthreads&#39;]
+
+    &#34;&#34;&#34;
     nthreads = ffi.new(&#34;int*&#34;)
     _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
     chunk = ffi.new(&#34;double*&#34;)
@@ -340,21 +349,60 @@ See SuiteSparse User Guide.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Set global library options.
-See SuiteSparse User Guide.</p></div>
+</p>
+<p>This options are passed directly to SuiteSparse so see the
+SuiteSparse User Guide for details.</p>
+<ul>
+<li>
+<p>'nthreads': Globals number of threads to use.</p>
+</li>
+<li>
+<p>'chunk': Chunk size for dividing parallel work.</p>
+</li>
+<li>
+<p>'burble': Switch to enable "burble" debug output.
+SuiteSparse
+must be compiled with burble turned on.</p>
+</li>
+<li>
+<p>'hyper_switch': Controls the hypersparsity of the internal data
+structure for a matrix.
+The parameter is typically in the range
+0 to 1.</p>
+</li>
+<li>
+<p>'bitmap_switch': Controls when to switch to bitmap format.</p>
+</li>
+<li>
+<p>'format': Default global matrix data format.</p>
+</li>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def options_set(
-    nthreads=None,
-    chunk=None,
-    burble=None,
-    hyper_switch=None,
-    bitmap_switch=None,
-    format=None,
-):
-    &#34;&#34;&#34;
-    Set global library options.  See SuiteSparse User Guide.
+<pre><code class="python">def options_set(nthreads=None, chunk=None, burble=None,
+                hyper_switch=None, bitmap_switch=None, format=None):
+    &#34;&#34;&#34;Set global library options.  
+
+    This options are passed directly to SuiteSparse so see the
+    SuiteSparse User Guide for details.
+
+    - &#39;nthreads&#39;: Globals number of threads to use.
+
+    - &#39;chunk&#39;: Chunk size for dividing parallel work.
+
+    - &#39;burble&#39;: Switch to enable &#34;burble&#34; debug output.  SuiteSparse
+      must be compiled with burble turned on.
+
+    - &#39;hyper_switch&#39;: Controls the hypersparsity of the internal data
+      structure for a matrix.  The parameter is typically in the range
+      0 to 1.
+
+    - &#39;bitmap_switch&#39;: Controls when to switch to bitmap format.
+
+    - &#39;format&#39;: Default global matrix data format.
+
     &#34;&#34;&#34;
     if nthreads is not None:
         nthreads = ffi.cast(&#34;int&#34;, nthreads)

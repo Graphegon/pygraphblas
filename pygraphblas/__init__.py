@@ -125,10 +125,10 @@ __all__ = [
 ]
 
 ffi = ffi  # global assign hack to fool pdoc
-""" CFFI C Foreign Function Interface. """
+""" CFFI C Foreign Function Interface.  For internal low-level use only. """
 
 lib = lib
-""" Raw interface to SuiteSparse library. """
+""" Raw interface to SuiteSparse library. For internal low-level use only.  """
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
@@ -148,6 +148,6 @@ __pdoc__ = {
 def run_doctests():
     import sys, doctest
     this = sys.modules[__name__]
-    for mod in (this, matrix):
+    for mod in (this, matrix, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
 
