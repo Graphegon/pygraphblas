@@ -275,6 +275,12 @@ class Matrix:
         one.
 
         If one is None, use the default typ one value.
+
+        >>> M = Matrix.identity(types.UINT8, 3, one=42)
+        >>> g = draw(M, filename='/docs/imgs/Matrix_identity')
+
+        ![Matrix_identity.png](../imgs/Matrix_identity.png)
+
         """
         result = cls.sparse(typ, nrows, nrows)
         if one is None:

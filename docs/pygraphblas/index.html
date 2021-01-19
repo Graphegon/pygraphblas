@@ -8049,6 +8049,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         one.
 
         If one is None, use the default typ one value.
+
+        &gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
+        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
+
+        ![Matrix_identity.png](../imgs/Matrix_identity.png)
+
         &#34;&#34;&#34;
         result = cls.sparse(typ, nrows, nrows)
         if one is None:
@@ -9450,7 +9456,11 @@ def from_tsv(cls, tsv_file, typ, nrows, ncols):
 <dd>
 <div class="desc"><p>Return a new square identity Matrix of nrows with diagonal set to
 one.</p>
-<p>If one is None, use the default typ one value.</p></div>
+<p>If one is None, use the default typ one value.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
+&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_identity')
+</code></pre>
+<p><img alt="Matrix_identity.png" src="../imgs/Matrix_identity.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9461,6 +9471,12 @@ def identity(cls, typ, nrows, one=None):
     one.
 
     If one is None, use the default typ one value.
+
+    &gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
+    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
+
+    ![Matrix_identity.png](../imgs/Matrix_identity.png)
+
     &#34;&#34;&#34;
     result = cls.sparse(typ, nrows, nrows)
     if one is None:
