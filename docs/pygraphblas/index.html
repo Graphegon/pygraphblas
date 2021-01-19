@@ -8049,11 +8049,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def T(self):
-        &#34;&#34;&#34;Returns the transpose of the Matrix.  See `Matrix.transpose`.&#34;&#34;&#34;
+        &#34;&#34;&#34;Compute transpose of the Matrix.  See `Matrix.transpose`.
+
+        Note: This property can be expensive, if you need the
+        transpose more than once, consider storing this in a local
+        variable.
+
+        &#34;&#34;&#34;
         return self.transpose()
 
     def dup(self):
-        &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create an duplicate Matrix.
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A[1,1] = 42
+        &gt;&gt;&gt; B = A.dup()
+        &gt;&gt;&gt; B[1,1]
+        42
+        &gt;&gt;&gt; B is not A
+        True
+
+        &#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
@@ -8123,6 +8139,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         matrix is set to identity value for the provided type which
         defaults to BOOL.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; P = M.pattern()
+        &gt;&gt;&gt; P.type == types.BOOL
+        True
+        &gt;&gt;&gt; P[0,1]
+        True
+
         &#34;&#34;&#34;
 
         r = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -8153,6 +8176,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Clear the matrix.  This does not change the size but removes all
         values.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.nvals == 3
+        True
+        &gt;&gt;&gt; M.clear()
+        &gt;&gt;&gt; M.nvals == 0
+        True
+
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
@@ -8160,11 +8190,33 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.shape
+        (3, 3)
+        &gt;&gt;&gt; M.resize(10, 10)
+        &gt;&gt;&gt; M.shape
+        (10, 10)
+
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return Transpose of this matrix.
+
+        This function can serve multiple interesting purposes
+        including typecasting.  See the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; MT = M.transpose()
+        &gt;&gt;&gt; MT.to_lists()
+        [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
+
+        &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+        &gt;&gt;&gt; MT.to_lists()
+        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+
+        &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -8185,6 +8237,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def cast(self, cast, out=None):
         &#34;&#34;&#34;Cast this matrix to the provided type.  If out is not provided, a
         new matrix is of the cast type is created.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; N = M.cast(types.BOOL)
+        &gt;&gt;&gt; N.to_lists()
+        [[0, 1, 2], [1, 2, 0], [True, True, True]]
 
         &#34;&#34;&#34;
         return self.transpose(cast, out, desc=TransposeA)
@@ -8306,18 +8363,41 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def iseq(self, other):
-        &#34;&#34;&#34;Compare two matrices for equality.&#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+
+        Not to be confused with `==` which will return a matrix of
+        BOOL values comparing *elements* for equality.
+
+        Uses code from LAGraph_isequal.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; N = M.dup()
+        &gt;&gt;&gt; M.iseq(N)
+        True
+        &gt;&gt;&gt; del N[0, 1]
+        &gt;&gt;&gt; M.iseq(N)
+        False
+
+        &#34;&#34;&#34;
         result = ffi.new(&#34;_Bool*&#34;)
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
-        &#34;&#34;&#34;Compare two matrices for inequality.&#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
+
+        &#34;&#34;&#34;
         return not self.iseq(other)
 
     def __iter__(self):
-        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; sorted(list(iter(M)))
+        [(0, 1, 42), (1, 2, 314), (2, 0, 1492)]
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -8327,7 +8407,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
-        &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.&#34;&#34;&#34;
+        &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.to_arrays()
+        (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 1492]))
+
+        &#34;&#34;&#34;
         if self.type.typecode is None:
             raise TypeError(&#34;This matrix has no array typecode.&#34;)
         nvals = self.nvals
@@ -8340,7 +8426,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; list(M.rows)
+        [0, 1, 2]
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -8351,7 +8443,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def cols(self):
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
+
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; list(M.cols)
+        [1, 2, 0]
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -8362,7 +8461,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;An iterator of values present in the matrix.
+
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; list(M.vals)
+        [42, 314, 1492]
+
+        &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
@@ -8372,7 +8478,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return iter(X)
 
     def __len__(self):
-        &#34;&#34;&#34;Return the number of elements in the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of elements in the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; len(M)
+        3
+
+        &#34;&#34;&#34;
         return self.nvals
 
     def __and__(self, other):
@@ -9417,28 +9529,48 @@ def sparse(cls, typ, nrows=None, ncols=None):
 <dl>
 <dt id="pygraphblas.Matrix.T"><code class="name">var <span class="ident">T</span></code></dt>
 <dd>
-<div class="desc"><p>Returns the transpose of the Matrix.
-See <code><a title="pygraphblas.Matrix.transpose" href="#pygraphblas.Matrix.transpose">Matrix.transpose()</a></code>.</p></div>
+<div class="desc"><p>Compute transpose of the Matrix.
+See <code><a title="pygraphblas.Matrix.transpose" href="#pygraphblas.Matrix.transpose">Matrix.transpose()</a></code>.</p>
+<p>Note: This property can be expensive, if you need the
+transpose more than once, consider storing this in a local
+variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def T(self):
-    &#34;&#34;&#34;Returns the transpose of the Matrix.  See `Matrix.transpose`.&#34;&#34;&#34;
+    &#34;&#34;&#34;Compute transpose of the Matrix.  See `Matrix.transpose`.
+
+    Note: This property can be expensive, if you need the
+    transpose more than once, consider storing this in a local
+    variable.
+
+    &#34;&#34;&#34;
     return self.transpose()</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.cols"><code class="name">var <span class="ident">cols</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of column indexes present in the matrix.</p></div>
+<div class="desc"><p>An iterator of column indexes present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; list(M.cols)
+[1, 2, 0]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def cols(self):
-    &#34;&#34;&#34;An iterator of column indexes present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of column indexes present in the matrix.
+
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; list(M.cols)
+    [1, 2, 0]
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -9567,14 +9699,24 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.Matrix.rows"><code class="name">var <span class="ident">rows</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of row indexes present in the matrix.</p></div>
+<div class="desc"><p>An iterator of row indexes present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; list(M.rows)
+[0, 1, 2]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; list(M.rows)
+    [0, 1, 2]
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
@@ -9662,14 +9804,25 @@ def square(self):
 </dd>
 <dt id="pygraphblas.Matrix.vals"><code class="name">var <span class="ident">vals</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of values present in the matrix.</p></div>
+<div class="desc"><p>An iterator of values present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; list(M.vals)
+[42, 314, 1492]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def vals(self):
-    &#34;&#34;&#34;An iterator of values present in the matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;An iterator of values present in the matrix.
+
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; list(M.vals)
+    [42, 314, 1492]
+
+    &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
@@ -9871,7 +10024,12 @@ second input to a scalar second.</p></div>
 <dd>
 <div class="desc"><p>Cast this matrix to the provided type.
 If out is not provided, a
-new matrix is of the cast type is created.</p></div>
+new matrix is of the cast type is created.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; N = M.cast(types.BOOL)
+&gt;&gt;&gt; N.to_lists()
+[[0, 1, 2], [1, 2, 0], [True, True, True]]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9879,6 +10037,11 @@ new matrix is of the cast type is created.</p></div>
 <pre><code class="python">def cast(self, cast, out=None):
     &#34;&#34;&#34;Cast this matrix to the provided type.  If out is not provided, a
     new matrix is of the cast type is created.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; N = M.cast(types.BOOL)
+    &gt;&gt;&gt; N.to_lists()
+    [[0, 1, 2], [1, 2, 0], [True, True, True]]
 
     &#34;&#34;&#34;
     return self.transpose(cast, out, desc=TransposeA)</code></pre>
@@ -9890,7 +10053,14 @@ new matrix is of the cast type is created.</p></div>
 <dd>
 <div class="desc"><p>Clear the matrix.
 This does not change the size but removes all
-values.</p></div>
+values.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.nvals == 3
+True
+&gt;&gt;&gt; M.clear()
+&gt;&gt;&gt; M.nvals == 0
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9898,6 +10068,13 @@ values.</p></div>
 <pre><code class="python">def clear(self):
     &#34;&#34;&#34;Clear the matrix.  This does not change the size but removes all
     values.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.nvals == 3
+    True
+    &gt;&gt;&gt; M.clear()
+    &gt;&gt;&gt; M.nvals == 0
+    True
 
     &#34;&#34;&#34;
     self._check(lib.GrB_Matrix_clear(self._matrix[0]))</code></pre>
@@ -9921,13 +10098,31 @@ values.</p></div>
 <span>def <span class="ident">dup</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create an duplicate Matrix.</p></div>
+<div class="desc"><p>Create an duplicate Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; A[1,1] = 42
+&gt;&gt;&gt; B = A.dup()
+&gt;&gt;&gt; B[1,1]
+42
+&gt;&gt;&gt; B is not A
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def dup(self):
-    &#34;&#34;&#34;Create an duplicate Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create an duplicate Matrix.
+
+    &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; A[1,1] = 42
+    &gt;&gt;&gt; B = A.dup()
+    &gt;&gt;&gt; B[1,1]
+    42
+    &gt;&gt;&gt; B is not A
+    True
+
+    &#34;&#34;&#34;
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
     self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
     return self.__class__(new_mat, self.type)</code></pre>
@@ -10206,13 +10401,40 @@ the element is not present.</p></div>
 <span>def <span class="ident">iseq</span></span>(<span>self, other)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two matrices for equality.</p></div>
+<div class="desc"><p>Compare two matrices for equality returning True or False.
+</p>
+<p>Not to be confused with <code>==</code> which will return a matrix of
+BOOL values comparing <em>elements</em> for equality.</p>
+<p>Uses code from LAGraph_isequal.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; N = M.dup()
+&gt;&gt;&gt; M.iseq(N)
+True
+&gt;&gt;&gt; del N[0, 1]
+&gt;&gt;&gt; M.iseq(N)
+False
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def iseq(self, other):
-    &#34;&#34;&#34;Compare two matrices for equality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two matrices for equality returning True or False.  
+
+    Not to be confused with `==` which will return a matrix of
+    BOOL values comparing *elements* for equality.
+
+    Uses code from LAGraph_isequal.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; N = M.dup()
+    &gt;&gt;&gt; M.iseq(N)
+    True
+    &gt;&gt;&gt; del N[0, 1]
+    &gt;&gt;&gt; M.iseq(N)
+    False
+
+    &#34;&#34;&#34;
     result = ffi.new(&#34;_Bool*&#34;)
     eq_op = self.type.EQ.get_binaryop(self.type, other.type)
     self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
@@ -10223,13 +10445,16 @@ the element is not present.</p></div>
 <span>def <span class="ident">isne</span></span>(<span>self, other)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two matrices for inequality.</p></div>
+<div class="desc"><p>Compare two matrices for inequality.
+See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Matrix.iseq()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isne(self, other):
-    &#34;&#34;&#34;Compare two matrices for inequality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two matrices for inequality.  See `Matrix.iseq`.
+
+    &#34;&#34;&#34;
     return not self.iseq(other)</code></pre>
 </details>
 </dd>
@@ -10389,7 +10614,14 @@ the element is not present.</p></div>
 <dd>
 <div class="desc"><p>Return the pattern of the matrix where every present value in this
 matrix is set to identity value for the provided type which
-defaults to BOOL.</p></div>
+defaults to BOOL.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; P = M.pattern()
+&gt;&gt;&gt; P.type == types.BOOL
+True
+&gt;&gt;&gt; P[0,1]
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10398,6 +10630,13 @@ defaults to BOOL.</p></div>
     &#34;&#34;&#34;Return the pattern of the matrix where every present value in this
     matrix is set to identity value for the provided type which
     defaults to BOOL.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; P = M.pattern()
+    &gt;&gt;&gt; P.type == types.BOOL
+    True
+    &gt;&gt;&gt; P[0,1]
+    True
 
     &#34;&#34;&#34;
 
@@ -10503,7 +10742,14 @@ defaults to BOOL.</p></div>
 <dd>
 <div class="desc"><p>Resize the matrix.
 If the dimensions decrease, entries that fall
-outside the resized matrix are deleted.</p></div>
+outside the resized matrix are deleted.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.shape
+(3, 3)
+&gt;&gt;&gt; M.resize(10, 10)
+&gt;&gt;&gt; M.shape
+(10, 10)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10511,6 +10757,13 @@ outside the resized matrix are deleted.</p></div>
 <pre><code class="python">def resize(self, nrows, ncols):
     &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
     outside the resized matrix are deleted.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.shape
+    (3, 3)
+    &gt;&gt;&gt; M.resize(10, 10)
+    &gt;&gt;&gt; M.shape
+    (10, 10)
 
     &#34;&#34;&#34;
     self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))</code></pre>
@@ -10584,13 +10837,23 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">to_arrays</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert Matrix to tuple of three dense array objects.</p></div>
+<div class="desc"><p>Convert Matrix to tuple of three dense array objects.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.to_arrays()
+(array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 1492]))
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_arrays(self):
-    &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.&#34;&#34;&#34;
+    &#34;&#34;&#34;Convert Matrix to tuple of three dense array objects.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.to_arrays()
+    (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 1492]))
+
+    &#34;&#34;&#34;
     if self.type.typecode is None:
         raise TypeError(&#34;This matrix has no array typecode.&#34;)
     nvals = self.nvals
@@ -10722,13 +10985,41 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return Transpose of this matrix.</p></div>
+<div class="desc"><p>Return Transpose of this matrix.</p>
+<p>This function can serve multiple interesting purposes
+including typecasting.
+See the <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
+Guide</a></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; MT = M.transpose()
+&gt;&gt;&gt; MT.to_lists()
+[[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+&gt;&gt;&gt; MT.to_lists()
+[[0, 1, 2], [1, 2, 0], [True, True, True]]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Return Transpose of this matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return Transpose of this matrix.
+
+    This function can serve multiple interesting purposes
+    including typecasting.  See the [SuiteSparse User
+    Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; MT = M.transpose()
+    &gt;&gt;&gt; MT.to_lists()
+    [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
+
+    &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+    &gt;&gt;&gt; MT.to_lists()
+    [[0, 1, 2], [1, 2, 0], [True, True, True]]
+
+    &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)

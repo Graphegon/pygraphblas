@@ -344,11 +344,27 @@ class Matrix:
 
     @property
     def T(self):
-        """Returns the transpose of the Matrix.  See `Matrix.transpose`."""
+        """Compute transpose of the Matrix.  See `Matrix.transpose`.
+
+        Note: This property can be expensive, if you need the
+        transpose more than once, consider storing this in a local
+        variable.
+
+        """
         return self.transpose()
 
     def dup(self):
-        """Create an duplicate Matrix."""
+        """Create an duplicate Matrix.
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A[1,1] = 42
+        >>> B = A.dup()
+        >>> B[1,1]
+        42
+        >>> B is not A
+        True
+
+        """
         new_mat = ffi.new("GrB_Matrix*")
         self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
@@ -418,6 +434,13 @@ class Matrix:
         matrix is set to identity value for the provided type which
         defaults to BOOL.
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> P = M.pattern()
+        >>> P.type == types.BOOL
+        True
+        >>> P[0,1]
+        True
+
         """
 
         r = ffi.new("GrB_Matrix*")
@@ -448,6 +471,13 @@ class Matrix:
         """Clear the matrix.  This does not change the size but removes all
         values.
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M.nvals == 3
+        True
+        >>> M.clear()
+        >>> M.nvals == 0
+        True
+
         """
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
@@ -455,11 +485,33 @@ class Matrix:
         """Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M.shape
+        (3, 3)
+        >>> M.resize(10, 10)
+        >>> M.shape
+        (10, 10)
+
         """
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
     def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
-        """Return Transpose of this matrix."""
+        """Return Transpose of this matrix.
+
+        This function can serve multiple interesting purposes
+        including typecasting.  See the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> MT = M.transpose()
+        >>> MT.to_lists()
+        [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
+
+        >>> MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+        >>> MT.to_lists()
+        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+
+        """
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
@@ -480,6 +532,11 @@ class Matrix:
     def cast(self, cast, out=None):
         """Cast this matrix to the provided type.  If out is not provided, a
         new matrix is of the cast type is created.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> N = M.cast(types.BOOL)
+        >>> N.to_lists()
+        [[0, 1, 2], [1, 2, 0], [True, True, True]]
 
         """
         return self.transpose(cast, out, desc=TransposeA)
@@ -601,18 +658,41 @@ class Matrix:
         return out
 
     def iseq(self, other):
-        """Compare two matrices for equality."""
+        """Compare two matrices for equality returning True or False.  
+
+        Not to be confused with `==` which will return a matrix of
+        BOOL values comparing *elements* for equality.
+
+        Uses code from LAGraph_isequal.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> N = M.dup()
+        >>> M.iseq(N)
+        True
+        >>> del N[0, 1]
+        >>> M.iseq(N)
+        False
+
+        """
         result = ffi.new("_Bool*")
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
         return result[0]
 
     def isne(self, other):
-        """Compare two matrices for inequality."""
+        """Compare two matrices for inequality.  See `Matrix.iseq`.
+
+        """
         return not self.iseq(other)
 
     def __iter__(self):
-        """Iterate over the (row, col, value) triples of the Matrix."""
+        """Iterate over the (row, col, value) triples of the Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> sorted(list(iter(M)))
+        [(0, 1, 42), (1, 2, 314), (2, 0, 1492)]
+
+        """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
@@ -622,7 +702,13 @@ class Matrix:
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
-        """Convert Matrix to tuple of three dense array objects."""
+        """Convert Matrix to tuple of three dense array objects.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M.to_arrays()
+        (array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 1492]))
+
+        """
         if self.type.typecode is None:
             raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
@@ -635,7 +721,13 @@ class Matrix:
 
     @property
     def rows(self):
-        """An iterator of row indexes present in the matrix."""
+        """An iterator of row indexes present in the matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> list(M.rows)
+        [0, 1, 2]
+
+        """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
@@ -646,7 +738,14 @@ class Matrix:
 
     @property
     def cols(self):
-        """An iterator of column indexes present in the matrix."""
+        """An iterator of column indexes present in the matrix.
+
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> list(M.cols)
+        [1, 2, 0]
+
+        """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
@@ -657,7 +756,14 @@ class Matrix:
 
     @property
     def vals(self):
-        """An iterator of values present in the matrix."""
+        """An iterator of values present in the matrix.
+
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> list(M.vals)
+        [42, 314, 1492]
+
+        """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
@@ -667,7 +773,13 @@ class Matrix:
         return iter(X)
 
     def __len__(self):
-        """Return the number of elements in the Matrix."""
+        """Return the number of elements in the Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> len(M)
+        3
+
+        """
         return self.nvals
 
     def __and__(self, other):
