@@ -254,21 +254,39 @@ class Matrix:
 
     @property
     def nrows(self):
-        """Return the number of Matrix rows."""
+        """Return the number of Matrix rows.
+
+        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M.nrows
+        3
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        """Return the number of Matrix columns."""
+        """Return the number of Matrix columns.
+
+        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M.ncols
+        3
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        """Numpy-like description of matrix shape as 2-tuple (nrows, ncols)."""
+        """Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
+
+        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
+        >>> M.shape
+        (3,3)
+
+        """
         return (self.nrows, self.ncols)
 
     @property
