@@ -44,27 +44,34 @@ GxB_IMPLEMENTATION = (
 
 GxB_SPEC = (lib.GxB_SPEC_MAJOR, lib.GxB_SPEC_MINOR, lib.GxB_SPEC_SUB)
 
-def options_set(nthreads=None, chunk=None, burble=None,
-                hyper_switch=None, bitmap_switch=None, format=None):
-    """Set global library options.  
+
+def options_set(
+    nthreads=None,
+    chunk=None,
+    burble=None,
+    hyper_switch=None,
+    bitmap_switch=None,
+    format=None,
+):
+    """Set global library options.
 
     This options are passed directly to SuiteSparse so see the
     SuiteSparse User Guide for details.
 
-    - 'nthreads': Globals number of threads to use.
+    - `nthreads`: Globals number of threads to use.
 
-    - 'chunk': Chunk size for dividing parallel work.
+    - `chunk`: Chunk size for dividing parallel work.
 
-    - 'burble': Switch to enable "burble" debug output.  SuiteSparse
+    - `burble`: Switch to enable "burble" debug output.  SuiteSparse
       must be compiled with burble turned on.
 
-    - 'hyper_switch': Controls the hypersparsity of the internal data
+    - `hyper_switch`: Controls the hypersparsity of the internal data
       structure for a matrix.  The parameter is typically in the range
       0 to 1.
 
-    - 'bitmap_switch': Controls when to switch to bitmap format.
+    - `bitmap_switch`: Controls when to switch to bitmap format.
 
-    - 'format': Default global matrix data format.
+    - `format`: Default global matrix data format.
 
     """
     if nthreads is not None:

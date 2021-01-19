@@ -1,10 +1,24 @@
-"""
-pygraphblas is a python extension that bridges [The GraphBLAS
+"""pygraphblas is a python extension that bridges [The GraphBLAS
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
 level GraphBLAS API and provides high level Matrix and Vector Python
 types that make GraphBLAS simple and easy.
+
+See the [Github README](https://github.com/Graphegon/pygraphblas) for
+details on how to install pygraphblas. Once installed, the library can
+be imported for use:
+
+   >>> from pygraphblas import *
+
+pygraphblas uses the SuiteSparse::GraphBLAS library for its
+implementation.  The implementation and GraphBLAS spec can be
+inspected with:
+
+   >>> IMPLEMENTATION
+   (4, 0, ...)
+   >>> SPEC
+   (1, 3, 0)
 
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
@@ -130,24 +144,24 @@ ffi = ffi  # global assign hack to fool pdoc
 lib = lib
 """ Raw interface to SuiteSparse library. For internal low-level use only.  """
 
-GxB_INDEX_MAX = GxB_INDEX_MAX
+INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
 
-GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
+IMPLEMENTATION = GxB_IMPLEMENTATION
 """ Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB) """
 
-GxB_SPEC = GxB_SPEC
+SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 __pdoc__ = {
     "base": False,
     "build": False,
-    }
+}
 
 
 def run_doctests():
     import sys, doctest
+
     this = sys.modules[__name__]
     for mod in (this, matrix, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
-

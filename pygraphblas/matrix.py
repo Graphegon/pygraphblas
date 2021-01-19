@@ -239,7 +239,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        >>> M = Matrix.random(types.UINT8, 5, 5, 20, 
+        >>> M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         >>> g = draw(M, filename='/docs/imgs/Matrix_random')
 
@@ -526,7 +526,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc))
+        self._check(
+            lib.GrB_transpose(out._matrix[0], mask, accum, self._matrix[0], desc)
+        )
         return out
 
     def cast(self, cast, out=None):
@@ -658,7 +660,7 @@ class Matrix:
         return out
 
     def iseq(self, other):
-        """Compare two matrices for equality returning True or False.  
+        """Compare two matrices for equality returning True or False.
 
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
@@ -676,13 +678,13 @@ class Matrix:
         """
         result = ffi.new("_Bool*")
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op))
+        self._check(
+            lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
+        )
         return result[0]
 
     def isne(self, other):
-        """Compare two matrices for inequality.  See `Matrix.iseq`.
-
-        """
+        """Compare two matrices for inequality.  See `Matrix.iseq`."""
         return not self.iseq(other)
 
     def __iter__(self):
@@ -1179,8 +1181,9 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
         """Kronecker product."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -1200,8 +1203,9 @@ class Matrix:
         )
         return out
 
-    def extract_matrix(self, rindex=None, cindex=None, out=None,
-                       mask=None, accum=None, desc=Default):
+    def extract_matrix(
+        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    ):
         """Extract a submatrix."""
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1224,8 +1228,9 @@ class Matrix:
         )
         return out
 
-    def extract_col(self, col_index, row_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_col(
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         """Extract a column Vector."""
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -1241,8 +1246,9 @@ class Matrix:
         )
         return out
 
-    def extract_row(self, row_index, col_slice=None, out=None,
-                    mask=None, accum=None, desc=Default):
+    def extract_row(
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    ):
         """Extract a row Vector."""
         desc = desc | TransposeA
         return self.extract_col(
@@ -1286,8 +1292,9 @@ class Matrix:
         # a[:,:] or a[[0,1,2], [3,4,5]] extract submatrix with slice or row/col indices
         return self.extract_matrix(i0, i1)
 
-    def assign_col(self, col_index, value, row_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_col(
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    ):
         """Assign a vector to a column."""
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
@@ -1299,8 +1306,9 @@ class Matrix:
             )
         )
 
-    def assign_row(self, row_index, value, col_slice=None, mask=None,
-                   accum=None, desc=Default):
+    def assign_row(
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         """Assign a vector to a row."""
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
@@ -1312,8 +1320,9 @@ class Matrix:
             )
         )
 
-    def assign_matrix(self, value, rindex=None, cindex=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_matrix(
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    ):
         """Assign a submatrix."""
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -1330,8 +1339,9 @@ class Matrix:
             )
         )
 
-    def assign_scalar(self, value, row_slice=None, col_slice=None,
-                      mask=None, accum=None, desc=Default):
+    def assign_scalar(
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    ):
         """Assign a scalar to the Matrix."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:

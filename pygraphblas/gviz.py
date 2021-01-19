@@ -63,6 +63,7 @@ def draw_graph(
         g.render(filename, format="png")
     return g
 
+
 def draw_layers(M, name="", rankdir="LR", label_width=None):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep="1")
@@ -102,6 +103,7 @@ def draw_layers(M, name="", rankdir="LR", label_width=None):
 
 def draw(obj, name="", **kws):
     from pygraphblas import Matrix, Vector
+
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
@@ -110,6 +112,7 @@ def draw(obj, name="", **kws):
 
 def draw_op(left, op, right, result):
     from pygraphblas import Matrix, Vector
+
     ioff = 0
     joff = 0
 
@@ -135,6 +138,7 @@ def draw_op(left, op, right, result):
 
 def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow"):
     from pygraphblas import BOOL
+
     if mode is None:
         mode = "RGB"
 

@@ -497,7 +497,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("_Bool*")
         self._check(
-            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_BOOL(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
@@ -523,7 +525,9 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("double*")
         self._check(
-            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc.desc[0])
+            lib.GrB_Vector_reduce_FP64(
+                result, accum, mon, self._vector[0], desc.desc[0]
+            )
         )
         return result[0]
 
