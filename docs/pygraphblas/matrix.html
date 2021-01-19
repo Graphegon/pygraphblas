@@ -285,21 +285,39 @@ class Matrix:
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.nrows
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.ncols
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.shape
+        (3, 3)
+
+        &#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
@@ -1720,21 +1738,39 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @property
     def nrows(self):
-        &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix rows.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.nrows
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
         return n[0]
 
     @property
     def ncols(self):
-        &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of Matrix columns.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.ncols
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
         return n[0]
 
     @property
     def shape(self):
-        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
+        &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.shape
+        (3, 3)
+
+        &#34;&#34;&#34;
         return (self.nrows, self.ncols)
 
     @property
@@ -3136,14 +3172,24 @@ def hyper_switch(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.ncols"><code class="name">var <span class="ident">ncols</span></code></dt>
 <dd>
-<div class="desc"><p>Return the number of Matrix columns.</p></div>
+<div class="desc"><p>Return the number of Matrix columns.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.ncols
+3
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def ncols(self):
-    &#34;&#34;&#34;Return the number of Matrix columns.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix columns.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.ncols
+    3
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_ncols(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3151,14 +3197,24 @@ def ncols(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.nrows"><code class="name">var <span class="ident">nrows</span></code></dt>
 <dd>
-<div class="desc"><p>Return the number of Matrix rows.</p></div>
+<div class="desc"><p>Return the number of Matrix rows.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.nrows
+3
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def nrows(self):
-    &#34;&#34;&#34;Return the number of Matrix rows.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of Matrix rows.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.nrows
+    3
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nrows(n, self.matrix[0]))
     return n[0]</code></pre>
@@ -3200,14 +3256,24 @@ def rows(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.shape"><code class="name">var <span class="ident">shape</span></code></dt>
 <dd>
-<div class="desc"><p>Numpy-like description of matrix shape as 2-tuple (nrows, ncols).</p></div>
+<div class="desc"><p>Numpy-like description of matrix shape as 2-tuple (nrows, ncols).</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.shape
+(3, 3)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def shape(self):
-    &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).&#34;&#34;&#34;
+    &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.shape
+    (3, 3)
+
+    &#34;&#34;&#34;
     return (self.nrows, self.ncols)</code></pre>
 </details>
 </dd>

@@ -284,7 +284,7 @@ class Matrix:
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.shape
-        (3,3)
+        (3, 3)
 
         """
         return (self.nrows, self.ncols)
