@@ -338,19 +338,19 @@
       % for c in classes:
         <li>
         <code>${link(c)}</code>
-        ## <%
-        ##     members = c.functions(sort=sort_identifiers) + c.methods(sort=sort_identifiers)
-        ##     if list_class_variables_in_index:
-        ##         members += (c.instance_variables(sort=sort_identifiers) +
-        ##                     c.class_variables(sort=sort_identifiers))
-        ##     if not show_inherited_members:
-        ##         members = [i for i in members if not i.inherits]
-        ##     if sort_identifiers:
-        ##       members = sorted(members)
-        ## %>
-        ## % if members:
-        ##   ${show_column_list(members)}
-        ## % endif
+        <%
+            members = c.functions(sort=sort_identifiers) + c.methods(sort=sort_identifiers)
+            if list_class_variables_in_index:
+                members += (c.instance_variables(sort=sort_identifiers) +
+                            c.class_variables(sort=sort_identifiers))
+            if not show_inherited_members:
+                members = [i for i in members if not i.inherits]
+            if sort_identifiers:
+              members = sorted(members)
+        %>
+        % if members:
+          ${show_column_list(members)}
+        % endif
         </li>
       % endfor
       </ul>
