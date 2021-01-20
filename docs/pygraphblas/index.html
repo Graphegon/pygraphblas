@@ -8860,11 +8860,53 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def tril(self, thunk=None):
-        &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the lower triangular Matrix.
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.tril())
+              0  1  2
+          0|  0      |  0
+          1|  0  0   |  1
+          2|  0  0  0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.tril(1))
+              0  1  2
+          0|  0  0   |  0
+          1|  0  0  0|  1
+          2|  0  0  0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.tril(-1))
+              0  1  2
+          0|         |  0
+          1|  0      |  1
+          2|  0  0   |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
     def triu(self, thunk=None):
-        &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the upper triangular Matrix.
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.triu())
+              0  1  2
+          0|  0  0  0|  0
+          1|     0  0|  1
+          2|        0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.triu(1))
+              0  1  2
+          0|     0  0|  0
+          1|        0|  1
+          2|         |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.triu(-1))
+              0  1  2
+          0|  0  0  0|  0
+          1|  0  0  0|  1
+          2|     0  0|  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=None):
@@ -9070,15 +9112,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
                   mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Kronecker product.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_kronecker1&#39;)
-
-        ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
-
-        &gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename=&#39;/docs/imgs/Matrix_kronecker2&#39;)
-
-        ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
-
         &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
@@ -9267,7 +9300,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|  t  t  t|  2
               0  1  2
         &gt;&gt;&gt; M.clear()
-        
+
         If `row_slice` or `col_slice` is an integer, use it as an
         index to one row or column:
 
@@ -9281,7 +9314,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M.clear()
 
         An integer index and a scalar does row assignment:
-        
+
         &gt;&gt;&gt; M[1] = True
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -9303,7 +9336,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M.clear()
 
         If `col_slice` is an integer, it does column assignment:
-        
+
         &gt;&gt;&gt; M.assign_scalar(True, None, 1)
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -9314,7 +9347,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M.clear()
 
         Which is the same as the syntax:
-        
+
         &gt;&gt;&gt; M[:,1] = True
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -9433,6 +9466,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Get the element at row `i` col `j` or return the default value if
         the element is not present.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; M.get(1, 2)
+        0
+        &gt;&gt;&gt; M.get(0, 0) is None
+        True
+        &gt;&gt;&gt; M.get(0, 0, &#39;foo&#39;)
+        &#39;foo&#39;
+
         &#34;&#34;&#34;
         try:
             return self[i, j]
@@ -9447,7 +9488,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         self._check(lib.GrB_Matrix_wait(self._matrix))
 
     def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
-        &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return a string representation of the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; M.to_string()
+        &#39;      0  1  2\\n  0|    42   |  0\\n  1|        0|  1\\n  2|149      |  2\\n      0  1  2&#39;
+        &#34;&#34;&#34;
         format_string = format_string % width
         header = (
             format_string.format(&#34;&#34;)
@@ -9477,7 +9523,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
 
     def to_scipy_sparse(self, format=&#34;csr&#34;):
-        &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; M.to_scipy_sparse()
+        &lt;3x3 sparse matrix of type &#39;&lt;class &#39;numpy.int64&#39;&gt;&#39;...
+
+        &#34;&#34;&#34;
         from scipy import sparse
 
         rows, cols, vals = self.to_arrays()
@@ -9489,7 +9541,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return s.asformat(format)
 
     def to_numpy(self):
-        &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; M.to_numpy()
+        array([[  0,  42,   0],
+               [  0,   0,   0],
+               [149,   0,   0]], dtype=int64)
+        &#34;&#34;&#34;
         s = self.to_scipy_sparse(&#34;coo&#34;)
         return s.toarray()</code></pre>
 </details>
@@ -10463,7 +10522,7 @@ index to one row or column:</p>
       2|  t  t  t|  2
           0  1  2
     &gt;&gt;&gt; M.clear()
-    
+
     If `row_slice` or `col_slice` is an integer, use it as an
     index to one row or column:
 
@@ -10477,7 +10536,7 @@ index to one row or column:</p>
     &gt;&gt;&gt; M.clear()
 
     An integer index and a scalar does row assignment:
-    
+
     &gt;&gt;&gt; M[1] = True
     &gt;&gt;&gt; print(M)
           0  1  2
@@ -10499,7 +10558,7 @@ index to one row or column:</p>
     &gt;&gt;&gt; M.clear()
 
     If `col_slice` is an integer, it does column assignment:
-    
+
     &gt;&gt;&gt; M.assign_scalar(True, None, 1)
     &gt;&gt;&gt; print(M)
           0  1  2
@@ -10510,7 +10569,7 @@ index to one row or column:</p>
     &gt;&gt;&gt; M.clear()
 
     Which is the same as the syntax:
-    
+
     &gt;&gt;&gt; M[:,1] = True
     &gt;&gt;&gt; print(M)
           0  1  2
@@ -10985,7 +11044,15 @@ interchangeably for either operation.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the element at row <code>i</code> col <code>j</code> or return the default value if
-the element is not present.</p></div>
+the element is not present.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; M.get(1, 2)
+0
+&gt;&gt;&gt; M.get(0, 0) is None
+True
+&gt;&gt;&gt; M.get(0, 0, 'foo')
+'foo'
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10993,6 +11060,14 @@ the element is not present.</p></div>
 <pre><code class="python">def get(self, i, j, default=None):
     &#34;&#34;&#34;Get the element at row `i` col `j` or return the default value if
     the element is not present.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; M.get(1, 2)
+    0
+    &gt;&gt;&gt; M.get(0, 0) is None
+    True
+    &gt;&gt;&gt; M.get(0, 0, &#39;foo&#39;)
+    &#39;foo&#39;
 
     &#34;&#34;&#34;
     try:
@@ -11065,14 +11140,7 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Kronecker product.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
-&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_kronecker1')
-</code></pre>
-<p><img alt="Matrix_kronecker1.png" src="../imgs/Matrix_kronecker1.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename='/docs/imgs/Matrix_kronecker2')
-</code></pre>
-<p><img alt="Matrix_kronecker2.png" src="../imgs/Matrix_kronecker2.png"></p></div>
+<div class="desc"><p>Kronecker product.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11080,15 +11148,6 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
               mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Kronecker product.
-
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
-    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_kronecker1&#39;)
-
-    ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
-
-    &gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename=&#39;/docs/imgs/Matrix_kronecker2&#39;)
-
-    ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
 
     &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -11615,13 +11674,26 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">to_numpy</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a dense numpy matrix of this Matrix.</p></div>
+<div class="desc"><p>Return a dense numpy matrix of this Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; M.to_numpy()
+array([[  0,  42,   0],
+       [  0,   0,   0],
+       [149,   0,   0]], dtype=int64)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_numpy(self):
-    &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return a dense numpy matrix of this Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; M.to_numpy()
+    array([[  0,  42,   0],
+           [  0,   0,   0],
+           [149,   0,   0]], dtype=int64)
+    &#34;&#34;&#34;
     s = self.to_scipy_sparse(&#34;coo&#34;)
     return s.toarray()</code></pre>
 </details>
@@ -11630,13 +11702,23 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">to_scipy_sparse</span></span>(<span>self, format='csr')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a scipy sparse matrix of this Matrix.</p></div>
+<div class="desc"><p>Return a scipy sparse matrix of this Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; M.to_scipy_sparse()
+&lt;3x3 sparse matrix of type '&lt;class 'numpy.int64'&gt;'...
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_scipy_sparse(self, format=&#34;csr&#34;):
-    &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return a scipy sparse matrix of this Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; M.to_scipy_sparse()
+    &lt;3x3 sparse matrix of type &#39;&lt;class &#39;numpy.int64&#39;&gt;&#39;...
+
+    &#34;&#34;&#34;
     from scipy import sparse
 
     rows, cols, vals = self.to_arrays()
@@ -11652,13 +11734,22 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=3, empty_char='')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a string representation of the Matrix.</p></div>
+<div class="desc"><p>Return a string representation of the Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; M.to_string()
+'      0  1  2\n  0|    42   |  0\n  1|        0|  1\n  2|149      |  2\n      0  1  2'
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
-    &#34;&#34;&#34;Return a string representation of the Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return a string representation of the Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; M.to_string()
+    &#39;      0  1  2\\n  0|    42   |  0\\n  1|        0|  1\\n  2|149      |  2\\n      0  1  2&#39;
+    &#34;&#34;&#34;
     format_string = format_string % width
     header = (
         format_string.format(&#34;&#34;)
@@ -11766,13 +11857,54 @@ Guide</a></p>
 <span>def <span class="ident">tril</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the lower triangular Matrix.</p></div>
+<div class="desc"><p>Select the lower triangular Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+&gt;&gt;&gt; print(M.tril())
+      0  1  2
+  0|  0      |  0
+  1|  0  0   |  1
+  2|  0  0  0|  2
+      0  1  2
+&gt;&gt;&gt; print(M.tril(1))
+      0  1  2
+  0|  0  0   |  0
+  1|  0  0  0|  1
+  2|  0  0  0|  2
+      0  1  2
+&gt;&gt;&gt; print(M.tril(-1))
+      0  1  2
+  0|         |  0
+  1|  0      |  1
+  2|  0  0   |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def tril(self, thunk=None):
-    &#34;&#34;&#34;Select the lower triangular Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Select the lower triangular Matrix.
+    &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+    &gt;&gt;&gt; print(M.tril())
+          0  1  2
+      0|  0      |  0
+      1|  0  0   |  1
+      2|  0  0  0|  2
+          0  1  2
+    &gt;&gt;&gt; print(M.tril(1))
+          0  1  2
+      0|  0  0   |  0
+      1|  0  0  0|  1
+      2|  0  0  0|  2
+          0  1  2
+    &gt;&gt;&gt; print(M.tril(-1))
+          0  1  2
+      0|         |  0
+      1|  0      |  1
+      2|  0  0   |  2
+          0  1  2
+
+    &#34;&#34;&#34;
     return self.select(lib.GxB_TRIL, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -11780,13 +11912,54 @@ Guide</a></p>
 <span>def <span class="ident">triu</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the upper triangular Matrix.</p></div>
+<div class="desc"><p>Select the upper triangular Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+&gt;&gt;&gt; print(M.triu())
+      0  1  2
+  0|  0  0  0|  0
+  1|     0  0|  1
+  2|        0|  2
+      0  1  2
+&gt;&gt;&gt; print(M.triu(1))
+      0  1  2
+  0|     0  0|  0
+  1|        0|  1
+  2|         |  2
+      0  1  2
+&gt;&gt;&gt; print(M.triu(-1))
+      0  1  2
+  0|  0  0  0|  0
+  1|  0  0  0|  1
+  2|     0  0|  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def triu(self, thunk=None):
-    &#34;&#34;&#34;Select the upper triangular Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Select the upper triangular Matrix.
+    &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+    &gt;&gt;&gt; print(M.triu())
+          0  1  2
+      0|  0  0  0|  0
+      1|     0  0|  1
+      2|        0|  2
+          0  1  2
+    &gt;&gt;&gt; print(M.triu(1))
+          0  1  2
+      0|     0  0|  0
+      1|        0|  1
+      2|         |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.triu(-1))
+          0  1  2
+      0|  0  0  0|  0
+      1|  0  0  0|  1
+      2|     0  0|  2
+          0  1  2
+
+    &#34;&#34;&#34;
     return self.select(lib.GxB_TRIU, thunk=thunk)</code></pre>
 </details>
 </dd>

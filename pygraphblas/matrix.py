@@ -1086,11 +1086,53 @@ class Matrix:
         return out
 
     def tril(self, thunk=None):
-        """Select the lower triangular Matrix."""
+        """Select the lower triangular Matrix.
+        >>> M = Matrix.dense(types.UINT8, 3, 3)
+        >>> print(M.tril())
+              0  1  2
+          0|  0      |  0
+          1|  0  0   |  1
+          2|  0  0  0|  2
+              0  1  2
+        >>> print(M.tril(1))
+              0  1  2
+          0|  0  0   |  0
+          1|  0  0  0|  1
+          2|  0  0  0|  2
+              0  1  2
+        >>> print(M.tril(-1))
+              0  1  2
+          0|         |  0
+          1|  0      |  1
+          2|  0  0   |  2
+              0  1  2
+
+        """
         return self.select(lib.GxB_TRIL, thunk=thunk)
 
     def triu(self, thunk=None):
-        """Select the upper triangular Matrix."""
+        """Select the upper triangular Matrix.
+        >>> M = Matrix.dense(types.UINT8, 3, 3)
+        >>> print(M.triu())
+              0  1  2
+          0|  0  0  0|  0
+          1|     0  0|  1
+          2|        0|  2
+              0  1  2
+        >>> print(M.triu(1))
+              0  1  2
+          0|     0  0|  0
+          1|        0|  1
+          2|         |  2
+              0  1  2
+        >>> print(M.triu(-1))
+              0  1  2
+          0|  0  0  0|  0
+          1|  0  0  0|  1
+          2|     0  0|  2
+              0  1  2
+
+        """
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=None):
@@ -1226,8 +1268,16 @@ class Matrix:
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(self, other, cast=None, out=None, semiring=None,
-            mask=None, accum=None, desc=Default):
+    def mxm(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         """Matrix-matrix multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1253,8 +1303,16 @@ class Matrix:
         )
         return out
 
-    def mxv(self, other, cast=None, out=None, semiring=None,
-            mask=None, accum=None, desc=Default):
+    def mxv(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         """Matrix-vector multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1292,20 +1350,10 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
-        """Kronecker product.
-
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
-        >>> g = draw_graph(M, filename='/docs/imgs/Matrix_kronecker1')
-
-        ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
-
-        >>> g = draw_graph(M.kronecker(M), filename='/docs/imgs/Matrix_kronecker2')
-
-        ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
-
-        """
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
+        """Kronecker product."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -1416,9 +1464,7 @@ class Matrix:
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a vector to a column.
-
-        """
+        """Assign a vector to a column."""
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1493,7 +1539,7 @@ class Matrix:
           2|  t  t  t|  2
               0  1  2
         >>> M.clear()
-        
+
         If `row_slice` or `col_slice` is an integer, use it as an
         index to one row or column:
 
@@ -1507,7 +1553,7 @@ class Matrix:
         >>> M.clear()
 
         An integer index and a scalar does row assignment:
-        
+
         >>> M[1] = True
         >>> print(M)
               0  1  2
@@ -1529,7 +1575,7 @@ class Matrix:
         >>> M.clear()
 
         If `col_slice` is an integer, it does column assignment:
-        
+
         >>> M.assign_scalar(True, None, 1)
         >>> print(M)
               0  1  2
@@ -1540,7 +1586,7 @@ class Matrix:
         >>> M.clear()
 
         Which is the same as the syntax:
-        
+
         >>> M[:,1] = True
         >>> print(M)
               0  1  2
@@ -1659,6 +1705,14 @@ class Matrix:
         """Get the element at row `i` col `j` or return the default value if
         the element is not present.
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> M.get(1, 2)
+        0
+        >>> M.get(0, 0) is None
+        True
+        >>> M.get(0, 0, 'foo')
+        'foo'
+
         """
         try:
             return self[i, j]
@@ -1673,7 +1727,12 @@ class Matrix:
         self._check(lib.GrB_Matrix_wait(self._matrix))
 
     def to_string(self, format_string="{:>%s}", width=3, empty_char=""):
-        """Return a string representation of the Matrix."""
+        """Return a string representation of the Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> M.to_string()
+        '      0  1  2\\n  0|    42   |  0\\n  1|        0|  1\\n  2|149      |  2\\n      0  1  2'
+        """
         format_string = format_string % width
         header = (
             format_string.format("")
@@ -1703,7 +1762,13 @@ class Matrix:
         )
 
     def to_scipy_sparse(self, format="csr"):
-        """Return a scipy sparse matrix of this Matrix."""
+        """Return a scipy sparse matrix of this Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> M.to_scipy_sparse()
+        <3x3 sparse matrix of type '<class 'numpy.int64'>'...
+
+        """
         from scipy import sparse
 
         rows, cols, vals = self.to_arrays()
@@ -1715,6 +1780,13 @@ class Matrix:
         return s.asformat(format)
 
     def to_numpy(self):
-        """Return a dense numpy matrix of this Matrix."""
+        """Return a dense numpy matrix of this Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> M.to_numpy()
+        array([[  0,  42,   0],
+               [  0,   0,   0],
+               [149,   0,   0]], dtype=int64)
+        """
         s = self.to_scipy_sparse("coo")
         return s.toarray()
