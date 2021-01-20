@@ -168,7 +168,9 @@ def draw_op(left, op, right, result):
     return g
 
 
-def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None):
+def draw_matrix(
+    M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None
+):
     from pygraphblas import BOOL
 
     if mode is None:
@@ -208,7 +210,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
         for j in range(M.nrows):
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill=&#34;black&#34;)
     if filename is not None:
-        im.save(filename + &#39;.png&#39;, &#34;PNG&#34;)
+        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
     return im</code></pre>
 </details>
 </section>
@@ -347,7 +349,9 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None):
+<pre><code class="python">def draw_matrix(
+    M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None
+):
     from pygraphblas import BOOL
 
     if mode is None:
@@ -387,7 +391,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
         for j in range(M.nrows):
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill=&#34;black&#34;)
     if filename is not None:
-        im.save(filename + &#39;.png&#39;, &#34;PNG&#34;)
+        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
     return im</code></pre>
 </details>
 </dd>

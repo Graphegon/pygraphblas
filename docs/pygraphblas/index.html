@@ -8237,12 +8237,20 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         matrix is set to identity value for the provided type which
         defaults to BOOL.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|142      |  2
+              0  1  2
         &gt;&gt;&gt; P = M.pattern()
-        &gt;&gt;&gt; P.type == types.BOOL
-        True
-        &gt;&gt;&gt; P[0,1]
-        True
+        &gt;&gt;&gt; print(P)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
 
         &#34;&#34;&#34;
 
@@ -9042,8 +9050,16 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(self, other, cast=None, out=None, semiring=None,
-            mask=None, accum=None, desc=Default):
+    def mxm(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -9069,8 +9085,16 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def mxv(self, other, cast=None, out=None, semiring=None,
-            mask=None, accum=None, desc=Default):
+    def mxv(
+        self,
+        other,
+        cast=None,
+        out=None,
+        semiring=None,
+        mask=None,
+        accum=None,
+        desc=Default,
+    ):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -9108,11 +9132,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(self, other, op=None, cast=None, out=None,
-                  mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Kronecker product.
-
-        &#34;&#34;&#34;
+    def kronecker(
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    ):
+        &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -9223,9 +9246,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Assign a vector to a column.
-
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -10338,9 +10359,7 @@ second input to a scalar second.</p></div>
 <pre><code class="python">def assign_col(
     self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Assign a vector to a column.
-
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -11145,11 +11164,10 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
-              mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Kronecker product.
-
-    &#34;&#34;&#34;
+<pre><code class="python">def kronecker(
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+):
+    &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
@@ -11178,8 +11196,16 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxm(self, other, cast=None, out=None, semiring=None,
-        mask=None, accum=None, desc=Default):
+<pre><code class="python">def mxm(
+    self,
+    other,
+    cast=None,
+    out=None,
+    semiring=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
@@ -11215,8 +11241,16 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxv(self, other, cast=None, out=None, semiring=None,
-        mask=None, accum=None, desc=Default):
+<pre><code class="python">def mxv(
+    self,
+    other,
+    cast=None,
+    out=None,
+    semiring=None,
+    mask=None,
+    accum=None,
+    desc=Default,
+):
     &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
@@ -11338,12 +11372,20 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <div class="desc"><p>Return the pattern of the matrix where every present value in this
 matrix is set to identity value for the provided type which
 defaults to BOOL.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|      314|  1
+  2|142      |  2
+      0  1  2
 &gt;&gt;&gt; P = M.pattern()
-&gt;&gt;&gt; P.type == types.BOOL
-True
-&gt;&gt;&gt; P[0,1]
-True
+&gt;&gt;&gt; print(P)
+      0  1  2
+  0|     t   |  0
+  1|        t|  1
+  2|  t      |  2
+      0  1  2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -11354,12 +11396,20 @@ True
     matrix is set to identity value for the provided type which
     defaults to BOOL.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|      314|  1
+      2|142      |  2
+          0  1  2
     &gt;&gt;&gt; P = M.pattern()
-    &gt;&gt;&gt; P.type == types.BOOL
-    True
-    &gt;&gt;&gt; P[0,1]
-    True
+    &gt;&gt;&gt; print(P)
+          0  1  2
+      0|     t   |  0
+      1|        t|  1
+      2|  t      |  2
+          0  1  2
 
     &#34;&#34;&#34;
 

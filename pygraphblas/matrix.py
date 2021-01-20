@@ -463,12 +463,20 @@ class Matrix:
         matrix is set to identity value for the provided type which
         defaults to BOOL.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|142      |  2
+              0  1  2
         >>> P = M.pattern()
-        >>> P.type == types.BOOL
-        True
-        >>> P[0,1]
-        True
+        >>> print(P)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
 
         """
 
