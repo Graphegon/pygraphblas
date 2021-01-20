@@ -1126,15 +1126,69 @@ class Matrix:
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
+        from the main diagonal.
+
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.diag())
+              0  1  2
+          0|  0      |  0
+          1|     0   |  1
+          2|        0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.diag(1))
+              0  1  2
+          0|     0   |  0
+          1|        0|  1
+          2|         |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.diag(-1))
+              0  1  2
+          0|         |  0
+          1|  0      |  1
+          2|     0   |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
     def offdiag(self, thunk=None):
-        &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the off-diagonal Matrix.
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.offdiag())
+              0  1  2
+          0|     0  0|  0
+          1|  0     0|  1
+          2|  0  0   |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.offdiag(1))
+              0  1  2
+          0|  0     0|  0
+          1|  0  0   |  1
+          2|  0  0  0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.offdiag(-1))
+              0  1  2
+          0|  0  0  0|  0
+          1|     0  0|  1
+          2|  0     0|  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
-        &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the non-zero Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; print(M.nonzero())
+              0  1  2
+          0|    42   |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
     def _full(self, identity=None):
@@ -1204,16 +1258,8 @@ class Matrix:
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxm(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1239,16 +1285,8 @@ class Matrix:
         )
         return out
 
-    def mxv(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxv(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1286,10 +1324,20 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-    ):
-        &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
+    def kronecker(self, other, op=None, cast=None, out=None,
+                  mask=None, accum=None, desc=Default):
+        &#34;&#34;&#34;Kronecker product.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_kronecker1&#39;)
+
+        ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
+
+        &gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename=&#39;/docs/imgs/Matrix_kronecker2&#39;)
+
+        ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -2908,15 +2956,69 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
+        from the main diagonal.
+
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.diag())
+              0  1  2
+          0|  0      |  0
+          1|     0   |  1
+          2|        0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.diag(1))
+              0  1  2
+          0|     0   |  0
+          1|        0|  1
+          2|         |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.diag(-1))
+              0  1  2
+          0|         |  0
+          1|  0      |  1
+          2|     0   |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
     def offdiag(self, thunk=None):
-        &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the off-diagonal Matrix.
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+        &gt;&gt;&gt; print(M.offdiag())
+              0  1  2
+          0|     0  0|  0
+          1|  0     0|  1
+          2|  0  0   |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.offdiag(1))
+              0  1  2
+          0|  0     0|  0
+          1|  0  0   |  1
+          2|  0  0  0|  2
+              0  1  2
+        &gt;&gt;&gt; print(M.offdiag(-1))
+              0  1  2
+          0|  0  0  0|  0
+          1|     0  0|  1
+          2|  0     0|  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
-        &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Select the non-zero Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; print(M.nonzero())
+              0  1  2
+          0|    42   |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
     def _full(self, identity=None):
@@ -2986,16 +3088,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxm(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -3021,16 +3115,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
         return out
 
-    def mxv(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxv(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -3068,10 +3154,20 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-    ):
-        &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
+    def kronecker(self, other, op=None, cast=None, out=None,
+                  mask=None, accum=None, desc=Default):
+        &#34;&#34;&#34;Kronecker product.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_kronecker1&#39;)
+
+        ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
+
+        &gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename=&#39;/docs/imgs/Matrix_kronecker2&#39;)
+
+        ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -4632,13 +4728,58 @@ True
 <span>def <span class="ident">diag</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the diagonal Matrix.</p></div>
+<div class="desc"><p>Select the diagonal Matrix.
+Thunk is the diagonal offset to select
+from the main diagonal.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+&gt;&gt;&gt; print(M.diag())
+      0  1  2
+  0|  0      |  0
+  1|     0   |  1
+  2|        0|  2
+      0  1  2
+&gt;&gt;&gt; print(M.diag(1))
+      0  1  2
+  0|     0   |  0
+  1|        0|  1
+  2|         |  2
+      0  1  2
+&gt;&gt;&gt; print(M.diag(-1))
+      0  1  2
+  0|         |  0
+  1|  0      |  1
+  2|     0   |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def diag(self, thunk=None):
-    &#34;&#34;&#34;Select the diagonal Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
+    from the main diagonal.
+
+    &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+    &gt;&gt;&gt; print(M.diag())
+          0  1  2
+      0|  0      |  0
+      1|     0   |  1
+      2|        0|  2
+          0  1  2
+    &gt;&gt;&gt; print(M.diag(1))
+          0  1  2
+      0|     0   |  0
+      1|        0|  1
+      2|         |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.diag(-1))
+          0  1  2
+      0|         |  0
+      1|  0      |  1
+      2|     0   |  2
+          0  1  2
+
+    &#34;&#34;&#34;
     return self.select(lib.GxB_DIAG, thunk=thunk)</code></pre>
 </details>
 </dd>
@@ -5012,15 +5153,32 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Kronecker product.</p></div>
+<div class="desc"><p>Kronecker product.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_kronecker1')
+</code></pre>
+<p><img alt="Matrix_kronecker1.png" src="../imgs/Matrix_kronecker1.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename='/docs/imgs/Matrix_kronecker2')
+</code></pre>
+<p><img alt="Matrix_kronecker2.png" src="../imgs/Matrix_kronecker2.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kronecker(
-    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-):
-    &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
+<pre><code class="python">def kronecker(self, other, op=None, cast=None, out=None,
+              mask=None, accum=None, desc=Default):
+    &#34;&#34;&#34;Kronecker product.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_kronecker1&#39;)
+
+    ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
+
+    &gt;&gt;&gt; g = draw_graph(M.kronecker(M), filename=&#39;/docs/imgs/Matrix_kronecker2&#39;)
+
+    ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
+
+    &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
@@ -5049,16 +5207,8 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxm(
-    self,
-    other,
-    cast=None,
-    out=None,
-    semiring=None,
-    mask=None,
-    accum=None,
-    desc=Default,
-):
+<pre><code class="python">def mxm(self, other, cast=None, out=None, semiring=None,
+        mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Matrix-matrix multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
@@ -5094,16 +5244,8 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mxv(
-    self,
-    other,
-    cast=None,
-    out=None,
-    semiring=None,
-    mask=None,
-    accum=None,
-    desc=Default,
-):
+<pre><code class="python">def mxv(self, other, cast=None, out=None, semiring=None,
+        mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(None)
@@ -5135,13 +5277,31 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <span>def <span class="ident">nonzero</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the non-zero Matrix.</p></div>
+<div class="desc"><p>Select the non-zero Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; print(M.nonzero())
+      0  1  2
+  0|    42   |  0
+  1|         |  1
+  2|149      |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def nonzero(self):
-    &#34;&#34;&#34;Select the non-zero Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Select the non-zero Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; print(M.nonzero())
+          0  1  2
+      0|    42   |  0
+      1|         |  1
+      2|149      |  2
+          0  1  2
+
+    &#34;&#34;&#34;
     return self.select(lib.GxB_NONZERO)</code></pre>
 </details>
 </dd>
@@ -5149,13 +5309,54 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <span>def <span class="ident">offdiag</span></span>(<span>self, thunk=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the off-diagonal Matrix.</p></div>
+<div class="desc"><p>Select the off-diagonal Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+&gt;&gt;&gt; print(M.offdiag())
+      0  1  2
+  0|     0  0|  0
+  1|  0     0|  1
+  2|  0  0   |  2
+      0  1  2
+&gt;&gt;&gt; print(M.offdiag(1))
+      0  1  2
+  0|  0     0|  0
+  1|  0  0   |  1
+  2|  0  0  0|  2
+      0  1  2
+&gt;&gt;&gt; print(M.offdiag(-1))
+      0  1  2
+  0|  0  0  0|  0
+  1|     0  0|  1
+  2|  0     0|  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def offdiag(self, thunk=None):
-    &#34;&#34;&#34;Select the off-diagonal Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Select the off-diagonal Matrix.
+    &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
+    &gt;&gt;&gt; print(M.offdiag())
+          0  1  2
+      0|     0  0|  0
+      1|  0     0|  1
+      2|  0  0   |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.offdiag(1))
+          0  1  2
+      0|  0     0|  0
+      1|  0  0   |  1
+      2|  0  0  0|  2
+          0  1  2
+    &gt;&gt;&gt; print(M.offdiag(-1))
+          0  1  2
+      0|  0  0  0|  0
+      1|     0  0|  1
+      2|  0     0|  2
+          0  1  2
+
+    &#34;&#34;&#34;
     return self.select(lib.GxB_OFFDIAG, thunk=thunk)</code></pre>
 </details>
 </dd>

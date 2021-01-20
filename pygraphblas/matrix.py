@@ -1094,15 +1094,69 @@ class Matrix:
         return self.select(lib.GxB_TRIU, thunk=thunk)
 
     def diag(self, thunk=None):
-        """Select the diagonal Matrix."""
+        """Select the diagonal Matrix.  Thunk is the diagonal offset to select
+        from the main diagonal.
+
+        >>> M = Matrix.dense(types.UINT8, 3, 3)
+        >>> print(M.diag())
+              0  1  2
+          0|  0      |  0
+          1|     0   |  1
+          2|        0|  2
+              0  1  2
+        >>> print(M.diag(1))
+              0  1  2
+          0|     0   |  0
+          1|        0|  1
+          2|         |  2
+              0  1  2
+        >>> print(M.diag(-1))
+              0  1  2
+          0|         |  0
+          1|  0      |  1
+          2|     0   |  2
+              0  1  2
+
+        """
         return self.select(lib.GxB_DIAG, thunk=thunk)
 
     def offdiag(self, thunk=None):
-        """Select the off-diagonal Matrix."""
+        """Select the off-diagonal Matrix.
+        >>> M = Matrix.dense(types.UINT8, 3, 3)
+        >>> print(M.offdiag())
+              0  1  2
+          0|     0  0|  0
+          1|  0     0|  1
+          2|  0  0   |  2
+              0  1  2
+        >>> print(M.offdiag(1))
+              0  1  2
+          0|  0     0|  0
+          1|  0  0   |  1
+          2|  0  0  0|  2
+              0  1  2
+        >>> print(M.offdiag(-1))
+              0  1  2
+          0|  0  0  0|  0
+          1|     0  0|  1
+          2|  0     0|  2
+              0  1  2
+
+        """
         return self.select(lib.GxB_OFFDIAG, thunk=thunk)
 
     def nonzero(self):
-        """Select the non-zero Matrix."""
+        """Select the non-zero Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> print(M.nonzero())
+              0  1  2
+          0|    42   |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
+
+        """
         return self.select(lib.GxB_NONZERO)
 
     def _full(self, identity=None):
@@ -1172,16 +1226,8 @@ class Matrix:
             desc = desc.desc[0]
         return mask, accum, desc
 
-    def mxm(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxm(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         """Matrix-matrix multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1207,16 +1253,8 @@ class Matrix:
         )
         return out
 
-    def mxv(
-        self,
-        other,
-        cast=None,
-        out=None,
-        semiring=None,
-        mask=None,
-        accum=None,
-        desc=Default,
-    ):
+    def mxv(self, other, cast=None, out=None, semiring=None,
+            mask=None, accum=None, desc=Default):
         """Matrix-vector multiply."""
         if semiring is None:
             semiring = current_semiring.get(None)
@@ -1254,10 +1292,20 @@ class Matrix:
     def __imatmul__(self, other):
         return self.mxm(other, out=self)
 
-    def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
-    ):
-        """Kronecker product."""
+    def kronecker(self, other, op=None, cast=None, out=None,
+                  mask=None, accum=None, desc=Default):
+        """Kronecker product.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> g = draw_graph(M, filename='/docs/imgs/Matrix_kronecker1')
+
+        ![Matrix_kronecker1.png](../imgs/Matrix_kronecker1.png)
+
+        >>> g = draw_graph(M.kronecker(M), filename='/docs/imgs/Matrix_kronecker2')
+
+        ![Matrix_kronecker2.png](../imgs/Matrix_kronecker2.png)
+
+        """
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
