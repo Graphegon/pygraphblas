@@ -37,13 +37,27 @@ types that make GraphBLAS simple and easy.</p>
 <p>See the <a href="https://github.com/Graphegon/pygraphblas">Github README</a> for
 details on how to install pygraphblas. Once installed, the library can
 be imported for use:</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>from pygraphblas import *</p>
-</blockquote>
-</blockquote>
-</blockquote>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
+</code></pre>
+<p><code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code> is the core object of The GraphBLAS.
+There are
+many ways to contstruct them, but a simple approach is to provide
+three lists of data, the first are are lists of the row and column
+positions that define the begining and end of a graph edge, and the
+third list is the weight for that edge:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2  3
+  0|            |  0
+  1|       42   |  1
+  2|         314|  2
+  3|   149      |  3
+      0  1  2  3
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas.gviz import draw_graph
+&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+</code></pre>
+<p><img alt="Matrix_from_lists.png" src="../imgs/Matrix_from_lists.png"></p>
 <p>The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.
 As illustrated here, a graph can be expressed as
@@ -94,7 +108,27 @@ See the [Github README](https://github.com/Graphegon/pygraphblas) for
 details on how to install pygraphblas. Once installed, the library can
 be imported for use:
 
-   &gt;&gt;&gt; from pygraphblas import *
+&gt;&gt;&gt; from pygraphblas import *
+
+`pygraphblas.Matrix` is the core object of The GraphBLAS.  There are
+many ways to contstruct them, but a simple approach is to provide
+three lists of data, the first are are lists of the row and column
+positions that define the begining and end of a graph edge, and the
+third list is the weight for that edge:
+
+&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2  3
+  0|            |  0
+  1|       42   |  1
+  2|         314|  2
+  3|   149      |  3
+      0  1  2  3
+
+&gt;&gt;&gt; from pygraphblas.gviz import draw_graph
+&gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+
+![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
@@ -181,6 +215,7 @@ from . import binaryop
 from . import unaryop
 from . import monoid
 from . import descriptor
+from . import gviz
 
 __all__ = [
     &#34;lib&#34;,
@@ -212,6 +247,7 @@ __all__ = [
     &#34;semiring&#34;,
     &#34;types&#34;,
     &#34;descriptor&#34;,
+    &#34;gviz&#34;,
 ]
 
 ffi = ffi  # global assign hack to fool pdoc
@@ -256,7 +292,8 @@ def run_doctests():
 </dd>
 <dt><code class="name"><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></dt>
 <dd>
-<div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz.</p></div>
+<div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz in
+doctests and Jupyter notebooks.</p></div>
 </dd>
 <dt><code class="name"><a title="pygraphblas.matrix" href="matrix.html">pygraphblas.matrix</a></code></dt>
 <dd>
@@ -9181,7 +9218,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def kronecker(
         self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
+        &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -9201,15 +9238,59 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def extract_matrix(
-        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a submatrix.
+
+        `GrB_Matrix_extract` extracts a submatrix from another matrix.
+        The input matrix may be transposed first, via the descriptor.
+        The result type remains the same.
+
+        `row_index` and `col_index` can be slice objects that default
+        to the equivalent of GrB_ALL.  Python slice objects support
+        the SuiteSparse extensions for `GxB_RANGE`, `GxB_BACKWARDS`
+        and `GxB_STRIDE`.  See the User Guide for details.
+
+        The size of `C` is `|row_index|`-by-`|col_index|`.  Entries
+        outside that sub-range are not accessed and do not take part
+        in the computation.
+
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; print(M.extract_matrix())
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.extract_matrix(0, 1))
+              0
+          0| 42|  0
+              0
+        &gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
+              0
+          0|  0|  0
+          1|   |  1
+              0
+        &gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
+              0  1
+          0|    42|  0
+              0  1
+
+        &#34;&#34;&#34;
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
-        I, ni, isize = _build_range(rindex, result_nrows - 1)
-        J, nj, jsize = _build_range(cindex, result_ncols - 1)
+        if isinstance(row_index, int):
+            I, ni, isize = _build_range(slice(row_index, row_index), result_nrows - 1)
+        else:
+            I, ni, isize = _build_range(row_index, result_nrows - 1)
+        if isinstance(col_index, int):
+            J, nj, jsize = _build_range(slice(col_index, col_index), result_ncols - 1)
+        else:
+            J, nj, jsize = _build_range(col_index, result_ncols - 1)
+
         if isize is None:
             isize = result_nrows
         if jsize is None:
@@ -9228,7 +9309,21 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def extract_col(
         self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a column Vector.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.extract_col(0))
+        0|  
+        1|  
+        2|149
+
+        &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
@@ -9246,7 +9341,22 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def extract_row(
         self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract a row Vector.
+
+        
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.extract_row(0))
+        0|  
+        1|42
+        2|  
+
+        &#34;&#34;&#34;
         desc = desc | TransposeA
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
@@ -11090,7 +11200,19 @@ interchangeably for either operation.</p></div>
 <span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract a column Vector.</p></div>
+<div class="desc"><p>Extract a column Vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
+&gt;&gt;&gt; print(M.extract_col(0))
+0|  
+1|  
+2|149
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11098,7 +11220,21 @@ interchangeably for either operation.</p></div>
 <pre><code class="python">def extract_col(
     self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Extract a column Vector.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a column Vector.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.extract_col(0))
+    0|  
+    1|  
+    2|149
+
+    &#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
         out = Vector.sparse(self.type, stop_val)
@@ -11115,24 +11251,102 @@ interchangeably for either operation.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.extract_matrix"><code class="name flex">
-<span>def <span class="ident">extract_matrix</span></span>(<span>self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">extract_matrix</span></span>(<span>self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract a submatrix.</p></div>
+<div class="desc"><p>Extract a submatrix.</p>
+<p><code>GrB_Matrix_extract</code> extracts a submatrix from another matrix.
+The input matrix may be transposed first, via the descriptor.
+The result type remains the same.</p>
+<p><code>row_index</code> and <code>col_index</code> can be slice objects that default
+to the equivalent of GrB_ALL.
+Python slice objects support
+the SuiteSparse extensions for <code>GxB_RANGE</code>, <code>GxB_BACKWARDS</code>
+and <code>GxB_STRIDE</code>.
+See the User Guide for details.</p>
+<p>The size of <code>C</code> is <code>|row_index|</code>-by-<code>|col_index|</code>.
+Entries
+outside that sub-range are not accessed and do not take part
+in the computation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; print(M.extract_matrix())
+      0  1  2
+  0|    42   |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
+&gt;&gt;&gt; print(M.extract_matrix(0, 1))
+      0
+  0| 42|  0
+      0
+&gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
+      0
+  0|  0|  0
+  1|   |  1
+      0
+&gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
+      0  1
+  0|    42|  0
+      0  1
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_matrix(
-    self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+    self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Extract a submatrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a submatrix.
+
+    `GrB_Matrix_extract` extracts a submatrix from another matrix.
+    The input matrix may be transposed first, via the descriptor.
+    The result type remains the same.
+
+    `row_index` and `col_index` can be slice objects that default
+    to the equivalent of GrB_ALL.  Python slice objects support
+    the SuiteSparse extensions for `GxB_RANGE`, `GxB_BACKWARDS`
+    and `GxB_STRIDE`.  See the User Guide for details.
+
+    The size of `C` is `|row_index|`-by-`|col_index|`.  Entries
+    outside that sub-range are not accessed and do not take part
+    in the computation.
+
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; print(M.extract_matrix())
+          0  1  2
+      0|    42   |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.extract_matrix(0, 1))
+          0
+      0| 42|  0
+          0
+    &gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
+          0
+      0|  0|  0
+      1|   |  1
+          0
+    &gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
+          0  1
+      0|    42|  0
+          0  1
+
+    &#34;&#34;&#34;
     ta = TransposeA in desc
     mask, accum, desc = self._get_args(mask, accum, desc)
     result_nrows = self.ncols if ta else self.nrows
     result_ncols = self.nrows if ta else self.ncols
-    I, ni, isize = _build_range(rindex, result_nrows - 1)
-    J, nj, jsize = _build_range(cindex, result_ncols - 1)
+    if isinstance(row_index, int):
+        I, ni, isize = _build_range(slice(row_index, row_index), result_nrows - 1)
+    else:
+        I, ni, isize = _build_range(row_index, result_nrows - 1)
+    if isinstance(col_index, int):
+        J, nj, jsize = _build_range(slice(col_index, col_index), result_ncols - 1)
+    else:
+        J, nj, jsize = _build_range(col_index, result_ncols - 1)
+
     if isize is None:
         isize = result_nrows
     if jsize is None:
@@ -11153,7 +11367,19 @@ interchangeably for either operation.</p></div>
 <span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract a row Vector.</p></div>
+<div class="desc"><p>Extract a row Vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
+&gt;&gt;&gt; print(M.extract_row(0))
+0|  
+1|42
+2|
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11161,7 +11387,22 @@ interchangeably for either operation.</p></div>
 <pre><code class="python">def extract_row(
     self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Extract a row Vector.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract a row Vector.
+
+    
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.extract_row(0))
+    0|  
+    1|42
+    2|  
+
+    &#34;&#34;&#34;
     desc = desc | TransposeA
     return self.extract_col(
         row_index, col_slice, out, desc=desc, mask=None, accum=None
@@ -11269,7 +11510,7 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Kronecker product.</p></div>
+<div class="desc"><p><a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11277,7 +11518,7 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <pre><code class="python">def kronecker(
     self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Kronecker product.&#34;&#34;&#34;
+    &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
@@ -16867,7 +17108,9 @@ def nvals(self):
         for row in range(self.size):
             value = self.get(row, empty_char)
             result += str(row) + &#34;|&#34;
-            result += format_string.format(self.type.format_value(value, width)) + &#34;\n&#34;
+            result += format_string.format(self.type.format_value(value, width))
+            if row &lt; self.size - 1:
+                result += &#34;\n&#34;
         return result
 
     def __str__(self):
@@ -17670,7 +17913,9 @@ outside the resized vector are deleted.</p></div>
     for row in range(self.size):
         value = self.get(row, empty_char)
         result += str(row) + &#34;|&#34;
-        result += format_string.format(self.type.format_value(value, width)) + &#34;\n&#34;
+        result += format_string.format(self.type.format_value(value, width))
+        if row &lt; self.size - 1:
+            result += &#34;\n&#34;
     return result</code></pre>
 </details>
 </dd>

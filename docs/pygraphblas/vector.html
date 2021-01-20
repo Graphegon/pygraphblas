@@ -761,7 +761,9 @@ class Vector:
         for row in range(self.size):
             value = self.get(row, empty_char)
             result += str(row) + &#34;|&#34;
-            result += format_string.format(self.type.format_value(value, width)) + &#34;\n&#34;
+            result += format_string.format(self.type.format_value(value, width))
+            if row &lt; self.size - 1:
+                result += &#34;\n&#34;
         return result
 
     def __str__(self):
@@ -1489,7 +1491,9 @@ class Vector:
         for row in range(self.size):
             value = self.get(row, empty_char)
             result += str(row) + &#34;|&#34;
-            result += format_string.format(self.type.format_value(value, width)) + &#34;\n&#34;
+            result += format_string.format(self.type.format_value(value, width))
+            if row &lt; self.size - 1:
+                result += &#34;\n&#34;
         return result
 
     def __str__(self):
@@ -2292,7 +2296,9 @@ outside the resized vector are deleted.</p></div>
     for row in range(self.size):
         value = self.get(row, empty_char)
         result += str(row) + &#34;|&#34;
-        result += format_string.format(self.type.format_value(value, width)) + &#34;\n&#34;
+        result += format_string.format(self.type.format_value(value, width))
+        if row &lt; self.size - 1:
+            result += &#34;\n&#34;
     return result</code></pre>
 </details>
 </dd>

@@ -9,7 +9,27 @@ See the [Github README](https://github.com/Graphegon/pygraphblas) for
 details on how to install pygraphblas. Once installed, the library can
 be imported for use:
 
-   >>> from pygraphblas import *
+>>> from pygraphblas import *
+
+`pygraphblas.Matrix` is the core object of The GraphBLAS.  There are
+many ways to contstruct them, but a simple approach is to provide
+three lists of data, the first are are lists of the row and column
+positions that define the begining and end of a graph edge, and the
+third list is the weight for that edge:
+
+>>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+>>> print(M)
+      0  1  2  3
+  0|            |  0
+  1|       42   |  1
+  2|         314|  2
+  3|   149      |  3
+      0  1  2  3
+
+>>> from pygraphblas.gviz import draw_graph
+>>> g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+
+![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
 The core idea of the GraphBLAS is the mathematical duality between a
 graph and a matrix.  As illustrated here, a graph can be expressed as
@@ -96,6 +116,7 @@ from . import binaryop
 from . import unaryop
 from . import monoid
 from . import descriptor
+from . import gviz
 
 __all__ = [
     "lib",
@@ -127,6 +148,7 @@ __all__ = [
     "semiring",
     "types",
     "descriptor",
+    "gviz",
 ]
 
 ffi = ffi  # global assign hack to fool pdoc

@@ -1397,7 +1397,7 @@ class Matrix:
     def kronecker(
         self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
     ):
-        """Kronecker product."""
+        """[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product)."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -1417,15 +1417,59 @@ class Matrix:
         return out
 
     def extract_matrix(
-        self, rindex=None, cindex=None, out=None, mask=None, accum=None, desc=Default
+        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
     ):
-        """Extract a submatrix."""
+        """Extract a submatrix.
+
+        `GrB_Matrix_extract` extracts a submatrix from another matrix.
+        The input matrix may be transposed first, via the descriptor.
+        The result type remains the same.
+
+        `row_index` and `col_index` can be slice objects that default
+        to the equivalent of GrB_ALL.  Python slice objects support
+        the SuiteSparse extensions for `GxB_RANGE`, `GxB_BACKWARDS`
+        and `GxB_STRIDE`.  See the User Guide for details.
+
+        The size of `C` is `|row_index|`-by-`|col_index|`.  Entries
+        outside that sub-range are not accessed and do not take part
+        in the computation.
+
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> print(M.extract_matrix())
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        >>> print(M.extract_matrix(0, 1))
+              0
+          0| 42|  0
+              0
+        >>> print(M.extract_matrix(slice(1,2), 2))
+              0
+          0|  0|  0
+          1|   |  1
+              0
+        >>> print(M.extract_matrix(0, slice(0,1)))
+              0  1
+          0|    42|  0
+              0  1
+
+        """
         ta = TransposeA in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
-        I, ni, isize = _build_range(rindex, result_nrows - 1)
-        J, nj, jsize = _build_range(cindex, result_ncols - 1)
+        if isinstance(row_index, int):
+            I, ni, isize = _build_range(slice(row_index, row_index), result_nrows - 1)
+        else:
+            I, ni, isize = _build_range(row_index, result_nrows - 1)
+        if isinstance(col_index, int):
+            J, nj, jsize = _build_range(slice(col_index, col_index), result_ncols - 1)
+        else:
+            J, nj, jsize = _build_range(col_index, result_ncols - 1)
+
         if isize is None:
             isize = result_nrows
         if jsize is None:
@@ -1444,7 +1488,21 @@ class Matrix:
     def extract_col(
         self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
     ):
-        """Extract a column Vector."""
+        """Extract a column Vector.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        >>> print(M.extract_col(0))
+        0|  
+        1|  
+        2|149
+
+        """
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
@@ -1462,7 +1520,22 @@ class Matrix:
     def extract_row(
         self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
     ):
-        """Extract a row Vector."""
+        """Extract a row Vector.
+
+        
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+        >>> print(M.extract_row(0))
+        0|  
+        1|42
+        2|  
+
+        """
         desc = desc | TransposeA
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None

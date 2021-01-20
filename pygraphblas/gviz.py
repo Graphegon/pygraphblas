@@ -1,4 +1,5 @@
-"""Helper functions for drawing graphs and matrices with graphviz.
+"""Helper functions for drawing graphs and matrices with graphviz in
+doctests and Jupyter notebooks.
 
 """
 from graphviz import Digraph, Source
@@ -6,9 +7,17 @@ from PIL import Image, ImageDraw
 from IPython.display import display
 
 
+__all__ = [
+    'draw',
+    'draw_graph',
+    'draw_matrix',
+    'draw_vector',
+    'draw_layers',
+    'draw_op',
+    ]
+
 def _str(s, label_width):
     return str(s)[:label_width]
-
 
 def draw_vector(V, name="", rankdir="LR", ioff=0, joff=0):
     g = Digraph(name)
