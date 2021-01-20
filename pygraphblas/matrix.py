@@ -1015,7 +1015,17 @@ class Matrix:
         return out
 
     def apply(self, op, out=None, mask=None, accum=None, desc=Default):
-        """Apply Unary op to matrix elements."""
+        """Apply Unary op to matrix elements.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> print(M.apply(unaryop.ABS))
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+
+        """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
@@ -1029,6 +1039,14 @@ class Matrix:
     def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         """Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> print(M.apply_first(1, binaryop.PLUS))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
 
         """
         if out is None:
@@ -1047,6 +1065,14 @@ class Matrix:
         """Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> print(M.apply_second(binaryop.PLUS, 1))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -1064,18 +1090,21 @@ class Matrix:
         """Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
-            ">": lib.GxB_GT_THUNK
-            "<": lib.GxB_LT_THUNK
-            ">=": lib.GxB_GE_THUNK
-            "<=": lib.GxB_LE_THUNK
-            "!=": lib.GxB_NE_THUNK
-            "==": lib.GxB_EQ_THUNK
-            ">0": lib.GxB_GT_ZERO
-            "<0": lib.GxB_LT_ZERO
-            ">=0": lib.GxB_GE_ZERO
-            "<=0": lib.GxB_LE_ZERO
-            "!=0": lib.GxB_NONZERO
-            "==0": lib.GxB_EQ_ZERO
+        Operator | Library Operation | Definition | Description
+        --- | --- | ---
+        >   | lib.GxB_GT_THUNK | T=A(A>k)  | Entries in 'T' are those in 'A' greater than 'k'. 
+        <   | lib.GxB_LT_THUNK | T=A(A<k)  | Entries in 'T' are those in 'A' less than 'k'. 
+        >=  | lib.GxB_GE_THUNK | T=A(A>=k) | Entries in 'T' are those in 'A' greater than or equal to 'k'. 
+        <=  | lib.GxB_LE_THUNK | T=A(A<=k) | Entries in 'T' are those in 'A' less than or equal to 'k'. 
+        !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in 'T' are those in 'A' not equal to 'k'. 
+        ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in 'T' are those in 'A' equal to 'k'. 
+        >0  | lib.GxB_GT_ZERO  | T=A(A>0)  | Entries in 'T' are those in 'A' greater than zero. 
+        <0  | lib.GxB_LT_ZERO  | T=A(A<0)  | Entries in 'T' are those in 'A' less than zero. 
+        >=0 | lib.GxB_GE_ZERO  | T=A(A>=0) | Entries in 'T' are those in 'A' greater than or equal to zero. 
+        <=0 | lib.GxB_LE_ZERO  | T=A(A<=0) | Entries in 'T' are those in 'A' less than or equal to zero. 
+        !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in 'T' are those in 'A' nonzero value. 
+        ==0 | lib.GxB_EQ_ZERO  | T=A(A==0) | Entries in 'T' are those in 'A' equal to zero.
+
 
         """
         if out is None:

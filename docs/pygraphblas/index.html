@@ -8799,7 +8799,17 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def apply(self, op, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Apply Unary op to matrix elements.&#34;&#34;&#34;
+        &#34;&#34;&#34;Apply Unary op to matrix elements.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; print(M.apply(unaryop.ABS))
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+
+        &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, UnaryOp):
@@ -8813,6 +8823,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
 
         &#34;&#34;&#34;
         if out is None:
@@ -8831,6 +8849,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -8848,18 +8874,21 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
-            &#34;&gt;&#34;: lib.GxB_GT_THUNK
-            &#34;&lt;&#34;: lib.GxB_LT_THUNK
-            &#34;&gt;=&#34;: lib.GxB_GE_THUNK
-            &#34;&lt;=&#34;: lib.GxB_LE_THUNK
-            &#34;!=&#34;: lib.GxB_NE_THUNK
-            &#34;==&#34;: lib.GxB_EQ_THUNK
-            &#34;&gt;0&#34;: lib.GxB_GT_ZERO
-            &#34;&lt;0&#34;: lib.GxB_LT_ZERO
-            &#34;&gt;=0&#34;: lib.GxB_GE_ZERO
-            &#34;&lt;=0&#34;: lib.GxB_LE_ZERO
-            &#34;!=0&#34;: lib.GxB_NONZERO
-            &#34;==0&#34;: lib.GxB_EQ_ZERO
+        Operator | Library Operation | Definition | Description
+        --- | --- | ---
+        &gt;   | lib.GxB_GT_THUNK | T=A(A&gt;k)  | Entries in &#39;T&#39; are those in &#39;A&#39; greater than &#39;k&#39;. 
+        &lt;   | lib.GxB_LT_THUNK | T=A(A&lt;k)  | Entries in &#39;T&#39; are those in &#39;A&#39; less than &#39;k&#39;. 
+        &gt;=  | lib.GxB_GE_THUNK | T=A(A&gt;=k) | Entries in &#39;T&#39; are those in &#39;A&#39; greater than or equal to &#39;k&#39;. 
+        &lt;=  | lib.GxB_LE_THUNK | T=A(A&lt;=k) | Entries in &#39;T&#39; are those in &#39;A&#39; less than or equal to &#39;k&#39;. 
+        !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in &#39;T&#39; are those in &#39;A&#39; not equal to &#39;k&#39;. 
+        ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in &#39;T&#39; are those in &#39;A&#39; equal to &#39;k&#39;. 
+        &gt;0  | lib.GxB_GT_ZERO  | T=A(A&gt;0)  | Entries in &#39;T&#39; are those in &#39;A&#39; greater than zero. 
+        &lt;0  | lib.GxB_LT_ZERO  | T=A(A&lt;0)  | Entries in &#39;T&#39; are those in &#39;A&#39; less than zero. 
+        &gt;=0 | lib.GxB_GE_ZERO  | T=A(A&gt;=0) | Entries in &#39;T&#39; are those in &#39;A&#39; greater than or equal to zero. 
+        &lt;=0 | lib.GxB_LE_ZERO  | T=A(A&lt;=0) | Entries in &#39;T&#39; are those in &#39;A&#39; less than or equal to zero. 
+        !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in &#39;T&#39; are those in &#39;A&#39; nonzero value. 
+        ==0 | lib.GxB_EQ_ZERO  | T=A(A==0) | Entries in &#39;T&#39; are those in &#39;A&#39; equal to zero.
+
 
         &#34;&#34;&#34;
         if out is None:
@@ -10304,13 +10333,31 @@ def vals(self):
 <span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Apply Unary op to matrix elements.</p></div>
+<div class="desc"><p>Apply Unary op to matrix elements.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; print(M.apply(unaryop.ABS))
+      0  1  2
+  0|    42   |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Apply Unary op to matrix elements.&#34;&#34;&#34;
+    &#34;&#34;&#34;Apply Unary op to matrix elements.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; print(M.apply(unaryop.ABS))
+          0  1  2
+      0|    42   |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
+
+    &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, UnaryOp):
@@ -10327,7 +10374,15 @@ def vals(self):
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
-first input to a scalar first.</p></div>
+first input to a scalar first.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+      0  1  2
+  0|   -41   |  0
+  1|        1|  1
+  2|150      |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10335,6 +10390,14 @@ first input to a scalar first.</p></div>
 <pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     first input to a scalar first.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+          0  1  2
+      0|   -41   |  0
+      1|        1|  1
+      2|150      |  2
+          0  1  2
 
     &#34;&#34;&#34;
     if out is None:
@@ -10355,7 +10418,15 @@ first input to a scalar first.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
-second input to a scalar second.</p></div>
+second input to a scalar second.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+      0  1  2
+  0|   -41   |  0
+  1|        1|  1
+  2|150      |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10363,6 +10434,14 @@ second input to a scalar second.</p></div>
 <pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     second input to a scalar second.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+          0  1  2
+      0|   -41   |  0
+      1|        1|  1
+      2|150      |  2
+          0  1  2
 
     &#34;&#34;&#34;
     if out is None:
@@ -11601,19 +11680,39 @@ outside the resized matrix are deleted.</p>
 <dd>
 <div class="desc"><p>Select elements that match the given select operation condition.
 Can be a string mapping to following operators:</p>
-<pre><code>"&gt;": lib.GxB_GT_THUNK
-"&lt;": lib.GxB_LT_THUNK
-"&gt;=": lib.GxB_GE_THUNK
-"&lt;=": lib.GxB_LE_THUNK
-"!=": lib.GxB_NE_THUNK
-"==": lib.GxB_EQ_THUNK
-"&gt;0": lib.GxB_GT_ZERO
-"&lt;0": lib.GxB_LT_ZERO
-"&gt;=0": lib.GxB_GE_ZERO
-"&lt;=0": lib.GxB_LE_ZERO
-"!=0": lib.GxB_NONZERO
-"==0": lib.GxB_EQ_ZERO
-</code></pre></div>
+<p>Operator | Library Operation | Definition | Description
+&mdash; | &mdash; | &mdash;</p>
+<blockquote>
+<p>| lib.GxB_GT_THUNK | T=A(A&gt;k)
+| Entries in 'T' are those in 'A' greater than 'k'.
+&lt;
+| lib.GxB_LT_THUNK | T=A(A<k)
+| Entries in 'T' are those in 'A' less than 'k'.
+=
+| lib.GxB_GE_THUNK | T=A(A>=k) | Entries in 'T' are those in 'A' greater than or equal to 'k'.
+&lt;=
+| lib.GxB_LE_THUNK | T=A(A&lt;=k) | Entries in 'T' are those in 'A' less than or equal to 'k'.
+!=
+| lib.GxB_NE_THUNK | T=A(A==k) | Entries in 'T' are those in 'A' not equal to 'k'.
+==
+| lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in 'T' are those in 'A' equal to 'k'.
+0
+| lib.GxB_GT_ZERO
+| T=A(A&gt;0)
+| Entries in 'T' are those in 'A' greater than zero.
+&lt;0
+| lib.GxB_LT_ZERO
+| T=A(A&lt;0)
+| Entries in 'T' are those in 'A' less than zero.
+=0 | lib.GxB_GE_ZERO
+| T=A(A&gt;=0) | Entries in 'T' are those in 'A' greater than or equal to zero.
+&lt;=0 | lib.GxB_LE_ZERO
+| T=A(A&lt;=0) | Entries in 'T' are those in 'A' less than or equal to zero.
+!=0 | lib.GxB_NONZERO
+| T=A(A!=0) | Entries in 'T' are those in 'A' nonzero value.
+==0 | lib.GxB_EQ_ZERO
+| T=A(A==0) | Entries in 'T' are those in 'A' equal to zero.</p>
+</blockquote></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11622,18 +11721,21 @@ Can be a string mapping to following operators:</p>
     &#34;&#34;&#34;Select elements that match the given select operation condition.
     Can be a string mapping to following operators:
 
-        &#34;&gt;&#34;: lib.GxB_GT_THUNK
-        &#34;&lt;&#34;: lib.GxB_LT_THUNK
-        &#34;&gt;=&#34;: lib.GxB_GE_THUNK
-        &#34;&lt;=&#34;: lib.GxB_LE_THUNK
-        &#34;!=&#34;: lib.GxB_NE_THUNK
-        &#34;==&#34;: lib.GxB_EQ_THUNK
-        &#34;&gt;0&#34;: lib.GxB_GT_ZERO
-        &#34;&lt;0&#34;: lib.GxB_LT_ZERO
-        &#34;&gt;=0&#34;: lib.GxB_GE_ZERO
-        &#34;&lt;=0&#34;: lib.GxB_LE_ZERO
-        &#34;!=0&#34;: lib.GxB_NONZERO
-        &#34;==0&#34;: lib.GxB_EQ_ZERO
+    Operator | Library Operation | Definition | Description
+    --- | --- | ---
+    &gt;   | lib.GxB_GT_THUNK | T=A(A&gt;k)  | Entries in &#39;T&#39; are those in &#39;A&#39; greater than &#39;k&#39;. 
+    &lt;   | lib.GxB_LT_THUNK | T=A(A&lt;k)  | Entries in &#39;T&#39; are those in &#39;A&#39; less than &#39;k&#39;. 
+    &gt;=  | lib.GxB_GE_THUNK | T=A(A&gt;=k) | Entries in &#39;T&#39; are those in &#39;A&#39; greater than or equal to &#39;k&#39;. 
+    &lt;=  | lib.GxB_LE_THUNK | T=A(A&lt;=k) | Entries in &#39;T&#39; are those in &#39;A&#39; less than or equal to &#39;k&#39;. 
+    !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in &#39;T&#39; are those in &#39;A&#39; not equal to &#39;k&#39;. 
+    ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in &#39;T&#39; are those in &#39;A&#39; equal to &#39;k&#39;. 
+    &gt;0  | lib.GxB_GT_ZERO  | T=A(A&gt;0)  | Entries in &#39;T&#39; are those in &#39;A&#39; greater than zero. 
+    &lt;0  | lib.GxB_LT_ZERO  | T=A(A&lt;0)  | Entries in &#39;T&#39; are those in &#39;A&#39; less than zero. 
+    &gt;=0 | lib.GxB_GE_ZERO  | T=A(A&gt;=0) | Entries in &#39;T&#39; are those in &#39;A&#39; greater than or equal to zero. 
+    &lt;=0 | lib.GxB_LE_ZERO  | T=A(A&lt;=0) | Entries in &#39;T&#39; are those in &#39;A&#39; less than or equal to zero. 
+    !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in &#39;T&#39; are those in &#39;A&#39; nonzero value. 
+    ==0 | lib.GxB_EQ_ZERO  | T=A(A==0) | Entries in &#39;T&#39; are those in &#39;A&#39; equal to zero.
+
 
     &#34;&#34;&#34;
     if out is None:
