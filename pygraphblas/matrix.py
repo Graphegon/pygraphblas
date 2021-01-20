@@ -1091,18 +1091,18 @@ class Matrix:
         Can be a string mapping to following operators:
 
         Operator | Library Operation | Definition | Description
-        --- | --- | ---
-        >   | lib.GxB_GT_THUNK | T=A(A>k)  | Entries in 'T' are those in 'A' greater than 'k'. 
-        <   | lib.GxB_LT_THUNK | T=A(A<k)  | Entries in 'T' are those in 'A' less than 'k'. 
-        >=  | lib.GxB_GE_THUNK | T=A(A>=k) | Entries in 'T' are those in 'A' greater than or equal to 'k'. 
-        <=  | lib.GxB_LE_THUNK | T=A(A<=k) | Entries in 'T' are those in 'A' less than or equal to 'k'. 
-        !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in 'T' are those in 'A' not equal to 'k'. 
-        ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in 'T' are those in 'A' equal to 'k'. 
-        >0  | lib.GxB_GT_ZERO  | T=A(A>0)  | Entries in 'T' are those in 'A' greater than zero. 
-        <0  | lib.GxB_LT_ZERO  | T=A(A<0)  | Entries in 'T' are those in 'A' less than zero. 
-        >=0 | lib.GxB_GE_ZERO  | T=A(A>=0) | Entries in 'T' are those in 'A' greater than or equal to zero. 
-        <=0 | lib.GxB_LE_ZERO  | T=A(A<=0) | Entries in 'T' are those in 'A' less than or equal to zero. 
-        !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in 'T' are those in 'A' nonzero value. 
+        --- | --- | --- | ---
+        >   | lib.GxB_GT_THUNK | T=A(A>k)  | Entries in 'T' are those in 'A' greater than 'k'.
+        <   | lib.GxB_LT_THUNK | T=A(A<k)  | Entries in 'T' are those in 'A' less than 'k'.
+        >=  | lib.GxB_GE_THUNK | T=A(A>=k) | Entries in 'T' are those in 'A' greater than or equal to 'k'.
+        <=  | lib.GxB_LE_THUNK | T=A(A<=k) | Entries in 'T' are those in 'A' less than or equal to 'k'.
+        !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in 'T' are those in 'A' not equal to 'k'.
+        ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in 'T' are those in 'A' equal to 'k'.
+        >0  | lib.GxB_GT_ZERO  | T=A(A>0)  | Entries in 'T' are those in 'A' greater than zero.
+        <0  | lib.GxB_LT_ZERO  | T=A(A<0)  | Entries in 'T' are those in 'A' less than zero.
+        >=0 | lib.GxB_GE_ZERO  | T=A(A>=0) | Entries in 'T' are those in 'A' greater than or equal to zero.
+        <=0 | lib.GxB_LE_ZERO  | T=A(A<=0) | Entries in 'T' are those in 'A' less than or equal to zero.
+        !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in 'T' are those in 'A' nonzero value.
         ==0 | lib.GxB_EQ_ZERO  | T=A(A==0) | Entries in 'T' are those in 'A' equal to zero.
 
 
