@@ -510,8 +510,12 @@ class Matrix:
         >>> M.nvals == 3
         True
         >>> M.clear()
-        >>> M.nvals == 0
-        True
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
 
         """
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
@@ -520,12 +524,23 @@ class Matrix:
         """Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
         >>> M.shape
         (3, 3)
         >>> M.resize(10, 10)
-        >>> M.shape
-        (10, 10)
+        >>> print(M)
+              0  1  2  3  4  5  6  7  8  9
+          0|    42                        |  0
+          1|      314                     |  1
+          2|149                           |  2
+          3|                              |  3
+          4|                              |  4
+          5|                              |  5
+          6|                              |  6
+          7|                              |  7
+          8|                              |  8
+          9|                              |  9
+              0  1  2  3  4  5  6  7  8  9
 
         """
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
@@ -537,14 +552,27 @@ class Matrix:
         including typecasting.  See the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
+              0  1  2
         >>> MT = M.transpose()
-        >>> MT.to_lists()
-        [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
-
+        >>> print(MT)
+              0  1  2
+          0|      149|  0
+          1| 42      |  1
+          2|   314   |  2
+              0  1  2
         >>> MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
-        >>> MT.to_lists()
-        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+        >>> print(MT)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
 
         """
         if out is None:
@@ -570,10 +598,20 @@ class Matrix:
         """Cast this matrix to the provided type.  If out is not provided, a
         new matrix is of the cast type is created.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-        >>> N = M.cast(types.BOOL)
-        >>> N.to_lists()
-        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
+              0  1  2
+        >>> N = M.cast(types.FP32)
+        >>> print(N.to_string(width=5))
+                  0    1    2
+            0|      42.0     |    0
+            1|          314.0|    1
+            2|149.0          |    2
+                  0    1    2
 
         """
         return self.transpose(cast, out, desc=TransposeA)
@@ -1431,7 +1469,7 @@ class Matrix:
               0  1  2
         >>> M.clear()
 
-        this is the same as:
+        this is the same as the syntax:
 
         >>> M[1,:] = True
         >>> print(M)
@@ -1452,6 +1490,8 @@ class Matrix:
           2|     t   |  2
               0  1  2
         >>> M.clear()
+
+        Which is the same as the syntax:
         
         >>> M[:,1] = True
         >>> print(M)

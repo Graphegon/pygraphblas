@@ -8284,8 +8284,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M.nvals == 3
         True
         &gt;&gt;&gt; M.clear()
-        &gt;&gt;&gt; M.nvals == 0
-        True
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
 
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
@@ -8294,12 +8298,23 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
         &gt;&gt;&gt; M.shape
         (3, 3)
         &gt;&gt;&gt; M.resize(10, 10)
-        &gt;&gt;&gt; M.shape
-        (10, 10)
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6  7  8  9
+          0|    42                        |  0
+          1|      314                     |  1
+          2|149                           |  2
+          3|                              |  3
+          4|                              |  4
+          5|                              |  5
+          6|                              |  6
+          7|                              |  7
+          8|                              |  8
+          9|                              |  9
+              0  1  2  3  4  5  6  7  8  9
 
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
@@ -8311,14 +8326,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         including typecasting.  See the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
+              0  1  2
         &gt;&gt;&gt; MT = M.transpose()
-        &gt;&gt;&gt; MT.to_lists()
-        [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
-
+        &gt;&gt;&gt; print(MT)
+              0  1  2
+          0|      149|  0
+          1| 42      |  1
+          2|   314   |  2
+              0  1  2
         &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
-        &gt;&gt;&gt; MT.to_lists()
-        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+        &gt;&gt;&gt; print(MT)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
 
         &#34;&#34;&#34;
         if out is None:
@@ -8344,10 +8372,20 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Cast this matrix to the provided type.  If out is not provided, a
         new matrix is of the cast type is created.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-        &gt;&gt;&gt; N = M.cast(types.BOOL)
-        &gt;&gt;&gt; N.to_lists()
-        [[0, 1, 2], [1, 2, 0], [True, True, True]]
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
+              0  1  2
+        &gt;&gt;&gt; N = M.cast(types.FP32)
+        &gt;&gt;&gt; print(N.to_string(width=5))
+                  0    1    2
+            0|      42.0     |    0
+            1|          314.0|    1
+            2|149.0          |    2
+                  0    1    2
 
         &#34;&#34;&#34;
         return self.transpose(cast, out, desc=TransposeA)
@@ -9205,7 +9243,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2
         &gt;&gt;&gt; M.clear()
 
-        this is the same as:
+        this is the same as the syntax:
 
         &gt;&gt;&gt; M[1,:] = True
         &gt;&gt;&gt; print(M)
@@ -9226,6 +9264,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|     t   |  2
               0  1  2
         &gt;&gt;&gt; M.clear()
+
+        Which is the same as the syntax:
         
         &gt;&gt;&gt; M[:,1] = True
         &gt;&gt;&gt; print(M)
@@ -10310,7 +10350,7 @@ index to one row or column:</p>
       0  1  2
 &gt;&gt;&gt; M.clear()
 </code></pre>
-<p>this is the same as:</p>
+<p>this is the same as the syntax:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M[1,:] = True
 &gt;&gt;&gt; print(M)
       0  1  2
@@ -10330,6 +10370,7 @@ index to one row or column:</p>
       0  1  2
 &gt;&gt;&gt; M.clear()
 </code></pre>
+<p>Which is the same as the syntax:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M[:,1] = True
 &gt;&gt;&gt; print(M)
       0  1  2
@@ -10398,7 +10439,7 @@ index to one row or column:</p>
           0  1  2
     &gt;&gt;&gt; M.clear()
 
-    this is the same as:
+    this is the same as the syntax:
 
     &gt;&gt;&gt; M[1,:] = True
     &gt;&gt;&gt; print(M)
@@ -10419,6 +10460,8 @@ index to one row or column:</p>
       2|     t   |  2
           0  1  2
     &gt;&gt;&gt; M.clear()
+
+    Which is the same as the syntax:
     
     &gt;&gt;&gt; M[:,1] = True
     &gt;&gt;&gt; print(M)
@@ -10462,10 +10505,20 @@ index to one row or column:</p>
 <div class="desc"><p>Cast this matrix to the provided type.
 If out is not provided, a
 new matrix is of the cast type is created.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-&gt;&gt;&gt; N = M.cast(types.BOOL)
-&gt;&gt;&gt; N.to_lists()
-[[0, 1, 2], [1, 2, 0], [True, True, True]]
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|      314|  1
+  2|149      |  2
+      0  1  2
+&gt;&gt;&gt; N = M.cast(types.FP32)
+&gt;&gt;&gt; print(N.to_string(width=5))
+          0    1    2
+    0|      42.0     |    0
+    1|          314.0|    1
+    2|149.0          |    2
+          0    1    2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -10475,10 +10528,20 @@ new matrix is of the cast type is created.</p>
     &#34;&#34;&#34;Cast this matrix to the provided type.  If out is not provided, a
     new matrix is of the cast type is created.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-    &gt;&gt;&gt; N = M.cast(types.BOOL)
-    &gt;&gt;&gt; N.to_lists()
-    [[0, 1, 2], [1, 2, 0], [True, True, True]]
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|      314|  1
+      2|149      |  2
+          0  1  2
+    &gt;&gt;&gt; N = M.cast(types.FP32)
+    &gt;&gt;&gt; print(N.to_string(width=5))
+              0    1    2
+        0|      42.0     |    0
+        1|          314.0|    1
+        2|149.0          |    2
+              0    1    2
 
     &#34;&#34;&#34;
     return self.transpose(cast, out, desc=TransposeA)</code></pre>
@@ -10495,8 +10558,12 @@ values.</p>
 &gt;&gt;&gt; M.nvals == 3
 True
 &gt;&gt;&gt; M.clear()
-&gt;&gt;&gt; M.nvals == 0
-True
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|         |  0
+  1|         |  1
+  2|         |  2
+      0  1  2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -10510,8 +10577,12 @@ True
     &gt;&gt;&gt; M.nvals == 3
     True
     &gt;&gt;&gt; M.clear()
-    &gt;&gt;&gt; M.nvals == 0
-    True
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|         |  0
+      1|         |  1
+      2|         |  2
+          0  1  2
 
     &#34;&#34;&#34;
     self._check(lib.GrB_Matrix_clear(self._matrix[0]))</code></pre>
@@ -11183,12 +11254,23 @@ True
 <div class="desc"><p>Resize the matrix.
 If the dimensions decrease, entries that fall
 outside the resized matrix are deleted.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
 &gt;&gt;&gt; M.shape
 (3, 3)
 &gt;&gt;&gt; M.resize(10, 10)
-&gt;&gt;&gt; M.shape
-(10, 10)
+&gt;&gt;&gt; print(M)
+      0  1  2  3  4  5  6  7  8  9
+  0|    42                        |  0
+  1|      314                     |  1
+  2|149                           |  2
+  3|                              |  3
+  4|                              |  4
+  5|                              |  5
+  6|                              |  6
+  7|                              |  7
+  8|                              |  8
+  9|                              |  9
+      0  1  2  3  4  5  6  7  8  9
 </code></pre></div>
 <details class="source">
 <summary>
@@ -11198,12 +11280,23 @@ outside the resized matrix are deleted.</p>
     &#34;&#34;&#34;Resize the matrix.  If the dimensions decrease, entries that fall
     outside the resized matrix are deleted.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
     &gt;&gt;&gt; M.shape
     (3, 3)
     &gt;&gt;&gt; M.resize(10, 10)
-    &gt;&gt;&gt; M.shape
-    (10, 10)
+    &gt;&gt;&gt; print(M)
+          0  1  2  3  4  5  6  7  8  9
+      0|    42                        |  0
+      1|      314                     |  1
+      2|149                           |  2
+      3|                              |  3
+      4|                              |  4
+      5|                              |  5
+      6|                              |  6
+      7|                              |  7
+      8|                              |  8
+      9|                              |  9
+          0  1  2  3  4  5  6  7  8  9
 
     &#34;&#34;&#34;
     self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))</code></pre>
@@ -11440,14 +11533,27 @@ Can be a string mapping to following operators:</p>
 including typecasting.
 See the <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
 Guide</a></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|      314|  1
+  2|149      |  2
+      0  1  2
 &gt;&gt;&gt; MT = M.transpose()
-&gt;&gt;&gt; MT.to_lists()
-[[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
-&gt;&gt;&gt; MT.to_lists()
-[[0, 1, 2], [1, 2, 0], [True, True, True]]
+&gt;&gt;&gt; print(MT)
+      0  1  2
+  0|      149|  0
+  1| 42      |  1
+  2|   314   |  2
+      0  1  2
+&gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+&gt;&gt;&gt; print(MT)
+      0  1  2
+  0|     t   |  0
+  1|        t|  1
+  2|  t      |  2
+      0  1  2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -11460,14 +11566,27 @@ Guide</a></p>
     including typecasting.  See the [SuiteSparse User
     Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 149])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|      314|  1
+      2|149      |  2
+          0  1  2
     &gt;&gt;&gt; MT = M.transpose()
-    &gt;&gt;&gt; MT.to_lists()
-    [[0, 1, 2], [2, 0, 1], [1492, 42, 314]]
-
+    &gt;&gt;&gt; print(MT)
+          0  1  2
+      0|      149|  0
+      1| 42      |  1
+      2|   314   |  2
+          0  1  2
     &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
-    &gt;&gt;&gt; MT.to_lists()
-    [[0, 1, 2], [1, 2, 0], [True, True, True]]
+    &gt;&gt;&gt; print(MT)
+          0  1  2
+      0|     t   |  0
+      1|        t|  1
+      2|  t      |  2
+          0  1  2
 
     &#34;&#34;&#34;
     if out is None:
