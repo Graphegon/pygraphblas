@@ -277,9 +277,12 @@ class Matrix:
         If one is None, use the default typ one value.
 
         >>> M = Matrix.identity(types.UINT8, 3, one=42)
-        >>> g = draw_matrix(M, filename='/docs/imgs/Matrix_identity')
-
-        ![Matrix_identity.png](../imgs/Matrix_identity.png)
+        >>> print(M)
+              0  1  2
+          0| 42      |  0
+          1|    42   |  1
+          2|       42|  2
+              0  1  2
 
         """
         result = cls.sparse(typ, nrows, nrows)
@@ -1378,47 +1381,102 @@ class Matrix:
     ):
         """Assign a scalar `value` to the Matrix.
 
-        >>> M = Matrix.sparse(types.UINT8, 3, 3)
+        >>> M = Matrix.sparse(types.BOOL, 3, 3)
 
         The values of `row_slice` and `col_slice` determine what
-        elements are assigned to the Matrix.
+        elements are assigned to the Matrix.  The value `None` maps to
+        the GraphBLAS symbol `lib.GrB_ALL`, so the default behavior,
+        with no other arguments, assigns the scalar to all elements:
 
-        With no other arguments, assigns the scalar to all elements:
-
-        >>> M.assign_scalar(42)
+        >>> M.assign_scalar(True)
         >>> print(M)
               0  1  2
-          0| 42 42 42|  0
-          1| 42 42 42|  1
-          2| 42 42 42|  2
+          0|  t  t  t|  0
+          1|  t  t  t|  1
+          2|  t  t  t|  2
               0  1  2
-
         >>> M.clear()
 
-        This is the same as the slice syntax:
+        This is the same as the slice syntax with a bare colon:
 
-        >>> M[:,:] = 42
+        >>> M[:,:] = True
         >>> print(M)
               0  1  2
-          0| 42 42 42|  0
-          1| 42 42 42|  1
-          2| 42 42 42|  2
+          0|  t  t  t|  0
+          1|  t  t  t|  1
+          2|  t  t  t|  2
               0  1  2
         >>> M.clear()
         
-
         If `row_slice` or `col_slice` is an integer, use it as an
         index to one row or column:
 
+        >>> M.assign_scalar(True, 1)
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|  t  t  t|  1
+          2|         |  2
+              0  1  2
+        >>> M.clear()
+
+        An integer index and a scalar does row assignment:
+        
+        >>> M[1] = True
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|  t  t  t|  1
+          2|         |  2
+              0  1  2
+        >>> M.clear()
+
+        this is the same as:
+
+        >>> M[1,:] = True
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|  t  t  t|  1
+          2|         |  2
+              0  1  2
+        >>> M.clear()
+
+        If `col_slice` is an integer, it does column assignment:
+        
+        >>> M.assign_scalar(True, None, 1)
+        >>> print(M)
+              0  1  2
+          0|     t   |  0
+          1|     t   |  1
+          2|     t   |  2
+              0  1  2
+        >>> M.clear()
+        
+        >>> M[:,1] = True
+        >>> print(M)
+              0  1  2
+          0|     t   |  0
+          1|     t   |  1
+          2|     t   |  2
+              0  1  2
+        >>> M.clear()
+
         """
         mask, accum, desc = self._get_args(mask, accum, desc)
-        if row_slice:
-            I, ni, isize = _build_range(row_slice, self.nrows - 1)
+        if row_slice is not None:
+            if isinstance(row_slice, int):
+                I, ni, isize = _build_range(slice(row_slice, row_slice), self.nrows - 1)
+            else:
+                I, ni, isize = _build_range(row_slice, self.nrows - 1)
         else:
             I = lib.GrB_ALL
             ni = 0
-        if col_slice:
-            J, nj, jsize = _build_range(col_slice, self.ncols - 1)
+        if col_slice is not None:
+            if isinstance(col_slice, int):
+                J, nj, jsize = _build_range(slice(col_slice, col_slice), self.ncols - 1)
+            else:
+                J, nj, jsize = _build_range(col_slice, self.ncols - 1)
         else:
             J = lib.GrB_ALL
             nj = 0
@@ -1434,6 +1492,8 @@ class Matrix:
             # A[3] = assign single row  vector
             if isinstance(value, Vector):
                 return self.assign_row(index, value)
+            elif isinstance(value, (bool, int, float, complex)):
+                return self.assign_scalar(value, index)
 
         if isinstance(index, slice):
             # A[3:] = assign submatrix to rows
@@ -1466,12 +1526,18 @@ class Matrix:
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] assign slice of row vector or scalar
-            self.assign_row(i0, value, i1)
+            if isinstance(value, Vector):
+                self.assign_row(i0, value, i1)
+            else:
+                self.assign_scalar(value, i0, i1)
             return
 
         if isinstance(i0, slice) and isinstance(i1, int):
             # a[:,3] extract slice of col vector or scalar
-            self.assign_col(i1, value, i0)
+            if isinstance(value, Vector):
+                self.assign_col(i1, value, i0)
+            else:
+                self.assign_scalar(value, i0, i1)
             return
 
         if isinstance(i0, slice) and isinstance(i1, slice):
