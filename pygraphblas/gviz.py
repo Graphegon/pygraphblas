@@ -136,7 +136,7 @@ def draw_op(left, op, right, result):
     return g
 
 
-def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow"):
+def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow", filename=None):
     from pygraphblas import BOOL
 
     if mode is None:
@@ -175,4 +175,6 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow")
             d.text((((i + 1) * scale) + scale / 5, scale / 5), str(i), fill="black")
         for j in range(M.nrows):
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill="black")
+    if filename is not None:
+        im.save(filename + '.png', "PNG")
     return im

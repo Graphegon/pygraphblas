@@ -168,7 +168,7 @@ def draw_op(left, op, right, result):
     return g
 
 
-def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
+def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None):
     from pygraphblas import BOOL
 
     if mode is None:
@@ -207,6 +207,8 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
             d.text((((i + 1) * scale) + scale / 5, scale / 5), str(i), fill=&#34;black&#34;)
         for j in range(M.nrows):
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill=&#34;black&#34;)
+    if filename is not None:
+        im.save(filename + &#39;.png&#39;, &#34;PNG&#34;)
     return im</code></pre>
 </details>
 </section>
@@ -337,7 +339,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix"><code class="name flex">
-<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow')</span>
+<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow', filename=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -345,7 +347,7 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;):
+<pre><code class="python">def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainbow&#34;, filename=None):
     from pygraphblas import BOOL
 
     if mode is None:
@@ -384,6 +386,8 @@ def draw_matrix(M, scale=10, axes=True, labels=False, mode=None, cmap=&#34;rainb
             d.text((((i + 1) * scale) + scale / 5, scale / 5), str(i), fill=&#34;black&#34;)
         for j in range(M.nrows):
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill=&#34;black&#34;)
+    if filename is not None:
+        im.save(filename + &#39;.png&#39;, &#34;PNG&#34;)
     return im</code></pre>
 </details>
 </dd>

@@ -61,7 +61,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
-from .gviz import draw_graph as draw
+from .gviz import draw_graph, draw_matrix
 
 __all__ = [&#34;Matrix&#34;]
 __pdoc__ = {&#34;Matrix.__init__&#34;: False}
@@ -212,7 +212,7 @@ class Matrix:
         column indices lists.
 
         &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -273,7 +273,7 @@ class Matrix:
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -309,7 +309,7 @@ class Matrix:
         If one is None, use the default typ one value.
 
         &gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
+        &gt;&gt;&gt; g = draw_matrix(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
 
         ![Matrix_identity.png](../imgs/Matrix_identity.png)
 
@@ -335,7 +335,7 @@ class Matrix:
     def nrows(self):
         &#34;&#34;&#34;Return the number of Matrix rows.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.nrows
         3
 
@@ -348,7 +348,7 @@ class Matrix:
     def ncols(self):
         &#34;&#34;&#34;Return the number of Matrix columns.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.ncols
         3
 
@@ -361,7 +361,7 @@ class Matrix:
     def shape(self):
         &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.shape
         (3, 3)
 
@@ -370,12 +370,27 @@ class Matrix:
 
     @property
     def square(self):
-        &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
+        &#34;&#34;&#34;True if Matrix is square, else False.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+        &gt;&gt;&gt; M.square
+        True
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 4)
+        &gt;&gt;&gt; M.square
+        False
+
+        &#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of values stored in the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.nvals
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
         return n[0]
@@ -387,6 +402,11 @@ class Matrix:
         Note: This property can be expensive, if you need the
         transpose more than once, consider storing this in a local
         variable.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; MT = M.T
+        &gt;&gt;&gt; MT.iseq(M.transpose())
+        True
 
         &#34;&#34;&#34;
         return self.transpose()
@@ -496,7 +516,13 @@ class Matrix:
         )
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.to_lists()
+        [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+
+        &#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -1333,7 +1359,9 @@ class Matrix:
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
+        &#34;&#34;&#34;Assign a vector to a column.
+
+        &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1380,7 +1408,41 @@ class Matrix:
     def assign_scalar(
         self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Assign a scalar `value` to the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+
+        The values of `row_slice` and `col_slice` determine what
+        elements are assigned to the Matrix.
+
+        With no other arguments, assigns the scalar to all elements:
+
+        &gt;&gt;&gt; M.assign_scalar(42)
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+
+        &gt;&gt;&gt; M.clear()
+
+        This is the same as the slice syntax:
+
+        &gt;&gt;&gt; M[:,:] = 42
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+        &gt;&gt;&gt; M.clear()
+        
+
+        If `row_slice` or `col_slice` is an integer, use it as an
+        index to one row or column:
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -1826,7 +1888,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         column indices lists.
 
         &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -1887,7 +1949,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -1923,7 +1985,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         If one is None, use the default typ one value.
 
         &gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
-        &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
+        &gt;&gt;&gt; g = draw_matrix(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
 
         ![Matrix_identity.png](../imgs/Matrix_identity.png)
 
@@ -1949,7 +2011,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def nrows(self):
         &#34;&#34;&#34;Return the number of Matrix rows.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.nrows
         3
 
@@ -1962,7 +2024,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def ncols(self):
         &#34;&#34;&#34;Return the number of Matrix columns.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.ncols
         3
 
@@ -1975,7 +2037,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def shape(self):
         &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
         &gt;&gt;&gt; M.shape
         (3, 3)
 
@@ -1984,12 +2046,27 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @property
     def square(self):
-        &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
+        &#34;&#34;&#34;True if Matrix is square, else False.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+        &gt;&gt;&gt; M.square
+        True
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 4)
+        &gt;&gt;&gt; M.square
+        False
+
+        &#34;&#34;&#34;
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the number of values stored in the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.nvals
+        3
+
+        &#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
         self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
         return n[0]
@@ -2001,6 +2078,11 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         Note: This property can be expensive, if you need the
         transpose more than once, consider storing this in a local
         variable.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; MT = M.T
+        &gt;&gt;&gt; MT.iseq(M.transpose())
+        True
 
         &#34;&#34;&#34;
         return self.transpose()
@@ -2110,7 +2192,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
 
     def to_lists(self):
-        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+        &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M.to_lists()
+        [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+
+        &#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
         V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)
@@ -2947,7 +3035,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
+        &#34;&#34;&#34;Assign a vector to a column.
+
+        &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -2994,7 +3084,41 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def assign_scalar(
         self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
+        &#34;&#34;&#34;Assign a scalar `value` to the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+
+        The values of `row_slice` and `col_slice` determine what
+        elements are assigned to the Matrix.
+
+        With no other arguments, assigns the scalar to all elements:
+
+        &gt;&gt;&gt; M.assign_scalar(42)
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+
+        &gt;&gt;&gt; M.clear()
+
+        This is the same as the slice syntax:
+
+        &gt;&gt;&gt; M[:,:] = 42
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+        &gt;&gt;&gt; M.clear()
+        
+
+        If `row_slice` or `col_slice` is an integer, use it as an
+        index to one row or column:
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -3252,7 +3376,7 @@ If nrows or ncols are not provided, they
 are computed from the max values of the provides row and
 column indices lists.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_from_lists')
+&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
 </code></pre>
 <p><img alt="Matrix_from_lists.png" src="../imgs/Matrix_from_lists.png"></p></div>
 <details class="source">
@@ -3267,7 +3391,7 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
     column indices lists.
 
     &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
     ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -3330,7 +3454,7 @@ def from_tsv(cls, tsv_file, typ, nrows, ncols):
 one.</p>
 <p>If one is None, use the default typ one value.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
-&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_identity')
+&gt;&gt;&gt; g = draw_matrix(M, filename='/docs/imgs/Matrix_identity')
 </code></pre>
 <p><img alt="Matrix_identity.png" src="../imgs/Matrix_identity.png"></p></div>
 <details class="source">
@@ -3345,7 +3469,7 @@ def identity(cls, typ, nrows, one=None):
     If one is None, use the default typ one value.
 
     &gt;&gt;&gt; M = Matrix.identity(types.UINT8, 3, one=42)
-    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
+    &gt;&gt;&gt; g = draw_matrix(M, filename=&#39;/docs/imgs/Matrix_identity&#39;)
 
     ![Matrix_identity.png](../imgs/Matrix_identity.png)
 
@@ -3368,7 +3492,7 @@ Other flags set additional properties the
 matrix will hold.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
 ...                   make_symmetric=True, no_diagonal=True, seed=42)
-&gt;&gt;&gt; g = draw(M, filename='/docs/imgs/Matrix_random')
+&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_random')
 </code></pre>
 <p><img alt="Matrix_random.png" src="../imgs/Matrix_random.png"></p></div>
 <details class="source">
@@ -3395,7 +3519,7 @@ def random(
 
     &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
     ...                   make_symmetric=True, no_diagonal=True, seed=42)
-    &gt;&gt;&gt; g = draw(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
 
     ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -3500,7 +3624,12 @@ def sparse(cls, typ, nrows=None, ncols=None):
 See <code><a title="pygraphblas.matrix.Matrix.transpose" href="#pygraphblas.matrix.Matrix.transpose">Matrix.transpose()</a></code>.</p>
 <p>Note: This property can be expensive, if you need the
 transpose more than once, consider storing this in a local
-variable.</p></div>
+variable.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; MT = M.T
+&gt;&gt;&gt; MT.iseq(M.transpose())
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3512,6 +3641,11 @@ def T(self):
     Note: This property can be expensive, if you need the
     transpose more than once, consider storing this in a local
     variable.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; MT = M.T
+    &gt;&gt;&gt; MT.iseq(M.transpose())
+    True
 
     &#34;&#34;&#34;
     return self.transpose()</code></pre>
@@ -3602,7 +3736,7 @@ def hyper_switch(self):
 <dt id="pygraphblas.matrix.Matrix.ncols"><code class="name">var <span class="ident">ncols</span></code></dt>
 <dd>
 <div class="desc"><p>Return the number of Matrix columns.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
 &gt;&gt;&gt; M.ncols
 3
 </code></pre></div>
@@ -3614,7 +3748,7 @@ def hyper_switch(self):
 def ncols(self):
     &#34;&#34;&#34;Return the number of Matrix columns.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
     &gt;&gt;&gt; M.ncols
     3
 
@@ -3627,7 +3761,7 @@ def ncols(self):
 <dt id="pygraphblas.matrix.Matrix.nrows"><code class="name">var <span class="ident">nrows</span></code></dt>
 <dd>
 <div class="desc"><p>Return the number of Matrix rows.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
 &gt;&gt;&gt; M.nrows
 3
 </code></pre></div>
@@ -3639,7 +3773,7 @@ def ncols(self):
 def nrows(self):
     &#34;&#34;&#34;Return the number of Matrix rows.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
     &gt;&gt;&gt; M.nrows
     3
 
@@ -3651,14 +3785,24 @@ def nrows(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.nvals"><code class="name">var <span class="ident">nvals</span></code></dt>
 <dd>
-<div class="desc"><p>Return the number of values stored in the Matrix.</p></div>
+<div class="desc"><p>Return the number of values stored in the Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.nvals
+3
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def nvals(self):
-    &#34;&#34;&#34;Return the number of values stored in the Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the number of values stored in the Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.nvals
+    3
+
+    &#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
     self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
     return n[0]</code></pre>
@@ -3696,7 +3840,7 @@ def rows(self):
 <dt id="pygraphblas.matrix.Matrix.shape"><code class="name">var <span class="ident">shape</span></code></dt>
 <dd>
 <div class="desc"><p>Numpy-like description of matrix shape as 2-tuple (nrows, ncols).</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
 &gt;&gt;&gt; M.shape
 (3, 3)
 </code></pre></div>
@@ -3708,7 +3852,7 @@ def rows(self):
 def shape(self):
     &#34;&#34;&#34;Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
     &gt;&gt;&gt; M.shape
     (3, 3)
 
@@ -3754,14 +3898,30 @@ def sparsity_status(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.square"><code class="name">var <span class="ident">square</span></code></dt>
 <dd>
-<div class="desc"><p>True if Matrix is square, else False.</p></div>
+<div class="desc"><p>True if Matrix is square, else False.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+&gt;&gt;&gt; M.square
+True
+&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 4)
+&gt;&gt;&gt; M.square
+False
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def square(self):
-    &#34;&#34;&#34;True if Matrix is square, else False.&#34;&#34;&#34;
+    &#34;&#34;&#34;True if Matrix is square, else False.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+    &gt;&gt;&gt; M.square
+    True
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 4)
+    &gt;&gt;&gt; M.square
+    False
+
+    &#34;&#34;&#34;
     return self.nrows == self.ncols</code></pre>
 </details>
 </dd>
@@ -3892,7 +4052,9 @@ second input to a scalar second.</p></div>
 <pre><code class="python">def assign_col(
     self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Assign a vector to a column.&#34;&#34;&#34;
+    &#34;&#34;&#34;Assign a vector to a column.
+
+    &#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -3961,7 +4123,34 @@ second input to a scalar second.</p></div>
 <span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Assign a scalar to the Matrix.</p></div>
+<div class="desc"><p>Assign a scalar <code>value</code> to the Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+</code></pre>
+<p>The values of <code>row_slice</code> and <code>col_slice</code> determine what
+elements are assigned to the Matrix.</p>
+<p>With no other arguments, assigns the scalar to all elements:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M.assign_scalar(42)
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0| 42 42 42|  0
+  1| 42 42 42|  1
+  2| 42 42 42|  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M.clear()
+</code></pre>
+<p>This is the same as the slice syntax:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M[:,:] = 42
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0| 42 42 42|  0
+  1| 42 42 42|  1
+  2| 42 42 42|  2
+      0  1  2
+&gt;&gt;&gt; M.clear()
+</code></pre>
+<p>If <code>row_slice</code> or <code>col_slice</code> is an integer, use it as an
+index to one row or column:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3969,7 +4158,41 @@ second input to a scalar second.</p></div>
 <pre><code class="python">def assign_scalar(
     self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;Assign a scalar to the Matrix.&#34;&#34;&#34;
+    &#34;&#34;&#34;Assign a scalar `value` to the Matrix.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.UINT8, 3, 3)
+
+    The values of `row_slice` and `col_slice` determine what
+    elements are assigned to the Matrix.
+
+    With no other arguments, assigns the scalar to all elements:
+
+    &gt;&gt;&gt; M.assign_scalar(42)
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0| 42 42 42|  0
+      1| 42 42 42|  1
+      2| 42 42 42|  2
+          0  1  2
+
+    &gt;&gt;&gt; M.clear()
+
+    This is the same as the slice syntax:
+
+    &gt;&gt;&gt; M[:,:] = 42
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0| 42 42 42|  0
+      1| 42 42 42|  1
+      2| 42 42 42|  2
+          0  1  2
+    &gt;&gt;&gt; M.clear()
+    
+
+    If `row_slice` or `col_slice` is an integer, use it as an
+    index to one row or column:
+
+    &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     if row_slice:
         I, ni, isize = _build_range(row_slice, self.nrows - 1)
@@ -4859,13 +5082,23 @@ Can be a string mapping to following operators:</p>
 <span>def <span class="ident">to_lists</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract the rows, columns and values of the Matrix as 3 lists.</p></div>
+<div class="desc"><p>Extract the rows, columns and values of the Matrix as 3 lists.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+&gt;&gt;&gt; M.to_lists()
+[[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_lists(self):
-    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.&#34;&#34;&#34;
+    &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M.to_lists()
+    [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+
+    &#34;&#34;&#34;
     I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     J = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
     V = self.type.ffi.new(self.type.C + &#34;[%s]&#34; % self.nvals)

@@ -29,7 +29,7 @@ from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, TransposeA, current_desc
-from .gviz import draw_graph as draw
+from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
 __pdoc__ = {"Matrix.__init__": False}
@@ -180,7 +180,7 @@ class Matrix:
         column indices lists.
 
         >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 1492])
-        >>> g = draw(M, filename='/docs/imgs/Matrix_from_lists')
+        >>> g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -241,7 +241,7 @@ class Matrix:
 
         >>> M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        >>> g = draw(M, filename='/docs/imgs/Matrix_random')
+        >>> g = draw_graph(M, filename='/docs/imgs/Matrix_random')
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -277,7 +277,7 @@ class Matrix:
         If one is None, use the default typ one value.
 
         >>> M = Matrix.identity(types.UINT8, 3, one=42)
-        >>> g = draw(M, filename='/docs/imgs/Matrix_identity')
+        >>> g = draw_matrix(M, filename='/docs/imgs/Matrix_identity')
 
         ![Matrix_identity.png](../imgs/Matrix_identity.png)
 
@@ -303,7 +303,7 @@ class Matrix:
     def nrows(self):
         """Return the number of Matrix rows.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.sparse(types.UINT8, 3, 3)
         >>> M.nrows
         3
 
@@ -316,7 +316,7 @@ class Matrix:
     def ncols(self):
         """Return the number of Matrix columns.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.sparse(types.UINT8, 3, 3)
         >>> M.ncols
         3
 
@@ -329,7 +329,7 @@ class Matrix:
     def shape(self):
         """Numpy-like description of matrix shape as 2-tuple (nrows, ncols).
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.sparse(types.UINT8, 3, 3)
         >>> M.shape
         (3, 3)
 
@@ -338,12 +338,27 @@ class Matrix:
 
     @property
     def square(self):
-        """True if Matrix is square, else False."""
+        """True if Matrix is square, else False.
+
+        >>> M = Matrix.sparse(types.UINT8, 3, 3)
+        >>> M.square
+        True
+        >>> M = Matrix.sparse(types.UINT8, 3, 4)
+        >>> M.square
+        False
+
+        """
         return self.nrows == self.ncols
 
     @property
     def nvals(self):
-        """Return the number of values stored in the Matrix."""
+        """Return the number of values stored in the Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M.nvals
+        3
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
         return n[0]
@@ -355,6 +370,11 @@ class Matrix:
         Note: This property can be expensive, if you need the
         transpose more than once, consider storing this in a local
         variable.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> MT = M.T
+        >>> MT.iseq(M.transpose())
+        True
 
         """
         return self.transpose()
@@ -464,7 +484,13 @@ class Matrix:
         )
 
     def to_lists(self):
-        """Extract the rows, columns and values of the Matrix as 3 lists."""
+        """Extract the rows, columns and values of the Matrix as 3 lists.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M.to_lists()
+        [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+
+        """
         I = ffi.new("GrB_Index[%s]" % self.nvals)
         J = ffi.new("GrB_Index[%s]" % self.nvals)
         V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
@@ -1301,7 +1327,9 @@ class Matrix:
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a vector to a column."""
+        """Assign a vector to a column.
+
+        """
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1348,7 +1376,41 @@ class Matrix:
     def assign_scalar(
         self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a scalar to the Matrix."""
+        """Assign a scalar `value` to the Matrix.
+
+        >>> M = Matrix.sparse(types.UINT8, 3, 3)
+
+        The values of `row_slice` and `col_slice` determine what
+        elements are assigned to the Matrix.
+
+        With no other arguments, assigns the scalar to all elements:
+
+        >>> M.assign_scalar(42)
+        >>> print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+
+        >>> M.clear()
+
+        This is the same as the slice syntax:
+
+        >>> M[:,:] = 42
+        >>> print(M)
+              0  1  2
+          0| 42 42 42|  0
+          1| 42 42 42|  1
+          2| 42 42 42|  2
+              0  1  2
+        >>> M.clear()
+        
+
+        If `row_slice` or `col_slice` is an integer, use it as an
+        index to one row or column:
+
+        """
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice:
             I, ni, isize = _build_range(row_slice, self.nrows - 1)
