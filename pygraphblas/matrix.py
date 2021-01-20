@@ -179,14 +179,21 @@ class Matrix:
         are computed from the max values of the provides row and
         column indices lists.
 
-        >>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        >>> V = [True for _ in range(len(I))]
+        >>> M = Matrix.from_lists(I, J, V)
         >>> print(M)
-              0  1  2  3
-          0|            |  0
-          1|       42   |  1
-          2|         314|  2
-          3|   149      |  3
-              0  1  2  3
+              0  1  2  3  4  5  6
+          0|     t     t         |  0
+          1|              t     t|  1
+          2|                 t   |  2
+          3|  t     t            |  3
+          4|                 t   |  4
+          5|        t            |  5
+          6|        t  t  t      |  6
+              0  1  2  3  4  5  6
+        >>> from pygraphblas.gviz import draw_graph
         >>> g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)

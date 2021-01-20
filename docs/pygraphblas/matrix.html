@@ -211,14 +211,21 @@ class Matrix:
         are computed from the max values of the provides row and
         column indices lists.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+        &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        &gt;&gt;&gt; V = [True for _ in range(len(I))]
+        &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
         &gt;&gt;&gt; print(M)
-              0  1  2  3
-          0|            |  0
-          1|       42   |  1
-          2|         314|  2
-          3|   149      |  3
-              0  1  2  3
+              0  1  2  3  4  5  6
+          0|     t     t         |  0
+          1|              t     t|  1
+          2|                 t   |  2
+          3|  t     t            |  3
+          4|                 t   |  4
+          5|        t            |  5
+          6|        t  t  t      |  6
+              0  1  2  3  4  5  6
+        &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
         &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
@@ -2230,14 +2237,21 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         are computed from the max values of the provides row and
         column indices lists.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+        &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        &gt;&gt;&gt; V = [True for _ in range(len(I))]
+        &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
         &gt;&gt;&gt; print(M)
-              0  1  2  3
-          0|            |  0
-          1|       42   |  1
-          2|         314|  2
-          3|   149      |  3
-              0  1  2  3
+              0  1  2  3  4  5  6
+          0|     t     t         |  0
+          1|              t     t|  1
+          2|                 t   |  2
+          3|  t     t            |  3
+          4|                 t   |  4
+          5|        t            |  5
+          6|        t  t  t      |  6
+              0  1  2  3  4  5  6
+        &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
         &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
@@ -4061,14 +4075,21 @@ indices, and values.
 If nrows or ncols are not provided, they
 are computed from the max values of the provides row and
 column indices lists.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+<pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+&gt;&gt;&gt; V = [True for _ in range(len(I))]
+&gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
 &gt;&gt;&gt; print(M)
-      0  1  2  3
-  0|            |  0
-  1|       42   |  1
-  2|         314|  2
-  3|   149      |  3
-      0  1  2  3
+      0  1  2  3  4  5  6
+  0|     t     t         |  0
+  1|              t     t|  1
+  2|                 t   |  2
+  3|  t     t            |  3
+  4|                 t   |  4
+  5|        t            |  5
+  6|        t  t  t      |  6
+      0  1  2  3  4  5  6
+&gt;&gt;&gt; from pygraphblas.gviz import draw_graph
 &gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
 </code></pre>
 <p><img alt="Matrix_from_lists.png" src="../imgs/Matrix_from_lists.png"></p></div>
@@ -4083,14 +4104,21 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
     are computed from the max values of the provides row and
     column indices lists.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+    &gt;&gt;&gt; V = [True for _ in range(len(I))]
+    &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
     &gt;&gt;&gt; print(M)
-          0  1  2  3
-      0|            |  0
-      1|       42   |  1
-      2|         314|  2
-      3|   149      |  3
-          0  1  2  3
+          0  1  2  3  4  5  6
+      0|     t     t         |  0
+      1|              t     t|  1
+      2|                 t   |  2
+      3|  t     t            |  3
+      4|                 t   |  4
+      5|        t            |  5
+      6|        t  t  t      |  6
+          0  1  2  3  4  5  6
+    &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
     &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
 
     ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)

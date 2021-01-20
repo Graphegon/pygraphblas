@@ -11,31 +11,34 @@ be imported for use:
 
 >>> from pygraphblas import *
 
+The core idea of the GraphBLAS is the mathematical duality between a
+graph and a matrix.  As illustrated here, a graph can be expressed as
+a matrix and vice versa.
+
 `pygraphblas.Matrix` is the core object of The GraphBLAS.  There are
 many ways to contstruct them, but a simple approach is to provide
 three lists of data, the first are are lists of the row and column
 positions that define the begining and end of a graph edge, and the
 third list is the weight for that edge:
 
->>> M = Matrix.from_lists([1, 2, 3], [2, 3, 1], [42, 314, 149])
+>>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+>>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+>>> V = [True for _ in range(len(I))]
+>>> M = Matrix.from_lists(I, J, V)
 >>> print(M)
-      0  1  2  3
-  0|            |  0
-  1|       42   |  1
-  2|         314|  2
-  3|   149      |  3
-      0  1  2  3
-
+      0  1  2  3  4  5  6
+  0|     t     t         |  0
+  1|              t     t|  1
+  2|                 t   |  2
+  3|  t     t            |  3
+  4|                 t   |  4
+  5|        t            |  5
+  6|        t  t  t      |  6
+      0  1  2  3  4  5  6
 >>> from pygraphblas.gviz import draw_graph
 >>> g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
 
 ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
-
-The core idea of the GraphBLAS is the mathematical duality between a
-graph and a matrix.  As illustrated here, a graph can be expressed as
-a matrix and vice versa:
-
-![Adjacency Matrix](../imgs/AdjacencyMatrix.png)
 
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
@@ -56,7 +59,7 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
-![Adjacency Matrix](../imgs/AdjacencyMatrixBFS.png)
+
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
