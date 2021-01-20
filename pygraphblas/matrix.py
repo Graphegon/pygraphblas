@@ -1090,20 +1090,20 @@ class Matrix:
         """Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
-        Operator | Library Operation | Definition | Description
-        --- | --- | --- | ---
-        >   | lib.GxB_GT_THUNK | T=A(A>k)  | Entries in 'T' are those in 'A' greater than 'k'.
-        <   | lib.GxB_LT_THUNK | T=A(A<k)  | Entries in 'T' are those in 'A' less than 'k'.
-        >=  | lib.GxB_GE_THUNK | T=A(A>=k) | Entries in 'T' are those in 'A' greater than or equal to 'k'.
-        <=  | lib.GxB_LE_THUNK | T=A(A<=k) | Entries in 'T' are those in 'A' less than or equal to 'k'.
-        !=  | lib.GxB_NE_THUNK | T=A(A==k) | Entries in 'T' are those in 'A' not equal to 'k'.
-        ==  | lib.GxB_EQ_THUNK | T=A(A!=k) | Entries in 'T' are those in 'A' equal to 'k'.
-        >0  | lib.GxB_GT_ZERO  | T=A(A>0)  | Entries in 'T' are those in 'A' greater than zero.
-        <0  | lib.GxB_LT_ZERO  | T=A(A<0)  | Entries in 'T' are those in 'A' less than zero.
-        >=0 | lib.GxB_GE_ZERO  | T=A(A>=0) | Entries in 'T' are those in 'A' greater than or equal to zero.
-        <=0 | lib.GxB_LE_ZERO  | T=A(A<=0) | Entries in 'T' are those in 'A' less than or equal to zero.
-        !=0 | lib.GxB_NONZERO  | T=A(A!=0) | Entries in 'T' are those in 'A' nonzero value.
-        ==0 | lib.GxB_EQ_ZERO  | T=A(A==0) | Entries in 'T' are those in 'A' equal to zero.
+        Operator | Library Operation | Definition
+        --- | --- | ---
+        >   | lib.GxB_GT_THUNK | Those greater than 'k'.
+        <   | lib.GxB_LT_THUNK | Those less than 'k'.
+        >=  | lib.GxB_GE_THUNK | Those greater than or equal to 'k'.
+        <=  | lib.GxB_LE_THUNK | Those less than or equal to 'k'.
+        !=  | lib.GxB_NE_THUNK | Those not equal to 'k'.
+        ==  | lib.GxB_EQ_THUNK | Those equal to 'k'.
+        >0  | lib.GxB_GT_ZERO  | Those greater than zero.
+        <0  | lib.GxB_LT_ZERO  | Those less than zero.
+        >=0 | lib.GxB_GE_ZERO  | Those greater than or equal to zero.
+        <=0 | lib.GxB_LE_ZERO  | Those less than or equal to zero.
+        !=0 | lib.GxB_NONZERO  | Those nonzero value.
+        ==0 | lib.GxB_EQ_ZERO  | Those equal to zero.
 
 
         """
