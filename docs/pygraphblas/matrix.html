@@ -700,7 +700,7 @@ class Matrix:
         &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
-        &gt;&gt;&gt; A = Matrix.from_lists(I, J, V)
+        &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
         &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
@@ -708,10 +708,25 @@ class Matrix:
         &gt;&gt;&gt; B = Matrix.from_lists(
         ...    [0, 1, 3],
         ...    [1, 5, 5],
-        ...    [9, 4, 7])
+        ...    [9, 4, 7], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
+        &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &gt;&gt;&gt; print(A.eadd(B))
+              0  1  2  3  4  5  6
+          0|     9     1         |  0
+          1|              2  4  3|  1
+          2|                 4   |  2
+          3|  5     6        7   |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
         &#34;&#34;&#34;
         if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
@@ -2737,7 +2752,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
-        &gt;&gt;&gt; A = Matrix.from_lists(I, J, V)
+        &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
         &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
@@ -2745,10 +2760,25 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; B = Matrix.from_lists(
         ...    [0, 1, 3],
         ...    [1, 5, 5],
-        ...    [9, 4, 7])
+        ...    [9, 4, 7], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
+        &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &gt;&gt;&gt; print(A.eadd(B))
+              0  1  2  3  4  5  6
+          0|     9     1         |  0
+          1|              2  4  3|  1
+          2|                 4   |  2
+          3|  5     6        7   |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
         &#34;&#34;&#34;
         if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
@@ -5324,15 +5354,28 @@ interchangeably for either operation.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = list(range(len(I)))
-&gt;&gt;&gt; A = Matrix.from_lists(I, J, V)
+&gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
 &gt;&gt;&gt; g = draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
 </code></pre>
 <p><img alt="Matrix_eadd_A.png" src="../imgs/Matrix_eadd_A.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
 ...    [0, 1, 3],
 ...    [1, 5, 5],
-...    [9, 4, 7])
+...    [9, 4, 7], 7, 7)
 &gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
+</code></pre>
+<p><img alt="Matrix_eadd_B.png" src="../imgs/Matrix_eadd_B.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_B')
+&gt;&gt;&gt; print(A.eadd(B))
+      0  1  2  3  4  5  6
+  0|     9     1         |  0
+  1|              2  4  3|  1
+  2|                 4   |  2
+  3|  5     6        7   |  3
+  4|                 7   |  4
+  5|        8            |  5
+  6|        9 10 11      |  6
+      0  1  2  3  4  5  6
 </code></pre>
 <p><img alt="Matrix_eadd_B.png" src="../imgs/Matrix_eadd_B.png"></p></div>
 <details class="source">
@@ -5373,7 +5416,7 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
     &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
     &gt;&gt;&gt; V = list(range(len(I)))
-    &gt;&gt;&gt; A = Matrix.from_lists(I, J, V)
+    &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
     &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
 
     ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
@@ -5381,10 +5424,25 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; B = Matrix.from_lists(
     ...    [0, 1, 3],
     ...    [1, 5, 5],
-    ...    [9, 4, 7])
+    ...    [9, 4, 7], 7, 7)
     &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
     ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
+    &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+    &gt;&gt;&gt; print(A.eadd(B))
+          0  1  2  3  4  5  6
+      0|     9     1         |  0
+      1|              2  4  3|  1
+      2|                 4   |  2
+      3|  5     6        7   |  3
+      4|                 7   |  4
+      5|        8            |  5
+      6|        9 10 11      |  6
+          0  1  2  3  4  5  6
+
+    ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
     &#34;&#34;&#34;
     if add_op is None:
         add_op = current_binop.get(binaryop.PLUS)

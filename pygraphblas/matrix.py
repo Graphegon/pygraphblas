@@ -668,7 +668,7 @@ class Matrix:
         >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         >>> V = list(range(len(I)))
-        >>> A = Matrix.from_lists(I, J, V)
+        >>> A = Matrix.from_lists(I, J, V, 7, 7)
         >>> g = draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
@@ -676,10 +676,25 @@ class Matrix:
         >>> B = Matrix.from_lists(
         ...    [0, 1, 3],
         ...    [1, 5, 5],
-        ...    [9, 4, 7])
+        ...    [9, 4, 7], 7, 7)
         >>> g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
+        >>> g = draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_B')
+        >>> print(A.eadd(B))
+              0  1  2  3  4  5  6
+          0|     9     1         |  0
+          1|              2  4  3|  1
+          2|                 4   |  2
+          3|  5     6        7   |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
         """
         if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
