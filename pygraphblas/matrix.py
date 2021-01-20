@@ -681,7 +681,7 @@ class Matrix:
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-        >>> g = draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_B')
+        >>> g = draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_C')
         >>> print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
@@ -693,7 +693,7 @@ class Matrix:
           6|        9 10 11      |  6
               0  1  2  3  4  5  6
 
-        ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+        ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
 
         """
         if add_op is None:
