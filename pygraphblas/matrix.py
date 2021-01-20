@@ -139,28 +139,24 @@ class Matrix:
         If `sparsity_control` is provided it is used for the new
         matrix (See SuiteSparse User Guide)
 
-        >>> m = Matrix.dense(types.UINT8, 3, 3)
-        >>> m.nrows == 3
-        True
-        >>> m.ncols == 3
-        True
-        >>> m.nvals == 9
-        True
-        >>> for i, j, v in m:
-        ...     assert v == 0
+        >>> M = Matrix.dense(types.UINT8, 3, 3)
+        >>> print(M)
+              0  1  2
+          0|  0  0  0|  0
+          1|  0  0  0|  1
+          2|  0  0  0|  2
+              0  1  2
 
         If a `fill` value is present, use that, otherwise use the
         `zero` attribte of the given type.
 
-        >>> m = Matrix.dense(types.UINT8, 3, 3, fill=1)
-        >>> m.nrows == 3
-        True
-        >>> m.ncols == 3
-        True
-        >>> m.nvals == 9
-        True
-        >>> for i, j, v in m:
-        ...     assert v == 1
+        >>> M = Matrix.dense(types.UINT8, 3, 3, fill=1)
+        >>> print(M)
+              0  1  2
+          0|  1  1  1|  0
+          1|  1  1  1|  1
+          2|  1  1  1|  2
+              0  1  2
 
         """
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
@@ -669,6 +665,21 @@ class Matrix:
         the intersection. Any binary operator can be used
         interchangeably for either operation.
 
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        >>> V = list(range(len(I)))
+        >>> A = Matrix.from_lists(I, J, V)
+        >>> g = draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
+
+        ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
+
+        >>> B = Matrix.from_lists(
+        ...    [0, 1, 3],
+        ...    [1, 5, 5],
+        ...    [9, 4, 7])
+        >>> g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
+
+        ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
         """
         if add_op is None:
             add_op = current_binop.get(binaryop.PLUS)
