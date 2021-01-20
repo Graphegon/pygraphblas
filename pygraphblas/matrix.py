@@ -1092,18 +1092,18 @@ class Matrix:
 
         Operator | Library Operation | Definition
         --- | --- | ---
-        >   | lib.GxB_GT_THUNK | Those greater than 'k'.
-        <   | lib.GxB_LT_THUNK | Those less than 'k'.
-        >=  | lib.GxB_GE_THUNK | Those greater than or equal to 'k'.
-        <=  | lib.GxB_LE_THUNK | Those less than or equal to 'k'.
-        !=  | lib.GxB_NE_THUNK | Those not equal to 'k'.
-        ==  | lib.GxB_EQ_THUNK | Those equal to 'k'.
-        >0  | lib.GxB_GT_ZERO  | Those greater than zero.
-        <0  | lib.GxB_LT_ZERO  | Those less than zero.
-        >=0 | lib.GxB_GE_ZERO  | Those greater than or equal to zero.
-        <=0 | lib.GxB_LE_ZERO  | Those less than or equal to zero.
-        !=0 | lib.GxB_NONZERO  | Those nonzero value.
-        ==0 | lib.GxB_EQ_ZERO  | Those equal to zero.
+        >   | lib.GxB_GT_THUNK | Select greater than 'thunk'.
+        <   | lib.GxB_LT_THUNK | Select less than 'thunk'.
+        >=  | lib.GxB_GE_THUNK | Select greater than or equal to 'thunk'.
+        <=  | lib.GxB_LE_THUNK | Select less than or equal to 'thunk'.
+        !=  | lib.GxB_NE_THUNK | Select not equal to 'thunk'.
+        ==  | lib.GxB_EQ_THUNK | Select equal to 'thunk'.
+        >0  | lib.GxB_GT_ZERO  | Select greater than zero.
+        <0  | lib.GxB_LT_ZERO  | Select less than zero.
+        >=0 | lib.GxB_GE_ZERO  | Select greater than or equal to zero.
+        <=0 | lib.GxB_LE_ZERO  | Select less than or equal to zero.
+        !=0 | lib.GxB_NONZERO  | Select nonzero value.
+        ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
 
 
         """
