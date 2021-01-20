@@ -3,6 +3,7 @@ level library import.
 
 """
 
+from pprint import pprint
 from _pygraphblas import lib, ffi
 from numba import njit
 
@@ -97,8 +98,13 @@ def options_set(
 def options_get():
     """Get global library options.  See SuiteSparse User Guide.
 
-    >>> sorted(list(options_get().keys()))
-    ['bitmap_switch', 'burble', 'chunk', 'format', 'hyper_switch', 'nthreads']
+    >>> pprint(options_get())
+    {'bitmap_switch': [...],
+     'burble': ...,
+     'chunk': ...,
+     'format': ...,
+     'hyper_switch': ...,
+     'nthreads': ...}
 
     """
     nthreads = ffi.new("int*")

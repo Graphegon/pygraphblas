@@ -323,8 +323,13 @@ For internal low-level use only.</p></div>
 <dd>
 <div class="desc"><p>Get global library options.
 See SuiteSparse User Guide.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; sorted(list(options_get().keys()))
-['bitmap_switch', 'burble', 'chunk', 'format', 'hyper_switch', 'nthreads']
+<pre><code class="language-python-repl">&gt;&gt;&gt; pprint(options_get())
+{'bitmap_switch': [...],
+ 'burble': ...,
+ 'chunk': ...,
+ 'format': ...,
+ 'hyper_switch': ...,
+ 'nthreads': ...}
 </code></pre></div>
 <details class="source">
 <summary>
@@ -333,8 +338,13 @@ See SuiteSparse User Guide.</p>
 <pre><code class="python">def options_get():
     &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
 
-    &gt;&gt;&gt; sorted(list(options_get().keys()))
-    [&#39;bitmap_switch&#39;, &#39;burble&#39;, &#39;chunk&#39;, &#39;format&#39;, &#39;hyper_switch&#39;, &#39;nthreads&#39;]
+    &gt;&gt;&gt; pprint(options_get())
+    {&#39;bitmap_switch&#39;: [...],
+     &#39;burble&#39;: ...,
+     &#39;chunk&#39;: ...,
+     &#39;format&#39;: ...,
+     &#39;hyper_switch&#39;: ...,
+     &#39;nthreads&#39;: ...}
 
     &#34;&#34;&#34;
     nthreads = ffi.new(&#34;int*&#34;)
