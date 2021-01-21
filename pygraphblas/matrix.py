@@ -753,6 +753,36 @@ class Matrix:
         the intersection. Any binary operator can be used
         interchangeably for either operation.
 
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        >>> V = list(range(len(I)))
+        >>> A = Matrix.from_lists(I, J, V, 7, 7)
+        >>> g = draw_graph(A, filename='/docs/imgs/Matrix_emult_A')
+
+        ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
+
+        >>> B = Matrix.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [1, 4, 5, 5],
+        ...    [9, 1, 4, 7], 7, 7)
+        >>> g = draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
+
+        ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
+
+        >>> g = draw_graph(A.emult(B), filename='/docs/imgs/Matrix_emult_C')
+        >>> print(A.emult(B))
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              2      |  1
+          2|                     |  2
+          3|                     |  3
+          4|                28   |  4
+          5|                     |  5
+          6|                     |  6
+              0  1  2  3  4  5  6
+
+        ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
         """
         if mult_op is None:
             mult_op = current_binop.get(binaryop.TIMES)

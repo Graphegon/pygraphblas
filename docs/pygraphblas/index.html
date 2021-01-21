@@ -8580,6 +8580,36 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         the intersection. Any binary operator can be used
         interchangeably for either operation.
 
+        &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        &gt;&gt;&gt; V = list(range(len(I)))
+        &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+
+        ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
+
+        &gt;&gt;&gt; B = Matrix.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [1, 4, 5, 5],
+        ...    [9, 1, 4, 7], 7, 7)
+        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+
+        ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
+
+        &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &gt;&gt;&gt; print(A.emult(B))
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              2      |  1
+          2|                     |  2
+          3|                     |  3
+          4|                28   |  4
+          5|                     |  5
+          6|                     |  6
+              0  1  2  3  4  5  6
+
+        ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
         &#34;&#34;&#34;
         if mult_op is None:
             mult_op = current_binop.get(binaryop.TIMES)
@@ -11234,7 +11264,34 @@ union. Entries outside the set intersection are dropped for
 multiplication, and kept for addition; in both cases the
 operator is only applied to those (and only those) entries in
 the intersection. Any binary operator can be used
-interchangeably for either operation.</p></div>
+interchangeably for either operation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+&gt;&gt;&gt; V = list(range(len(I)))
+&gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+&gt;&gt;&gt; g = draw_graph(A, filename='/docs/imgs/Matrix_emult_A')
+</code></pre>
+<p><img alt="Matrix_emult_A.png" src="../imgs/Matrix_emult_A.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
+...    [0, 1, 4, 6],
+...    [1, 4, 5, 5],
+...    [9, 1, 4, 7], 7, 7)
+&gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
+</code></pre>
+<p><img alt="Matrix_emult_B.png" src="../imgs/Matrix_emult_B.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(A.emult(B), filename='/docs/imgs/Matrix_emult_C')
+&gt;&gt;&gt; print(A.emult(B))
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              2      |  1
+  2|                     |  2
+  3|                     |  3
+  4|                28   |  4
+  5|                     |  5
+  6|                     |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p><img alt="Matrix_emult_C.png" src="../imgs/Matrix_emult_C.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11269,6 +11326,36 @@ interchangeably for either operation.</p></div>
     operator is only applied to those (and only those) entries in
     the intersection. Any binary operator can be used
     interchangeably for either operation.
+
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+    &gt;&gt;&gt; V = list(range(len(I)))
+    &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+    &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+
+    ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
+
+    &gt;&gt;&gt; B = Matrix.from_lists(
+    ...    [0, 1, 4, 6],
+    ...    [1, 4, 5, 5],
+    ...    [9, 1, 4, 7], 7, 7)
+    &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+
+    ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
+
+    &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+    &gt;&gt;&gt; print(A.emult(B))
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              2      |  1
+      2|                     |  2
+      3|                     |  3
+      4|                28   |  4
+      5|                     |  5
+      6|                     |  6
+          0  1  2  3  4  5  6
+
+    ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
 
     &#34;&#34;&#34;
     if mult_op is None:
