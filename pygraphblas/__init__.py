@@ -36,9 +36,10 @@ the third list is the weight for that edge:
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
 >>> from pygraphblas.gviz import draw_graph
->>> g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+>>> g = draw_graph(M, show_weight=False, 
+...     filename='/docs/imgs/Matrix_from_lists_intro')
 
-![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
+![Matrix_from_lists_intro.png](../imgs/Matrix_from_lists_intro.png)
 
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
