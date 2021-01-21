@@ -222,7 +222,8 @@ class Matrix:
           6|        t  t  t      |  6
               0  1  2  3  4  5  6
         &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -283,7 +284,8 @@ class Matrix:
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -701,7 +703,8 @@ class Matrix:
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
@@ -709,11 +712,13 @@ class Matrix:
         ...    [0, 1, 4, 6],
         ...    [1, 3, 5, 5],
         ...    [9, 1, 4, 7], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
@@ -789,7 +794,8 @@ class Matrix:
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
@@ -797,11 +803,13 @@ class Matrix:
         ...    [0, 1, 1, 6, 6],
         ...    [1, 4, 6, 3, 5],
         ...    [9, 1, 4, 7, 11], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
@@ -2346,7 +2354,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
           6|        t  t  t      |  6
               0  1  2  3  4  5  6
         &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -2407,7 +2416,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -2825,7 +2835,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
@@ -2833,11 +2844,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         ...    [0, 1, 4, 6],
         ...    [1, 3, 5, 5],
         ...    [9, 1, 4, 7], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
@@ -2913,7 +2926,8 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
@@ -2921,11 +2935,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         ...    [0, 1, 1, 6, 6],
         ...    [1, 4, 6, 3, 5],
         ...    [9, 1, 4, 7, 11], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
@@ -4278,7 +4294,8 @@ column indices lists.</p>
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
 &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
-&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+&gt;&gt;&gt; draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_from_lists.png" src="../imgs/Matrix_from_lists.png"></p></div>
 <details class="source">
@@ -4307,7 +4324,8 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
       6|        t  t  t      |  6
           0  1  2  3  4  5  6
     &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
-    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+    &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -4415,7 +4433,8 @@ Other flags set additional properties the
 matrix will hold.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
 ...                   make_symmetric=True, no_diagonal=True, seed=42)
-&gt;&gt;&gt; g = draw_graph(M, filename='/docs/imgs/Matrix_random')
+&gt;&gt;&gt; draw_graph(M, filename='/docs/imgs/Matrix_random')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_random.png" src="../imgs/Matrix_random.png"></p></div>
 <details class="source">
@@ -4442,7 +4461,8 @@ def random(
 
     &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
     ...                   make_symmetric=True, no_diagonal=True, seed=42)
-    &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+    &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -5497,17 +5517,20 @@ interchangeably for either operation.</p>
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = list(range(len(I)))
 &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-&gt;&gt;&gt; g = draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
+&gt;&gt;&gt; draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_eadd_A.png" src="../imgs/Matrix_eadd_A.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
 ...    [0, 1, 4, 6],
 ...    [1, 3, 5, 5],
 ...    [9, 1, 4, 7], 7, 7)
-&gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
+&gt;&gt;&gt; draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_eadd_B.png" src="../imgs/Matrix_eadd_B.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_C')
+<pre><code class="language-python-repl">&gt;&gt;&gt; draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_C')
+&lt;graphviz.dot.Digraph object at ...&gt;
 &gt;&gt;&gt; print(A.eadd(B))
       0  1  2  3  4  5  6
   0|     9     1         |  0
@@ -5559,7 +5582,8 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
     &gt;&gt;&gt; V = list(range(len(I)))
     &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-    &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+    &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
@@ -5567,11 +5591,13 @@ interchangeably for either operation.</p>
     ...    [0, 1, 4, 6],
     ...    [1, 3, 5, 5],
     ...    [9, 1, 4, 7], 7, 7)
-    &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+    &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-    &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+    &gt;&gt;&gt; draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
     &gt;&gt;&gt; print(A.eadd(B))
           0  1  2  3  4  5  6
       0|     9     1         |  0
@@ -5638,17 +5664,20 @@ interchangeably for either operation.</p>
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = list(range(len(I)))
 &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-&gt;&gt;&gt; g = draw_graph(A, filename='/docs/imgs/Matrix_emult_A')
+&gt;&gt;&gt; draw_graph(A, filename='/docs/imgs/Matrix_emult_A')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_emult_A.png" src="../imgs/Matrix_emult_A.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
 ...    [0, 1, 1, 6, 6],
 ...    [1, 4, 6, 3, 5],
 ...    [9, 1, 4, 7, 11], 7, 7)
-&gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
+&gt;&gt;&gt; draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
+&lt;graphviz.dot.Digraph object at ...&gt;
 </code></pre>
 <p><img alt="Matrix_emult_B.png" src="../imgs/Matrix_emult_B.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(A.emult(B), filename='/docs/imgs/Matrix_emult_C')
+<pre><code class="language-python-repl">&gt;&gt;&gt; draw_graph(A.emult(B), filename='/docs/imgs/Matrix_emult_C')
+&lt;graphviz.dot.Digraph object at ...&gt;
 &gt;&gt;&gt; print(A.emult(B))
       0  1  2  3  4  5  6
   0|     0               |  0
@@ -5700,7 +5729,8 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
     &gt;&gt;&gt; V = list(range(len(I)))
     &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-    &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+    &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
@@ -5708,11 +5738,13 @@ interchangeably for either operation.</p>
     ...    [0, 1, 1, 6, 6],
     ...    [1, 4, 6, 3, 5],
     ...    [9, 1, 4, 7, 11], 7, 7)
-    &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+    &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
 
     ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
 
-    &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+    &gt;&gt;&gt; draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
     &gt;&gt;&gt; print(A.emult(B))
           0  1  2  3  4  5  6
       0|     0               |  0

@@ -531,10 +531,6 @@ The parameter is typically in the range
     def to_value(cls, cdata):
         return bool(cdata)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.FC32"><code class="flex name class">
 <span>class <span class="ident">FC32</span></span>
@@ -553,10 +549,6 @@ The parameter is typically in the range
     C = &#34;float _Complex&#34;
     numba_t = numba.complex64</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.FC64"><code class="flex name class">
 <span>class <span class="ident">FC64</span></span>
@@ -575,10 +567,6 @@ The parameter is typically in the range
     C = &#34;double _Complex&#34;
     numba_t = numba.complex128</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.FP32"><code class="flex name class">
 <span>class <span class="ident">FP32</span></span>
@@ -597,10 +585,6 @@ The parameter is typically in the range
     typecode = &#34;f&#34;
     numba_t = numba.float32</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.FP64"><code class="flex name class">
 <span>class <span class="ident">FP64</span></span>
@@ -619,10 +603,6 @@ The parameter is typically in the range
     typecode = &#34;d&#34;
     numba_t = numba.float64</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.INT16"><code class="flex name class">
 <span>class <span class="ident">INT16</span></span>
@@ -639,10 +619,6 @@ The parameter is typically in the range
     typecode = &#34;i&#34;
     numba_t = numba.int16</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.INT32"><code class="flex name class">
 <span>class <span class="ident">INT32</span></span>
@@ -659,10 +635,6 @@ The parameter is typically in the range
     typecode = &#34;l&#34;
     numba_t = numba.int32</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.INT64"><code class="flex name class">
 <span>class <span class="ident">INT64</span></span>
@@ -679,10 +651,6 @@ The parameter is typically in the range
     typecode = &#34;q&#34;
     numba_t = numba.int64</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.INT8"><code class="flex name class">
 <span>class <span class="ident">INT8</span></span>
@@ -699,10 +667,6 @@ The parameter is typically in the range
     typecode = &#34;b&#34;
     numba_t = numba.int8</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.Matrix"><code class="flex name class">
 <span>class <span class="ident">Matrix</span></span>
@@ -996,7 +960,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           6|        t  t  t      |  6
               0  1  2  3  4  5  6
         &gt;&gt;&gt; from pygraphblas.gviz import draw_graph
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_from_lists&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
@@ -1057,7 +1022,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &gt;&gt;&gt; M = Matrix.random(types.UINT8, 5, 5, 20,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        &gt;&gt;&gt; g = draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &gt;&gt;&gt; draw_graph(M, filename=&#39;/docs/imgs/Matrix_random&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
@@ -1475,7 +1441,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_eadd_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
@@ -1483,11 +1450,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         ...    [0, 1, 4, 6],
         ...    [1, 3, 5, 5],
         ...    [9, 1, 4, 7], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.eadd(B), filename=&#39;/docs/imgs/Matrix_eadd_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
@@ -1563,7 +1532,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         &gt;&gt;&gt; V = list(range(len(I)))
         &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
-        &gt;&gt;&gt; g = draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &gt;&gt;&gt; draw_graph(A, filename=&#39;/docs/imgs/Matrix_emult_A&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
@@ -1571,11 +1541,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         ...    [0, 1, 1, 6, 6],
         ...    [1, 4, 6, 3, 5],
         ...    [9, 1, 4, 7, 11], 7, 7)
-        &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &gt;&gt;&gt; draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
 
-        &gt;&gt;&gt; g = draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &gt;&gt;&gt; draw_graph(A.emult(B), filename=&#39;/docs/imgs/Matrix_emult_C&#39;)
+        &lt;graphviz.dot.Digraph object at ...&gt;
         &gt;&gt;&gt; print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
@@ -2925,10 +2897,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     typecode = &#34;I&#34;
     numba_t = numba.uint16</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.UINT32"><code class="flex name class">
 <span>class <span class="ident">UINT32</span></span>
@@ -2945,10 +2913,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     typecode = &#34;L&#34;
     numba_t = numba.uint32</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.UINT64"><code class="flex name class">
 <span>class <span class="ident">UINT64</span></span>
@@ -2965,10 +2929,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     typecode = &#34;Q&#34;
     numba_t = numba.uint64</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.UINT8"><code class="flex name class">
 <span>class <span class="ident">UINT8</span></span>
@@ -2985,10 +2945,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     typecode = &#34;B&#34;
     numba_t = numba.uint8</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="pygraphblas.types.Type" href="types.html#pygraphblas.types.Type">Type</a></li>
-</ul>
 </dd>
 <dt id="pygraphblas.Vector"><code class="flex name class">
 <span>class <span class="ident">Vector</span></span>
