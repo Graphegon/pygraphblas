@@ -660,9 +660,9 @@ class Matrix:
         &gt;&gt;&gt; N = M.cast(types.FP32)
         &gt;&gt;&gt; print(N.to_string(width=5))
                   0    1    2
-            0|      42.0     |    0
-            1|          314.0|    1
-            2|149.0          |    2
+            0|      42.0     |  0
+            1|          314.0|  1
+            2|149.0          |  2
                   0    1    2
 
         &#34;&#34;&#34;
@@ -2064,7 +2064,7 @@ class Matrix:
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += &#34;|&#34; + format_string.format(row) + &#34;\n&#34;
+            result += &#34;|  &#34; +str(row) + &#34;\n&#34;
         result += header
 
         return result
@@ -2849,9 +2849,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; N = M.cast(types.FP32)
         &gt;&gt;&gt; print(N.to_string(width=5))
                   0    1    2
-            0|      42.0     |    0
-            1|          314.0|    1
-            2|149.0          |    2
+            0|      42.0     |  0
+            1|          314.0|  1
+            2|149.0          |  2
                   0    1    2
 
         &#34;&#34;&#34;
@@ -4253,7 +4253,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += &#34;|&#34; + format_string.format(row) + &#34;\n&#34;
+            result += &#34;|  &#34; +str(row) + &#34;\n&#34;
         result += header
 
         return result
@@ -5503,9 +5503,9 @@ new matrix is of the cast type is created.</p>
 &gt;&gt;&gt; N = M.cast(types.FP32)
 &gt;&gt;&gt; print(N.to_string(width=5))
           0    1    2
-    0|      42.0     |    0
-    1|          314.0|    1
-    2|149.0          |    2
+    0|      42.0     |  0
+    1|          314.0|  1
+    2|149.0          |  2
           0    1    2
 </code></pre></div>
 <details class="source">
@@ -5526,9 +5526,9 @@ new matrix is of the cast type is created.</p>
     &gt;&gt;&gt; N = M.cast(types.FP32)
     &gt;&gt;&gt; print(N.to_string(width=5))
               0    1    2
-        0|      42.0     |    0
-        1|          314.0|    1
-        2|149.0          |    2
+        0|      42.0     |  0
+        1|          314.0|  1
+        2|149.0          |  2
               0    1    2
 
     &#34;&#34;&#34;
@@ -7089,7 +7089,7 @@ array([[  0,  42,   0],
         for col in range(self.ncols):
             value = self.get(row, col, empty_char)
             result += self.type.format_value(value, width)
-        result += &#34;|&#34; + format_string.format(row) + &#34;\n&#34;
+        result += &#34;|  &#34; +str(row) + &#34;\n&#34;
     result += header
 
     return result</code></pre>

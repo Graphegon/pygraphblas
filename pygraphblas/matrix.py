@@ -628,9 +628,9 @@ class Matrix:
         >>> N = M.cast(types.FP32)
         >>> print(N.to_string(width=5))
                   0    1    2
-            0|      42.0     |    0
-            1|          314.0|    1
-            2|149.0          |    2
+            0|      42.0     |  0
+            1|          314.0|  1
+            2|149.0          |  2
                   0    1    2
 
         """
@@ -2032,7 +2032,7 @@ class Matrix:
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += "|" + format_string.format(row) + "\n"
+            result += "|  " +str(row) + "\n"
         result += header
 
         return result
