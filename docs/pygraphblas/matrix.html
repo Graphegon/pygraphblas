@@ -1250,7 +1250,6 @@ class Matrix:
         !=0 | lib.GxB_NONZERO  | Select nonzero value.
         ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
 
-
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -1274,8 +1273,13 @@ class Matrix:
         )
         return out
 
-    def tril(self, thunk=None):
+    def tril(self, offset=None):
         &#34;&#34;&#34;Select the lower triangular Matrix.
+
+        The diagonal `offset` can be used to select all below any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.tril())
               0  1  2
@@ -1297,10 +1301,15 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_TRIL, thunk=thunk)
+        return self.select(lib.GxB_TRIL, thunk=offset)
 
-    def triu(self, thunk=None):
+    def triu(self, offset=None):
         &#34;&#34;&#34;Select the upper triangular Matrix.
+
+        The diagonal `offset` can be used to select all above any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.triu())
               0  1  2
@@ -1322,11 +1331,14 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_TRIU, thunk=thunk)
+        return self.select(lib.GxB_TRIU, thunk=offset)
 
-    def diag(self, thunk=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
-        from the main diagonal.
+    def diag(self, offset=None):
+        &#34;&#34;&#34;Select the diagonal Matrix.  
+
+        The diagonal `offset` can be used to select any diagonal rank,
+        positive towars the upper right coner and negative toward the
+        lower left.
 
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.diag())
@@ -1349,10 +1361,15 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_DIAG, thunk=thunk)
+        return self.select(lib.GxB_DIAG, thunk=offset)
 
-    def offdiag(self, thunk=None):
+    def offdiag(self, offset=None):
         &#34;&#34;&#34;Select the off-diagonal Matrix.
+
+        The diagonal `offset` can be used to select off any diagonal
+        rank, positive towars the upper right coner and negative
+        toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.offdiag())
               0  1  2
@@ -1374,7 +1391,7 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_OFFDIAG, thunk=thunk)
+        return self.select(lib.GxB_OFFDIAG, thunk=offset)
 
     def nonzero(self):
         &#34;&#34;&#34;Select the non-zero Matrix.
@@ -3422,7 +3439,6 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         !=0 | lib.GxB_NONZERO  | Select nonzero value.
         ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
 
-
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -3446,8 +3462,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         )
         return out
 
-    def tril(self, thunk=None):
+    def tril(self, offset=None):
         &#34;&#34;&#34;Select the lower triangular Matrix.
+
+        The diagonal `offset` can be used to select all below any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.tril())
               0  1  2
@@ -3469,10 +3490,15 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_TRIL, thunk=thunk)
+        return self.select(lib.GxB_TRIL, thunk=offset)
 
-    def triu(self, thunk=None):
+    def triu(self, offset=None):
         &#34;&#34;&#34;Select the upper triangular Matrix.
+
+        The diagonal `offset` can be used to select all above any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.triu())
               0  1  2
@@ -3494,11 +3520,14 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_TRIU, thunk=thunk)
+        return self.select(lib.GxB_TRIU, thunk=offset)
 
-    def diag(self, thunk=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
-        from the main diagonal.
+    def diag(self, offset=None):
+        &#34;&#34;&#34;Select the diagonal Matrix.  
+
+        The diagonal `offset` can be used to select any diagonal rank,
+        positive towars the upper right coner and negative toward the
+        lower left.
 
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.diag())
@@ -3521,10 +3550,15 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_DIAG, thunk=thunk)
+        return self.select(lib.GxB_DIAG, thunk=offset)
 
-    def offdiag(self, thunk=None):
+    def offdiag(self, offset=None):
         &#34;&#34;&#34;Select the off-diagonal Matrix.
+
+        The diagonal `offset` can be used to select off any diagonal
+        rank, positive towars the upper right coner and negative
+        toward the lower left.
+
         &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
         &gt;&gt;&gt; print(M.offdiag())
               0  1  2
@@ -3546,7 +3580,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        return self.select(lib.GxB_OFFDIAG, thunk=thunk)
+        return self.select(lib.GxB_OFFDIAG, thunk=offset)
 
     def nonzero(self):
         &#34;&#34;&#34;Select the non-zero Matrix.
@@ -5543,12 +5577,14 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.diag"><code class="name flex">
-<span>def <span class="ident">diag</span></span>(<span>self, thunk=None)</span>
+<span>def <span class="ident">diag</span></span>(<span>self, offset=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the diagonal Matrix.
-Thunk is the diagonal offset to select
-from the main diagonal.</p>
+</p>
+<p>The diagonal <code>offset</code> can be used to select any diagonal rank,
+positive towars the upper right coner and negative toward the
+lower left.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
 &gt;&gt;&gt; print(M.diag())
       0  1  2
@@ -5573,9 +5609,12 @@ from the main diagonal.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def diag(self, thunk=None):
-    &#34;&#34;&#34;Select the diagonal Matrix.  Thunk is the diagonal offset to select
-    from the main diagonal.
+<pre><code class="python">def diag(self, offset=None):
+    &#34;&#34;&#34;Select the diagonal Matrix.  
+
+    The diagonal `offset` can be used to select any diagonal rank,
+    positive towars the upper right coner and negative toward the
+    lower left.
 
     &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
     &gt;&gt;&gt; print(M.diag())
@@ -5598,7 +5637,7 @@ from the main diagonal.</p>
           0  1  2
 
     &#34;&#34;&#34;
-    return self.select(lib.GxB_DIAG, thunk=thunk)</code></pre>
+    return self.select(lib.GxB_DIAG, thunk=offset)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.dup"><code class="name flex">
@@ -6401,10 +6440,13 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.offdiag"><code class="name flex">
-<span>def <span class="ident">offdiag</span></span>(<span>self, thunk=None)</span>
+<span>def <span class="ident">offdiag</span></span>(<span>self, offset=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the off-diagonal Matrix.</p>
+<p>The diagonal <code>offset</code> can be used to select off any diagonal
+rank, positive towars the upper right coner and negative
+toward the lower left.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
 &gt;&gt;&gt; print(M.offdiag())
       0  1  2
@@ -6429,8 +6471,13 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def offdiag(self, thunk=None):
+<pre><code class="python">def offdiag(self, offset=None):
     &#34;&#34;&#34;Select the off-diagonal Matrix.
+
+    The diagonal `offset` can be used to select off any diagonal
+    rank, positive towars the upper right coner and negative
+    toward the lower left.
+
     &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
     &gt;&gt;&gt; print(M.offdiag())
           0  1  2
@@ -6452,7 +6499,7 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
           0  1  2
 
     &#34;&#34;&#34;
-    return self.select(lib.GxB_OFFDIAG, thunk=thunk)</code></pre>
+    return self.select(lib.GxB_OFFDIAG, thunk=offset)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.pattern"><code class="name flex">
@@ -6834,7 +6881,6 @@ Can be a string mapping to following operators:</p>
     !=0 | lib.GxB_NONZERO  | Select nonzero value.
     ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
 
-
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -7135,10 +7181,13 @@ Guide</a></p>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.tril"><code class="name flex">
-<span>def <span class="ident">tril</span></span>(<span>self, thunk=None)</span>
+<span>def <span class="ident">tril</span></span>(<span>self, offset=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the lower triangular Matrix.</p>
+<p>The diagonal <code>offset</code> can be used to select all below any
+diagonal rank, positive towars the upper right coner and
+negative toward the lower left.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
 &gt;&gt;&gt; print(M.tril())
       0  1  2
@@ -7163,8 +7212,13 @@ Guide</a></p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def tril(self, thunk=None):
+<pre><code class="python">def tril(self, offset=None):
     &#34;&#34;&#34;Select the lower triangular Matrix.
+
+    The diagonal `offset` can be used to select all below any
+    diagonal rank, positive towars the upper right coner and
+    negative toward the lower left.
+
     &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
     &gt;&gt;&gt; print(M.tril())
           0  1  2
@@ -7186,14 +7240,17 @@ Guide</a></p>
           0  1  2
 
     &#34;&#34;&#34;
-    return self.select(lib.GxB_TRIL, thunk=thunk)</code></pre>
+    return self.select(lib.GxB_TRIL, thunk=offset)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.triu"><code class="name flex">
-<span>def <span class="ident">triu</span></span>(<span>self, thunk=None)</span>
+<span>def <span class="ident">triu</span></span>(<span>self, offset=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select the upper triangular Matrix.</p>
+<p>The diagonal <code>offset</code> can be used to select all above any
+diagonal rank, positive towars the upper right coner and
+negative toward the lower left.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
 &gt;&gt;&gt; print(M.triu())
       0  1  2
@@ -7218,8 +7275,13 @@ Guide</a></p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def triu(self, thunk=None):
+<pre><code class="python">def triu(self, offset=None):
     &#34;&#34;&#34;Select the upper triangular Matrix.
+
+    The diagonal `offset` can be used to select all above any
+    diagonal rank, positive towars the upper right coner and
+    negative toward the lower left.
+
     &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 3, 3)
     &gt;&gt;&gt; print(M.triu())
           0  1  2
@@ -7241,7 +7303,7 @@ Guide</a></p>
           0  1  2
 
     &#34;&#34;&#34;
-    return self.select(lib.GxB_TRIU, thunk=thunk)</code></pre>
+    return self.select(lib.GxB_TRIU, thunk=offset)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.wait"><code class="name flex">

@@ -1218,7 +1218,6 @@ class Matrix:
         !=0 | lib.GxB_NONZERO  | Select nonzero value.
         ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
 
-
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -1242,8 +1241,13 @@ class Matrix:
         )
         return out
 
-    def tril(self, thunk=None):
+    def tril(self, offset=None):
         """Select the lower triangular Matrix.
+
+        The diagonal `offset` can be used to select all below any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         >>> M = Matrix.dense(types.UINT8, 3, 3)
         >>> print(M.tril())
               0  1  2
@@ -1265,10 +1269,15 @@ class Matrix:
               0  1  2
 
         """
-        return self.select(lib.GxB_TRIL, thunk=thunk)
+        return self.select(lib.GxB_TRIL, thunk=offset)
 
-    def triu(self, thunk=None):
+    def triu(self, offset=None):
         """Select the upper triangular Matrix.
+
+        The diagonal `offset` can be used to select all above any
+        diagonal rank, positive towars the upper right coner and
+        negative toward the lower left.
+
         >>> M = Matrix.dense(types.UINT8, 3, 3)
         >>> print(M.triu())
               0  1  2
@@ -1290,11 +1299,14 @@ class Matrix:
               0  1  2
 
         """
-        return self.select(lib.GxB_TRIU, thunk=thunk)
+        return self.select(lib.GxB_TRIU, thunk=offset)
 
-    def diag(self, thunk=None):
-        """Select the diagonal Matrix.  Thunk is the diagonal offset to select
-        from the main diagonal.
+    def diag(self, offset=None):
+        """Select the diagonal Matrix.  
+
+        The diagonal `offset` can be used to select any diagonal rank,
+        positive towars the upper right coner and negative toward the
+        lower left.
 
         >>> M = Matrix.dense(types.UINT8, 3, 3)
         >>> print(M.diag())
@@ -1317,10 +1329,15 @@ class Matrix:
               0  1  2
 
         """
-        return self.select(lib.GxB_DIAG, thunk=thunk)
+        return self.select(lib.GxB_DIAG, thunk=offset)
 
-    def offdiag(self, thunk=None):
+    def offdiag(self, offset=None):
         """Select the off-diagonal Matrix.
+
+        The diagonal `offset` can be used to select off any diagonal
+        rank, positive towars the upper right coner and negative
+        toward the lower left.
+
         >>> M = Matrix.dense(types.UINT8, 3, 3)
         >>> print(M.offdiag())
               0  1  2
@@ -1342,7 +1359,7 @@ class Matrix:
               0  1  2
 
         """
-        return self.select(lib.GxB_OFFDIAG, thunk=thunk)
+        return self.select(lib.GxB_OFFDIAG, thunk=offset)
 
     def nonzero(self):
         """Select the non-zero Matrix.
