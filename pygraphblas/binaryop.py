@@ -108,13 +108,16 @@ def binop_group(reg):
         srs.append(BinaryOp(op, typ, getattr(lib, n.string)))
     return srs
 
-
-def build_binaryops():
+def build_binaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
+        this.__all__.append(r.name)
+        name = f'pygraphblas.binaryop.{r.name}'
+        __pdoc__[name] = f"BinaryOp {r.name}"
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
+        __pdoc__[f'pygraphblas.binaryop.{name}'] = f"AutoBinaryOp {name}"
         setattr(this, name, bo)
 
 

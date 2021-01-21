@@ -73,6 +73,13 @@ information](http://faculty.cse.tamu.edu/davis/news.html) can provide
 you with a lot more background information.
 
 """
+
+__pdoc__ = {
+    "base": False,
+    "build": False,
+}
+
+
 from .base import (
     lib,
     ffi,
@@ -94,7 +101,7 @@ from .unaryop import build_unaryops
 from .monoid import build_monoids
 
 build_semirings()
-build_binaryops()
+build_binaryops(__pdoc__)
 build_unaryops()
 build_monoids()
 
@@ -168,12 +175,6 @@ GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
 
 GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
-
-__pdoc__ = {
-    "base": False,
-    "build": False,
-}
-
 
 def run_doctests():
     import sys, doctest
