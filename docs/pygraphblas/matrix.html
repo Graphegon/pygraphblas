@@ -794,9 +794,9 @@ class Matrix:
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
         &gt;&gt;&gt; B = Matrix.from_lists(
-        ...    [0, 1, 4, 6],
-        ...    [1, 4, 5, 5],
-        ...    [9, 1, 4, 7], 7, 7)
+        ...    [0, 1, 1, 6, 6],
+        ...    [1, 4, 6, 3, 5],
+        ...    [9, 1, 4, 7, 11], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
@@ -805,12 +805,12 @@ class Matrix:
         &gt;&gt;&gt; print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
-          1|              2      |  1
+          1|              2    12|  1
           2|                     |  2
           3|                     |  3
-          4|                28   |  4
+          4|                     |  4
           5|                     |  5
-          6|                     |  6
+          6|          70         |  6
               0  1  2  3  4  5  6
 
         ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
@@ -2876,9 +2876,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
         &gt;&gt;&gt; B = Matrix.from_lists(
-        ...    [0, 1, 4, 6],
-        ...    [1, 4, 5, 5],
-        ...    [9, 1, 4, 7], 7, 7)
+        ...    [0, 1, 1, 6, 6],
+        ...    [1, 4, 6, 3, 5],
+        ...    [9, 1, 4, 7, 11], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
@@ -2887,12 +2887,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
-          1|              2      |  1
+          1|              2    12|  1
           2|                     |  2
           3|                     |  3
-          4|                28   |  4
+          4|                     |  4
           5|                     |  5
-          6|                     |  6
+          6|          70         |  6
               0  1  2  3  4  5  6
 
         ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
@@ -5560,9 +5560,9 @@ interchangeably for either operation.</p>
 </code></pre>
 <p><img alt="Matrix_emult_A.png" src="../imgs/Matrix_emult_A.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
-...    [0, 1, 4, 6],
-...    [1, 4, 5, 5],
-...    [9, 1, 4, 7], 7, 7)
+...    [0, 1, 1, 6, 6],
+...    [1, 4, 6, 3, 5],
+...    [9, 1, 4, 7, 11], 7, 7)
 &gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
 </code></pre>
 <p><img alt="Matrix_emult_B.png" src="../imgs/Matrix_emult_B.png"></p>
@@ -5570,12 +5570,12 @@ interchangeably for either operation.</p>
 &gt;&gt;&gt; print(A.emult(B))
       0  1  2  3  4  5  6
   0|     0               |  0
-  1|              2      |  1
+  1|              2    12|  1
   2|                     |  2
   3|                     |  3
-  4|                28   |  4
+  4|                     |  4
   5|                     |  5
-  6|                     |  6
+  6|          70         |  6
       0  1  2  3  4  5  6
 </code></pre>
 <p><img alt="Matrix_emult_C.png" src="../imgs/Matrix_emult_C.png"></p></div>
@@ -5623,9 +5623,9 @@ interchangeably for either operation.</p>
     ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
     &gt;&gt;&gt; B = Matrix.from_lists(
-    ...    [0, 1, 4, 6],
-    ...    [1, 4, 5, 5],
-    ...    [9, 1, 4, 7], 7, 7)
+    ...    [0, 1, 1, 6, 6],
+    ...    [1, 4, 6, 3, 5],
+    ...    [9, 1, 4, 7, 11], 7, 7)
     &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_emult_B&#39;)
 
     ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
@@ -5634,12 +5634,12 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; print(A.emult(B))
           0  1  2  3  4  5  6
       0|     0               |  0
-      1|              2      |  1
+      1|              2    12|  1
       2|                     |  2
       3|                     |  3
-      4|                28   |  4
+      4|                     |  4
       5|                     |  5
-      6|                     |  6
+      6|          70         |  6
           0  1  2  3  4  5  6
 
     ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)

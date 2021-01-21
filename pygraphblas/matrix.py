@@ -773,12 +773,12 @@ class Matrix:
         >>> print(A.emult(B))
               0  1  2  3  4  5  6
           0|     0               |  0
-          1|              2      |  1
+          1|              2    12|  1
           2|                     |  2
           3|                     |  3
-          4|                28   |  4
+          4|                     |  4
           5|                     |  5
-          6|                     |  6
+          6|          70         |  6
               0  1  2  3  4  5  6
 
         ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
