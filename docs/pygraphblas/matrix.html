@@ -124,7 +124,13 @@ class Matrix:
 
         self._matrix = matrix
         self.type = typ
-        &#34;&#34;&#34;The type of the Matrix. &#34;&#34;&#34;
+        &#34;&#34;&#34;The type of the Matrix. 
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.type == types.INT8
+        True
+
+        &#34;&#34;&#34;
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -1339,7 +1345,7 @@ class Matrix:
         return self.select(lib.GxB_TRIU, thunk=offset)
 
     def diag(self, offset=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.  
+        &#34;&#34;&#34;Select the diagonal Matrix.
 
         The diagonal `offset` can be used to select any diagonal rank,
         positive towars the upper right coner and negative toward the
@@ -2069,7 +2075,7 @@ class Matrix:
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += &#34;|  &#34; +str(row) + &#34;\n&#34;
+            result += &#34;|  &#34; + str(row) + &#34;\n&#34;
         result += header
 
         return result
@@ -2318,7 +2324,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._matrix = matrix
         self.type = typ
-        &#34;&#34;&#34;The type of the Matrix. &#34;&#34;&#34;
+        &#34;&#34;&#34;The type of the Matrix. 
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.type == types.INT8
+        True
+
+        &#34;&#34;&#34;
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -3533,7 +3545,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return self.select(lib.GxB_TRIU, thunk=offset)
 
     def diag(self, offset=None):
-        &#34;&#34;&#34;Select the diagonal Matrix.  
+        &#34;&#34;&#34;Select the diagonal Matrix.
 
         The diagonal `offset` can be used to select any diagonal rank,
         positive towars the upper right coner and negative toward the
@@ -4263,7 +4275,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += &#34;|  &#34; +str(row) + &#34;\n&#34;
+            result += &#34;|  &#34; + str(row) + &#34;\n&#34;
         result += header
 
         return result
@@ -5001,7 +5013,11 @@ def square(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.type"><code class="name">var <span class="ident">type</span></code></dt>
 <dd>
-<div class="desc"><p>The type of the Matrix.</p></div>
+<div class="desc"><p>The type of the Matrix. </p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+&gt;&gt;&gt; M.type == types.INT8
+True
+</code></pre></div>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.vals"><code class="name">var <span class="ident">vals</span></code></dt>
 <dd>
@@ -5598,8 +5614,7 @@ True
 <span>def <span class="ident">diag</span></span>(<span>self, offset=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select the diagonal Matrix.
-</p>
+<div class="desc"><p>Select the diagonal Matrix.</p>
 <p>The diagonal <code>offset</code> can be used to select any diagonal rank,
 positive towars the upper right coner and negative toward the
 lower left.</p>
@@ -5628,7 +5643,7 @@ lower left.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def diag(self, offset=None):
-    &#34;&#34;&#34;Select the diagonal Matrix.  
+    &#34;&#34;&#34;Select the diagonal Matrix.
 
     The diagonal `offset` can be used to select any diagonal rank,
     positive towars the upper right coner and negative toward the
@@ -7107,7 +7122,7 @@ array([[  0,  42,   0],
         for col in range(self.ncols):
             value = self.get(row, col, empty_char)
             result += self.type.format_value(value, width)
-        result += &#34;|  &#34; +str(row) + &#34;\n&#34;
+        result += &#34;|  &#34; + str(row) + &#34;\n&#34;
     result += header
 
     return result</code></pre>

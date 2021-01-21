@@ -729,7 +729,9 @@ class Vector:
         for row in range(self.size):
             value = self.get(row, empty_char)
             result += str(row) + "|"
-            result += format_string.format(self.type.format_value(value, width)).rstrip()
+            result += format_string.format(
+                self.type.format_value(value, width)
+            ).rstrip()
             if row < self.size - 1:
                 result += "\n"
         return result

@@ -77,6 +77,7 @@ current_desc = contextvars.ContextVar("current_desc")
 
 __pdoc__ = {}
 
+
 class Descriptor:
     """Wrapper class around pre-defined GraphBLAS Descriptors."""
 
@@ -90,7 +91,7 @@ class Descriptor:
         self[field] = value
         self.token = None
         self.name = name
-        __pdoc__[f'descriptor.{name}'] = self.name
+        __pdoc__[f"descriptor.{name}"] = self.name
 
     def __enter__(self):
         self.token = current_desc.set(self)

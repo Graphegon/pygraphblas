@@ -92,7 +92,13 @@ class Matrix:
 
         self._matrix = matrix
         self.type = typ
-        """The type of the Matrix. """
+        """The type of the Matrix. 
+
+        >>> M = Matrix.sparse(types.INT8)
+        >>> M.type == types.INT8
+        True
+
+        """
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -1307,7 +1313,7 @@ class Matrix:
         return self.select(lib.GxB_TRIU, thunk=offset)
 
     def diag(self, offset=None):
-        """Select the diagonal Matrix.  
+        """Select the diagonal Matrix.
 
         The diagonal `offset` can be used to select any diagonal rank,
         positive towars the upper right coner and negative toward the
@@ -2037,7 +2043,7 @@ class Matrix:
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
                 result += self.type.format_value(value, width)
-            result += "|  " +str(row) + "\n"
+            result += "|  " + str(row) + "\n"
         result += header
 
         return result

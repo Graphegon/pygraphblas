@@ -109,6 +109,7 @@ current_desc = contextvars.ContextVar(&#34;current_desc&#34;)
 
 __pdoc__ = {}
 
+
 class Descriptor:
     &#34;&#34;&#34;Wrapper class around pre-defined GraphBLAS Descriptors.&#34;&#34;&#34;
 
@@ -122,7 +123,7 @@ class Descriptor:
         self[field] = value
         self.token = None
         self.name = name
-        __pdoc__[f&#39;descriptor.{name}&#39;] = self.name
+        __pdoc__[f&#34;descriptor.{name}&#34;] = self.name
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -244,7 +245,7 @@ ttscr = RSCT0T1 = R | S | C | T0 | T1</code></pre>
         self[field] = value
         self.token = None
         self.name = name
-        __pdoc__[f&#39;descriptor.{name}&#39;] = self.name
+        __pdoc__[f&#34;descriptor.{name}&#34;] = self.name
 
     def __enter__(self):
         self.token = current_desc.set(self)
