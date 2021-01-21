@@ -17,8 +17,26 @@ library.  Once you have these installed, pygraphblas can be installed
 with:
 
   python setup.py install
+  
+There are two ways to download precompiled binaries of pygraphblas
+with SuiteSparse included.  One way is to use `pip install
+pygraphblas` on an Intel Linux machine.  This will download a package
+compatible with most modern linux distributions.  This also works in a
+Docker container on Mac.
 
-An installation script for Ubuntu 18.04 is provided in the `install-ubuntu.sh` file.
+There are also pre-build docker images based on Ubuntu 20.04 that have
+a pre-compiled SuiteSparse and pygraphblas installed.  These come in
+two flavors `minimal` which is the Ipython interpreter-only, and
+`notebook` which comes with a complete Jupyter Notebook server.  These
+containers also work on Mac.
+
+An installation script for Ubuntu 18.04 is provided in the
+`install-ubuntu.sh` file.
+
+NOTE: DO NOT USE THESE PRE-COMPILED BINARIES FOR BENCHMARKING
+SUITESPARSE.  These binaries are not guaranteed to be idealy compiled
+for your environment.  You must build your own binaries on your own
+platforms if you intend to do ANY valid benchmarking.
 
 ## Docker 
 
@@ -151,3 +169,9 @@ referred to as "plus_times".  This is the common operation of
 multiplying two matrices containing real numbers, the corresponding row
 and column entries are multipled and the results are summed for the
 final value.
+
+## Code of Conduct
+
+Everyone interacting in the pygraphblas project's codebases, issue
+trackers, chat rooms, and mailing lists is expected to follow the [PSF
+Code of Conduct](https://www.python.org/psf/conduct/).

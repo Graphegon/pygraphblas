@@ -4,7 +4,6 @@ doctests and Jupyter notebooks.
 """
 from graphviz import Digraph, Source
 from PIL import Image, ImageDraw
-from IPython.display import display
 
 
 __all__ = [
