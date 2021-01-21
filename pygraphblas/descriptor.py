@@ -5,6 +5,7 @@ import contextvars
 from .base import lib, ffi, _check
 
 __all__ = [
+    "Descriptor",
     "TransposeA",
     "TransposeB",
     "ComplementMask",

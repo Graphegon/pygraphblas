@@ -37,6 +37,7 @@ import contextvars
 from .base import lib, ffi, _check
 
 __all__ = [
+    &#34;Descriptor&#34;,
     &#34;TransposeA&#34;,
     &#34;TransposeB&#34;,
     &#34;ComplementMask&#34;,
@@ -218,6 +219,103 @@ ttscr = RSCT0T1 = R | S | C | T0 | T1</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Types</h2>
+<dl>
+<dt id="pygraphblas.descriptor.Descriptor"><code class="flex name class">
+<span>class <span class="ident">Descriptor</span></span>
+<span>(</span><span>field, value, name=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper class around pre-defined GraphBLAS Descriptors.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Descriptor:
+    &#34;&#34;&#34;Wrapper class around pre-defined GraphBLAS Descriptors.&#34;&#34;&#34;
+
+    __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;desc&#34;, &#34;token&#34;, &#34;name&#34;)
+
+    def __init__(self, field, value, name=None):
+        self.field = field
+        self.value = value
+        self.desc = ffi.new(&#34;GrB_Descriptor*&#34;)
+        _check(lib.GrB_Descriptor_new(self.desc))
+        self[field] = value
+        self.token = None
+        self.name = name
+        __pdoc__[f&#39;descriptor.{name}&#39;] = self.name
+
+    def __enter__(self):
+        self.token = current_desc.set(self)
+        return self
+
+    def __exit__(self, *errors):
+        current_desc.reset(self.token)
+
+    def __del__(self):
+        if lib is not None:  # pragma: no cover
+            _check(lib.GrB_Descriptor_free(self.desc))
+
+    def __or__(self, other):
+        d = Descriptor(self.field, self.value, self.name + &#34;|&#34; + other.name)
+        d[other.field] = other.value
+        return d
+
+    def __contains__(self, other):
+        return self[other.field] != lib.GxB_DEFAULT
+
+    def __setitem__(self, field, value):
+        _check(lib.GrB_Descriptor_set(self.desc[0], field, value))
+
+    def __getitem__(self, field):
+        val = ffi.new(&#34;GrB_Desc_Value*&#34;)
+        _check(lib.GxB_Desc_get(self.desc[0], field, val))
+        return val[0]
+
+    def __eq__(self, other):
+        for f in (
+            lib.GrB_INP0,
+            lib.GrB_INP1,
+            lib.GrB_MASK,
+            lib.GrB_OUTP,
+            lib.GxB_DESCRIPTOR_NTHREADS,
+            lib.GxB_DESCRIPTOR_CHUNK,
+            lib.GxB_AxB_METHOD,
+            lib.GxB_SORT,
+        ):
+            if self[f] != other[f]:
+                return False
+        return True
+
+    def __repr__(self):
+        return f&#34;&lt;Descriptor {self.name}&gt;&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pygraphblas.descriptor.Descriptor.desc"><code class="name">var <span class="ident">desc</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="pygraphblas.descriptor.Descriptor.field"><code class="name">var <span class="ident">field</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="pygraphblas.descriptor.Descriptor.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="pygraphblas.descriptor.Descriptor.token"><code class="name">var <span class="ident">token</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="pygraphblas.descriptor.Descriptor.value"><code class="name">var <span class="ident">value</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -229,6 +327,20 @@ ttscr = RSCT0T1 = R | S | C | T0 | T1</code></pre>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="pygraphblas" href="index.html">pygraphblas</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Types</a></h3>
+<ul>
+<li>
+<code><a title="pygraphblas.descriptor.Descriptor" href="#pygraphblas.descriptor.Descriptor">Descriptor</a></code>
+<ul class="">
+<li><code><a title="pygraphblas.descriptor.Descriptor.desc" href="#pygraphblas.descriptor.Descriptor.desc">desc</a></code></li>
+<li><code><a title="pygraphblas.descriptor.Descriptor.field" href="#pygraphblas.descriptor.Descriptor.field">field</a></code></li>
+<li><code><a title="pygraphblas.descriptor.Descriptor.name" href="#pygraphblas.descriptor.Descriptor.name">name</a></code></li>
+<li><code><a title="pygraphblas.descriptor.Descriptor.token" href="#pygraphblas.descriptor.Descriptor.token">token</a></code></li>
+<li><code><a title="pygraphblas.descriptor.Descriptor.value" href="#pygraphblas.descriptor.Descriptor.value">value</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
