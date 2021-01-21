@@ -70,6 +70,8 @@ can be defined with any associative and commutative operator that has
 an identity value.
 &#34;&#34;&#34;
 
+__all__ = [&#34;Monoid&#34;, &#34;AutoMonoid&#34;, &#34;current_monoid&#34;]
+
 import os
 import sys
 import re
@@ -124,8 +126,6 @@ class AutoMonoid(Monoid):
         typ = types.promote(left, right)
         return Monoid._auto_monoids[self.name][typ.gb_type]
 
-
-__all__ = [&#34;Monoid&#34;, &#34;AutoMonoid&#34;, &#34;current_monoid&#34;]
 
 gxb_monoid_re = re.compile(
     &#34;^GxB_(MIN|MAX|PLUS|TIMES|ANY|BOR|BAND|BXOR|BXNOR)_&#34;

@@ -36,8 +36,77 @@
 import contextvars
 from .base import lib, ffi, _check
 
+__all__ = [
+    &#34;TransposeA&#34;,
+    &#34;TransposeB&#34;,
+    &#34;ComplementMask&#34;,
+    &#34;Replace&#34;,
+    &#34;TransposeAComplementMask&#34;,
+    &#34;TransposeAReplace&#34;,
+    &#34;TransposeBComplementMask&#34;,
+    &#34;TransposeBReplace&#34;,
+    &#34;TransposeATransposeB&#34;,
+    &#34;ComplementMaskReplace&#34;,
+    &#34;oooo&#34;,
+    &#34;otoo&#34;,
+    &#34;tooo&#34;,
+    &#34;ttoo&#34;,
+    &#34;ooco&#34;,
+    &#34;otco&#34;,
+    &#34;toco&#34;,
+    &#34;ttco&#34;,
+    &#34;ooor&#34;,
+    &#34;toor&#34;,
+    &#34;otor&#34;,
+    &#34;ttor&#34;,
+    &#34;oocr&#34;,
+    &#34;tocr&#34;,
+    &#34;otcr&#34;,
+    &#34;ttcr&#34;,
+    &#34;oosoo&#34;,
+    &#34;otsoo&#34;,
+    &#34;tosoo&#34;,
+    &#34;ttsoo&#34;,
+    &#34;oosor&#34;,
+    &#34;otsor&#34;,
+    &#34;tosor&#34;,
+    &#34;ttsor&#34;,
+    &#34;ooscr&#34;,
+    &#34;otscr&#34;,
+    &#34;toscr&#34;,
+    &#34;ttscr&#34;,
+    &#34;T1&#34;,
+    &#34;T0&#34;,
+    &#34;T0T1&#34;,
+    &#34;C&#34;,
+    &#34;CT1&#34;,
+    &#34;CT0&#34;,
+    &#34;CT0T1&#34;,
+    &#34;R&#34;,
+    &#34;RT0&#34;,
+    &#34;RT1&#34;,
+    &#34;RT0T1&#34;,
+    &#34;RC&#34;,
+    &#34;RCT0&#34;,
+    &#34;RCT1&#34;,
+    &#34;RCT0T1&#34;,
+    &#34;S&#34;,
+    &#34;ST1&#34;,
+    &#34;ST0&#34;,
+    &#34;ST0T1&#34;,
+    &#34;RS&#34;,
+    &#34;RST1&#34;,
+    &#34;RST0&#34;,
+    &#34;RST0T1&#34;,
+    &#34;RSC&#34;,
+    &#34;RSCT1&#34;,
+    &#34;RSCT0&#34;,
+    &#34;RSCT0T1&#34;,
+]
+
 current_desc = contextvars.ContextVar(&#34;current_desc&#34;)
 
+__pdoc__ = {}
 
 class Descriptor:
     &#34;&#34;&#34;Wrapper class around pre-defined GraphBLAS Descriptors.&#34;&#34;&#34;
@@ -52,6 +121,7 @@ class Descriptor:
         self[field] = value
         self.token = None
         self.name = name
+        __pdoc__[f&#39;descriptor.{name}&#39;] = self.name
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -138,75 +208,7 @@ ttsor = RST0T1 = R | S | T0 | T1
 ooscr = RSC = R | S | C
 otscr = RSCT1 = R | S | C | T1
 toscr = RSCT0 = R | S | C | T0
-ttscr = RSCT0T1 = R | S | C | T0 | T1
-
-__all__ = [
-    &#34;TransposeA&#34;,
-    &#34;TransposeB&#34;,
-    &#34;ComplementMask&#34;,
-    &#34;Replace&#34;,
-    &#34;TransposeAComplementMask&#34;,
-    &#34;TransposeAReplace&#34;,
-    &#34;TransposeBComplementMask&#34;,
-    &#34;TransposeBReplace&#34;,
-    &#34;TransposeATransposeB&#34;,
-    &#34;ComplementMaskReplace&#34;,
-    &#34;oooo&#34;,
-    &#34;otoo&#34;,
-    &#34;tooo&#34;,
-    &#34;ttoo&#34;,
-    &#34;ooco&#34;,
-    &#34;otco&#34;,
-    &#34;toco&#34;,
-    &#34;ttco&#34;,
-    &#34;ooor&#34;,
-    &#34;toor&#34;,
-    &#34;otor&#34;,
-    &#34;ttor&#34;,
-    &#34;oocr&#34;,
-    &#34;tocr&#34;,
-    &#34;otcr&#34;,
-    &#34;ttcr&#34;,
-    &#34;oosoo&#34;,
-    &#34;otsoo&#34;,
-    &#34;tosoo&#34;,
-    &#34;ttsoo&#34;,
-    &#34;oosor&#34;,
-    &#34;otsor&#34;,
-    &#34;tosor&#34;,
-    &#34;ttsor&#34;,
-    &#34;ooscr&#34;,
-    &#34;otscr&#34;,
-    &#34;toscr&#34;,
-    &#34;ttscr&#34;,
-    &#34;T1&#34;,
-    &#34;T0&#34;,
-    &#34;T0T1&#34;,
-    &#34;C&#34;,
-    &#34;CT1&#34;,
-    &#34;CT0&#34;,
-    &#34;CT0T1&#34;,
-    &#34;R&#34;,
-    &#34;RT0&#34;,
-    &#34;RT1&#34;,
-    &#34;RT0T1&#34;,
-    &#34;RC&#34;,
-    &#34;RCT0&#34;,
-    &#34;RCT1&#34;,
-    &#34;RCT0T1&#34;,
-    &#34;S&#34;,
-    &#34;ST1&#34;,
-    &#34;ST0&#34;,
-    &#34;ST0T1&#34;,
-    &#34;RS&#34;,
-    &#34;RST1&#34;,
-    &#34;RST0&#34;,
-    &#34;RST0T1&#34;,
-    &#34;RSC&#34;,
-    &#34;RSCT1&#34;,
-    &#34;RSCT0&#34;,
-    &#34;RSCT0T1&#34;,
-]</code></pre>
+ttscr = RSCT0T1 = R | S | C | T0 | T1</code></pre>
 </details>
 </section>
 <section>

@@ -2,6 +2,8 @@
 
 """
 
+__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop", "unary_op"]
+
 import re, sys
 from itertools import chain
 from textwrap import dedent
@@ -53,8 +55,6 @@ class AutoUnaryOp(UnaryOp):
     def get_unaryop(self, operand1=None):
         return UnaryOp._auto_unaryops[self.name][operand1.gb_type]
 
-
-__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop", "unary_op"]
 
 uop_re = re.compile(
     "^(GrB|GxB)_(ONE|ABS|SQRT|LOG|EXP|LOG2|SIN|COS|TAN|ACOS|ASIN|ATAN|SINH|"

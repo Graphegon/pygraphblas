@@ -23,6 +23,8 @@ from . import types
 
 current_semiring = contextvars.ContextVar("current_semiring")
 
+__all__ = ["Semiring", "AutoSemiring", "current_semiring"]
+
 
 class Semiring:
 
@@ -66,8 +68,6 @@ class AutoSemiring(Semiring):
         typ = types.promote(left, right)
         return Semiring._auto_semirings[self.name][typ.gb_type]
 
-
-__all__ = ["Semiring", "AutoSemiring", "current_semiring"]
 
 non_boolean_re = re.compile(
     "^(GxB|GrB)_(MIN|MAX|PLUS|TIMES|ANY)_"

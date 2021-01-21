@@ -18,6 +18,8 @@ can be defined with any associative and commutative operator that has
 an identity value.
 """
 
+__all__ = ["Monoid", "AutoMonoid", "current_monoid"]
+
 import os
 import sys
 import re
@@ -72,8 +74,6 @@ class AutoMonoid(Monoid):
         typ = types.promote(left, right)
         return Monoid._auto_monoids[self.name][typ.gb_type]
 
-
-__all__ = ["Monoid", "AutoMonoid", "current_monoid"]
 
 gxb_monoid_re = re.compile(
     "^GxB_(MIN|MAX|PLUS|TIMES|ANY|BOR|BAND|BXOR|BXNOR)_"

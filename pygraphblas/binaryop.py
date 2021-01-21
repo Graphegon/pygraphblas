@@ -2,6 +2,15 @@
 
 """
 
+__all__ = [
+    "BinaryOp",
+    "AutoBinaryOp",
+    "Accum",
+    "current_binop",
+    "current_accum",
+    "binary_op",
+]
+
 import sys
 import re
 import contextvars
@@ -78,15 +87,6 @@ class Accum:
         current_accum.reset(self.token)
         return False
 
-
-__all__ = [
-    "BinaryOp",
-    "AutoBinaryOp",
-    "Accum",
-    "current_binop",
-    "current_accum",
-    "binary_op",
-]
 
 grb_binop_re = re.compile(
     "^(GrB|GxB)_(FIRST|SECOND|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|"
