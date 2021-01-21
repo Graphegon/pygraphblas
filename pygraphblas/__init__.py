@@ -2,8 +2,8 @@
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provides high level Matrix and Vector Python
-types that make GraphBLAS simple and easy.
+level GraphBLAS API and provides high level `pygraphblas.Matrix` and
+`pygraphblas.Vector` Python types that make GraphBLAS simple and easy.
 
 See the [Github README](https://github.com/Graphegon/pygraphblas) for
 details on how to install pygraphblas. Once installed, the library can
@@ -12,14 +12,14 @@ be imported for use:
 >>> from pygraphblas import *
 
 The core idea of the GraphBLAS is the mathematical duality between a
-graph and a matrix.  As illustrated here, a graph can be expressed as
-a matrix and vice versa.
+graph and a `pygraphblas.Matrix`.  As illustrated here, a graph can be
+expressed as a `pygraphblas.Matrix` and vice versa.
 
-`pygraphblas.Matrix` is the core object of The GraphBLAS.  There are
-many ways to contstruct them, but a simple approach is to provide
-three lists of data, the first are are lists of the row and column
-positions that define the begining and end of a graph edge, and the
-third list is the weight for that edge:
+`pygraphblas.Matrix` is the primary object of The GraphBLAS API.
+There are many ways to contstruct them, but a simple approach is to
+provide three lists of data, the first are are lists of the row and
+column positions that define the begining and end of a graph edge, and
+the third list is the weight for that edge:
 
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
@@ -43,8 +43,8 @@ third list is the weight for that edge:
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
 for processing graphs encoded as sparse matrices and vectors.  In
-addition to common real/integer matrix algebra operations, GraphBLAS
-supports over a thousand different
+addition to common real/integer `pygraphblas.Matrix` algebra
+operations, GraphBLAS supports over a thousand different
 [Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
 that can be used as basic building blocks to implement a wide variety
 of graph algorithms. See
