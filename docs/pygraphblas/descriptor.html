@@ -81,7 +81,11 @@ class Descriptor:
         return val[0]
 
     def __eq__(self, other):
-        for f in (lib.GrB_INP0, lib.GrB_INP1, lib.GrB_MASK, lib.GrB_OUTP):
+        for f in (lib.GrB_INP0, lib.GrB_INP1,
+                  lib.GrB_MASK, lib.GrB_OUTP,
+                  lib.GxB_DESCRIPTOR_NTHREADS,
+                  lib.GxB_DESCRIPTOR_CHUNK,
+                  lib.GxB_AxB_METHOD, lib.GxB_SORT):
             if self[f] != other[f]:
                 return False
         return True

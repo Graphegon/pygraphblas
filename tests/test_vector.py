@@ -497,8 +497,7 @@ def test_str_and_repr():
         str(m)
         == """\
 0| 4
-1| 2
-"""
+1| 2"""
     )
 
     b = Vector.from_lists([0, 1], [True, True])
@@ -506,8 +505,7 @@ def test_str_and_repr():
         str(b)
         == """\
 0| t
-1| t
-"""
+1| t"""
     )
     assert repr(b) == "<Vector (2: 2:BOOL)>"
 

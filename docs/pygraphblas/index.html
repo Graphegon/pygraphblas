@@ -8720,7 +8720,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def cols(self):
         &#34;&#34;&#34;An iterator of column indexes present in the matrix.
 
-
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         &gt;&gt;&gt; list(M.cols)
         [1, 2, 0]
@@ -8737,7 +8736,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     @property
     def vals(self):
         &#34;&#34;&#34;An iterator of values present in the matrix.
-
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         &gt;&gt;&gt; list(M.vals)
@@ -8854,7 +8852,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return result
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to a boolean.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to a boolean.
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
@@ -10218,7 +10218,6 @@ def T(self):
 def cols(self):
     &#34;&#34;&#34;An iterator of column indexes present in the matrix.
 
-
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
     &gt;&gt;&gt; list(M.cols)
     [1, 2, 0]
@@ -10495,7 +10494,6 @@ def square(self):
 <pre><code class="python">@property
 def vals(self):
     &#34;&#34;&#34;An iterator of values present in the matrix.
-
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
     &gt;&gt;&gt; list(M.vals)
@@ -11968,7 +11966,9 @@ defaults to BOOL.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce matrix to a boolean.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce matrix to a boolean.
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.BOOL.LOR_MONOID)
     mon = mon.get_monoid(self.type)

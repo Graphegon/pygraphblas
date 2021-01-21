@@ -893,7 +893,6 @@ class Matrix:
     def cols(self):
         """An iterator of column indexes present in the matrix.
 
-
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> list(M.cols)
         [1, 2, 0]
@@ -910,7 +909,6 @@ class Matrix:
     @property
     def vals(self):
         """An iterator of values present in the matrix.
-
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> list(M.vals)
@@ -1027,7 +1025,9 @@ class Matrix:
         return result
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce matrix to a boolean."""
+        """Reduce matrix to a boolean.
+
+        """
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
