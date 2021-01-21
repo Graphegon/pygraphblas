@@ -211,7 +211,7 @@
           % endfor
           </ul>
       % endif
-      % if class_vars:
+      % if class_vars and module.supermodule:
           <h3>Class variables</h3>
           <dl>
           % for v in class_vars:
@@ -221,7 +221,7 @@
           % endfor
           </dl>
       % endif
-      % if smethods:
+      % if smethods and module.supermodule:
           <h3>Static methods</h3>
           <dl>
           % for f in smethods:
@@ -229,7 +229,7 @@
           % endfor
           </dl>
       % endif
-      % if inst_vars:
+      % if inst_vars and module.supermodule:
           <h3>Instance variables</h3>
           <dl>
           % for v in inst_vars:
@@ -239,7 +239,7 @@
           % endfor
           </dl>
       % endif
-      % if methods:
+      % if methods and module.supermodule:
           <h3>Methods</h3>
           <dl>
           % for f in methods:
