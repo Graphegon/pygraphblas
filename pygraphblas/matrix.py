@@ -762,8 +762,8 @@ class Matrix:
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
 
         >>> B = Matrix.from_lists(
-        ...    [0, 1, 4, 6],
-        ...    [1, 4, 5, 5],
+        ...    [0, 1, 1, 6],
+        ...    [1, 4, 6, 5],
         ...    [9, 1, 4, 7], 7, 7)
         >>> g = draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
 
