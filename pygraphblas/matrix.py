@@ -92,6 +92,7 @@ class Matrix:
 
         self._matrix = matrix
         self.type = typ
+        """The type of the Matrix. """
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -308,6 +309,10 @@ class Matrix:
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Matrix.  This is
         only used if interacting with the low level API.
+
+        >>> M = Matrix.sparse(types.INT8)
+        >>> M.gb_type == lib.GrB_INT8
+        True
 
         """
         new_type = ffi.new("GrB_Type*")

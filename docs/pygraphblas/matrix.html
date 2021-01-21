@@ -124,6 +124,7 @@ class Matrix:
 
         self._matrix = matrix
         self.type = typ
+        &#34;&#34;&#34;The type of the Matrix. &#34;&#34;&#34;
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -340,6 +341,10 @@ class Matrix:
     def gb_type(self):
         &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
         only used if interacting with the low level API.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.gb_type == lib.GrB_INT8
+        True
 
         &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
@@ -2313,6 +2318,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         self._matrix = matrix
         self.type = typ
+        &#34;&#34;&#34;The type of the Matrix. &#34;&#34;&#34;
         self._keep_alives = weakref.WeakKeyDictionary()
 
     def __del__(self):
@@ -2529,6 +2535,10 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def gb_type(self):
         &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
         only used if interacting with the low level API.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.gb_type == lib.GrB_INT8
+        True
 
         &#34;&#34;&#34;
         new_type = ffi.new(&#34;GrB_Type*&#34;)
@@ -4756,7 +4766,11 @@ def format(self):
 <dd>
 <div class="desc"><p>Return the GraphBLAS low-level type object of the Matrix.
 This is
-only used if interacting with the low level API.</p></div>
+only used if interacting with the low level API.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+&gt;&gt;&gt; M.gb_type == lib.GrB_INT8
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4765,6 +4779,10 @@ only used if interacting with the low level API.</p></div>
 def gb_type(self):
     &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
     only used if interacting with the low level API.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+    &gt;&gt;&gt; M.gb_type == lib.GrB_INT8
+    True
 
     &#34;&#34;&#34;
     new_type = ffi.new(&#34;GrB_Type*&#34;)
@@ -4983,7 +5001,7 @@ def square(self):
 </dd>
 <dt id="pygraphblas.matrix.Matrix.type"><code class="name">var <span class="ident">type</span></code></dt>
 <dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+<div class="desc"><p>The type of the Matrix.</p></div>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.vals"><code class="name">var <span class="ident">vals</span></code></dt>
 <dd>
