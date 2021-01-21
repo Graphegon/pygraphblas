@@ -32,7 +32,7 @@ API</a> with the <a href="https://python.org">Python</a>
 programming language.
 It uses the
 <a href="https://cffi.readthedocs.io/en/latest/">CFFI</a> library to wrap the low
-level GraphBLAS API and provides high level <code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code> and
+level GraphBLAS API and provides high level <code><a title="pygraphblas.matrix.Matrix" href="matrix.html#pygraphblas.matrix.Matrix">Matrix</a></code> and
 <code><a title="pygraphblas.Vector" href="#pygraphblas.Vector">Vector</a></code> Python types that make GraphBLAS simple and easy.</p>
 <p>See the <a href="https://github.com/Graphegon/pygraphblas">Github README</a> for
 details on how to install pygraphblas. Once installed, the library can
@@ -40,10 +40,10 @@ be imported for use:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
 </code></pre>
 <p>The core idea of the GraphBLAS is the mathematical duality between a
-graph and a <code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code>.
+graph and a <code><a title="pygraphblas.matrix.Matrix" href="matrix.html#pygraphblas.matrix.Matrix">Matrix</a></code>.
 As illustrated here, a graph can be
-expressed as a <code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code> and vice versa.</p>
-<p><code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code> is the primary object of The GraphBLAS API.
+expressed as a <code><a title="pygraphblas.matrix.Matrix" href="matrix.html#pygraphblas.matrix.Matrix">Matrix</a></code> and vice versa.</p>
+<p><code><a title="pygraphblas.matrix.Matrix" href="matrix.html#pygraphblas.matrix.Matrix">Matrix</a></code> is the primary object of The GraphBLAS API.
 There are many ways to contstruct them, but a simple approach is to
 provide three lists of data, the first are are lists of the row and
 column positions that define the begining and end of a graph edge, and
@@ -70,7 +70,7 @@ the third list is the weight for that edge:</p>
 Algebra</a> API optimized
 for processing graphs encoded as sparse matrices and vectors.
 In
-addition to common real/integer <code><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code> algebra
+addition to common real/integer <code><a title="pygraphblas.matrix.Matrix" href="matrix.html#pygraphblas.matrix.Matrix">Matrix</a></code> algebra
 operations, GraphBLAS supports over a thousand different
 <a href="https://en.wikipedia.org/wiki/Semiring">Semiring</a> algebra operations,
 that can be used as basic building blocks to implement a wide variety
@@ -103,7 +103,7 @@ you with a lot more background information.</p>
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provides high level `pygraphblas.Matrix` and
+level GraphBLAS API and provides high level `pygraphblas.matrix.Matrix` and
 `pygraphblas.Vector` Python types that make GraphBLAS simple and easy.
 
 See the [Github README](https://github.com/Graphegon/pygraphblas) for
@@ -113,10 +113,10 @@ be imported for use:
 &gt;&gt;&gt; from pygraphblas import *
 
 The core idea of the GraphBLAS is the mathematical duality between a
-graph and a `pygraphblas.Matrix`.  As illustrated here, a graph can be
-expressed as a `pygraphblas.Matrix` and vice versa.
+graph and a `pygraphblas.matrix.Matrix`.  As illustrated here, a graph can be
+expressed as a `pygraphblas.matrix.Matrix` and vice versa.
 
-`pygraphblas.Matrix` is the primary object of The GraphBLAS API.
+`pygraphblas.matrix.Matrix` is the primary object of The GraphBLAS API.
 There are many ways to contstruct them, but a simple approach is to
 provide three lists of data, the first are are lists of the row and
 column positions that define the begining and end of a graph edge, and
@@ -144,7 +144,7 @@ the third list is the weight for that edge:
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
 for processing graphs encoded as sparse matrices and vectors.  In
-addition to common real/integer `pygraphblas.Matrix` algebra
+addition to common real/integer `pygraphblas.matrix.Matrix` algebra
 operations, GraphBLAS supports over a thousand different
 [Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
 that can be used as basic building blocks to implement a wide variety
