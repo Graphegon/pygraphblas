@@ -250,7 +250,22 @@ class Matrix:
 
     @classmethod
     def from_mm(cls, mm_file, typ):
-        &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.
+
+        &gt;&gt;&gt; with open(&#39;/docs/test_mm.mm&#39;, &#39;r&#39;) as f:
+        ...     M = Matrix.from_mm(f, types.INT8)
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        &#34;&#34;&#34;
         m = ffi.new(&#34;GrB_Matrix*&#34;)
         i = cls(m, typ)
         _check(lib.LAGraph_mmread(m, mm_file))
@@ -266,7 +281,21 @@ class Matrix:
 
     @classmethod
     def from_binfile(cls, bin_file):
-        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
+
+        &gt;&gt;&gt; M = Matrix.from_binfile(bytes(&#39;/docs/test_binfile.grb&#39;, &#39;utf8&#39;))
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        &#34;&#34;&#34;
         m = ffi.new(&#34;GrB_Matrix*&#34;)
         _check(lib.LAGraph_binread(m, bin_file))
         return cls(m)
@@ -2450,7 +2479,22 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @classmethod
     def from_mm(cls, mm_file, typ):
-        &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.
+
+        &gt;&gt;&gt; with open(&#39;/docs/test_mm.mm&#39;, &#39;r&#39;) as f:
+        ...     M = Matrix.from_mm(f, types.INT8)
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        &#34;&#34;&#34;
         m = ffi.new(&#34;GrB_Matrix*&#34;)
         i = cls(m, typ)
         _check(lib.LAGraph_mmread(m, mm_file))
@@ -2466,7 +2510,21 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
     @classmethod
     def from_binfile(cls, bin_file):
-        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
+
+        &gt;&gt;&gt; M = Matrix.from_binfile(bytes(&#39;/docs/test_binfile.grb&#39;, &#39;utf8&#39;))
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        &#34;&#34;&#34;
         m = ffi.new(&#34;GrB_Matrix*&#34;)
         _check(lib.LAGraph_binread(m, bin_file))
         return cls(m)
@@ -4393,14 +4451,40 @@ def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
 <span>def <span class="ident">from_binfile</span></span>(<span>bin_file)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new matrix by reading a SuiteSparse specific binary file.</p></div>
+<div class="desc"><p>Create a new matrix by reading a SuiteSparse specific binary file.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_binfile(bytes('/docs/test_binfile.grb', 'utf8'))
+&gt;&gt;&gt; print(M)
+      0  1  2  3  4  5  6
+  0|     0     1         |  0
+  1|              2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                 7   |  4
+  5|        8            |  5
+  6|        9 10 11      |  6
+      0  1  2  3  4  5  6
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def from_binfile(cls, bin_file):
-    &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
+
+    &gt;&gt;&gt; M = Matrix.from_binfile(bytes(&#39;/docs/test_binfile.grb&#39;, &#39;utf8&#39;))
+    &gt;&gt;&gt; print(M)
+          0  1  2  3  4  5  6
+      0|     0     1         |  0
+      1|              2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                 7   |  4
+      5|        8            |  5
+      6|        9 10 11      |  6
+          0  1  2  3  4  5  6
+
+    &#34;&#34;&#34;
     m = ffi.new(&#34;GrB_Matrix*&#34;)
     _check(lib.LAGraph_binread(m, bin_file))
     return cls(m)</code></pre>
@@ -4484,14 +4568,42 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
 <span>def <span class="ident">from_mm</span></span>(<span>mm_file, typ)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new matrix by reading a Matrix Market file.</p></div>
+<div class="desc"><p>Create a new matrix by reading a Matrix Market file.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with open('/docs/test_mm.mm', 'r') as f:
+...     M = Matrix.from_mm(f, types.INT8)
+&gt;&gt;&gt; print(M)
+      0  1  2  3  4  5  6
+  0|     0     1         |  0
+  1|              2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                 7   |  4
+  5|        8            |  5
+  6|        9 10 11      |  6
+      0  1  2  3  4  5  6
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def from_mm(cls, mm_file, typ):
-    &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create a new matrix by reading a Matrix Market file.
+
+    &gt;&gt;&gt; with open(&#39;/docs/test_mm.mm&#39;, &#39;r&#39;) as f:
+    ...     M = Matrix.from_mm(f, types.INT8)
+    &gt;&gt;&gt; print(M)
+          0  1  2  3  4  5  6
+      0|     0     1         |  0
+      1|              2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                 7   |  4
+      5|        8            |  5
+      6|        9 10 11      |  6
+          0  1  2  3  4  5  6
+
+    &#34;&#34;&#34;
     m = ffi.new(&#34;GrB_Matrix*&#34;)
     i = cls(m, typ)
     _check(lib.LAGraph_mmread(m, mm_file))
