@@ -1027,6 +1027,13 @@ class Matrix:
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
         """Reduce matrix to a boolean.
 
+        >>> M = Matrix.sparse(types.INT8)
+        >>> M.reduce_bool()
+        False
+        >>> M[0,1] = True
+        >>> M.reduce_bool()
+        True
+
         """
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -1039,7 +1046,17 @@ class Matrix:
         return result[0]
 
     def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce matrix to an integer."""
+        """Reduce matrix to an integer.
+
+        >>> M = Matrix.sparse(types.INT8)
+        >>> M.reduce_int()
+        0
+        >>> M[0,1] = 42
+        >>> M[0,2] = 42
+        >>> M.reduce_int()
+        84
+
+        """
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -1051,7 +1068,17 @@ class Matrix:
         return result[0]
 
     def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce matrix to an float."""
+        """Reduce matrix to an float.
+
+        >>> M = Matrix.sparse(types.FP32)
+        >>> M.reduce_float()
+        0.0
+        >>> M[0,1] = 42.0
+        >>> M[0,2] = 42.0
+        >>> M.reduce_float()
+        84.0
+
+        """
         if mon is None:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -1063,7 +1090,22 @@ class Matrix:
         return result[0]
 
     def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
-        """Reduce matrix to a vector."""
+        """Reduce matrix to a vector.
+
+        >>> M = Matrix.sparse(types.FP32, 3, 3)
+        >>> print(M.reduce_vector())
+        0|  
+        1|  
+        2|  
+        >>> M[0,1] = 42.0
+        >>> M[0,2] = 42.0
+        >>> M[2,0] = -42.0
+        >>> print(M.reduce_vector())
+        0|84.0
+        1|  
+        2|-42.0
+
+        """
         if mon is None:
             mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
         mon = mon.get_monoid(self.type)

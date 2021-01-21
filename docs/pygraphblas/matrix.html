@@ -1059,6 +1059,13 @@ class Matrix:
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a boolean.
 
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.reduce_bool()
+        False
+        &gt;&gt;&gt; M[0,1] = True
+        &gt;&gt;&gt; M.reduce_bool()
+        True
+
         &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -1071,7 +1078,17 @@ class Matrix:
         return result[0]
 
     def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to an integer.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.reduce_int()
+        0
+        &gt;&gt;&gt; M[0,1] = 42
+        &gt;&gt;&gt; M[0,2] = 42
+        &gt;&gt;&gt; M.reduce_int()
+        84
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -1083,7 +1100,17 @@ class Matrix:
         return result[0]
 
     def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to an float.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.FP32)
+        &gt;&gt;&gt; M.reduce_float()
+        0.0
+        &gt;&gt;&gt; M[0,1] = 42.0
+        &gt;&gt;&gt; M[0,2] = 42.0
+        &gt;&gt;&gt; M.reduce_float()
+        84.0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -1095,7 +1122,22 @@ class Matrix:
         return result[0]
 
     def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to a vector.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
+        &gt;&gt;&gt; print(M.reduce_vector())
+        0|  
+        1|  
+        2|  
+        &gt;&gt;&gt; M[0,1] = 42.0
+        &gt;&gt;&gt; M[0,2] = 42.0
+        &gt;&gt;&gt; M[2,0] = -42.0
+        &gt;&gt;&gt; print(M.reduce_vector())
+        0|84.0
+        1|  
+        2|-42.0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
         mon = mon.get_monoid(self.type)
@@ -3141,6 +3183,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Reduce matrix to a boolean.
 
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.reduce_bool()
+        False
+        &gt;&gt;&gt; M[0,1] = True
+        &gt;&gt;&gt; M.reduce_bool()
+        True
+
         &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -3153,7 +3202,17 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return result[0]
 
     def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to an integer.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+        &gt;&gt;&gt; M.reduce_int()
+        0
+        &gt;&gt;&gt; M[0,1] = 42
+        &gt;&gt;&gt; M[0,2] = 42
+        &gt;&gt;&gt; M.reduce_int()
+        84
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -3165,7 +3224,17 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return result[0]
 
     def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to an float.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.FP32)
+        &gt;&gt;&gt; M.reduce_float()
+        0.0
+        &gt;&gt;&gt; M[0,1] = 42.0
+        &gt;&gt;&gt; M[0,2] = 42.0
+        &gt;&gt;&gt; M.reduce_float()
+        84.0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(self.type.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -3177,7 +3246,22 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return result[0]
 
     def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce matrix to a vector.
+
+        &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
+        &gt;&gt;&gt; print(M.reduce_vector())
+        0|  
+        1|  
+        2|  
+        &gt;&gt;&gt; M[0,1] = 42.0
+        &gt;&gt;&gt; M[0,2] = 42.0
+        &gt;&gt;&gt; M[2,0] = -42.0
+        &gt;&gt;&gt; print(M.reduce_vector())
+        0|84.0
+        1|  
+        2|-42.0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
         mon = mon.get_monoid(self.type)
@@ -6247,13 +6331,27 @@ defaults to BOOL.</p>
 <span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce matrix to a boolean.</p></div>
+<div class="desc"><p>Reduce matrix to a boolean.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+&gt;&gt;&gt; M.reduce_bool()
+False
+&gt;&gt;&gt; M[0,1] = True
+&gt;&gt;&gt; M.reduce_bool()
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Reduce matrix to a boolean.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+    &gt;&gt;&gt; M.reduce_bool()
+    False
+    &gt;&gt;&gt; M[0,1] = True
+    &gt;&gt;&gt; M.reduce_bool()
+    True
 
     &#34;&#34;&#34;
     if mon is None:
@@ -6271,13 +6369,31 @@ defaults to BOOL.</p>
 <span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce matrix to an float.</p></div>
+<div class="desc"><p>Reduce matrix to an float.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.FP32)
+&gt;&gt;&gt; M.reduce_float()
+0.0
+&gt;&gt;&gt; M[0,1] = 42.0
+&gt;&gt;&gt; M[0,2] = 42.0
+&gt;&gt;&gt; M.reduce_float()
+84.0
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce matrix to an float.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce matrix to an float.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.FP32)
+    &gt;&gt;&gt; M.reduce_float()
+    0.0
+    &gt;&gt;&gt; M[0,1] = 42.0
+    &gt;&gt;&gt; M[0,2] = 42.0
+    &gt;&gt;&gt; M.reduce_float()
+    84.0
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(self.type.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
@@ -6293,13 +6409,31 @@ defaults to BOOL.</p>
 <span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce matrix to an integer.</p></div>
+<div class="desc"><p>Reduce matrix to an integer.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+&gt;&gt;&gt; M.reduce_int()
+0
+&gt;&gt;&gt; M[0,1] = 42
+&gt;&gt;&gt; M[0,2] = 42
+&gt;&gt;&gt; M.reduce_int()
+84
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce matrix to an integer.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce matrix to an integer.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
+    &gt;&gt;&gt; M.reduce_int()
+    0
+    &gt;&gt;&gt; M[0,1] = 42
+    &gt;&gt;&gt; M[0,2] = 42
+    &gt;&gt;&gt; M.reduce_int()
+    84
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.INT64.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
@@ -6315,13 +6449,41 @@ defaults to BOOL.</p>
 <span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce matrix to a vector.</p></div>
+<div class="desc"><p>Reduce matrix to a vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
+&gt;&gt;&gt; print(M.reduce_vector())
+0|  
+1|  
+2|  
+&gt;&gt;&gt; M[0,1] = 42.0
+&gt;&gt;&gt; M[0,2] = 42.0
+&gt;&gt;&gt; M[2,0] = -42.0
+&gt;&gt;&gt; print(M.reduce_vector())
+0|84.0
+1|  
+2|-42.0
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce matrix to a vector.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce matrix to a vector.
+
+    &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
+    &gt;&gt;&gt; print(M.reduce_vector())
+    0|  
+    1|  
+    2|  
+    &gt;&gt;&gt; M[0,1] = 42.0
+    &gt;&gt;&gt; M[0,2] = 42.0
+    &gt;&gt;&gt; M[2,0] = -42.0
+    &gt;&gt;&gt; print(M.reduce_vector())
+    0|84.0
+    1|  
+    2|-42.0
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
     mon = mon.get_monoid(self.type)
