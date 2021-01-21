@@ -172,9 +172,8 @@ class Type(metaclass=MetaType):
 
 
 class BOOL(Type):
-    """GraphBLAS Boolean Type.
+    """GraphBLAS Boolean Type."""
 
-    """
     gb_type = lib.GrB_BOOL
     C = "_Bool"
     one = True
@@ -195,9 +194,8 @@ class BOOL(Type):
 
 
 class INT8(Type):
-    """GraphBLAS 8 bit signed integer.
+    """GraphBLAS 8 bit signed integer."""
 
-    """
     gb_type = lib.GrB_INT8
     C = "int8_t"
     typecode = "b"
@@ -205,9 +203,8 @@ class INT8(Type):
 
 
 class UINT8(Type):
-    """GraphBLAS 8 bit unsigned integer.
+    """GraphBLAS 8 bit unsigned integer."""
 
-    """
     gb_type = lib.GrB_UINT8
     C = "uint8_t"
     typecode = "B"
@@ -215,9 +212,8 @@ class UINT8(Type):
 
 
 class INT16(Type):
-    """GraphBLAS 16 bit signed integer.
+    """GraphBLAS 16 bit signed integer."""
 
-    """
     gb_type = lib.GrB_INT16
     C = "int16_t"
     typecode = "i"
@@ -225,9 +221,8 @@ class INT16(Type):
 
 
 class UINT16(Type):
-    """GraphBLAS 16 bit unsigned integer.
+    """GraphBLAS 16 bit unsigned integer."""
 
-    """
     gb_type = lib.GrB_UINT16
     C = "uint16_t"
     typecode = "I"
@@ -235,9 +230,8 @@ class UINT16(Type):
 
 
 class INT32(Type):
-    """GraphBLAS 32 bit signed integer.
+    """GraphBLAS 32 bit signed integer."""
 
-    """
     gb_type = lib.GrB_INT32
     C = "int32_t"
     typecode = "l"
@@ -245,9 +239,8 @@ class INT32(Type):
 
 
 class UINT32(Type):
-    """GraphBLAS 32 bit unsigned integer.
+    """GraphBLAS 32 bit unsigned integer."""
 
-    """
     gb_type = lib.GrB_UINT32
     C = "uint32_t"
     typecode = "L"
@@ -255,9 +248,8 @@ class UINT32(Type):
 
 
 class INT64(Type):
-    """GraphBLAS 64 bit signed integer.
+    """GraphBLAS 64 bit signed integer."""
 
-    """
     gb_type = lib.GrB_INT64
     C = "int64_t"
     typecode = "q"
@@ -265,9 +257,8 @@ class INT64(Type):
 
 
 class UINT64(Type):
-    """GraphBLAS 64 bit unsigned integer.
+    """GraphBLAS 64 bit unsigned integer."""
 
-    """
     gb_type = lib.GrB_UINT64
     C = "uint64_t"
     typecode = "Q"
@@ -275,9 +266,8 @@ class UINT64(Type):
 
 
 class FP32(Type):
-    """GraphBLAS 32 bit float.
+    """GraphBLAS 32 bit float."""
 
-    """
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP32
@@ -287,9 +277,8 @@ class FP32(Type):
 
 
 class FP64(Type):
-    """GraphBLAS 64 bit float.
+    """GraphBLAS 64 bit float."""
 
-    """
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP64
@@ -299,9 +288,8 @@ class FP64(Type):
 
 
 class FC32(Type):
-    """GraphBLAS 32 bit float complex.
+    """GraphBLAS 32 bit float complex."""
 
-    """
     prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)
@@ -311,9 +299,8 @@ class FC32(Type):
 
 
 class FC64(Type):
-    """GraphBLAS 64 bit float complex.
+    """GraphBLAS 64 bit float complex."""
 
-    """
     prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)

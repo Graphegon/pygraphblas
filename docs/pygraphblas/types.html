@@ -212,9 +212,8 @@ class Type(metaclass=MetaType):
 
 
 class BOOL(Type):
-    &#34;&#34;&#34;GraphBLAS Boolean Type.
+    &#34;&#34;&#34;GraphBLAS Boolean Type.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_BOOL
     C = &#34;_Bool&#34;
     one = True
@@ -235,9 +234,8 @@ class BOOL(Type):
 
 
 class INT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT8
     C = &#34;int8_t&#34;
     typecode = &#34;b&#34;
@@ -245,9 +243,8 @@ class INT8(Type):
 
 
 class UINT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT8
     C = &#34;uint8_t&#34;
     typecode = &#34;B&#34;
@@ -255,9 +252,8 @@ class UINT8(Type):
 
 
 class INT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT16
     C = &#34;int16_t&#34;
     typecode = &#34;i&#34;
@@ -265,9 +261,8 @@ class INT16(Type):
 
 
 class UINT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT16
     C = &#34;uint16_t&#34;
     typecode = &#34;I&#34;
@@ -275,9 +270,8 @@ class UINT16(Type):
 
 
 class INT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT32
     C = &#34;int32_t&#34;
     typecode = &#34;l&#34;
@@ -285,9 +279,8 @@ class INT32(Type):
 
 
 class UINT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT32
     C = &#34;uint32_t&#34;
     typecode = &#34;L&#34;
@@ -295,9 +288,8 @@ class UINT32(Type):
 
 
 class INT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT64
     C = &#34;int64_t&#34;
     typecode = &#34;q&#34;
@@ -305,9 +297,8 @@ class INT64(Type):
 
 
 class UINT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT64
     C = &#34;uint64_t&#34;
     typecode = &#34;Q&#34;
@@ -315,9 +306,8 @@ class UINT64(Type):
 
 
 class FP32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float.
+    &#34;&#34;&#34;GraphBLAS 32 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP32
@@ -327,9 +317,8 @@ class FP32(Type):
 
 
 class FP64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float.
+    &#34;&#34;&#34;GraphBLAS 64 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP64
@@ -339,9 +328,8 @@ class FP64(Type):
 
 
 class FC32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 32 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -351,9 +339,8 @@ class FC32(Type):
 
 
 class FC64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 64 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -635,9 +622,8 @@ infered from the operands and possible semiring.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BOOL(Type):
-    &#34;&#34;&#34;GraphBLAS Boolean Type.
+    &#34;&#34;&#34;GraphBLAS Boolean Type.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_BOOL
     C = &#34;_Bool&#34;
     one = True
@@ -1212,9 +1198,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FC32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 32 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -1636,9 +1621,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FC64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 64 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -2060,9 +2044,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FP32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float.
+    &#34;&#34;&#34;GraphBLAS 32 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP32
@@ -3048,9 +3031,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FP64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float.
+    &#34;&#34;&#34;GraphBLAS 64 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP64
@@ -4036,9 +4018,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT16
     C = &#34;int16_t&#34;
     typecode = &#34;i&#34;
@@ -4894,9 +4875,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT32
     C = &#34;int32_t&#34;
     typecode = &#34;l&#34;
@@ -5960,9 +5940,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT64
     C = &#34;int64_t&#34;
     typecode = &#34;q&#34;
@@ -7026,9 +7005,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT8
     C = &#34;int8_t&#34;
     typecode = &#34;b&#34;
@@ -8006,9 +7984,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT16
     C = &#34;uint16_t&#34;
     typecode = &#34;I&#34;
@@ -8944,9 +8921,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT32
     C = &#34;uint32_t&#34;
     typecode = &#34;L&#34;
@@ -9882,9 +9858,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT64
     C = &#34;uint64_t&#34;
     typecode = &#34;Q&#34;
@@ -10820,9 +10795,8 @@ def to_value(cls, cdata):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT8
     C = &#34;uint8_t&#34;
     typecode = &#34;B&#34;

@@ -53,8 +53,6 @@ class BinaryOp:
 
     _auto_binaryops = defaultdict(dict)
 
-    __slots__ = (&#34;name&#34;, &#34;binaryop&#34;, &#34;token&#34;)
-
     def __init__(self, op, typ, binaryop, udt=None, boolean=False):
         if udt is not None:
             o = ffi.new(&#34;GrB_BinaryOp*&#34;)
@@ -140,17 +138,18 @@ def binop_group(reg):
         srs.append(BinaryOp(op, typ, getattr(lib, n.string)))
     return srs
 
-def build_binaryops(__pdoc__):
+
+def build_binaryops():
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
-        name = f&#39;pygraphblas.binaryop.{r.name}&#39;
-        __pdoc__[name] = f&#34;BinaryOp {r.name}&#34;
+        r.__doc__ = f&#34;BinaryOp {r.name}&#34;
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
-        __pdoc__[f&#39;pygraphblas.binaryop.{name}&#39;] = f&#34;AutoBinaryOp {name}&#34;
         setattr(this, name, bo)
+        this.__all__.append(name)
+        bo.__doc__ = f&#34;AutoBinaryOp {name}&#34;
 
 
 def binary_op(arg_type, result_type=None):
@@ -319,16 +318,6 @@ def binary_op(arg_type, result_type=None):
 </details>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="pygraphblas.binaryop.BinaryOp" href="#pygraphblas.binaryop.BinaryOp">BinaryOp</a></b></code>:
-<ul class="hlist">
-<li><code><a title="pygraphblas.binaryop.BinaryOp.binaryop" href="#pygraphblas.binaryop.BinaryOp.binaryop">binaryop</a></code></li>
-<li><code><a title="pygraphblas.binaryop.BinaryOp.name" href="#pygraphblas.binaryop.BinaryOp.name">name</a></code></li>
-<li><code><a title="pygraphblas.binaryop.BinaryOp.token" href="#pygraphblas.binaryop.BinaryOp.token">token</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 <dt id="pygraphblas.binaryop.BinaryOp"><code class="flex name class">
 <span>class <span class="ident">BinaryOp</span></span>
@@ -344,8 +333,6 @@ def binary_op(arg_type, result_type=None):
     &#34;&#34;&#34;Wrapper around GrB_BinaryOp.&#34;&#34;&#34;
 
     _auto_binaryops = defaultdict(dict)
-
-    __slots__ = (&#34;name&#34;, &#34;binaryop&#34;, &#34;token&#34;)
 
     def __init__(self, op, typ, binaryop, udt=None, boolean=False):
         if udt is not None:
@@ -382,21 +369,6 @@ def binary_op(arg_type, result_type=None):
 <ul class="hlist">
 <li><a title="pygraphblas.binaryop.AutoBinaryOp" href="#pygraphblas.binaryop.AutoBinaryOp">AutoBinaryOp</a></li>
 </ul>
-<h3>Instance variables</h3>
-<dl>
-<dt id="pygraphblas.binaryop.BinaryOp.binaryop"><code class="name">var <span class="ident">binaryop</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
-</dd>
-<dt id="pygraphblas.binaryop.BinaryOp.name"><code class="name">var <span class="ident">name</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
-</dd>
-<dt id="pygraphblas.binaryop.BinaryOp.token"><code class="name">var <span class="ident">token</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="pygraphblas.binaryop.BinaryOp.get_binaryop"><code class="name flex">
@@ -451,10 +423,7 @@ def binary_op(arg_type, result_type=None):
 <li>
 <code><a title="pygraphblas.binaryop.BinaryOp" href="#pygraphblas.binaryop.BinaryOp">BinaryOp</a></code>
 <ul class="">
-<li><code><a title="pygraphblas.binaryop.BinaryOp.binaryop" href="#pygraphblas.binaryop.BinaryOp.binaryop">binaryop</a></code></li>
 <li><code><a title="pygraphblas.binaryop.BinaryOp.get_binaryop" href="#pygraphblas.binaryop.BinaryOp.get_binaryop">get_binaryop</a></code></li>
-<li><code><a title="pygraphblas.binaryop.BinaryOp.name" href="#pygraphblas.binaryop.BinaryOp.name">name</a></code></li>
-<li><code><a title="pygraphblas.binaryop.BinaryOp.token" href="#pygraphblas.binaryop.BinaryOp.token">token</a></code></li>
 </ul>
 </li>
 </ul>

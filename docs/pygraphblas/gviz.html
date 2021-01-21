@@ -42,16 +42,18 @@ from IPython.display import display
 
 
 __all__ = [
-    &#39;draw&#39;,
-    &#39;draw_graph&#39;,
-    &#39;draw_matrix&#39;,
-    &#39;draw_vector&#39;,
-    &#39;draw_layers&#39;,
-    &#39;draw_op&#39;,
-    ]
+    &#34;draw&#34;,
+    &#34;draw_graph&#34;,
+    &#34;draw_matrix&#34;,
+    &#34;draw_vector&#34;,
+    &#34;draw_layers&#34;,
+    &#34;draw_op&#34;,
+]
+
 
 def _str(s, label_width):
     return str(s)[:label_width]
+
 
 def draw_vector(V, name=&#34;&#34;, rankdir=&#34;LR&#34;, ioff=0, joff=0):
     g = Digraph(name)

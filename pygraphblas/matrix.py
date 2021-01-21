@@ -1102,15 +1102,15 @@ class Matrix:
 
         >>> M = Matrix.sparse(types.FP32, 3, 3)
         >>> print(M.reduce_vector())
-        0|  
-        1|  
-        2|  
+        0|
+        1|
+        2|
         >>> M[0,1] = 42.0
         >>> M[0,2] = 42.0
         >>> M[2,0] = -42.0
         >>> print(M.reduce_vector())
         0|84.0
-        1|  
+        1|
         2|-42.0
 
         """
@@ -1530,7 +1530,13 @@ class Matrix:
         return out
 
     def extract_matrix(
-        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
+        self,
+        row_index=None,
+        col_index=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
     ):
         """Extract a submatrix.
 
@@ -1611,10 +1617,9 @@ class Matrix:
           2|149      |  2
               0  1  2
         >>> print(M.extract_col(0))
-        0|  
-        1|  
+        0|
+        1|
         2|149
-
         """
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -1635,7 +1640,7 @@ class Matrix:
     ):
         """Extract a row Vector.
 
-        
+
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
         >>> print(M)
               0  1  2
@@ -1644,9 +1649,9 @@ class Matrix:
           2|149      |  2
               0  1  2
         >>> print(M.extract_row(0))
-        0|  
+        0|
         1|42
-        2|  
+        2|
 
         """
         desc = desc | TransposeA

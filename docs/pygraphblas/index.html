@@ -175,12 +175,6 @@ you with a lot more background information.
 
 &#34;&#34;&#34;
 
-__pdoc__ = {
-    &#34;base&#34;: False,
-    &#34;build&#34;: False,
-}
-
-
 from .base import (
     lib,
     ffi,
@@ -202,7 +196,7 @@ from .unaryop import build_unaryops
 from .monoid import build_monoids
 
 build_semirings()
-build_binaryops(__pdoc__)
+build_binaryops()
 build_unaryops()
 build_monoids()
 
@@ -277,12 +271,19 @@ GxB_IMPLEMENTATION = GxB_IMPLEMENTATION
 GxB_SPEC = GxB_SPEC
 &#34;&#34;&#34; Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
+
 def run_doctests():
     import sys, doctest
 
     this = sys.modules[__name__]
     for mod in (this, matrix, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
+
+
+__pdoc__ = {
+    &#34;base&#34;: False,
+    &#34;build&#34;: False,
+}</code></pre>
 </details>
 </section>
 <section>
@@ -513,9 +514,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BOOL(Type):
-    &#34;&#34;&#34;GraphBLAS Boolean Type.
+    &#34;&#34;&#34;GraphBLAS Boolean Type.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_BOOL
     C = &#34;_Bool&#34;
     one = True
@@ -545,9 +545,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FC32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 32 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -566,9 +565,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FC64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float complex.
+    &#34;&#34;&#34;GraphBLAS 64 bit float complex.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     prefix = &#34;GxB&#34;
     one = complex(1.0)
     zero = complex(0.0)
@@ -587,9 +585,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FP32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit float.
+    &#34;&#34;&#34;GraphBLAS 32 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP32
@@ -608,9 +605,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FP64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit float.
+    &#34;&#34;&#34;GraphBLAS 64 bit float.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     one = 1.0
     zero = 0.0
     gb_type = lib.GrB_FP64
@@ -629,9 +625,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT16
     C = &#34;int16_t&#34;
     typecode = &#34;i&#34;
@@ -648,9 +643,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT32
     C = &#34;int32_t&#34;
     typecode = &#34;l&#34;
@@ -667,9 +661,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT64
     C = &#34;int64_t&#34;
     typecode = &#34;q&#34;
@@ -686,9 +679,8 @@ The parameter is typically in the range
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class INT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit signed integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_INT8
     C = &#34;int8_t&#34;
     typecode = &#34;b&#34;
@@ -1899,15 +1891,15 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
         &gt;&gt;&gt; print(M.reduce_vector())
-        0|  
-        1|  
-        2|  
+        0|
+        1|
+        2|
         &gt;&gt;&gt; M[0,1] = 42.0
         &gt;&gt;&gt; M[0,2] = 42.0
         &gt;&gt;&gt; M[2,0] = -42.0
         &gt;&gt;&gt; print(M.reduce_vector())
         0|84.0
-        1|  
+        1|
         2|-42.0
 
         &#34;&#34;&#34;
@@ -2327,7 +2319,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def extract_matrix(
-        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
+        self,
+        row_index=None,
+        col_index=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
     ):
         &#34;&#34;&#34;Extract a submatrix.
 
@@ -2408,10 +2406,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_col(0))
-        0|  
-        1|  
+        0|
+        1|
         2|149
-
         &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -2432,7 +2429,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     ):
         &#34;&#34;&#34;Extract a row Vector.
 
-        
+
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -2441,9 +2438,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_row(0))
-        0|  
+        0|
         1|42
-        2|  
+        2|
 
         &#34;&#34;&#34;
         desc = desc | TransposeA
@@ -2919,9 +2916,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT16(Type):
-    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 16 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT16
     C = &#34;uint16_t&#34;
     typecode = &#34;I&#34;
@@ -2938,9 +2934,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT32(Type):
-    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 32 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT32
     C = &#34;uint32_t&#34;
     typecode = &#34;L&#34;
@@ -2957,9 +2952,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT64(Type):
-    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 64 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT64
     C = &#34;uint64_t&#34;
     typecode = &#34;Q&#34;
@@ -2976,9 +2970,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UINT8(Type):
-    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.
+    &#34;&#34;&#34;GraphBLAS 8 bit unsigned integer.&#34;&#34;&#34;
 
-    &#34;&#34;&#34;
     gb_type = lib.GrB_UINT8
     C = &#34;uint8_t&#34;
     typecode = &#34;B&#34;
@@ -3695,7 +3688,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         for row in range(self.size):
             value = self.get(row, empty_char)
             result += str(row) + &#34;|&#34;
-            result += format_string.format(self.type.format_value(value, width))
+            result += format_string.format(self.type.format_value(value, width)).rstrip()
             if row &lt; self.size - 1:
                 result += &#34;\n&#34;
         return result

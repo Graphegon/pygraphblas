@@ -1134,15 +1134,15 @@ class Matrix:
 
         &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
         &gt;&gt;&gt; print(M.reduce_vector())
-        0|  
-        1|  
-        2|  
+        0|
+        1|
+        2|
         &gt;&gt;&gt; M[0,1] = 42.0
         &gt;&gt;&gt; M[0,2] = 42.0
         &gt;&gt;&gt; M[2,0] = -42.0
         &gt;&gt;&gt; print(M.reduce_vector())
         0|84.0
-        1|  
+        1|
         2|-42.0
 
         &#34;&#34;&#34;
@@ -1562,7 +1562,13 @@ class Matrix:
         return out
 
     def extract_matrix(
-        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
+        self,
+        row_index=None,
+        col_index=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
     ):
         &#34;&#34;&#34;Extract a submatrix.
 
@@ -1643,10 +1649,9 @@ class Matrix:
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_col(0))
-        0|  
-        1|  
+        0|
+        1|
         2|149
-
         &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -1667,7 +1672,7 @@ class Matrix:
     ):
         &#34;&#34;&#34;Extract a row Vector.
 
-        
+
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -1676,9 +1681,9 @@ class Matrix:
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_row(0))
-        0|  
+        0|
         1|42
-        2|  
+        2|
 
         &#34;&#34;&#34;
         desc = desc | TransposeA
@@ -3266,15 +3271,15 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
         &gt;&gt;&gt; print(M.reduce_vector())
-        0|  
-        1|  
-        2|  
+        0|
+        1|
+        2|
         &gt;&gt;&gt; M[0,1] = 42.0
         &gt;&gt;&gt; M[0,2] = 42.0
         &gt;&gt;&gt; M[2,0] = -42.0
         &gt;&gt;&gt; print(M.reduce_vector())
         0|84.0
-        1|  
+        1|
         2|-42.0
 
         &#34;&#34;&#34;
@@ -3694,7 +3699,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         return out
 
     def extract_matrix(
-        self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
+        self,
+        row_index=None,
+        col_index=None,
+        out=None,
+        mask=None,
+        accum=None,
+        desc=Default,
     ):
         &#34;&#34;&#34;Extract a submatrix.
 
@@ -3775,10 +3786,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_col(0))
-        0|  
-        1|  
+        0|
+        1|
         2|149
-
         &#34;&#34;&#34;
         stop_val = self.ncols if TransposeA in desc else self.nrows
         if out is None:
@@ -3799,7 +3809,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     ):
         &#34;&#34;&#34;Extract a row Vector.
 
-        
+
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
         &gt;&gt;&gt; print(M)
               0  1  2
@@ -3808,9 +3818,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; print(M.extract_row(0))
-        0|  
+        0|
         1|42
-        2|  
+        2|
 
         &#34;&#34;&#34;
         desc = desc | TransposeA
@@ -5799,8 +5809,8 @@ interchangeably for either operation.</p>
   2|149      |  2
       0  1  2
 &gt;&gt;&gt; print(M.extract_col(0))
-0|  
-1|  
+0|
+1|
 2|149
 </code></pre></div>
 <details class="source">
@@ -5820,10 +5830,9 @@ interchangeably for either operation.</p>
       2|149      |  2
           0  1  2
     &gt;&gt;&gt; print(M.extract_col(0))
-    0|  
-    1|  
+    0|
+    1|
     2|149
-
     &#34;&#34;&#34;
     stop_val = self.ncols if TransposeA in desc else self.nrows
     if out is None:
@@ -5884,7 +5893,13 @@ in the computation.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_matrix(
-    self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=Default
+    self,
+    row_index=None,
+    col_index=None,
+    out=None,
+    mask=None,
+    accum=None,
+    desc=Default,
 ):
     &#34;&#34;&#34;Extract a submatrix.
 
@@ -5966,7 +5981,7 @@ in the computation.</p>
   2|149      |  2
       0  1  2
 &gt;&gt;&gt; print(M.extract_row(0))
-0|  
+0|
 1|42
 2|
 </code></pre></div>
@@ -5979,7 +5994,7 @@ in the computation.</p>
 ):
     &#34;&#34;&#34;Extract a row Vector.
 
-    
+
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
     &gt;&gt;&gt; print(M)
           0  1  2
@@ -5988,9 +6003,9 @@ in the computation.</p>
       2|149      |  2
           0  1  2
     &gt;&gt;&gt; print(M.extract_row(0))
-    0|  
+    0|
     1|42
-    2|  
+    2|
 
     &#34;&#34;&#34;
     desc = desc | TransposeA
@@ -6484,15 +6499,15 @@ True
 <div class="desc"><p>Reduce matrix to a vector.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
 &gt;&gt;&gt; print(M.reduce_vector())
-0|  
-1|  
-2|  
+0|
+1|
+2|
 &gt;&gt;&gt; M[0,1] = 42.0
 &gt;&gt;&gt; M[0,2] = 42.0
 &gt;&gt;&gt; M[2,0] = -42.0
 &gt;&gt;&gt; print(M.reduce_vector())
 0|84.0
-1|  
+1|
 2|-42.0
 </code></pre></div>
 <details class="source">
@@ -6504,15 +6519,15 @@ True
 
     &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
     &gt;&gt;&gt; print(M.reduce_vector())
-    0|  
-    1|  
-    2|  
+    0|
+    1|
+    2|
     &gt;&gt;&gt; M[0,1] = 42.0
     &gt;&gt;&gt; M[0,2] = 42.0
     &gt;&gt;&gt; M[2,0] = -42.0
     &gt;&gt;&gt; print(M.reduce_vector())
     0|84.0
-    1|  
+    1|
     2|-42.0
 
     &#34;&#34;&#34;
