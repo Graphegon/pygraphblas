@@ -706,9 +706,9 @@ class Matrix:
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
         &gt;&gt;&gt; B = Matrix.from_lists(
-        ...    [0, 1, 3],
-        ...    [1, 5, 5],
-        ...    [9, 4, 7], 7, 7)
+        ...    [0, 1, 4, 6],
+        ...    [1, 3, 5, 5],
+        ...    [9, 1, 4, 7], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
@@ -717,12 +717,12 @@ class Matrix:
         &gt;&gt;&gt; print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
-          1|              2  4  3|  1
+          1|           1  2     3|  1
           2|                 4   |  2
-          3|  5     6        7   |  3
-          4|                 7   |  4
+          3|  5     6            |  3
+          4|                11   |  4
           5|        8            |  5
-          6|        9 10 11      |  6
+          6|        9 10 11  7   |  6
               0  1  2  3  4  5  6
 
         ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
@@ -2758,9 +2758,9 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
         &gt;&gt;&gt; B = Matrix.from_lists(
-        ...    [0, 1, 3],
-        ...    [1, 5, 5],
-        ...    [9, 4, 7], 7, 7)
+        ...    [0, 1, 4, 6],
+        ...    [1, 3, 5, 5],
+        ...    [9, 1, 4, 7], 7, 7)
         &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
@@ -2769,12 +2769,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &gt;&gt;&gt; print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
-          1|              2  4  3|  1
+          1|           1  2     3|  1
           2|                 4   |  2
-          3|  5     6        7   |  3
-          4|                 7   |  4
+          3|  5     6            |  3
+          4|                11   |  4
           5|        8            |  5
-          6|        9 10 11      |  6
+          6|        9 10 11  7   |  6
               0  1  2  3  4  5  6
 
         ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
@@ -5359,9 +5359,9 @@ interchangeably for either operation.</p>
 </code></pre>
 <p><img alt="Matrix_eadd_A.png" src="../imgs/Matrix_eadd_A.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
-...    [0, 1, 3],
-...    [1, 5, 5],
-...    [9, 4, 7], 7, 7)
+...    [0, 1, 4, 6],
+...    [1, 3, 5, 5],
+...    [9, 1, 4, 7], 7, 7)
 &gt;&gt;&gt; g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
 </code></pre>
 <p><img alt="Matrix_eadd_B.png" src="../imgs/Matrix_eadd_B.png"></p>
@@ -5369,12 +5369,12 @@ interchangeably for either operation.</p>
 &gt;&gt;&gt; print(A.eadd(B))
       0  1  2  3  4  5  6
   0|     9     1         |  0
-  1|              2  4  3|  1
+  1|           1  2     3|  1
   2|                 4   |  2
-  3|  5     6        7   |  3
-  4|                 7   |  4
+  3|  5     6            |  3
+  4|                11   |  4
   5|        8            |  5
-  6|        9 10 11      |  6
+  6|        9 10 11  7   |  6
       0  1  2  3  4  5  6
 </code></pre>
 <p><img alt="Matrix_eadd_C.png" src="../imgs/Matrix_eadd_C.png"></p></div>
@@ -5422,9 +5422,9 @@ interchangeably for either operation.</p>
     ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
     &gt;&gt;&gt; B = Matrix.from_lists(
-    ...    [0, 1, 3],
-    ...    [1, 5, 5],
-    ...    [9, 4, 7], 7, 7)
+    ...    [0, 1, 4, 6],
+    ...    [1, 3, 5, 5],
+    ...    [9, 1, 4, 7], 7, 7)
     &gt;&gt;&gt; g = draw_graph(B, filename=&#39;/docs/imgs/Matrix_eadd_B&#39;)
 
     ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
@@ -5433,12 +5433,12 @@ interchangeably for either operation.</p>
     &gt;&gt;&gt; print(A.eadd(B))
           0  1  2  3  4  5  6
       0|     9     1         |  0
-      1|              2  4  3|  1
+      1|           1  2     3|  1
       2|                 4   |  2
-      3|  5     6        7   |  3
-      4|                 7   |  4
+      3|  5     6            |  3
+      4|                11   |  4
       5|        8            |  5
-      6|        9 10 11      |  6
+      6|        9 10 11  7   |  6
           0  1  2  3  4  5  6
 
     ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)

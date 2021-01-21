@@ -674,9 +674,9 @@ class Matrix:
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
 
         >>> B = Matrix.from_lists(
-        ...    [0, 1, 3],
-        ...    [1, 5, 5],
-        ...    [9, 4, 7], 7, 7)
+        ...    [0, 1, 4, 6],
+        ...    [1, 3, 5, 5],
+        ...    [9, 1, 4, 7], 7, 7)
         >>> g = draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
@@ -685,12 +685,12 @@ class Matrix:
         >>> print(A.eadd(B))
               0  1  2  3  4  5  6
           0|     9     1         |  0
-          1|              2  4  3|  1
+          1|           1  2     3|  1
           2|                 4   |  2
-          3|  5     6        7   |  3
-          4|                 7   |  4
+          3|  5     6            |  3
+          4|                11   |  4
           5|        8            |  5
-          6|        9 10 11      |  6
+          6|        9 10 11  7   |  6
               0  1  2  3  4  5  6
 
         ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
