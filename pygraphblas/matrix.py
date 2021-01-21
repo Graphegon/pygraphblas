@@ -1699,7 +1699,18 @@ class Matrix:
     def assign_col(
         self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a vector to a column."""
+        """Assign a vector to a column.
+
+        >>> M = Matrix.sparse(types.BOOL, 3, 3)
+        >>> M.assign_col(1, Vector.from_lists([1, 2], [True, True], 3))
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|     t   |  1
+          2|     t   |  2
+              0  1  2
+
+        """
         stop_val = self.ncols if TransposeA in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1713,7 +1724,18 @@ class Matrix:
     def assign_row(
         self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a vector to a row."""
+        """Assign a vector to a row.
+
+        >>> M = Matrix.sparse(types.BOOL, 3, 3)
+        >>> M.assign_row(1, Vector.from_lists([1, 2], [True, True], 3))
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|     t  t|  1
+          2|         |  2
+              0  1  2
+
+        """
         stop_val = self.nrows if TransposeA in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
@@ -1727,7 +1749,20 @@ class Matrix:
     def assign_matrix(
         self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
     ):
-        """Assign a submatrix."""
+        """Assign a submatrix.
+
+        >>> M = Matrix.sparse(types.BOOL, 3, 3)
+        >>> S = Matrix.sparse(types.BOOL, 3, 3)
+        >>> S[1,1] = True
+        >>> M.assign_matrix(S)
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|     t   |  1
+          2|         |  2
+              0  1  2
+
+        """
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
         if isize is None:
