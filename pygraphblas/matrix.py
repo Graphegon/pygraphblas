@@ -65,6 +65,12 @@ class Matrix:
     A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
     A /    B | Matrix Element-Wise Intersection | type default DIV combiner
     A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
+    A ==   B | Compare Element-Wise Union | type default EQ operator
+    A !=   B | Compare Element-Wise Union | type default NE operator
+    A <    B | Compare Element-Wise Union | type default LT operator
+    A >    B | Compare Element-Wise Union | type default GT operator
+    A <=   B | Compare Element-Wise Union | type default LE operator
+    A >=   B | Compare Element-Wise Union | type default GE operator
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,

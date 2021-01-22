@@ -1,0 +1,9 @@
+cffi
+numpy
+scipy
+numba
+pytest
+setuptools
+contextvars
+matplotlib
+graphviz

@@ -97,6 +97,12 @@ class Matrix:
     A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
     A /    B | Matrix Element-Wise Intersection | type default DIV combiner
     A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
+    A ==   B | Compare Element-Wise Union | type default EQ operator
+    A !=   B | Compare Element-Wise Union | type default NE operator
+    A &lt;    B | Compare Element-Wise Union | type default LT operator
+    A &gt;    B | Compare Element-Wise Union | type default GT operator
+    A &lt;=   B | Compare Element-Wise Union | type default LE operator
+    A &gt;=   B | Compare Element-Wise Union | type default GE operator
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
@@ -2287,6 +2293,42 @@ B</td>
 <td>In-place Matrix Element-Wise Intersection</td>
 <td>type default DIV combiner</td>
 </tr>
+<tr>
+<td>A ==
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default EQ operator</td>
+</tr>
+<tr>
+<td>A !=
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default NE operator</td>
+</tr>
+<tr>
+<td>A &lt;
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default LT operator</td>
+</tr>
+<tr>
+<td>A &gt;
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default GT operator</td>
+</tr>
+<tr>
+<td>A &lt;=
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default LE operator</td>
+</tr>
+<tr>
+<td>A &gt;=
+B</td>
+<td>Compare Element-Wise Union</td>
+<td>type default GE operator</td>
+</tr>
 </tbody>
 </table>
 <p>Note that all the above operator syntax is mearly sugar over
@@ -2326,6 +2368,12 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
     A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
     A /    B | Matrix Element-Wise Intersection | type default DIV combiner
     A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
+    A ==   B | Compare Element-Wise Union | type default EQ operator
+    A !=   B | Compare Element-Wise Union | type default NE operator
+    A &lt;    B | Compare Element-Wise Union | type default LT operator
+    A &gt;    B | Compare Element-Wise Union | type default GT operator
+    A &lt;=   B | Compare Element-Wise Union | type default LE operator
+    A &gt;=   B | Compare Element-Wise Union | type default GE operator
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
