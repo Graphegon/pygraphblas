@@ -256,10 +256,10 @@ def test_mxm_context():
         o = m @ n
     assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [True, True, True]))
 
-    with descriptor.TransposeA:
+    with descriptor.T0:
         o = m @ n
 
-    assert o.iseq(m.mxm(n, desc=descriptor.TransposeA))
+    assert o.iseq(m.mxm(n, desc=descriptor.T0))
 
     with BOOL.LOR_LAND:
         o = m @ n
@@ -279,7 +279,7 @@ def test_mxv():
 
     assert o.iseq(m @ v)
 
-    assert o.iseq(m.transpose().mxv(v, desc=descriptor.TransposeA))
+    assert o.iseq(m.transpose().mxv(v, desc=descriptor.T0))
 
     with semiring.PLUS_PLUS:
         o = m.mxv(v)
@@ -302,7 +302,7 @@ def test_matrix_transpose():
     )
     w = v.transpose()
     assert w.iseq(Matrix.from_lists([0, 1, 2], [2, 1, 0], [0, 1, 2], nrows=4, ncols=3))
-    v2 = v.transpose(desc=descriptor.TransposeA)
+    v2 = v.transpose(desc=descriptor.T0)
     assert v2.iseq(v)
 
 

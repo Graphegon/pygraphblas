@@ -87,18 +87,24 @@ from .base import (
 
 lib.LAGraph_init()
 
+from . import matrix
+from . import vector
+from . import scalar
+from . import semiring
+from . import binaryop
+from . import unaryop
+from . import monoid
+from . import descriptor
+from . import gviz
+
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
-from .semiring import build_semirings
-from .binaryop import build_binaryops
-from .unaryop import build_unaryops
-from .monoid import build_monoids
 
-build_semirings()
-build_binaryops()
-build_unaryops()
-build_monoids()
+semiring.build_semirings()
+binaryop.build_binaryops()
+unaryop.build_unaryops()
+monoid.build_monoids()
 
 from .types import (
     FP64,
@@ -115,13 +121,6 @@ from .types import (
     UINT8,
     BOOL,
 )
-
-from . import semiring
-from . import binaryop
-from . import unaryop
-from . import monoid
-from . import descriptor
-from . import gviz
 
 __all__ = [
     "lib",
@@ -176,7 +175,7 @@ def run_doctests():
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, base):
+    for mod in (this, matrix, descriptor, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
 
 
