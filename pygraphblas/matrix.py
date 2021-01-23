@@ -1717,7 +1717,7 @@ class Matrix:
         2|
 
         """
-        desc = desc | T0
+        desc = desc & T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
