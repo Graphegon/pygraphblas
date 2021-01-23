@@ -28,7 +28,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeA, current_desc
+from .descriptor import Descriptor, Default, T0, current_desc
 from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
@@ -644,7 +644,7 @@ class Matrix:
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
-                if TransposeA in desc
+                if T0 in desc
                 else (self.ncols, self.nrows)
             )
             _out = ffi.new("GrB_Matrix*")
@@ -680,7 +680,7 @@ class Matrix:
                   0    1    2
 
         """
-        return self.transpose(cast, out, desc=TransposeA)
+        return self.transpose(cast, out, desc=T0)
 
     def eadd(
         self,
@@ -1539,7 +1539,7 @@ class Matrix:
 
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = self.ncols if TransposeA in desc else self.nrows
+            new_dimension = self.ncols if T0 in desc else self.nrows
             out = Vector.sparse(typ, new_dimension)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1639,7 +1639,7 @@ class Matrix:
               0  1
 
         """
-        ta = TransposeA in desc
+        ta = T0 in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -1684,7 +1684,7 @@ class Matrix:
         1|
         2|149
         """
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
@@ -1717,7 +1717,7 @@ class Matrix:
         2|
 
         """
-        desc = desc | TransposeA
+        desc = desc | T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -1774,7 +1774,7 @@ class Matrix:
               0  1  2
 
         """
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -1799,7 +1799,7 @@ class Matrix:
               0  1  2
 
         """
-        stop_val = self.nrows if TransposeA in desc else self.ncols
+        stop_val = self.nrows if T0 in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(mask, accum, desc)

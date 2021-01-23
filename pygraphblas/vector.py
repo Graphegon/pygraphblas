@@ -24,7 +24,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeB
+from .descriptor import Descriptor, Default, T1
 
 __all__ = ["Vector"]
 __pdoc__ = {"Vector.__init__": False}
@@ -361,7 +361,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = other.nrows if TransposeB in desc else other.ncols
+            new_dimension = other.nrows if T1 in desc else other.ncols
             out = Vector.sparse(typ, new_dimension)
         elif not isinstance(out, Vector):
             raise TypeError("Output argument must be Vector.")

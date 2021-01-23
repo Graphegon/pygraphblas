@@ -60,7 +60,7 @@ from .binaryop import BinaryOp, current_accum, current_binop
 from .unaryop import UnaryOp
 from .monoid import Monoid, current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, TransposeA, current_desc
+from .descriptor import Descriptor, Default, T0, current_desc
 from .gviz import draw_graph, draw_matrix
 
 __all__ = [&#34;Matrix&#34;]
@@ -676,7 +676,7 @@ class Matrix:
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
-                if TransposeA in desc
+                if T0 in desc
                 else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -712,7 +712,7 @@ class Matrix:
                   0    1    2
 
         &#34;&#34;&#34;
-        return self.transpose(cast, out, desc=TransposeA)
+        return self.transpose(cast, out, desc=T0)
 
     def eadd(
         self,
@@ -1571,7 +1571,7 @@ class Matrix:
 
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = self.ncols if TransposeA in desc else self.nrows
+            new_dimension = self.ncols if T0 in desc else self.nrows
             out = Vector.sparse(typ, new_dimension)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1671,7 +1671,7 @@ class Matrix:
               0  1
 
         &#34;&#34;&#34;
-        ta = TransposeA in desc
+        ta = T0 in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -1716,7 +1716,7 @@ class Matrix:
         1|
         2|149
         &#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
@@ -1749,7 +1749,7 @@ class Matrix:
         2|
 
         &#34;&#34;&#34;
-        desc = desc | TransposeA
+        desc = desc | T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -1806,7 +1806,7 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -1831,7 +1831,7 @@ class Matrix:
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.nrows if TransposeA in desc else self.ncols
+        stop_val = self.nrows if T0 in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -2947,7 +2947,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         if out is None:
             new_dimensions = (
                 (self.nrows, self.ncols)
-                if TransposeA in desc
+                if T0 in desc
                 else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -2983,7 +2983,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
                   0    1    2
 
         &#34;&#34;&#34;
-        return self.transpose(cast, out, desc=TransposeA)
+        return self.transpose(cast, out, desc=T0)
 
     def eadd(
         self,
@@ -3842,7 +3842,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
 
         typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
-            new_dimension = self.ncols if TransposeA in desc else self.nrows
+            new_dimension = self.ncols if T0 in desc else self.nrows
             out = Vector.sparse(typ, new_dimension)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -3942,7 +3942,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1
 
         &#34;&#34;&#34;
-        ta = TransposeA in desc
+        ta = T0 in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -3987,7 +3987,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         1|
         2|149
         &#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
@@ -4020,7 +4020,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         2|
 
         &#34;&#34;&#34;
-        desc = desc | TransposeA
+        desc = desc | T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -4077,7 +4077,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.ncols if TransposeA in desc else self.nrows
+        stop_val = self.ncols if T0 in desc else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -4102,7 +4102,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.nrows if TransposeA in desc else self.ncols
+        stop_val = self.nrows if T0 in desc else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -5372,7 +5372,7 @@ second input to a scalar second.</p>
           0  1  2
 
     &#34;&#34;&#34;
-    stop_val = self.ncols if TransposeA in desc else self.nrows
+    stop_val = self.ncols if T0 in desc else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -5469,7 +5469,7 @@ second input to a scalar second.</p>
           0  1  2
 
     &#34;&#34;&#34;
-    stop_val = self.nrows if TransposeA in desc else self.ncols
+    stop_val = self.nrows if T0 in desc else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
 
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -5726,7 +5726,7 @@ new matrix is of the cast type is created.</p>
               0    1    2
 
     &#34;&#34;&#34;
-    return self.transpose(cast, out, desc=TransposeA)</code></pre>
+    return self.transpose(cast, out, desc=T0)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.matrix.Matrix.clear"><code class="name flex">
@@ -6200,7 +6200,7 @@ interchangeably for either operation.</p>
     1|
     2|149
     &#34;&#34;&#34;
-    stop_val = self.ncols if TransposeA in desc else self.nrows
+    stop_val = self.ncols if T0 in desc else self.nrows
     if out is None:
         out = Vector.sparse(self.type, stop_val)
 
@@ -6305,7 +6305,7 @@ in the computation.</p>
           0  1
 
     &#34;&#34;&#34;
-    ta = TransposeA in desc
+    ta = T0 in desc
     mask, accum, desc = self._get_args(mask, accum, desc)
     result_nrows = self.ncols if ta else self.nrows
     result_ncols = self.nrows if ta else self.ncols
@@ -6374,7 +6374,7 @@ in the computation.</p>
     2|
 
     &#34;&#34;&#34;
-    desc = desc | TransposeA
+    desc = desc | T0
     return self.extract_col(
         row_index, col_slice, out, desc=desc, mask=None, accum=None
     )</code></pre>
@@ -6579,7 +6579,7 @@ See <code><a title="pygraphblas.matrix.Matrix.iseq" href="#pygraphblas.matrix.Ma
 
     typ = cast or types.promote(self.type, other.type, semiring)
     if out is None:
-        new_dimension = self.ncols if TransposeA in desc else self.nrows
+        new_dimension = self.ncols if T0 in desc else self.nrows
         out = Vector.sparse(typ, new_dimension)
 
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -7356,7 +7356,7 @@ Guide</a></p>
     if out is None:
         new_dimensions = (
             (self.nrows, self.ncols)
-            if TransposeA in desc
+            if T0 in desc
             else (self.ncols, self.nrows)
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
