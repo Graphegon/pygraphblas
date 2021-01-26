@@ -177,6 +177,11 @@ you with a lot more background information.
 
 &#34;&#34;&#34;
 
+__pdoc__ = {
+    &#34;base&#34;: False,
+    &#34;build&#34;: False,
+}
+
 from .base import (
     lib,
     ffi,
@@ -204,7 +209,8 @@ from .vector import Vector
 from .scalar import Scalar
 
 semiring.build_semirings()
-binaryop.build_binaryops()
+binaryop.build_binaryops(__pdoc__)
+breakpoint()
 unaryop.build_unaryops()
 monoid.build_monoids()
 
@@ -278,13 +284,7 @@ def run_doctests():
 
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
-
-
-__pdoc__ = {
-    &#34;base&#34;: False,
-    &#34;build&#34;: False,
-}</code></pre>
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
 </details>
 </section>
 <section>
@@ -2543,7 +2543,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         2|
 
         &#34;&#34;&#34;
-        desc = desc | T0
+        desc = desc &amp; T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )

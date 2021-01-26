@@ -2,9 +2,10 @@
 doctests and Jupyter notebooks.
 
 """
+import operator
+from itertools import accumulate
 from graphviz import Digraph, Source
-from PIL import Image, ImageDraw
-
+from PIL import Image, ImageDraw, ImageFont
 
 __all__ = [
     "draw",
@@ -12,7 +13,9 @@ __all__ = [
     "draw_matrix",
     "draw_vector",
     "draw_layers",
-    "draw_op",
+    "draw_graph_op",
+    "draw_matrix_op",
+    "draw_matrix_layers",
 ]
 
 
@@ -20,7 +23,7 @@ def _str(s, label_width):
     return str(s)[:label_width]
 
 
-def draw_vector(V, name="", rankdir="LR", ioff=0, joff=0):
+def draw_vector_dot(V, name="", rankdir="LR", ioff=0, joff=0):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep="1")
     for i, v in V:
@@ -117,10 +120,10 @@ def draw(obj, name="", **kws):
     if isinstance(obj, Matrix):
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
-        return draw_vector(obj, name, **kws)
+        return draw_vector_dot(obj, name, **kws)
 
 
-def draw_op(left, op, right, result):
+def draw_graph_op(left, op, right, result):
     from pygraphblas import Matrix, Vector
 
     ioff = 0
@@ -135,7 +138,7 @@ def draw_op(left, op, right, result):
         if isinstance(obj, Vector):
             ioff += obj.size
             joff += obj.size
-            return draw_vector(obj, name=name, ioff=ioff, joff=joff)
+            return draw_vector_dot(obj, name=name, ioff=ioff, joff=joff)
 
     g = Digraph()
     g.subgraph(draw(left, name="cluster_left"))
@@ -146,10 +149,38 @@ def draw_op(left, op, right, result):
     return g
 
 
-def draw_matrix(
-    M, scale=10, axes=True, labels=False, mode=None, cmap="rainbow", filename=None
+def draw_vector(
+    V, scale=10, axes=True, labels=False, mode=None, cmap="rainbow", filename=None
 ):
-    from pygraphblas import BOOL
+    if not isinstance(V, Vector):
+        raise TypeError
+
+
+def draw_matrix(
+    M,
+    scale=10,
+    axes=True,
+    labels=False,
+    mode=None,
+    cmap="rainbow",
+    filename=None,
+    column=True,
+):
+    from pygraphblas import BOOL, Vector
+
+    cosmic_font = ImageFont.truetype("FantasqueSansMono-Bold.ttf", int(scale * 0.5))
+
+    if isinstance(M, Vector):
+        return draw_vector(
+            M,
+            scale=scale,
+            axes=axes,
+            labels=labels,
+            mode=mode,
+            cmap=cmap,
+            filename=filename,
+            column=column,
+        )
 
     if mode is None:
         mode = "RGB"
@@ -159,8 +190,8 @@ def draw_matrix(
 
         cmap = plt.get_cmap(cmap)
 
-    sx = (M.ncols + 1) * scale
-    sy = (M.nrows + 1) * scale
+    sx = ((M.ncols + 1) * scale) + 1
+    sy = ((M.nrows + 1) * scale) + 1
     im = Image.new(mode, (sx, sy), color="white")
     d = ImageDraw.Draw(im)
     for i, j, v in M:
@@ -170,23 +201,93 @@ def draw_matrix(
         if M.type is BOOL:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
-                fill="black",
-                outline="white",
+                fill="AliceBlue",
+                outline="black",
             )
         else:
+            d.rectangle(
+                (x - offset, y - offset, x + scale - offset, y + scale - offset),
+                outline="black",
+                fill="AliceBlue",
+            )
             d.text(
-                ((x - offset) + scale / 5, (y - offset) + scale / 5),
+                ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
                 str(v),
                 fill="black",
+                font=cosmic_font,
             )
     if axes:
         d.line((0, scale, im.size[0], scale), fill="black")
         d.line((scale, 0, scale, im.size[1]), fill="black")
     if labels:
         for i in range(M.ncols):
-            d.text((((i + 1) * scale) + scale / 5, scale / 5), str(i), fill="black")
+            d.text(
+                (((i + 1) * scale) + scale / 5, scale / 5),
+                str(i),
+                fill="black",
+                font=cosmic_font,
+            )
         for j in range(M.nrows):
-            d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill="black")
+            d.text(
+                (scale / 5, ((j + 1) * scale) + scale / 5),
+                str(j),
+                fill="black",
+                font=cosmic_font,
+            )
+    if filename is not None:
+        im.save(filename + ".png", "PNG")
+    return im
+
+
+def draw_vector(V, column=True, *args, **kwargs):
+    from pygraphblas import Matrix
+
+    if column:
+        A = Matrix.sparse(V.type, V.size, 1)
+        A[:, 0] = V
+    else:
+        A = Matrix.sparse(V.type, 1, V.size)
+        A[0, :] = V
+
+    return draw_matrix(A, *args, **kwargs)
+
+
+def draw_matrix_op(left, op, right, result, **kwargs):
+    scale = kwargs["scale"]
+    cosmic_font = ImageFont.truetype("FantasqueSansMono-Bold.ttf", scale)
+    left = draw_matrix(left, **kwargs)
+    right = draw_matrix(right, **kwargs)
+    result = draw_matrix(result, **kwargs)
+    op_width = cosmic_font.getsize(op)[0]
+    spacer = int(scale * 2)
+    width = left.size[0] + op_width + spacer + right.size[0] + spacer + result.size[0]
+    height = max(op_width + spacer, left.size[1], right.size[1], result.size[1])
+    im = Image.new(left.mode, (width, height), color="white")
+    d = ImageDraw.Draw(im)
+    im.paste(left, (0, 0))
+    d.text(
+        (left.size[0] + int(spacer / 2), height / 2), op, fill="black", font=cosmic_font
+    )
+    im.paste(right, (left.size[0] + op_width + spacer, 0))
+    d.text(
+        (left.size[0] + right.size[0] + op_width + (spacer * 1.5), height / 2),
+        "=",
+        fill="black",
+        font=cosmic_font,
+    )
+    im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
+    return im
+
+
+def draw_matrix_layers(layers, **kwargs):
+    filename = kwargs.pop("filename", None)
+    imgs = [draw_matrix(i, **kwargs) for i in layers]
+    widths = [0] + list(accumulate((i.size[0] for i in imgs), operator.add))
+    width = sum(widths)
+    height = max(i.size[1] for i in imgs)
+    im = Image.new(imgs[0].mode, (width, height), color="white")
+    for c, i in enumerate(imgs):
+        im.paste(i, (widths[c], 0))
     if filename is not None:
         im.save(filename + ".png", "PNG")
     return im

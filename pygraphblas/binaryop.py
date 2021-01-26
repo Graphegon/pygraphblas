@@ -48,6 +48,7 @@ class BinaryOp:
             cls = getattr(types, typ)
             setattr(cls, op, self)
         self.name = "_".join((op, typ))
+        self.__doc__ = self.name
         self.token = None
 
     def __enter__(self):
@@ -112,12 +113,10 @@ def build_binaryops():
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
-        r.__doc__ = f"BinaryOp {r.name}"
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)
         this.__all__.append(name)
-        bo.__doc__ = f"AutoBinaryOp {name}"
 
 
 def binary_op(arg_type, result_type=None):

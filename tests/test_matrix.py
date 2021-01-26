@@ -239,7 +239,7 @@ def test_mxm():
     assert r.iseq(m @ n)
     m @= n
     assert r.iseq(m)
-    o = m.mxm(n, semiring=BOOL.LOR_LAND)
+    o = m.mxm(n, sring=BOOL.LOR_LAND)
     assert o.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [True, True, True]))
 
 
@@ -534,7 +534,7 @@ def test_get_set_options():
     v.format = lib.GxB_BY_COL
     assert v.hyper_switch == lib.GxB_ALWAYS_HYPER
     assert v.format == lib.GxB_BY_COL
-    assert v.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert v.sparsity == lib.GxB_AUTO_SPARSITY
     assert v.sparsity_status == lib.GxB_HYPERSPARSE
 
     v.hyper_switch = 2.0
@@ -543,13 +543,13 @@ def test_get_set_options():
     v.format = lib.GxB_BY_ROW
     assert v.format == lib.GxB_BY_ROW
 
-    v.sparsity_control = lib.GxB_BITMAP + lib.GxB_FULL
-    assert v.sparsity_control == lib.GxB_BITMAP + lib.GxB_FULL
+    v.sparsity = lib.GxB_BITMAP + lib.GxB_FULL
+    assert v.sparsity == lib.GxB_BITMAP + lib.GxB_FULL
 
     w = Matrix.sparse(INT8, 10, 10)
     assert w.hyper_switch == lib.GxB_HYPER_DEFAULT
     assert w.format == lib.GxB_BY_ROW
-    assert w.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert w.sparsity == lib.GxB_AUTO_SPARSITY
     assert w.sparsity_status == lib.GxB_HYPERSPARSE
 
 

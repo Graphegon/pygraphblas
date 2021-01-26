@@ -347,32 +347,30 @@ class Vector:
         other,
         cast=None,
         out=None,
-        semiring=None,
+        sring=None,
         mask=None,
         accum=None,
         desc=Default,
     ):
         """Vector-Matrix multiply."""
-        from .matrix import Matrix
 
-        if semiring is None:
-            semiring = current_semiring.get(None)
-
-        mask, accum, desc = self._get_args(mask, accum, desc)
-        typ = cast or types.promote(self.type, other.type, semiring)
         if out is None:
             new_dimension = other.nrows if T1 in desc else other.ncols
+            typ = cast or types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
-        elif not isinstance(out, Vector):
-            raise TypeError("Output argument must be Vector.")
-        if semiring is None:
-            semiring = typ.PLUS_TIMES
+        else:
+            typ = out.type
+
+        sring = current_semiring.get(typ.default_semiring())
+
+        mask, accum, desc = self._get_args(mask, accum, desc)
+
         self._check(
             lib.GrB_vxm(
                 out._vector[0],
                 mask,
                 accum,
-                semiring.get_semiring(typ),
+                sring.get_semiring(typ),
                 self._vector[0],
                 other._matrix[0],
                 desc.desc[0],

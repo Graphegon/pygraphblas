@@ -55,7 +55,7 @@ class Semiring:
         current_semiring.reset(self.token)
         return False
 
-    def get_semiring(self, left=None, right=None):
+    def get_semiring(self, typ):
         return self.semiring
 
 
@@ -64,8 +64,7 @@ class AutoSemiring(Semiring):
         self.name = name
         self.token = None
 
-    def get_semiring(self, left=None, right=None):
-        typ = types.promote(left, right)
+    def get_semiring(self, typ):
         return Semiring._auto_semirings[self.name][typ.gb_type]
 
 

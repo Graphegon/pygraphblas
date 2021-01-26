@@ -156,6 +156,10 @@ class Type(metaclass=MetaType):
         return ("{:>%s}" % width).format(val)
 
     @classmethod
+    def default_semiring(cls):
+        return cls.PLUS_TIMES
+
+    @classmethod
     def from_value(cls, value):
         if cls.base_name != "UDT":
             return value
@@ -180,6 +184,10 @@ class BOOL(Type):
     zero = False
     typecode = "B"
     numba_t = numba.boolean
+
+    @classmethod
+    def default_semiring(self):
+        return self.LOR_LAND
 
     @classmethod
     def format_value(cls, val, width=2):
@@ -457,15 +465,11 @@ _promotion_order = (
 )
 
 
-def promote(left, right, semiring=None):
+def promote(left, right):
     """Do type promotion, determine the result type of an operation
     infered from the operands and possible semiring.
 
     """
-    from .semiring import AutoSemiring
-
-    if semiring is not None and not isinstance(semiring, AutoSemiring):
-        return get_ztype(get_binaryop(get_add(semiring.get_semiring(left, right))))
     if left == right:
         return left
     elif left is None:

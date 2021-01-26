@@ -75,6 +75,11 @@ you with a lot more background information.
 
 """
 
+__pdoc__ = {
+    "base": False,
+    "build": False,
+}
+
 from .base import (
     lib,
     ffi,
@@ -177,9 +182,3 @@ def run_doctests():
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
-
-
-__pdoc__ = {
-    "base": False,
-    "build": False,
-}

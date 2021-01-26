@@ -6,11 +6,12 @@ from .base import lib, ffi, _check
 
 current_desc = contextvars.ContextVar("current_desc")
 
+
 class Descriptor:
     """Wrapper class around GraphBLAS Descriptors.
 
     Descriptors "describe" the various options that can be used to
-    control many aspects of graphblas operation.  
+    control many aspects of graphblas operation.
 
     GraphBLAS Descriptors have a field and a value.  All of the common
     Descriptors necessary to use the GraphBLAS are available from the
@@ -122,18 +123,15 @@ RT0 = R & T0
 RT1 = R & T1
 RT0T1 = R & T0 & T1
 
-RC = R & C
-RCT0 = R & C & T0
-RCT1 = R & C & T1
-RCT0T1 = R & C & T0 & T1
-
-# STRUCTURAL is new so it doesnt have an lagraph naming scheme or
-# verbose names due to their silly length.
-
 S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, "S")
 ST1 = S & T1
 ST0 = S & T0
 ST0T1 = S & T0 & T1
+
+RC = R & C
+RCT0 = R & C & T0
+RCT1 = R & C & T1
+RCT0T1 = R & C & T0 & T1
 
 RS = R & S
 RST1 = R & S & T1
