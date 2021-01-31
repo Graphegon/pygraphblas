@@ -193,7 +193,7 @@ def test_matrix_reduce_bool():
     v[3, 3] = True
     v[4, 4] = False
     assert v.reduce_bool() == True
-    with monoid.LAND_MONOID:
+    with BOOL.LAND_MONOID:
         assert v.reduce_bool() == False
 
 
@@ -205,7 +205,7 @@ def test_matrix_reduce_int():
     v[3, 3] = 3
     v[4, 4] = 4
     assert v.reduce_int() == 7
-    with monoid.TIMES_MONOID:
+    with INT8.TIMES_MONOID:
         assert v.reduce_int() == 12
 
 
@@ -217,8 +217,9 @@ def test_matrix_reduce_float():
     v[3, 3] = 3.3
     v[4, 4] = 4.4
     assert v.reduce_float() == 7.7
-    with monoid.TIMES_MONOID:
+    with FP64.TIMES_MONOID:
         assert v.reduce_float() == 14.52
+    assert v.reduce_float(FP64.TIMES_MONOID) == 14.52
 
 
 def test_matrix_reduce_vector():
@@ -247,12 +248,12 @@ def test_mxm_context():
     m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
     n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
 
-    with semiring.PLUS_PLUS:
+    with INT64.PLUS_PLUS:
         o = m @ n
 
     assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [4, 6, 5]))
 
-    with semiring.LOR_LAND_BOOL:
+    with BOOL.LOR_LAND:
         o = m @ n
     assert o.iseq(Matrix.from_lists([0, 1, 2], [2, 0, 1], [True, True, True]))
 
@@ -281,7 +282,7 @@ def test_mxv():
 
     assert o.iseq(m.transpose().mxv(v, desc=descriptor.T0))
 
-    with semiring.PLUS_PLUS:
+    with INT64.PLUS_PLUS:
         o = m.mxv(v)
         assert o.iseq(Vector.from_lists([0, 1, 2, 3], [4, 6, 5, 7]))
         assert o.iseq(m @ v)
@@ -517,15 +518,11 @@ def test_apply():
     w = v.apply(INT64.AINV)
     assert w.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [-2, -3, -4]))
 
-    w2 = v.apply(unaryop.AINV)
+    w2 = v.apply(INT64.AINV)
     assert w.iseq(w2)
 
-    w3 = v.apply(lib.GrB_AINV_INT64)
+    w3 = v.apply(INT64.AINV)
     assert w.iseq(w3)
-
-    with unaryop.AINV:
-        w4 = v.apply(unaryop.AINV)
-    assert w.iseq(w4)
 
 
 def test_get_set_options():

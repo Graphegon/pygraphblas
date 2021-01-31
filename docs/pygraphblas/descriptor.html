@@ -38,11 +38,12 @@ from .base import lib, ffi, _check
 
 current_desc = contextvars.ContextVar(&#34;current_desc&#34;)
 
+
 class Descriptor:
     &#34;&#34;&#34;Wrapper class around GraphBLAS Descriptors.
 
     Descriptors &#34;describe&#34; the various options that can be used to
-    control many aspects of graphblas operation.  
+    control many aspects of graphblas operation.
 
     GraphBLAS Descriptors have a field and a value.  All of the common
     Descriptors necessary to use the GraphBLAS are available from the
@@ -140,7 +141,6 @@ class Descriptor:
 
 
 Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT, &#34;Default&#34;)
-&#34;&#34;&#34; Test default &#34;&#34;&#34;
 T1 = Descriptor(lib.GrB_INP1, lib.GrB_TRAN, &#34;T1&#34;)
 T0 = Descriptor(lib.GrB_INP0, lib.GrB_TRAN, &#34;T0&#34;)
 T0T1 = T0 &amp; T1
@@ -155,18 +155,15 @@ RT0 = R &amp; T0
 RT1 = R &amp; T1
 RT0T1 = R &amp; T0 &amp; T1
 
-RC = R &amp; C
-RCT0 = R &amp; C &amp; T0
-RCT1 = R &amp; C &amp; T1
-RCT0T1 = R &amp; C &amp; T0 &amp; T1
-
-# STRUCTURAL is new so it doesnt have an lagraph naming scheme or
-# verbose names due to their silly length.
-
 S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, &#34;S&#34;)
 ST1 = S &amp; T1
 ST0 = S &amp; T0
 ST0T1 = S &amp; T0 &amp; T1
+
+RC = R &amp; C
+RCT0 = R &amp; C &amp; T0
+RCT1 = R &amp; C &amp; T1
+RCT0T1 = R &amp; C &amp; T0 &amp; T1
 
 RS = R &amp; S
 RST1 = R &amp; S &amp; T1
@@ -211,12 +208,6 @@ __all__ = [
 </details>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 <h2 class="section-title" id="header-classes">Types</h2>
 <dl>
 <dt id="pygraphblas.descriptor.Descriptor"><code class="flex name class">
@@ -226,8 +217,7 @@ __all__ = [
 <dd>
 <div class="desc"><p>Wrapper class around GraphBLAS Descriptors.</p>
 <p>Descriptors "describe" the various options that can be used to
-control many aspects of graphblas operation.
-</p>
+control many aspects of graphblas operation.</p>
 <p>GraphBLAS Descriptors have a field and a value.
 All of the common
 Descriptors necessary to use the GraphBLAS are available from the
@@ -359,7 +349,7 @@ Descriptors necessary to use the GraphBLAS are available from the
     &#34;&#34;&#34;Wrapper class around GraphBLAS Descriptors.
 
     Descriptors &#34;describe&#34; the various options that can be used to
-    control many aspects of graphblas operation.  
+    control many aspects of graphblas operation.
 
     GraphBLAS Descriptors have a field and a value.  All of the common
     Descriptors necessary to use the GraphBLAS are available from the
@@ -480,6 +470,12 @@ Descriptors necessary to use the GraphBLAS are available from the
 </dl>
 </dd>
 </dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
 </section>
 </article>
 <nav id="sidebar">

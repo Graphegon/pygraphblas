@@ -46,6 +46,7 @@ class Semiring:
             ] = semiring
             cls = getattr(types, typ)
             setattr(cls, name, self)
+            types.__pdoc__[f"{typ}.{pls}_{mul}"] = f"UnaryOp {typ}.{pls}_{mul}"
 
     def __enter__(self):
         self.token = current_semiring.set(self)
@@ -107,7 +108,7 @@ def semiring_group(reg):
     return srs
 
 
-def build_semirings():
+def build_semirings(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(
         semiring_group(non_boolean_re),
@@ -117,6 +118,8 @@ def build_semirings():
         semiring_group(complex_re),
     ):
         setattr(this, r.name, r)
+        pls, mul, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{pls}_{mul}"] = f"Semiring {r.name}"
     for name in Semiring._auto_semirings:
         sr = AutoSemiring(name)
         setattr(this, name, sr)

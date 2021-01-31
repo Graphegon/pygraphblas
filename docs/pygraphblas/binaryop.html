@@ -145,7 +145,13 @@ def build_binaryops(__pdoc__):
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
+<<<<<<< HEAD
         __pdoc__[&#39;pygraphblas.binaryop.&#39; + r.name] = f&#34;BinaryOp {r.name}&#34;
+=======
+        op, typ = r.name.split(&#39;_&#39;)
+        __pdoc__[f&#39;{typ}.{op}&#39;] = r.__doc__ = f&#34;BinaryOp {r.name}&#34;
+        
+>>>>>>> main
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)

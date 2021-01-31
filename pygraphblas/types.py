@@ -19,6 +19,8 @@ from numba.core.typing import cffi_utils as cffi_support
 
 from cffi import FFI
 
+__pdoc__ = {}
+
 __all__ = [
     "Type",
     "BOOL",

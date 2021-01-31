@@ -136,42 +136,6 @@
   </section>
 
   <section>
-    % if submodules:
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-    <dl>
-    % for m in submodules:
-      <dt><code class="name">${link(m)}</code></dt>
-      <dd>${show_desc(m, short=True)}</dd>
-    % endfor
-    </dl>
-    % endif
-  </section>
-
-  <section>
-    % if variables:
-    <h2 class="section-title" id="header-variables">Global variables</h2>
-    <dl>
-    % for v in variables:
-      <% return_type = get_annotation(v.type_annotation) %>
-      <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
-      <dd>${show_desc(v)}</dd>
-    % endfor
-    </dl>
-    % endif
-  </section>
-
-  <section>
-    % if functions:
-    <h2 class="section-title" id="header-functions">Functions</h2>
-    <dl>
-    % for f in functions:
-      ${show_func(f)}
-    % endfor
-    </dl>
-    % endif
-  </section>
-
-  <section>
     % if classes:
     <h2 class="section-title" id="header-classes">Types</h2>
     <dl>
@@ -211,7 +175,7 @@
           % endfor
           </ul>
       % endif
-      % if class_vars and module.supermodule:
+      % if class_vars : # and module.supermodule:
           <h3>Class variables</h3>
           <dl>
           % for v in class_vars:
@@ -229,7 +193,7 @@
           % endfor
           </dl>
       % endif
-      % if inst_vars and module.supermodule:
+      % if inst_vars : # and module.supermodule:
           <h3>Instance variables</h3>
           <dl>
           % for v in inst_vars:
@@ -239,7 +203,7 @@
           % endfor
           </dl>
       % endif
-      % if methods and module.supermodule:
+      % if methods : # and module.supermodule:
           <h3>Methods</h3>
           <dl>
           % for f in methods:
@@ -270,6 +234,42 @@
       % endif
 
       </dd>
+    % endfor
+    </dl>
+    % endif
+  </section>
+
+  <section>
+    % if submodules:
+    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+    <dl>
+    % for m in submodules:
+      <dt><code class="name">${link(m)}</code></dt>
+      <dd>${show_desc(m, short=True)}</dd>
+    % endfor
+    </dl>
+    % endif
+  </section>
+
+  <section>
+    % if variables:
+    <h2 class="section-title" id="header-variables">Global variables</h2>
+    <dl>
+    % for v in variables:
+      <% return_type = get_annotation(v.type_annotation) %>
+      <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
+      <dd>${show_desc(v)}</dd>
+    % endfor
+    </dl>
+    % endif
+  </section>
+
+  <section>
+    % if functions:
+    <h2 class="section-title" id="header-functions">Functions</h2>
+    <dl>
+    % for f in functions:
+      ${show_func(f)}
     % endfor
     </dl>
     % endif

@@ -108,11 +108,13 @@ def binop_group(reg):
     return srs
 
 
-def build_binaryops():
+def build_binaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)

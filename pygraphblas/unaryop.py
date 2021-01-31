@@ -34,6 +34,7 @@ class UnaryOp:
         self.__class__._auto_unaryops[name][types.Type.gb_from_name(typ)] = op
         cls = getattr(types, typ)
         setattr(cls, name, self)
+        types.__pdoc__[f"{typ}.{name}"] = f"UnaryOp {typ}.{name}"
 
     def __enter__(self):
         self.token = current_uop.set(self)
@@ -74,10 +75,12 @@ def uop_group(reg):
     return srs
 
 
-def build_unaryops():
+def build_unaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
     for name in UnaryOp._auto_unaryops:
         bo = AutoUnaryOp(name)
         setattr(this, name, bo)

@@ -100,6 +100,7 @@ class Monoid:
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, op + &#34;_MONOID&#34;, self)
+            types.__pdoc__[f&#39;{typ}.{op}_MONOID&#39;] = f&#39;UnaryOp {typ}.{op}_MONOID&#39;
         self.op = op
         self.type = typ
         self.name = &#34;_&#34;.join((op, typ, &#34;monoid&#34;))
@@ -150,7 +151,7 @@ def monoid_group(reg):
     return srs
 
 
-def build_monoids():
+def build_monoids(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(
         monoid_group(gxb_monoid_re),
@@ -250,6 +251,7 @@ def build_monoids():
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, op + &#34;_MONOID&#34;, self)
+            types.__pdoc__[f&#39;{typ}.{op}_MONOID&#39;] = f&#39;UnaryOp {typ}.{op}_MONOID&#39;
         self.op = op
         self.type = typ
         self.name = &#34;_&#34;.join((op, typ, &#34;monoid&#34;))

@@ -16,7 +16,7 @@ __all__ = ["Scalar"]
 class Scalar:
     """GraphBLAS Scalar
 
-    Used for now mostly for the `pygraphblas.matrix.Matrix.select`.
+    Used for now mostly for the `pygraphblas.Matrix.select`.
 
     """
 

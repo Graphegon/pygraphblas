@@ -1,5 +1,5 @@
 import pytest
-from pygraphblas import *
+from pygraphblas import types
 
 
 def test_type_lookup_name():
