@@ -5,7 +5,7 @@ import re
 import pytest
 
 from pygraphblas import *
-from pygraphblas.base import _check
+from pygraphblas.base import ffi, lib, _check
 
 
 def test_vector_init_without_type():

@@ -155,18 +155,15 @@ RT0 = R &amp; T0
 RT1 = R &amp; T1
 RT0T1 = R &amp; T0 &amp; T1
 
-RC = R &amp; C
-RCT0 = R &amp; C &amp; T0
-RCT1 = R &amp; C &amp; T1
-RCT0T1 = R &amp; C &amp; T0 &amp; T1
-
-# STRUCTURAL is new so it doesnt have an lagraph naming scheme or
-# verbose names due to their silly length.
-
 S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, &#34;S&#34;)
 ST1 = S &amp; T1
 ST0 = S &amp; T0
 ST0T1 = S &amp; T0 &amp; T1
+
+RC = R &amp; C
+RCT0 = R &amp; C &amp; T0
+RCT1 = R &amp; C &amp; T1
+RCT0T1 = R &amp; C &amp; T0 &amp; T1
 
 RS = R &amp; S
 RST1 = R &amp; S &amp; T1

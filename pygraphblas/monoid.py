@@ -18,7 +18,7 @@ can be defined with any associative and commutative operator that has
 an identity value.
 """
 
-__all__ = ["Monoid", "AutoMonoid", "current_monoid"]
+__all__ = ["Monoid", "current_monoid"]
 
 import os
 import sys
@@ -66,16 +66,6 @@ class Monoid:
         return self.monoid
 
 
-class AutoMonoid(Monoid):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_monoid(self, left=None, right=None):
-        typ = types.promote(left, right)
-        return Monoid._auto_monoids[self.name][typ.gb_type]
-
-
 gxb_monoid_re = re.compile(
     "^GxB_(MIN|MAX|PLUS|TIMES|ANY|BOR|BAND|BXOR|BXNOR)_"
     "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)_MONOID$"
@@ -108,6 +98,3 @@ def build_monoids(__pdoc__):
         monoid_group(pure_bool_re_v13),
     ):
         setattr(this, r.name, r)
-    for name in Monoid._auto_monoids:
-        bo = AutoMonoid(name)
-        setattr(this, name, bo)

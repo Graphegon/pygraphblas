@@ -75,6 +75,11 @@ you with a lot more background information.
 
 """
 
+__pdoc__ = {
+    "base": False,
+    "build": False,
+}
+
 from .base import (
     lib,
     ffi,
@@ -88,7 +93,7 @@ from .base import (
 lib.LAGraph_init()
 
 from .semiring import build_semirings
-from .binaryop import build_binaryops
+from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops
 from .monoid import build_monoids
 from .matrix import Matrix
@@ -153,6 +158,9 @@ __all__ = [
     "UINT8",
     "BOOL",
     "descriptor",
+    "Accum",
+    "binary_op",
+    "run_doctests",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -165,9 +173,14 @@ GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
-def run_doctests():
+def run_doctests(raise_on_error=False):
+    from . import matrix
+    from . import descriptor
+    from . import base
     import sys, doctest
 
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
+        doctest.testmod(
+            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
+        )

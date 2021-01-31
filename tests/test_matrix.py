@@ -6,7 +6,7 @@ import re
 import pytest
 
 from pygraphblas import *
-from pygraphblas.base import lib, _check
+from pygraphblas.base import ffi, lib, _check
 
 
 def test_matrix_init_without_type():
@@ -41,6 +41,7 @@ def test_matrix_create():
     assert m.nrows == 1
     assert m.ncols == 1
     assert m.nvals == 1
+    m = Matrix.dense(INT8, 1, 1, sparsity=lib.GxB_FULL + lib.GxB_BITMAP)
 
 
 def test_matrix_get_set_element():
@@ -531,7 +532,7 @@ def test_get_set_options():
     v.format = lib.GxB_BY_COL
     assert v.hyper_switch == lib.GxB_ALWAYS_HYPER
     assert v.format == lib.GxB_BY_COL
-    assert v.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert v.sparsity == lib.GxB_AUTO_SPARSITY
     assert v.sparsity_status == lib.GxB_HYPERSPARSE
 
     v.hyper_switch = 2.0
@@ -540,13 +541,13 @@ def test_get_set_options():
     v.format = lib.GxB_BY_ROW
     assert v.format == lib.GxB_BY_ROW
 
-    v.sparsity_control = lib.GxB_BITMAP + lib.GxB_FULL
-    assert v.sparsity_control == lib.GxB_BITMAP + lib.GxB_FULL
+    v.sparsity = lib.GxB_BITMAP + lib.GxB_FULL
+    assert v.sparsity == lib.GxB_BITMAP + lib.GxB_FULL
 
     w = Matrix.sparse(INT8, 10, 10)
     assert w.hyper_switch == lib.GxB_HYPER_DEFAULT
     assert w.format == lib.GxB_BY_ROW
-    assert w.sparsity_control == lib.GxB_AUTO_SPARSITY
+    assert w.sparsity == lib.GxB_AUTO_SPARSITY
     assert w.sparsity_status == lib.GxB_HYPERSPARSE
 
 
@@ -896,20 +897,21 @@ def test_apply_second():
     assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [0, 1], [3, -1]]
 
 
-def test_add_scalar():
+def test_add():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (m + 3).to_lists() == [[0, 1], [0, 1], [8, 4]]
-
-
-def test_radd_scalar():
-    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m + n).to_lists() == [[0, 1], [0, 1], [10, 2]]
     assert (3 + m).to_lists() == [[0, 1], [0, 1], [8, 4]]
 
 
 def test_iadd_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m += 3
     assert m.to_lists() == [[0, 1], [0, 1], [8, 4]]
+    m += n
+    assert m.to_lists() == [[0, 1], [0, 1], [13, 5]]
 
 
 def test_sub_scalar():
@@ -924,8 +926,11 @@ def test_rsub_scalar_second():
 
 def test_isub_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m -= 3
     assert m.to_lists() == [[0, 1], [0, 1], [2, -2]]
+    m -= n
+    assert m.to_lists() == [[0, 1], [0, 1], [3, 3]]
 
 
 def test_mul_scalar():
@@ -940,8 +945,11 @@ def test_rmul_scalar_second():
 
 def test_imul_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m *= 3
     assert m.to_lists() == [[0, 1], [0, 1], [15, 3]]
+    m *= n
+    assert m.to_lists() == [[0, 1], [0, 1], [75, 3]]
 
 
 def test_truediv_scalar():
@@ -956,8 +964,11 @@ def test_rtruediv_scalar_second():
 
 def test_itruediv_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m /= 3
     assert m.to_lists() == [[0, 1], [0, 1], [5, 1]]
+    m /= n
+    assert m.to_lists() == [[0, 1], [0, 1], [1, 1]]
 
 
 def test_delitem():

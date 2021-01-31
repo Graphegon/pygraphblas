@@ -1,6 +1,7 @@
 import pytest
 
 from pygraphblas import *
+from pygraphblas import lib
 
 
 def test_options_set():
