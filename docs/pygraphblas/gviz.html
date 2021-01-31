@@ -329,48 +329,56 @@ def draw_matrix_layers(layers, **kwargs):
         im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
     return im
 
+
 def cy_matrix(M):
     nodes = dict()
     edges = []
 
     for i, j, v in M:
-        edges.append({&#39;data&#39;: {&#39;id&#39;: f&#39;{i}:{j}:{v}&#39;, &#39;source&#39;: str(i), &#39;target&#39;: str(j)}})
+        edges.append(
+            {&#34;data&#34;: {&#34;id&#34;: f&#34;{i}:{j}:{v}&#34;, &#34;source&#34;: str(i), &#34;target&#34;: str(j)}}
+        )
         if i not in nodes:
-            nodes[i] = {&#39;data&#39;: {&#39;id&#39;: str(i)}}
+            nodes[i] = {&#34;data&#34;: {&#34;id&#34;: str(i)}}
         if j not in nodes:
-            nodes[j] = {&#39;data&#39;: {&#39;id&#39;: str(j)}}
+            nodes[j] = {&#34;data&#34;: {&#34;id&#34;: str(j)}}
 
-    return {&#39;directed&#39;: True, &#39;elements&#39;: {&#39;nodes&#39;: list(nodes.values()), &#39;edges&#39;: edges}}
+    return {
+        &#34;directed&#34;: True,
+        &#34;elements&#34;: {&#34;nodes&#34;: list(nodes.values()), &#34;edges&#34;: edges},
+    }
 
 
 my_style = [
     {
-        &#39;selector&#39;: &#39;node&#39;,
-        &#39;style&#39;: {
-            &#39;background-color&#39;: &#39;blue&#39;,
-            &#39;label&#39;: &#39;data(name)&#39;,
-            &#39;width&#39;: 2,
-            &#39;height&#39;: 2,
-            &#39;shape&#39;: &#39;circle&#39;,
-            &#39;color&#39;: &#39;#EEEEEE&#39;,
-            &#39;font-weight&#39;: 400,
-            &#39;text-halign&#39;: &#39;right&#39;,
-            &#39;text-valign&#39;: &#39;bottom&#39;,
-            &#39;font-size&#39;: 12
-        }
+        &#34;selector&#34;: &#34;node&#34;,
+        &#34;style&#34;: {
+            &#34;background-color&#34;: &#34;blue&#34;,
+            &#34;label&#34;: &#34;data(name)&#34;,
+            &#34;width&#34;: 2,
+            &#34;height&#34;: 2,
+            &#34;shape&#34;: &#34;circle&#34;,
+            &#34;color&#34;: &#34;#EEEEEE&#34;,
+            &#34;font-weight&#34;: 400,
+            &#34;text-halign&#34;: &#34;right&#34;,
+            &#34;text-valign&#34;: &#34;bottom&#34;,
+            &#34;font-size&#34;: 12,
+        },
     },
     {
-        &#39;selector&#39;: &#39;edge&#39;,
-        &#39;style&#39;: {
-            &#39;width&#39;: 0.2,
-            &#39;opacity&#39;: 1,
-            &#39;line-color&#39;: &#39;green&#39;,
-        }
-    }
+        &#34;selector&#34;: &#34;edge&#34;,
+        &#34;style&#34;: {
+            &#34;width&#34;: 0.2,
+            &#34;opacity&#34;: 1,
+            &#34;line-color&#34;: &#34;green&#34;,
+        },
+    },
 ]
+
 
 def draw_cy(M, visual_style=my_style):
     from cyjupyter import Cytoscape
+
     return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
 </details>
 </section>
@@ -412,6 +420,7 @@ def draw_cy(M, visual_style=my_style):
 </summary>
 <pre><code class="python">def draw_cy(M, visual_style=my_style):
     from cyjupyter import Cytoscape
+
     return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
 </details>
 </dd>

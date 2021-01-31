@@ -56,8 +56,12 @@ class Semiring:
         current_semiring.reset(self.token)
         return False
 
-    def get_semiring(self, typ):
+    def get_semiring(self, typ=None):
         return self.semiring
+
+    @property
+    def ztype(self):
+        return types.get_semiring_ztype(self.semiring)
 
 
 class AutoSemiring(Semiring):

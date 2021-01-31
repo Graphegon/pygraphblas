@@ -451,6 +451,10 @@ def get_ztype(bop):
     return gb_type_to_type(typ[0])
 
 
+def get_semiring_ztype(sring):
+    return get_ztype(get_binaryop(get_add(sring)))
+
+
 _promotion_order = (
     FC64,
     FC32,

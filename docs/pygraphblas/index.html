@@ -8354,11 +8354,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &#34;&#34;&#34;
         if add_op is None:
-            add_op = current_binop.get(binaryop.PLUS)
+            add_op = current_binop.get(NULL)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
-        add_op = add_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -8366,6 +8365,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if add_op is NULL:
+            add_op = out.type.PLUS
+        add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
                 out._matrix[0],
@@ -8445,11 +8447,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &#34;&#34;&#34;
         if mult_op is None:
-            mult_op = current_binop.get(binaryop.TIMES)
+            mult_op = current_binop.get(NULL)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
-        mult_op = mult_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -8457,6 +8458,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if mult_op is NULL:
+            mult_op = out.type.TIMES
+        mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
                 out._matrix[0],
@@ -8683,13 +8687,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return other.emult(self, op, out=self)
 
     def __invert__(self):
-        return self.apply(unaryop.MINV)
+        return self.apply(self.type.MINV)
 
     def __neg__(self):
-        return self.apply(unaryop.AINV)
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(unaryop.ABS)
+        return self.apply(self.type.ABS)
 
     def __pow__(self, exponent):
         if exponent == 0:
@@ -8800,7 +8804,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Apply Unary op to matrix elements.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        &gt;&gt;&gt; print(M.apply(unaryop.ABS))
+        &gt;&gt;&gt; print(M.apply(types.INT64.ABS))
               0  1  2
           0|    42   |  0
           1|        0|  1
@@ -8810,8 +8814,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self.type)
+
+        op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
@@ -8823,7 +8827,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         first input to a scalar first.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        &gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+        &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -8833,8 +8837,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
@@ -8848,7 +8851,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         second input to a scalar second.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        &gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+        &gt;&gt;&gt; print(M.apply_second(types.INT64.PLUS, 1))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -8858,8 +8861,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
@@ -9103,7 +9105,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             mask = NULL
         if accum is None:
             accum = current_accum.get(NULL)
-        if isinstance(accum, BinaryOp):
+        if accum is not NULL:
             accum = accum.get_binaryop(self.type)
         if desc is None or desc == Default:
             desc = current_desc.get(Default)
@@ -9116,7 +9118,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         other,
         cast=None,
         out=None,
-        sring=None,
+        semiring=None,
         mask=None,
         accum=None,
         desc=Default,
@@ -9129,21 +9131,29 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         for details.
 
         &#34;&#34;&#34;
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
-            typ = cast or types.promote(self.type, other.type)
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
         else:
             typ = out.type
 
-        sring = current_semiring.get(typ.default_semiring())
+        if semiring is NULL:
+            semiring = out.type.PLUS_TIMES
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
                 out._matrix[0],
                 mask,
                 accum,
-                sring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._matrix[0],
                 desc,
@@ -9156,29 +9166,38 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         other,
         cast=None,
         out=None,
-        sring=None,
+        semiring=None,
         mask=None,
         accum=None,
         desc=Default,
     ):
         &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
 
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
             new_dimension = self.ncols if T0 in desc else self.nrows
-            typ = cast or types.promote(self.type, other.type)
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
         else:
             typ = out.type
 
-        sring = current_semiring.get(typ.default_semiring())
+        if semiring is NULL:
+            semiring = out.type.PLUS_TIMES
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
+
         self._check(
             lib.GrB_mxv(
                 out._vector[0],
                 mask,
                 accum,
-                sring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._vector[0],
                 desc,
@@ -9208,9 +9227,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
                 typ, self.nrows * other.nrows, self.ncols * other.ncols
             )
         if op is None:
-            op = typ.TIMES
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type, other.type)
+            op = current_binop.get(self.type.TIMES)
+
+        op = op.get_binaryop(self.type, other.type)
 
         self._check(
             lib.GrB_Matrix_kronecker_BinaryOp(
@@ -10113,7 +10132,7 @@ def vals(self):
 <dd>
 <div class="desc"><p>Apply Unary op to matrix elements.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-&gt;&gt;&gt; print(M.apply(unaryop.ABS))
+&gt;&gt;&gt; print(M.apply(types.INT64.ABS))
       0  1  2
   0|    42   |  0
   1|        0|  1
@@ -10128,7 +10147,7 @@ def vals(self):
     &#34;&#34;&#34;Apply Unary op to matrix elements.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-    &gt;&gt;&gt; print(M.apply(unaryop.ABS))
+    &gt;&gt;&gt; print(M.apply(types.INT64.ABS))
           0  1  2
       0|    42   |  0
       1|        0|  1
@@ -10138,8 +10157,8 @@ def vals(self):
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-    if isinstance(op, UnaryOp):
-        op = op.get_unaryop(self.type)
+
+    op = op.get_unaryop(self.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
@@ -10154,7 +10173,7 @@ def vals(self):
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
 first input to a scalar first.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-&gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+&gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS))
       0  1  2
   0|   -41   |  0
   1|        1|  1
@@ -10170,7 +10189,7 @@ first input to a scalar first.</p>
     first input to a scalar first.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-    &gt;&gt;&gt; print(M.apply_first(1, binaryop.PLUS))
+    &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS))
           0  1  2
       0|   -41   |  0
       1|        1|  1
@@ -10180,8 +10199,7 @@ first input to a scalar first.</p>
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self.type)
+    op = op.get_binaryop(self.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(first, Scalar):
         f = lib.GxB_Matrix_apply_BinaryOp1st
@@ -10198,7 +10216,7 @@ first input to a scalar first.</p>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
 second input to a scalar second.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-&gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+&gt;&gt;&gt; print(M.apply_second(types.INT64.PLUS, 1))
       0  1  2
   0|   -41   |  0
   1|        1|  1
@@ -10214,7 +10232,7 @@ second input to a scalar second.</p>
     second input to a scalar second.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-    &gt;&gt;&gt; print(M.apply_second(binaryop.PLUS, 1))
+    &gt;&gt;&gt; print(M.apply_second(types.INT64.PLUS, 1))
           0  1  2
       0|   -41   |  0
       1|        1|  1
@@ -10224,8 +10242,7 @@ second input to a scalar second.</p>
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self.type)
+    op = op.get_binaryop(self.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         self.type.Matrix_apply_BinaryOp2nd(
@@ -10885,11 +10902,10 @@ interchangeably for either operation.</p>
 
     &#34;&#34;&#34;
     if add_op is None:
-        add_op = current_binop.get(binaryop.PLUS)
+        add_op = current_binop.get(NULL)
     elif isinstance(add_op, str):
         add_op = _get_bin_op(add_op, self.type)
 
-    add_op = add_op.get_binaryop(self.type, other.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     if out is None:
         typ = cast or types.promote(self.type, other.type)
@@ -10897,6 +10913,9 @@ interchangeably for either operation.</p>
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
         out = Matrix(_out, typ)
 
+    if add_op is NULL:
+        add_op = out.type.PLUS
+    add_op = add_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Matrix_eWiseAdd_BinaryOp(
             out._matrix[0],
@@ -11032,11 +11051,10 @@ interchangeably for either operation.</p>
 
     &#34;&#34;&#34;
     if mult_op is None:
-        mult_op = current_binop.get(binaryop.TIMES)
+        mult_op = current_binop.get(NULL)
     elif isinstance(mult_op, str):
         mult_op = _get_bin_op(mult_op, self.type)
 
-    mult_op = mult_op.get_binaryop(self.type, other.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
     if out is None:
         typ = cast or types.promote(self.type, other.type)
@@ -11044,6 +11062,9 @@ interchangeably for either operation.</p>
         self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
         out = Matrix(_out, typ)
 
+    if mult_op is NULL:
+        mult_op = out.type.TIMES
+    mult_op = mult_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Matrix_eWiseMult_BinaryOp(
             out._matrix[0],
@@ -11393,9 +11414,9 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
             typ, self.nrows * other.nrows, self.ncols * other.ncols
         )
     if op is None:
-        op = typ.TIMES
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self.type, other.type)
+        op = current_binop.get(self.type.TIMES)
+
+    op = op.get_binaryop(self.type, other.type)
 
     self._check(
         lib.GrB_Matrix_kronecker_BinaryOp(
@@ -11406,7 +11427,7 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.mxm"><code class="name flex">
-<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, sring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-matrix multiply.</p>
@@ -11424,7 +11445,7 @@ for details.</p></div>
     other,
     cast=None,
     out=None,
-    sring=None,
+    semiring=None,
     mask=None,
     accum=None,
     desc=Default,
@@ -11437,21 +11458,29 @@ for details.</p></div>
     for details.
 
     &#34;&#34;&#34;
+    if semiring is None:
+        semiring = current_semiring.get(NULL)
+
     if out is None:
-        typ = cast or types.promote(self.type, other.type)
+        if semiring is not NULL:
+            typ = semiring.ztype
+        else:
+            typ = cast or types.promote(self.type, other.type)
         out = self.__class__.sparse(typ, self.nrows, other.ncols)
     else:
         typ = out.type
 
-    sring = current_semiring.get(typ.default_semiring())
+    if semiring is NULL:
+        semiring = out.type.PLUS_TIMES
 
+    semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_mxm(
             out._matrix[0],
             mask,
             accum,
-            sring.get_semiring(typ),
+            semiring,
             self._matrix[0],
             other._matrix[0],
             desc,
@@ -11461,7 +11490,7 @@ for details.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.mxv"><code class="name flex">
-<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, sring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-vector multiply.</p></div>
@@ -11474,29 +11503,38 @@ for details.</p></div>
     other,
     cast=None,
     out=None,
-    sring=None,
+    semiring=None,
     mask=None,
     accum=None,
     desc=Default,
 ):
     &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
 
+    if semiring is None:
+        semiring = current_semiring.get(NULL)
+
     if out is None:
         new_dimension = self.ncols if T0 in desc else self.nrows
-        typ = cast or types.promote(self.type, other.type)
+        if semiring is not NULL:
+            typ = semiring.ztype
+        else:
+            typ = cast or types.promote(self.type, other.type)
         out = Vector.sparse(typ, new_dimension)
     else:
         typ = out.type
 
-    sring = current_semiring.get(typ.default_semiring())
+    if semiring is NULL:
+        semiring = out.type.PLUS_TIMES
 
+    semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
+
     self._check(
         lib.GrB_mxv(
             out._vector[0],
             mask,
             accum,
-            sring.get_semiring(typ),
+            semiring,
             self._matrix[0],
             other._vector[0],
             desc,
@@ -16538,7 +16576,7 @@ def nvals(self):
                 B._vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
             )
         )
-        return self.eadd(B, binaryop.FIRST)
+        return self.eadd(B, self.type.FIRST)
 
     def _compare(self, other, op, strop):
         C = self.__class__.sparse(types.BOOL, self.size)
@@ -16549,7 +16587,7 @@ def nvals(self):
                 self.emult(B, strop, out=C)
                 return C
             else:
-                self.select(strop, other).apply(lib.GxB_ONE_BOOL, out=C)
+                self.select(strop, other).apply(types.BOOL.ONE, out=C)
                 return C
         elif isinstance(other, Vector):
             A = self._full()
@@ -16600,11 +16638,9 @@ def nvals(self):
 
         &#34;&#34;&#34;
         if add_op is None:
-            add_op = current_binop.get(binaryop.PLUS)
-        if isinstance(add_op, str):
+            add_op = current_binop.get(NULL)
+        elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
-        if isinstance(add_op, BinaryOp):
-            add_op = add_op.get_binaryop(self.type, other.type)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -16613,6 +16649,10 @@ def nvals(self):
             _out = ffi.new(&#34;GrB_Vector*&#34;)
             self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
+
+        if add_op is NULL:
+            add_op = out.type.PLUS
+        add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Vector_eWiseAdd_BinaryOp(
                 out._vector[0],
@@ -16649,17 +16689,21 @@ def nvals(self):
 
         &#34;&#34;&#34;
         if mult_op is None:
-            mult_op = current_binop.get(binaryop.TIMES)
-        if isinstance(mult_op, str):
+            mult_op = current_binop.get(NULL)
+        elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
-        if isinstance(mult_op, BinaryOp):
-            mult_op = mult_op.get_binaryop(self.type, other.type)
+
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new(&#34;GrB_Vector*&#34;)
             self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
             out = self.__class__(_out, typ)
+
+        if mult_op is NULL:
+            mult_op = out.type.TIMES
+
+        mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Vector_eWiseMult_BinaryOp(
                 out._vector[0],
@@ -16678,30 +16722,37 @@ def nvals(self):
         other,
         cast=None,
         out=None,
-        sring=None,
+        semiring=None,
         mask=None,
         accum=None,
         desc=Default,
     ):
         &#34;&#34;&#34;Vector-Matrix multiply.&#34;&#34;&#34;
 
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
             new_dimension = other.nrows if T1 in desc else other.ncols
-            typ = cast or types.promote(self.type, other.type)
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
         else:
             typ = out.type
 
-        sring = current_semiring.get(typ.default_semiring())
+        if semiring is NULL:
+            semiring = out.type.PLUS_TIMES
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
-
         self._check(
             lib.GrB_vxm(
                 out._vector[0],
                 mask,
                 accum,
-                sring.get_semiring(typ),
+                semiring,
                 self._vector[0],
                 other._matrix[0],
                 desc.desc[0],
@@ -16788,13 +16839,13 @@ def nvals(self):
         return other.eadd(self, self.type.DIV, out=self)
 
     def __invert__(self):
-        return self.apply(unaryop.MINV)
+        return self.apply(self.type.MINV)
 
     def __neg__(self):
-        return self.apply(unaryop.AINV)
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(unaryop.ABS)
+        return self.apply(self.type.ABS)
 
     def clear(self):
         &#34;&#34;&#34;Clear this vector removing all entries.&#34;&#34;&#34;
@@ -16808,10 +16859,12 @@ def nvals(self):
         self._check(lib.GrB_Vector_resize(self._vector[0], size))
 
     def _get_args(self, mask=None, accum=None, desc=Default):
-        if accum is None or accum is NULL:
+        if accum is None:
             accum = current_accum.get(NULL)
-        if isinstance(accum, BinaryOp):
+
+        if accum is not NULL:
             accum = accum.get_binaryop(self.type)
+
         if mask is None:
             mask = NULL
         if isinstance(mask, Vector):
@@ -16864,9 +16917,8 @@ def nvals(self):
         &#34;&#34;&#34;Apply Unary op to vector elements.&#34;&#34;&#34;
         if out is None:
             out = Vector.sparse(self.type, self.size)
-        if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self)
 
+        op = op.get_unaryop(self)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Vector_apply(
@@ -16881,8 +16933,8 @@ def nvals(self):
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self)
+
+        op = op.get_binaryop(self)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp1st
@@ -16901,8 +16953,8 @@ def nvals(self):
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self)
+
+        op = op.get_binaryop(self)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(second, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp2nd
@@ -17138,9 +17190,8 @@ def size(self):
     &#34;&#34;&#34;Apply Unary op to vector elements.&#34;&#34;&#34;
     if out is None:
         out = Vector.sparse(self.type, self.size)
-    if isinstance(op, UnaryOp):
-        op = op.get_unaryop(self)
 
+    op = op.get_unaryop(self)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GrB_Vector_apply(
@@ -17166,8 +17217,8 @@ to a scalar first.</p></div>
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.size)
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self)
+
+    op = op.get_binaryop(self)
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(first, Scalar):
         f = lib.GxB_Vector_apply_BinaryOp1st
@@ -17197,8 +17248,8 @@ to a scalar second.</p></div>
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.size)
-    if isinstance(op, BinaryOp):
-        op = op.get_binaryop(self)
+
+    op = op.get_binaryop(self)
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(second, Scalar):
         f = lib.GxB_Vector_apply_BinaryOp2nd
@@ -17322,11 +17373,9 @@ A nor in B do not appear in the result.</p></div>
 
     &#34;&#34;&#34;
     if add_op is None:
-        add_op = current_binop.get(binaryop.PLUS)
-    if isinstance(add_op, str):
+        add_op = current_binop.get(NULL)
+    elif isinstance(add_op, str):
         add_op = _get_bin_op(add_op, self.type)
-    if isinstance(add_op, BinaryOp):
-        add_op = add_op.get_binaryop(self.type, other.type)
 
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -17335,6 +17384,10 @@ A nor in B do not appear in the result.</p></div>
         _out = ffi.new(&#34;GrB_Vector*&#34;)
         self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
         out = self.__class__(_out, typ)
+
+    if add_op is NULL:
+        add_op = out.type.PLUS
+    add_op = add_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Vector_eWiseAdd_BinaryOp(
             out._vector[0],
@@ -17388,17 +17441,21 @@ visa versa, do not appear in the result.</p></div>
 
     &#34;&#34;&#34;
     if mult_op is None:
-        mult_op = current_binop.get(binaryop.TIMES)
-    if isinstance(mult_op, str):
+        mult_op = current_binop.get(NULL)
+    elif isinstance(mult_op, str):
         mult_op = _get_bin_op(mult_op, self.type)
-    if isinstance(mult_op, BinaryOp):
-        mult_op = mult_op.get_binaryop(self.type, other.type)
+
     mask, accum, desc = self._get_args(mask, accum, desc)
     if out is None:
         typ = cast or types.promote(self.type, other.type)
         _out = ffi.new(&#34;GrB_Vector*&#34;)
         self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
         out = self.__class__(_out, typ)
+
+    if mult_op is NULL:
+        mult_op = out.type.TIMES
+
+    mult_op = mult_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Vector_eWiseMult_BinaryOp(
             out._vector[0],
@@ -17751,7 +17808,7 @@ outside the resized vector are deleted.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.vxm"><code class="name flex">
-<span>def <span class="ident">vxm</span></span>(<span>self, other, cast=None, out=None, sring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">vxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Vector-Matrix multiply.</p></div>
@@ -17764,30 +17821,37 @@ outside the resized vector are deleted.</p></div>
     other,
     cast=None,
     out=None,
-    sring=None,
+    semiring=None,
     mask=None,
     accum=None,
     desc=Default,
 ):
     &#34;&#34;&#34;Vector-Matrix multiply.&#34;&#34;&#34;
 
+    if semiring is None:
+        semiring = current_semiring.get(NULL)
+
     if out is None:
         new_dimension = other.nrows if T1 in desc else other.ncols
-        typ = cast or types.promote(self.type, other.type)
+        if semiring is not NULL:
+            typ = semiring.ztype
+        else:
+            typ = cast or types.promote(self.type, other.type)
         out = Vector.sparse(typ, new_dimension)
     else:
         typ = out.type
 
-    sring = current_semiring.get(typ.default_semiring())
+    if semiring is NULL:
+        semiring = out.type.PLUS_TIMES
 
+    semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
-
     self._check(
         lib.GrB_vxm(
             out._vector[0],
             mask,
             accum,
-            sring.get_semiring(typ),
+            semiring,
             self._vector[0],
             other._matrix[0],
             desc.desc[0],

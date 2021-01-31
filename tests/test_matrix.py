@@ -6,7 +6,7 @@ import re
 import pytest
 
 from pygraphblas import *
-from pygraphblas.base import lib, _check
+from pygraphblas.base import ffi, lib, _check
 
 
 def test_matrix_init_without_type():
@@ -240,7 +240,7 @@ def test_mxm():
     assert r.iseq(m @ n)
     m @= n
     assert r.iseq(m)
-    o = m.mxm(n, sring=BOOL.LOR_LAND)
+    o = m.mxm(n, semiring=BOOL.LOR_LAND)
     assert o.iseq(Matrix.from_lists([0, 1, 2], [0, 1, 2], [True, True, True]))
 
 

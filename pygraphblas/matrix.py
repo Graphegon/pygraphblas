@@ -20,15 +20,15 @@ from .base import (
     GxB_INDEX_MAX,
 )
 
-from . import types, binaryop, monoid, unaryop, semiring as _semiring
+from . import types
 from .vector import Vector
 from .scalar import Scalar
-from .semiring import Semiring, current_semiring
-from .binaryop import BinaryOp, current_accum, current_binop
-from .unaryop import UnaryOp
-from .monoid import Monoid, current_monoid
-from . import descriptor
+from .semiring import current_semiring
+from .binaryop import current_accum, current_binop
+from .unaryop import current_uop
+from .monoid import current_monoid
 from .descriptor import Descriptor, Default, T0, current_desc
+from . import descriptor
 from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
@@ -759,11 +759,10 @@ class Matrix:
 
         """
         if add_op is None:
-            add_op = current_binop.get(binaryop.PLUS)
+            add_op = current_binop.get(NULL)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
-        add_op = add_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -771,6 +770,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if add_op is NULL:
+            add_op = out.type.PLUS
+        add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
                 out._matrix[0],
@@ -850,11 +852,10 @@ class Matrix:
 
         """
         if mult_op is None:
-            mult_op = current_binop.get(binaryop.TIMES)
+            mult_op = current_binop.get(NULL)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
-        mult_op = mult_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -862,6 +863,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if mult_op is NULL:
+            mult_op = out.type.TIMES
+        mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
                 out._matrix[0],
@@ -1088,13 +1092,13 @@ class Matrix:
         return other.emult(self, op, out=self)
 
     def __invert__(self):
-        return self.apply(unaryop.MINV)
+        return self.apply(self.type.MINV)
 
     def __neg__(self):
-        return self.apply(unaryop.AINV)
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(unaryop.ABS)
+        return self.apply(self.type.ABS)
 
     def __pow__(self, exponent):
         if exponent == 0:
@@ -1205,7 +1209,7 @@ class Matrix:
         """Apply Unary op to matrix elements.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply(unaryop.ABS))
+        >>> print(M.apply(types.INT64.ABS))
               0  1  2
           0|    42   |  0
           1|        0|  1
@@ -1215,8 +1219,8 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self.type)
+
+        op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
@@ -1228,7 +1232,7 @@ class Matrix:
         first input to a scalar first.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply_first(1, binaryop.PLUS))
+        >>> print(M.apply_first(1, types.INT64.PLUS))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1238,8 +1242,7 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
@@ -1253,7 +1256,7 @@ class Matrix:
         second input to a scalar second.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply_second(binaryop.PLUS, 1))
+        >>> print(M.apply_second(types.INT64.PLUS, 1))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1263,8 +1266,7 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             self.type.Matrix_apply_BinaryOp2nd(
@@ -1508,7 +1510,7 @@ class Matrix:
             mask = NULL
         if accum is None:
             accum = current_accum.get(NULL)
-        if isinstance(accum, BinaryOp):
+        if accum is not NULL:
             accum = accum.get_binaryop(self.type)
         if desc is None or desc == Default:
             desc = current_desc.get(Default)
@@ -1521,7 +1523,7 @@ class Matrix:
         other,
         cast=None,
         out=None,
-        sring=None,
+        semiring=None,
         mask=None,
         accum=None,
         desc=Default,
@@ -1534,21 +1536,29 @@ class Matrix:
         for details.
 
         """
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
-            typ = cast or types.promote(self.type, other.type)
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
         else:
             typ = out.type
 
-        sring = current_semiring.get(typ.default_semiring())
+        if semiring is NULL:
+            semiring = out.type.PLUS_TIMES
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
                 out._matrix[0],
                 mask,
                 accum,
-                sring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._matrix[0],
                 desc,
@@ -1561,29 +1571,38 @@ class Matrix:
         other,
         cast=None,
         out=None,
-        sring=None,
+        semiring=None,
         mask=None,
         accum=None,
         desc=Default,
     ):
         """Matrix-vector multiply."""
 
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
             new_dimension = self.ncols if T0 in desc else self.nrows
-            typ = cast or types.promote(self.type, other.type)
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
         else:
             typ = out.type
 
-        sring = current_semiring.get(typ.default_semiring())
+        if semiring is NULL:
+            semiring = out.type.PLUS_TIMES
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
+
         self._check(
             lib.GrB_mxv(
                 out._vector[0],
                 mask,
                 accum,
-                sring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._vector[0],
                 desc,
@@ -1613,9 +1632,9 @@ class Matrix:
                 typ, self.nrows * other.nrows, self.ncols * other.ncols
             )
         if op is None:
-            op = typ.TIMES
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type, other.type)
+            op = current_binop.get(self.type.TIMES)
+
+        op = op.get_binaryop(self.type, other.type)
 
         self._check(
             lib.GrB_Matrix_kronecker_BinaryOp(
