@@ -194,7 +194,7 @@
 
       <dd>${show_desc(c)}
 
-      % if mro : # and module.supermodule:
+      % if mro and module.supermodule:
           <h3>Ancestors</h3>
           <ul class="hlist">
           % for cls in mro:
