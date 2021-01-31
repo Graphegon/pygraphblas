@@ -47,7 +47,6 @@ class BinaryOp:
             self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ)
             setattr(cls, op, self)
-            types.__pdoc__[f'{typ}.{op}'] = f'BinaryOp {typ}.{op}'
         self.name = "_".join((op, typ))
         self.token = None
 
@@ -108,12 +107,14 @@ def binop_group(reg):
     return srs
 
 
-def build_binaryops():
+def build_binaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
-        r.__doc__ = f"BinaryOp {r.name}"
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = r.__doc__ = f"BinaryOp {r.name}"
+
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)

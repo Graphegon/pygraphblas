@@ -107,7 +107,7 @@ def uop_group(reg):
     return srs
 
 
-def build_unaryops():
+def build_unaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)

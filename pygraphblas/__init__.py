@@ -87,24 +87,29 @@ from .base import (
 
 lib.LAGraph_init()
 
-from . import matrix
-from . import vector
-from . import scalar
-from . import semiring
-from . import binaryop
-from . import unaryop
-from . import monoid
-from . import descriptor
-from . import gviz
+# from . import matrix
+# from . import vector
+# from . import scalar
+# from . import semiring
+# from . import binaryop
+# from . import unaryop
+# from . import monoid
+# from . import descriptor
+# from . import gviz
 
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
 
-semiring.build_semirings()
-binaryop.build_binaryops()
-unaryop.build_unaryops()
-monoid.build_monoids()
+__pdoc__ = {
+    "base": False,
+    "build": False,
+}
+
+semiring.build_semirings(__pdoc__)
+binaryop.build_binaryops(__pdoc__)
+unaryop.build_unaryops(__pdoc__)
+monoid.build_monoids(__pdoc__)
 
 from .types import (
     FP64,
@@ -146,13 +151,6 @@ __all__ = [
     "UINT16",
     "UINT8",
     "BOOL",
-    "monoid",
-    "unaryop",
-    "binaryop",
-    "semiring",
-    "types",
-    "descriptor",
-    "gviz",
 ]
 
 ffi = ffi  # global assign hack to fool pdoc
@@ -177,9 +175,3 @@ def run_doctests():
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
-
-
-__pdoc__ = {
-    "base": False,
-    "build": False,
-}

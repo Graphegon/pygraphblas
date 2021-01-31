@@ -643,9 +643,7 @@ class Matrix:
         """
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols)
-                if T0 in desc
-                else (self.ncols, self.nrows)
+                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
             )
             _out = ffi.new("GrB_Matrix*")
             if cast is not None:

@@ -6,11 +6,12 @@ from .base import lib, ffi, _check
 
 current_desc = contextvars.ContextVar("current_desc")
 
+
 class Descriptor:
     """Wrapper class around GraphBLAS Descriptors.
 
     Descriptors "describe" the various options that can be used to
-    control many aspects of graphblas operation.  
+    control many aspects of graphblas operation.
 
     GraphBLAS Descriptors have a field and a value.  All of the common
     Descriptors necessary to use the GraphBLAS are available from the

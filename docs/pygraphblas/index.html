@@ -189,24 +189,29 @@ from .base import (
 
 lib.LAGraph_init()
 
-from . import matrix
-from . import vector
-from . import scalar
-from . import semiring
-from . import binaryop
-from . import unaryop
-from . import monoid
-from . import descriptor
-from . import gviz
+# from . import matrix
+# from . import vector
+# from . import scalar
+# from . import semiring
+# from . import binaryop
+# from . import unaryop
+# from . import monoid
+# from . import descriptor
+# from . import gviz
 
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
 
-semiring.build_semirings()
-binaryop.build_binaryops()
-unaryop.build_unaryops()
-monoid.build_monoids()
+__pdoc__ = {
+    &#34;base&#34;: False,
+    &#34;build&#34;: False,
+}
+
+semiring.build_semirings(__pdoc__)
+binaryop.build_binaryops(__pdoc__)
+unaryop.build_unaryops(__pdoc__)
+monoid.build_monoids(__pdoc__)
 
 from .types import (
     FP64,
@@ -248,13 +253,6 @@ __all__ = [
     &#34;UINT16&#34;,
     &#34;UINT8&#34;,
     &#34;BOOL&#34;,
-    &#34;monoid&#34;,
-    &#34;unaryop&#34;,
-    &#34;binaryop&#34;,
-    &#34;semiring&#34;,
-    &#34;types&#34;,
-    &#34;descriptor&#34;,
-    &#34;gviz&#34;,
 ]
 
 ffi = ffi  # global assign hack to fool pdoc
@@ -278,13 +276,7 @@ def run_doctests():
 
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
-
-
-__pdoc__ = {
-    &#34;base&#34;: False,
-    &#34;build&#34;: False,
-}</code></pre>
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
 </details>
 </section>
 <section>
@@ -547,7 +539,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.ANY_EQ"><code class="name">var <span class="ident">ANY_EQ</span></code></dt>
 <dd>
@@ -603,11 +595,11 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -659,15 +651,15 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -675,7 +667,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -727,7 +719,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -735,7 +727,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -787,7 +779,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.LXNOR_MONOID"><code class="name">var <span class="ident">LXNOR_MONOID</span></code></dt>
 <dd>
@@ -795,7 +787,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -847,15 +839,15 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -863,7 +855,7 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -871,31 +863,31 @@ The parameter is typically in the range
 </dd>
 <dt id="pygraphblas.BOOL.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_BOOL</p></div>
 </dd>
 <dt id="pygraphblas.BOOL.base_name"><code class="name">var <span class="ident">base_name</span></code></dt>
 <dd>
@@ -1954,7 +1946,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -2078,7 +2070,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.ATAN2"><code class="name">var <span class="ident">ATAN2</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ATAN2_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.ATANH"><code class="name">var <span class="ident">ATANH</span></code></dt>
 <dd>
@@ -2094,11 +2086,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.CMPLX"><code class="name">var <span class="ident">CMPLX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp CMPLX_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.COPYSIGN"><code class="name">var <span class="ident">COPYSIGN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp COPYSIGN_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.COS"><code class="name">var <span class="ident">COS</span></code></dt>
 <dd>
@@ -2110,11 +2102,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -2162,7 +2154,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.FLOOR"><code class="name">var <span class="ident">FLOOR</span></code></dt>
 <dd>
@@ -2170,7 +2162,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.FMOD"><code class="name">var <span class="ident">FMOD</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FMOD_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.FREXPE"><code class="name">var <span class="ident">FREXPE</span></code></dt>
 <dd>
@@ -2182,15 +2174,15 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.HYPOT"><code class="name">var <span class="ident">HYPOT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp HYPOT_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -2210,7 +2202,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -2238,11 +2230,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.LDEXP"><code class="name">var <span class="ident">LDEXP</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LDEXP_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LGAMMA"><code class="name">var <span class="ident">LGAMMA</span></code></dt>
 <dd>
@@ -2266,7 +2258,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -2294,11 +2286,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -2326,7 +2318,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -2414,11 +2406,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -2510,7 +2502,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -2518,11 +2510,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -2610,19 +2602,19 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.REMAINDER"><code class="name">var <span class="ident">REMAINDER</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp REMAINDER_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.ROUND"><code class="name">var <span class="ident">ROUND</span></code></dt>
 <dd>
@@ -2630,7 +2622,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.SIGNUM"><code class="name">var <span class="ident">SIGNUM</span></code></dt>
 <dd>
@@ -2662,7 +2654,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP32.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_FP32</p></div>
 </dd>
 <dt id="pygraphblas.FP32.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -2937,7 +2929,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -3061,7 +3053,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.ATAN2"><code class="name">var <span class="ident">ATAN2</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ATAN2_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.ATANH"><code class="name">var <span class="ident">ATANH</span></code></dt>
 <dd>
@@ -3077,11 +3069,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.CMPLX"><code class="name">var <span class="ident">CMPLX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp CMPLX_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.COPYSIGN"><code class="name">var <span class="ident">COPYSIGN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp COPYSIGN_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.COS"><code class="name">var <span class="ident">COS</span></code></dt>
 <dd>
@@ -3093,11 +3085,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -3145,7 +3137,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.FLOOR"><code class="name">var <span class="ident">FLOOR</span></code></dt>
 <dd>
@@ -3153,7 +3145,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.FMOD"><code class="name">var <span class="ident">FMOD</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FMOD_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.FREXPE"><code class="name">var <span class="ident">FREXPE</span></code></dt>
 <dd>
@@ -3165,15 +3157,15 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.HYPOT"><code class="name">var <span class="ident">HYPOT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp HYPOT_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -3193,7 +3185,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -3221,11 +3213,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.LDEXP"><code class="name">var <span class="ident">LDEXP</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LDEXP_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LGAMMA"><code class="name">var <span class="ident">LGAMMA</span></code></dt>
 <dd>
@@ -3249,7 +3241,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -3277,11 +3269,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -3309,7 +3301,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -3397,11 +3389,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -3493,7 +3485,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -3501,11 +3493,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -3593,19 +3585,19 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.REMAINDER"><code class="name">var <span class="ident">REMAINDER</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp REMAINDER_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.ROUND"><code class="name">var <span class="ident">ROUND</span></code></dt>
 <dd>
@@ -3613,7 +3605,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.SIGNUM"><code class="name">var <span class="ident">SIGNUM</span></code></dt>
 <dd>
@@ -3645,7 +3637,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.FP64.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_FP64</p></div>
 </dd>
 <dt id="pygraphblas.FP64.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -3910,7 +3902,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -4022,35 +4014,35 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.C"><code class="name">var <span class="ident">C</span></code></dt>
 <dd>
@@ -4058,11 +4050,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -4090,15 +4082,15 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -4106,7 +4098,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -4134,7 +4126,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -4142,7 +4134,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -4170,11 +4162,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -4202,7 +4194,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -4290,11 +4282,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -4386,7 +4378,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -4394,11 +4386,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -4486,23 +4478,23 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT16.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_INT16</p></div>
 </dd>
 <dt id="pygraphblas.INT16.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -4763,7 +4755,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -4907,35 +4899,35 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.C"><code class="name">var <span class="ident">C</span></code></dt>
 <dd>
@@ -4943,11 +4935,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -4975,31 +4967,31 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.FIRSTI"><code class="name">var <span class="ident">FIRSTI</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTI_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.FIRSTI1"><code class="name">var <span class="ident">FIRSTI1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTI1_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.FIRSTJ"><code class="name">var <span class="ident">FIRSTJ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTJ_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.FIRSTJ1"><code class="name">var <span class="ident">FIRSTJ1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTJ1_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -5007,7 +4999,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -5035,7 +5027,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -5043,7 +5035,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -5071,11 +5063,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -5103,7 +5095,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -5223,11 +5215,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -5351,7 +5343,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -5359,11 +5351,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -5499,39 +5491,39 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT32.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.SECONDI"><code class="name">var <span class="ident">SECONDI</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDI_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.SECONDI1"><code class="name">var <span class="ident">SECONDI1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDI1_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.SECONDJ"><code class="name">var <span class="ident">SECONDJ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDJ_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.SECONDJ1"><code class="name">var <span class="ident">SECONDJ1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDJ1_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_INT32</p></div>
 </dd>
 <dt id="pygraphblas.INT32.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -5824,7 +5816,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -5968,35 +5960,35 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.C"><code class="name">var <span class="ident">C</span></code></dt>
 <dd>
@@ -6004,11 +5996,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -6036,31 +6028,31 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.FIRSTI"><code class="name">var <span class="ident">FIRSTI</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTI_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.FIRSTI1"><code class="name">var <span class="ident">FIRSTI1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTI1_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.FIRSTJ"><code class="name">var <span class="ident">FIRSTJ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTJ_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.FIRSTJ1"><code class="name">var <span class="ident">FIRSTJ1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRSTJ1_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -6068,7 +6060,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -6096,7 +6088,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -6104,7 +6096,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -6132,11 +6124,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -6164,7 +6156,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -6284,11 +6276,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -6412,7 +6404,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -6420,11 +6412,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -6560,39 +6552,39 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT64.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.SECONDI"><code class="name">var <span class="ident">SECONDI</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDI_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.SECONDI1"><code class="name">var <span class="ident">SECONDI1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDI1_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.SECONDJ"><code class="name">var <span class="ident">SECONDJ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDJ_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.SECONDJ1"><code class="name">var <span class="ident">SECONDJ1</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECONDJ1_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_INT64</p></div>
 </dd>
 <dt id="pygraphblas.INT64.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -6885,7 +6877,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -6997,35 +6989,35 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.C"><code class="name">var <span class="ident">C</span></code></dt>
 <dd>
@@ -7033,11 +7025,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -7065,15 +7057,15 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -7081,7 +7073,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -7109,7 +7101,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -7117,7 +7109,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -7145,11 +7137,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -7177,7 +7169,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -7265,11 +7257,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -7361,7 +7353,7 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -7369,11 +7361,11 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -7461,23 +7453,23 @@ def to_value(cls, cdata):
 </dd>
 <dt id="pygraphblas.INT8.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_INT8</p></div>
 </dd>
 <dt id="pygraphblas.INT8.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -13305,7 +13297,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -13417,7 +13409,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BAND_BAND"><code class="name">var <span class="ident">BAND_BAND</span></code></dt>
 <dd>
@@ -13441,15 +13433,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BOR_BAND"><code class="name">var <span class="ident">BOR_BAND</span></code></dt>
 <dd>
@@ -13473,15 +13465,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BXNOR_BAND"><code class="name">var <span class="ident">BXNOR_BAND</span></code></dt>
 <dd>
@@ -13505,7 +13497,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.BXOR_BAND"><code class="name">var <span class="ident">BXOR_BAND</span></code></dt>
 <dd>
@@ -13533,11 +13525,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -13565,15 +13557,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -13581,7 +13573,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -13609,7 +13601,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -13617,7 +13609,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -13645,11 +13637,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -13677,7 +13669,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -13765,11 +13757,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -13861,7 +13853,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -13869,11 +13861,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -13961,23 +13953,23 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT16.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_UINT16</p></div>
 </dd>
 <dt id="pygraphblas.UINT16.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -14238,7 +14230,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -14350,7 +14342,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BAND_BAND"><code class="name">var <span class="ident">BAND_BAND</span></code></dt>
 <dd>
@@ -14374,15 +14366,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BOR_BAND"><code class="name">var <span class="ident">BOR_BAND</span></code></dt>
 <dd>
@@ -14406,15 +14398,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BXNOR_BAND"><code class="name">var <span class="ident">BXNOR_BAND</span></code></dt>
 <dd>
@@ -14438,7 +14430,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.BXOR_BAND"><code class="name">var <span class="ident">BXOR_BAND</span></code></dt>
 <dd>
@@ -14466,11 +14458,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -14498,15 +14490,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -14514,7 +14506,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -14542,7 +14534,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -14550,7 +14542,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -14578,11 +14570,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -14610,7 +14602,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -14698,11 +14690,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -14794,7 +14786,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -14802,11 +14794,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -14894,23 +14886,23 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT32.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_UINT32</p></div>
 </dd>
 <dt id="pygraphblas.UINT32.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -15171,7 +15163,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -15283,7 +15275,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BAND_BAND"><code class="name">var <span class="ident">BAND_BAND</span></code></dt>
 <dd>
@@ -15307,15 +15299,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BOR_BAND"><code class="name">var <span class="ident">BOR_BAND</span></code></dt>
 <dd>
@@ -15339,15 +15331,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BXNOR_BAND"><code class="name">var <span class="ident">BXNOR_BAND</span></code></dt>
 <dd>
@@ -15371,7 +15363,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.BXOR_BAND"><code class="name">var <span class="ident">BXOR_BAND</span></code></dt>
 <dd>
@@ -15399,11 +15391,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -15431,15 +15423,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -15447,7 +15439,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -15475,7 +15467,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -15483,7 +15475,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -15511,11 +15503,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -15543,7 +15535,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -15631,11 +15623,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -15727,7 +15719,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -15735,11 +15727,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -15827,23 +15819,23 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT64.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_UINT64</p></div>
 </dd>
 <dt id="pygraphblas.UINT64.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>
@@ -16104,7 +16096,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.ANY"><code class="name">var <span class="ident">ANY</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp ANY_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.ANY_DIV"><code class="name">var <span class="ident">ANY_DIV</span></code></dt>
 <dd>
@@ -16216,7 +16208,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.BAND"><code class="name">var <span class="ident">BAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BAND_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BAND_BAND"><code class="name">var <span class="ident">BAND_BAND</span></code></dt>
 <dd>
@@ -16240,15 +16232,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.BCLR"><code class="name">var <span class="ident">BCLR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BCLR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BGET"><code class="name">var <span class="ident">BGET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BGET_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BOR"><code class="name">var <span class="ident">BOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BOR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BOR_BAND"><code class="name">var <span class="ident">BOR_BAND</span></code></dt>
 <dd>
@@ -16272,15 +16264,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.BSET"><code class="name">var <span class="ident">BSET</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSET_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BSHIFT"><code class="name">var <span class="ident">BSHIFT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BSHIFT_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BXNOR"><code class="name">var <span class="ident">BXNOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXNOR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BXNOR_BAND"><code class="name">var <span class="ident">BXNOR_BAND</span></code></dt>
 <dd>
@@ -16304,7 +16296,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.BXOR"><code class="name">var <span class="ident">BXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp BXOR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.BXOR_BAND"><code class="name">var <span class="ident">BXOR_BAND</span></code></dt>
 <dd>
@@ -16332,11 +16324,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.DIV"><code class="name">var <span class="ident">DIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp DIV_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.EQ"><code class="name">var <span class="ident">EQ</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp EQ_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.EQ_EQ"><code class="name">var <span class="ident">EQ_EQ</span></code></dt>
 <dd>
@@ -16364,15 +16356,15 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.FIRST"><code class="name">var <span class="ident">FIRST</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp FIRST_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.GE"><code class="name">var <span class="ident">GE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GE_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.GT"><code class="name">var <span class="ident">GT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp GT_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.IDENTITY"><code class="name">var <span class="ident">IDENTITY</span></code></dt>
 <dd>
@@ -16380,7 +16372,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.LAND"><code class="name">var <span class="ident">LAND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LAND_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.LAND_EQ"><code class="name">var <span class="ident">LAND_EQ</span></code></dt>
 <dd>
@@ -16408,7 +16400,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.LE"><code class="name">var <span class="ident">LE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LE_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.LNOT"><code class="name">var <span class="ident">LNOT</span></code></dt>
 <dd>
@@ -16416,7 +16408,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.LOR"><code class="name">var <span class="ident">LOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LOR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.LOR_EQ"><code class="name">var <span class="ident">LOR_EQ</span></code></dt>
 <dd>
@@ -16444,11 +16436,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.LT"><code class="name">var <span class="ident">LT</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LT_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.LXOR"><code class="name">var <span class="ident">LXOR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp LXOR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.LXOR_EQ"><code class="name">var <span class="ident">LXOR_EQ</span></code></dt>
 <dd>
@@ -16476,7 +16468,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.MAX"><code class="name">var <span class="ident">MAX</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MAX_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.MAX_DIV"><code class="name">var <span class="ident">MAX_DIV</span></code></dt>
 <dd>
@@ -16564,11 +16556,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.MIN"><code class="name">var <span class="ident">MIN</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MIN_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.MINUS"><code class="name">var <span class="ident">MINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp MINUS_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.MINV"><code class="name">var <span class="ident">MINV</span></code></dt>
 <dd>
@@ -16660,7 +16652,7 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.NE"><code class="name">var <span class="ident">NE</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp NE_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.ONE"><code class="name">var <span class="ident">ONE</span></code></dt>
 <dd>
@@ -16668,11 +16660,11 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.PAIR"><code class="name">var <span class="ident">PAIR</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PAIR_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.PLUS"><code class="name">var <span class="ident">PLUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp PLUS_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.PLUS_DIV"><code class="name">var <span class="ident">PLUS_DIV</span></code></dt>
 <dd>
@@ -16760,23 +16752,23 @@ def nvals(self):
 </dd>
 <dt id="pygraphblas.UINT8.POW"><code class="name">var <span class="ident">POW</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp POW_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.RDIV"><code class="name">var <span class="ident">RDIV</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RDIV_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.RMINUS"><code class="name">var <span class="ident">RMINUS</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp RMINUS_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.SECOND"><code class="name">var <span class="ident">SECOND</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp SECOND_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.TIMES"><code class="name">var <span class="ident">TIMES</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>BinaryOp TIMES_UINT8</p></div>
 </dd>
 <dt id="pygraphblas.UINT8.TIMES_DIV"><code class="name">var <span class="ident">TIMES_DIV</span></code></dt>
 <dd>

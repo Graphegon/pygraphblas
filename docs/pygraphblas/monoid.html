@@ -151,7 +151,7 @@ def monoid_group(reg):
     return srs
 
 
-def build_monoids():
+def build_monoids(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(
         monoid_group(gxb_monoid_re),

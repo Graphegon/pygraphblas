@@ -150,7 +150,7 @@ def semiring_group(reg):
     return srs
 
 
-def build_semirings():
+def build_semirings(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(
         semiring_group(non_boolean_re),
