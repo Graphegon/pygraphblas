@@ -1749,7 +1749,7 @@ class Matrix:
         2|
 
         &#34;&#34;&#34;
-        desc = desc | T0
+        desc = desc &amp; T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -4020,7 +4020,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         2|
 
         &#34;&#34;&#34;
-        desc = desc | T0
+        desc = desc &amp; T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -6374,7 +6374,7 @@ in the computation.</p>
     2|
 
     &#34;&#34;&#34;
-    desc = desc | T0
+    desc = desc &amp; T0
     return self.extract_col(
         row_index, col_slice, out, desc=desc, mask=None, accum=None
     )</code></pre>

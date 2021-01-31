@@ -46,6 +46,7 @@ class Semiring:
             ] = semiring
             cls = getattr(types, typ)
             setattr(cls, name, self)
+            types.__pdoc__[f'{typ}.{pls}_{mul}'] = f'UnaryOp {typ}.{pls}_{mul}'
 
     def __enter__(self):
         self.token = current_semiring.set(self)

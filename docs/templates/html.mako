@@ -194,7 +194,7 @@
 
       <dd>${show_desc(c)}
 
-      % if mro and module.supermodule:
+      % if mro : # and module.supermodule:
           <h3>Ancestors</h3>
           <ul class="hlist">
           % for cls in mro:
@@ -211,7 +211,7 @@
           % endfor
           </ul>
       % endif
-      % if class_vars and module.supermodule:
+      % if class_vars : # and module.supermodule:
           <h3>Class variables</h3>
           <dl>
           % for v in class_vars:
@@ -221,7 +221,7 @@
           % endfor
           </dl>
       % endif
-      % if smethods and module.supermodule:
+      % if smethods : # and module.supermodule:
           <h3>Static methods</h3>
           <dl>
           % for f in smethods:
@@ -229,7 +229,7 @@
           % endfor
           </dl>
       % endif
-      % if inst_vars and module.supermodule:
+      % if inst_vars : # and module.supermodule:
           <h3>Instance variables</h3>
           <dl>
           % for v in inst_vars:
@@ -239,7 +239,7 @@
           % endfor
           </dl>
       % endif
-      % if methods and module.supermodule:
+      % if methods : # and module.supermodule:
           <h3>Methods</h3>
           <dl>
           % for f in methods:
@@ -348,7 +348,7 @@
             if sort_identifiers:
               members = sorted(members)
         %>
-        % if members and module.supermodule:
+        % if members : # and module.supermodule:
           ${show_column_list(members)}
         % endif
         </li>

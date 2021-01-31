@@ -34,6 +34,7 @@ class UnaryOp:
         self.__class__._auto_unaryops[name][types.Type.gb_from_name(typ)] = op
         cls = getattr(types, typ)
         setattr(cls, name, self)
+        types.__pdoc__[f'{typ}.{op}'] = f'UnaryOp {typ}.{op}'
 
     def __enter__(self):
         self.token = current_uop.set(self)

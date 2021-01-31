@@ -79,6 +79,7 @@ class BinaryOp:
             self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ)
             setattr(cls, op, self)
+            types.__pdoc__[f&#39;{typ}.{op}&#39;] = f&#39;BinaryOp {typ}.{op}&#39;
         self.name = &#34;_&#34;.join((op, typ))
         self.token = None
 
@@ -351,6 +352,7 @@ def binary_op(arg_type, result_type=None):
             self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ)
             setattr(cls, op, self)
+            types.__pdoc__[f&#39;{typ}.{op}&#39;] = f&#39;BinaryOp {typ}.{op}&#39;
         self.name = &#34;_&#34;.join((op, typ))
         self.token = None
 

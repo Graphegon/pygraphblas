@@ -47,6 +47,7 @@ class BinaryOp:
             self.__class__._auto_binaryops[op][types.Type.gb_from_name(typ)] = binaryop
             cls = getattr(types, typ)
             setattr(cls, op, self)
+            types.__pdoc__[f'{typ}.{op}'] = f'BinaryOp {typ}.{op}'
         self.name = "_".join((op, typ))
         self.token = None
 
