@@ -160,6 +160,7 @@ __all__ = [
     "descriptor",
     "Accum",
     "binary_op",
+    "run_doctests",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -172,9 +173,11 @@ GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
-def run_doctests():   # pragma: no cover
+def run_doctests():
+    from . import matrix
+    from . import descriptor
+    from . import base
     import sys, doctest
-
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
+        doctest.testmod(mod, optionflags=doctest.ELLIPSIS, raise_on_error=True)

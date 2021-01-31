@@ -103,7 +103,6 @@ class Matrix:
         >>> M = Matrix.sparse(types.INT8)
         >>> M.type == types.INT8
         True
-
         """
         self._keep_alives = weakref.WeakKeyDictionary()
 
@@ -1576,7 +1575,9 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Matrix-vector multiply."""
+        """Matrix-vector multiply.
+
+        """
 
         if semiring is None:
             semiring = current_semiring.get(NULL)
