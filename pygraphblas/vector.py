@@ -282,7 +282,7 @@ class Vector:
             out = self.__class__(_out, typ)
 
         if add_op is NULL:
-            add_op = out.type.PLUS
+            add_op = out.type.default_addop()
         add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Vector_eWiseAdd_BinaryOp(
@@ -332,7 +332,7 @@ class Vector:
             out = self.__class__(_out, typ)
 
         if mult_op is NULL:
-            mult_op = out.type.TIMES
+            mult_op = out.type.default_multop()
 
         mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
@@ -374,7 +374,7 @@ class Vector:
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)

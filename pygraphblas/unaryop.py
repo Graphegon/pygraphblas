@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop", "unary_op"]
+__all__ = ["UnaryOp", "current_uop", "unary_op"]
 
 import re, sys
 from itertools import chain
@@ -48,15 +48,6 @@ class UnaryOp:
         return self.unaryop
 
 
-class AutoUnaryOp(UnaryOp):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_unaryop(self, operand1=None):
-        return UnaryOp._auto_unaryops[self.name][operand1.gb_type]
-
-
 uop_re = re.compile(
     "^(GrB|GxB)_(ONE|ABS|SQRT|LOG|EXP|LOG2|SIN|COS|TAN|ACOS|ASIN|ATAN|SINH|"
     "POSITIONI|POSITIONI1|POSITIONJ|POSITIONJ1|"
@@ -81,9 +72,6 @@ def build_unaryops(__pdoc__):
         setattr(this, r.name, r)
         op, typ = r.name.split("_")
         __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
-    for name in UnaryOp._auto_unaryops:
-        bo = AutoUnaryOp(name)
-        setattr(this, name, bo)
 
 
 def _uop_name(name):

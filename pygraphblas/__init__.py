@@ -93,7 +93,7 @@ from .base import (
 lib.LAGraph_init()
 
 from .semiring import build_semirings
-from .binaryop import build_binaryops
+from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops
 from .monoid import build_monoids
 from .matrix import Matrix
@@ -158,6 +158,8 @@ __all__ = [
     "UINT8",
     "BOOL",
     "descriptor",
+    "Accum",
+    "binary_op",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -170,7 +172,7 @@ GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
-def run_doctests():
+def run_doctests():   # pragma: no cover
     import sys, doctest
 
     this = sys.modules[__name__]

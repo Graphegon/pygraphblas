@@ -23,7 +23,7 @@ from . import types
 
 current_semiring = contextvars.ContextVar("current_semiring")
 
-__all__ = ["Semiring", "AutoSemiring", "current_semiring"]
+__all__ = ["Semiring", "current_semiring"]
 
 
 class Semiring:
@@ -62,15 +62,6 @@ class Semiring:
     @property
     def ztype(self):
         return types.get_semiring_ztype(self.semiring)
-
-
-class AutoSemiring(Semiring):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_semiring(self, typ):
-        return Semiring._auto_semirings[self.name][typ.gb_type]
 
 
 non_boolean_re = re.compile(
@@ -124,6 +115,3 @@ def build_semirings(__pdoc__):
         setattr(this, r.name, r)
         pls, mul, typ = r.name.split("_")
         __pdoc__[f"{typ}.{pls}_{mul}"] = f"Semiring {r.name}"
-    for name in Semiring._auto_semirings:
-        sr = AutoSemiring(name)
-        setattr(this, name, sr)

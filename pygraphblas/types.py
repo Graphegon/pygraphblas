@@ -158,6 +158,14 @@ class Type(metaclass=MetaType):
         return ("{:>%s}" % width).format(val)
 
     @classmethod
+    def default_addop(cls):
+        return cls.PLUS
+
+    @classmethod
+    def default_multop(cls):
+        return cls.TIMES
+
+    @classmethod
     def default_semiring(cls):
         return cls.PLUS_TIMES
 
@@ -186,6 +194,14 @@ class BOOL(Type):
     zero = False
     typecode = "B"
     numba_t = numba.boolean
+
+    @classmethod
+    def default_addop(self):
+        return self.LOR
+
+    @classmethod
+    def default_multop(self):
+        return self.LAND
 
     @classmethod
     def default_semiring(self):

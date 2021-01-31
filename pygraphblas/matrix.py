@@ -83,7 +83,7 @@ class Matrix:
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError
+                raise KeyError # pragma: nocover
 
             error_string = ffi.new("char**")
             lib.GrB_Matrix_error(error_string, self._matrix[0])
@@ -177,7 +177,7 @@ class Matrix:
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
         m = cls.sparse(typ, nrows, ncols)
         if sparsity is not None:
-            v.sparsity = sparsity
+            m.sparsity = sparsity
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
@@ -771,7 +771,7 @@ class Matrix:
             out = Matrix(_out, typ)
 
         if add_op is NULL:
-            add_op = out.type.PLUS
+            add_op = out.type.default_addop()
         add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
@@ -864,7 +864,7 @@ class Matrix:
             out = Matrix(_out, typ)
 
         if mult_op is NULL:
-            mult_op = out.type.TIMES
+            mult_op = out.type.default_multop()
         mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
@@ -1029,7 +1029,7 @@ class Matrix:
         op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op)
+        return other.eadd(self, op) # pragma: nocover
 
     def __iadd__(self, other):
         op = current_binop.get(self.type.PLUS)
@@ -1047,7 +1047,7 @@ class Matrix:
         op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op)
+        return other.eadd(self, op) # pragma: nocover
 
     def __isub__(self, other):
         op = current_binop.get(self.type.MINUS)
@@ -1065,7 +1065,7 @@ class Matrix:
         op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op)
+        return other.emult(self, op) # pragma: nocover
 
     def __imul__(self, other):
         op = current_binop.get(self.type.TIMES)
@@ -1083,7 +1083,7 @@ class Matrix:
         op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op)
+        return other.emult(self, op) # pragma: nocover
 
     def __itruediv__(self, other):
         op = current_binop.get(self.type.DIV)
@@ -1549,7 +1549,7 @@ class Matrix:
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -1592,7 +1592,7 @@ class Matrix:
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)

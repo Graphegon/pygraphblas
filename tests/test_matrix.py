@@ -41,7 +41,7 @@ def test_matrix_create():
     assert m.nrows == 1
     assert m.ncols == 1
     assert m.nvals == 1
-
+    m = Matrix.dense(INT8, 1, 1, sparsity=lib.GxB_FULL + lib.GxB_BITMAP)
 
 def test_matrix_get_set_element():
     m = Matrix.sparse(INT8, 10, 10)
@@ -896,20 +896,20 @@ def test_apply_second():
     assert m.apply_second(INT8.MINUS, 2).to_lists() == [[0, 1], [0, 1], [3, -1]]
 
 
-def test_add_scalar():
+def test_add():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (m + 3).to_lists() == [[0, 1], [0, 1], [8, 4]]
-
-
-def test_radd_scalar():
-    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m + n).to_lists() == [[0, 1], [0, 1], [10, 2]]
     assert (3 + m).to_lists() == [[0, 1], [0, 1], [8, 4]]
-
 
 def test_iadd_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m += 3
     assert m.to_lists() == [[0, 1], [0, 1], [8, 4]]
+    m += n
+    assert m.to_lists() == [[0, 1], [0, 1], [13, 5]]
 
 
 def test_sub_scalar():
@@ -924,9 +924,11 @@ def test_rsub_scalar_second():
 
 def test_isub_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m -= 3
     assert m.to_lists() == [[0, 1], [0, 1], [2, -2]]
-
+    m -= n
+    assert m.to_lists() == [[0, 1], [0, 1], [3, 3]]
 
 def test_mul_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
@@ -940,9 +942,11 @@ def test_rmul_scalar_second():
 
 def test_imul_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m *= 3
     assert m.to_lists() == [[0, 1], [0, 1], [15, 3]]
-
+    m *= n
+    assert m.to_lists() == [[0, 1], [0, 1], [75, 3]]
 
 def test_truediv_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
@@ -956,9 +960,11 @@ def test_rtruediv_scalar_second():
 
 def test_itruediv_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     m /= 3
     assert m.to_lists() == [[0, 1], [0, 1], [5, 1]]
-
+    m /= n
+    assert m.to_lists() == [[0, 1], [0, 1], [1, 1]]
 
 def test_delitem():
     m = Matrix.from_lists([0, 1], [0, 1], [4, 2])
