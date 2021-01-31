@@ -94,9 +94,9 @@ lib.LAGraph_init()
 # from . import binaryop
 # from . import unaryop
 # from . import monoid
-# from . import descriptor
 # from . import gviz
 
+from . import descriptor
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
@@ -151,6 +151,7 @@ __all__ = [
     "UINT16",
     "UINT8",
     "BOOL",
+    "descriptor",
 ]
 
 ffi = ffi  # global assign hack to fool pdoc

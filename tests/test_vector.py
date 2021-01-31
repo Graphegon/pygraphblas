@@ -262,7 +262,7 @@ def test_vxm():
 
     assert v.vxm(m.transpose(), desc=descriptor.T1).iseq(o)
 
-    with semiring.PLUS_PLUS:
+    with INT64.PLUS_PLUS:
         o = v.vxm(m)
         assert o.iseq(Vector.from_lists([0, 1, 2, 3], [7, 3, 5, 6]))
         assert o.iseq(v @ m)
@@ -274,11 +274,8 @@ def test_apply():
     w = v.apply(INT64.AINV)
     assert w.iseq(Vector.from_lists([0, 1, 2], [-2.0, -4.0, -8.0]))
 
-    w2 = v.apply(unaryop.AINV)
+    w2 = v.apply(INT64.AINV)
     assert w.iseq(w2)
-
-    w3 = v.apply(lib.GrB_AINV_INT64)
-    assert w.iseq(w3)
 
     w = ~v
     assert w.iseq(Vector.from_lists([0, 1, 2], [0.5, 0.25, 0.125]))
@@ -322,7 +319,7 @@ def test_compare():
 
     assert (v != 3).iseq(Vector.from_lists([0, 1, 2], [True, True, False], 3))
 
-    m = Matrix.sparse(types.INT8, v.size)
+    m = Matrix.sparse(INT8, v.size)
     with pytest.raises(NotImplementedError):
         v < m
 
@@ -333,7 +330,7 @@ def test_1_to_n():
         Vector.from_lists(
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            typ=types.INT32,
+            typ=INT32,
         )
     )
     # this takes too much ram
@@ -347,7 +344,7 @@ def test_to_arrays():
         array("L", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
         array("l", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     )
-    c = Vector.sparse(types.FC32, 10)
+    c = Vector.sparse(FC32, 10)
     with pytest.raises(TypeError):
         c.to_arrays()
 
@@ -482,11 +479,11 @@ def test_itruediv_scalar():
 
 def test_slicing():
     v = Vector.from_1_to_n(10)
-    assert v[1:9:3].iseq(Vector.from_lists([0, 1, 2], [2, 5, 8], typ=types.INT32))
+    assert v[1:9:3].iseq(Vector.from_lists([0, 1, 2], [2, 5, 8], typ=INT32))
 
     assert len(v[1:9:-3]) == 0
 
-    assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4], typ=types.INT32))
+    assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4], typ=INT32))
 
     assert len(v[9:1:3]) == 0
 
