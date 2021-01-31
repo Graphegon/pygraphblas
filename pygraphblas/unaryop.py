@@ -79,6 +79,8 @@ def build_unaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
     for name in UnaryOp._auto_unaryops:
         bo = AutoUnaryOp(name)
         setattr(this, name, bo)

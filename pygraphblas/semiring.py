@@ -119,6 +119,8 @@ def build_semirings(__pdoc__):
         semiring_group(complex_re),
     ):
         setattr(this, r.name, r)
+        pls, mul, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{pls}_{mul}"] = f"Semiring {r.name}"
     for name in Semiring._auto_semirings:
         sr = AutoSemiring(name)
         setattr(this, name, sr)

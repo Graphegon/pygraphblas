@@ -221,7 +221,7 @@
           % endfor
           </dl>
       % endif
-      % if smethods : # and module.supermodule:
+      % if smethods and module.supermodule:
           <h3>Static methods</h3>
           <dl>
           % for f in smethods:

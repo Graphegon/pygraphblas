@@ -221,6 +221,7 @@ def test_matrix_reduce_float():
         assert v.reduce_float() == 14.52
     assert v.reduce_float(FP64.TIMES_MONOID) == 14.52
 
+
 def test_matrix_reduce_vector():
     m = Matrix.from_lists(list(range(10)), list(range(10)), list(range(10)))
     v = m.reduce_vector()

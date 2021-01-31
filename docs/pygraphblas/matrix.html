@@ -675,9 +675,7 @@ class Matrix:
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols)
-                if T0 in desc
-                else (self.ncols, self.nrows)
+                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -2946,9 +2944,7 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols)
-                if T0 in desc
-                else (self.ncols, self.nrows)
+                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -7355,9 +7351,7 @@ Guide</a></p>
     &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
-            (self.nrows, self.ncols)
-            if T0 in desc
-            else (self.ncols, self.nrows)
+            (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
         if cast is not None:

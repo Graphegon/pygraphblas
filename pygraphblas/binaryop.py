@@ -113,7 +113,7 @@ def build_binaryops(__pdoc__):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
         op, typ = r.name.split("_")
-        __pdoc__[f"{typ}.{op}"] = r.__doc__ = f"BinaryOp {r.name}"
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
 
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
