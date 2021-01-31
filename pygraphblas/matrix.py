@@ -74,7 +74,7 @@ class Matrix:
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     """
 

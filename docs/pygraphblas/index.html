@@ -208,6 +208,7 @@ __pdoc__ = {
     &#34;matrix&#34;: False,
     &#34;vector&#34;: False,
     &#34;scalar&#34;: False,
+    &#34;types&#34;: False,
 }
 
 build_semirings(__pdoc__)
@@ -232,8 +233,6 @@ from .types import (
 )
 
 __all__ = [
-    &#34;lib&#34;,
-    &#34;ffi&#34;,
     &#34;GxB_INDEX_MAX&#34;,
     &#34;GxB_IMPLEMENTATION&#34;,
     &#34;GxB_SPEC&#34;,
@@ -258,12 +257,6 @@ __all__ = [
     &#34;descriptor&#34;,
 ]
 
-ffi = ffi  # global assign hack to fool pdoc
-&#34;&#34;&#34; CFFI C Foreign Function Interface.  For internal low-level use only. &#34;&#34;&#34;
-
-lib = lib
-&#34;&#34;&#34; Raw interface to SuiteSparse library. For internal low-level use only.  &#34;&#34;&#34;
-
 GxB_INDEX_MAX = GxB_INDEX_MAX
 &#34;&#34;&#34;Maximum key size for SuiteSparse, defaults to `2**60`.&#34;&#34;&#34;
 
@@ -281,193 +274,6 @@ def run_doctests():
     for mod in (this, matrix, descriptor, base):
         doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
 </details>
-</section>
-<section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="pygraphblas.descriptor" href="descriptor.html">pygraphblas.descriptor</a></code></dt>
-<dd>
-<div class="desc"><p>Contains all automatically generated Descriptors from CFFI.</p></div>
-</dd>
-<dt><code class="name"><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></dt>
-<dd>
-<div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz in
-doctests and Jupyter notebooks.</p></div>
-</dd>
-<dt><code class="name"><a title="pygraphblas.types" href="types.html">pygraphblas.types</a></code></dt>
-<dd>
-<div class="desc"><p>Pythonic GraphBLAS type wrappers including User Defined Types …</p></div>
-</dd>
-</dl>
-</section>
-<section>
-<h2 class="section-title" id="header-variables">Global variables</h2>
-<dl>
-<dt id="pygraphblas.GxB_IMPLEMENTATION"><code class="name">var <span class="ident">GxB_IMPLEMENTATION</span></code></dt>
-<dd>
-<div class="desc"><p>Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
-</dd>
-<dt id="pygraphblas.GxB_INDEX_MAX"><code class="name">var <span class="ident">GxB_INDEX_MAX</span></code></dt>
-<dd>
-<div class="desc"><p>Maximum key size for SuiteSparse, defaults to <code>2**60</code>.</p></div>
-</dd>
-<dt id="pygraphblas.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
-<dd>
-<div class="desc"><p>Tuple containing GxB_SPEC (MAJOR, MINOR, SUB)</p></div>
-</dd>
-<dt id="pygraphblas.ffi"><code class="name">var <span class="ident">ffi</span></code></dt>
-<dd>
-<div class="desc"><p>CFFI C Foreign Function Interface.
-For internal low-level use only.</p></div>
-</dd>
-<dt id="pygraphblas.lib"><code class="name">var <span class="ident">lib</span></code></dt>
-<dd>
-<div class="desc"><p>Raw interface to SuiteSparse library. For internal low-level use only.</p></div>
-</dd>
-</dl>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="pygraphblas.options_get"><code class="name flex">
-<span>def <span class="ident">options_get</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get global library options.
-See SuiteSparse User Guide.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; pprint(options_get())
-{'bitmap_switch': [...],
- 'burble': ...,
- 'chunk': ...,
- 'format': ...,
- 'hyper_switch': ...,
- 'nthreads': ...}
-</code></pre></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def options_get():
-    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
-
-    &gt;&gt;&gt; pprint(options_get())
-    {&#39;bitmap_switch&#39;: [...],
-     &#39;burble&#39;: ...,
-     &#39;chunk&#39;: ...,
-     &#39;format&#39;: ...,
-     &#39;hyper_switch&#39;: ...,
-     &#39;nthreads&#39;: ...}
-
-    &#34;&#34;&#34;
-    nthreads = ffi.new(&#34;int*&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
-    chunk = ffi.new(&#34;double*&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_CHUNK, chunk))
-    burble = ffi.new(&#34;int*&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_BURBLE, burble))
-    hyper_switch = ffi.new(&#34;double*&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_HYPER_SWITCH, hyper_switch))
-    bitmap_switch = ffi.new(&#34;double[8]&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_BITMAP_SWITCH, bitmap_switch))
-    format = ffi.new(&#34;GxB_Format_Value*&#34;)
-    _check(lib.GxB_Global_Option_get(lib.GxB_FORMAT, format))
-
-    return dict(
-        nthreads=nthreads[0],
-        chunk=chunk[0],
-        burble=burble[0],
-        hyper_switch=hyper_switch[0],
-        bitmap_switch=list(bitmap_switch),
-        format=format[0],
-    )</code></pre>
-</details>
-</dd>
-<dt id="pygraphblas.options_set"><code class="name flex">
-<span>def <span class="ident">options_set</span></span>(<span>nthreads=None, chunk=None, burble=None, hyper_switch=None, bitmap_switch=None, format=None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set global library options.</p>
-<p>This options are passed directly to SuiteSparse so see the
-SuiteSparse User Guide for details.</p>
-<ul>
-<li>
-<p><code>nthreads</code>: Globals number of threads to use.</p>
-</li>
-<li>
-<p><code>chunk</code>: Chunk size for dividing parallel work.</p>
-</li>
-<li>
-<p><code>burble</code>: Switch to enable "burble" debug output.
-SuiteSparse
-must be compiled with burble turned on.</p>
-</li>
-<li>
-<p><code>hyper_switch</code>: Controls the hypersparsity of the internal data
-structure for a matrix.
-The parameter is typically in the range
-0 to 1.</p>
-</li>
-<li>
-<p><code>bitmap_switch</code>: Controls when to switch to bitmap format.</p>
-</li>
-<li>
-<p><code>format</code>: Default global matrix data format.</p>
-</li>
-</ul></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def options_set(
-    nthreads=None,
-    chunk=None,
-    burble=None,
-    hyper_switch=None,
-    bitmap_switch=None,
-    format=None,
-):
-    &#34;&#34;&#34;Set global library options.
-
-    This options are passed directly to SuiteSparse so see the
-    SuiteSparse User Guide for details.
-
-    - `nthreads`: Globals number of threads to use.
-
-    - `chunk`: Chunk size for dividing parallel work.
-
-    - `burble`: Switch to enable &#34;burble&#34; debug output.  SuiteSparse
-      must be compiled with burble turned on.
-
-    - `hyper_switch`: Controls the hypersparsity of the internal data
-      structure for a matrix.  The parameter is typically in the range
-      0 to 1.
-
-    - `bitmap_switch`: Controls when to switch to bitmap format.
-
-    - `format`: Default global matrix data format.
-
-    &#34;&#34;&#34;
-    if nthreads is not None:
-        nthreads = ffi.cast(&#34;int&#34;, nthreads)
-        _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
-    if chunk is not None:
-        chunk = ffi.cast(&#34;double&#34;, chunk)
-        _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_CHUNK, chunk))
-    if burble is not None:
-        burble = ffi.cast(&#34;int&#34;, burble)
-        _check(lib.GxB_Global_Option_set(lib.GxB_BURBLE, burble))
-    if hyper_switch is not None:
-        hyper_switch = ffi.cast(&#34;double&#34;, hyper_switch)
-        _check(lib.GxB_Global_Option_set(lib.GxB_HYPER_SWITCH, hyper_switch))
-    if bitmap_switch is not None:
-        bitmap_switch = ffi.new(&#34;double[8]&#34;, bitmap_switch)
-        _check(lib.GxB_Global_Option_set(lib.GxB_BITMAP_SWITCH, bitmap_switch))
-    if format is not None:
-        format = ffi.cast(&#34;GxB_Format_Value*&#34;, format)
-        _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Types</h2>
@@ -7810,7 +7616,7 @@ B</td>
 </table>
 <p>Note that all the above operator syntax is mearly sugar over
 various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#pygraphblas.Matrix.mxm">Matrix.mxm()</a></code>, <code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">Matrix.mxv()</a></code>,
-<code>pygraphblas.vector.Vector.vxm</code>, <code><a title="pygraphblas.Matrix.eadd" href="#pygraphblas.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.Matrix.emult" href="#pygraphblas.Matrix.emult">Matrix.emult()</a></code>.</p></div>
+<code><a title="pygraphblas.Vector.vxm" href="#pygraphblas.Vector.vxm">Vector.vxm()</a></code>, <code><a title="pygraphblas.Matrix.eadd" href="#pygraphblas.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.Matrix.emult" href="#pygraphblas.Matrix.emult">Matrix.emult()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -7854,7 +7660,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     &#34;&#34;&#34;
 
@@ -17937,6 +17743,180 @@ outside the resized vector are deleted.</p></div>
 </dd>
 </dl>
 </section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="pygraphblas.descriptor" href="descriptor.html">pygraphblas.descriptor</a></code></dt>
+<dd>
+<div class="desc"><p>Contains all automatically generated Descriptors from CFFI.</p></div>
+</dd>
+<dt><code class="name"><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></dt>
+<dd>
+<div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz in
+doctests and Jupyter notebooks.</p></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="pygraphblas.GxB_IMPLEMENTATION"><code class="name">var <span class="ident">GxB_IMPLEMENTATION</span></code></dt>
+<dd>
+<div class="desc"><p>Tuple containing GxB_IMPLEMENTATION (MAJOR, MINOR, SUB)</p></div>
+</dd>
+<dt id="pygraphblas.GxB_INDEX_MAX"><code class="name">var <span class="ident">GxB_INDEX_MAX</span></code></dt>
+<dd>
+<div class="desc"><p>Maximum key size for SuiteSparse, defaults to <code>2**60</code>.</p></div>
+</dd>
+<dt id="pygraphblas.GxB_SPEC"><code class="name">var <span class="ident">GxB_SPEC</span></code></dt>
+<dd>
+<div class="desc"><p>Tuple containing GxB_SPEC (MAJOR, MINOR, SUB)</p></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pygraphblas.options_get"><code class="name flex">
+<span>def <span class="ident">options_get</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get global library options.
+See SuiteSparse User Guide.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pprint(options_get())
+{'bitmap_switch': [...],
+ 'burble': ...,
+ 'chunk': ...,
+ 'format': ...,
+ 'hyper_switch': ...,
+ 'nthreads': ...}
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def options_get():
+    &#34;&#34;&#34;Get global library options.  See SuiteSparse User Guide.
+
+    &gt;&gt;&gt; pprint(options_get())
+    {&#39;bitmap_switch&#39;: [...],
+     &#39;burble&#39;: ...,
+     &#39;chunk&#39;: ...,
+     &#39;format&#39;: ...,
+     &#39;hyper_switch&#39;: ...,
+     &#39;nthreads&#39;: ...}
+
+    &#34;&#34;&#34;
+    nthreads = ffi.new(&#34;int*&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_NTHREADS, nthreads))
+    chunk = ffi.new(&#34;double*&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_GLOBAL_CHUNK, chunk))
+    burble = ffi.new(&#34;int*&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_BURBLE, burble))
+    hyper_switch = ffi.new(&#34;double*&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_HYPER_SWITCH, hyper_switch))
+    bitmap_switch = ffi.new(&#34;double[8]&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    format = ffi.new(&#34;GxB_Format_Value*&#34;)
+    _check(lib.GxB_Global_Option_get(lib.GxB_FORMAT, format))
+
+    return dict(
+        nthreads=nthreads[0],
+        chunk=chunk[0],
+        burble=burble[0],
+        hyper_switch=hyper_switch[0],
+        bitmap_switch=list(bitmap_switch),
+        format=format[0],
+    )</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.options_set"><code class="name flex">
+<span>def <span class="ident">options_set</span></span>(<span>nthreads=None, chunk=None, burble=None, hyper_switch=None, bitmap_switch=None, format=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set global library options.</p>
+<p>This options are passed directly to SuiteSparse so see the
+SuiteSparse User Guide for details.</p>
+<ul>
+<li>
+<p><code>nthreads</code>: Globals number of threads to use.</p>
+</li>
+<li>
+<p><code>chunk</code>: Chunk size for dividing parallel work.</p>
+</li>
+<li>
+<p><code>burble</code>: Switch to enable "burble" debug output.
+SuiteSparse
+must be compiled with burble turned on.</p>
+</li>
+<li>
+<p><code>hyper_switch</code>: Controls the hypersparsity of the internal data
+structure for a matrix.
+The parameter is typically in the range
+0 to 1.</p>
+</li>
+<li>
+<p><code>bitmap_switch</code>: Controls when to switch to bitmap format.</p>
+</li>
+<li>
+<p><code>format</code>: Default global matrix data format.</p>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def options_set(
+    nthreads=None,
+    chunk=None,
+    burble=None,
+    hyper_switch=None,
+    bitmap_switch=None,
+    format=None,
+):
+    &#34;&#34;&#34;Set global library options.
+
+    This options are passed directly to SuiteSparse so see the
+    SuiteSparse User Guide for details.
+
+    - `nthreads`: Globals number of threads to use.
+
+    - `chunk`: Chunk size for dividing parallel work.
+
+    - `burble`: Switch to enable &#34;burble&#34; debug output.  SuiteSparse
+      must be compiled with burble turned on.
+
+    - `hyper_switch`: Controls the hypersparsity of the internal data
+      structure for a matrix.  The parameter is typically in the range
+      0 to 1.
+
+    - `bitmap_switch`: Controls when to switch to bitmap format.
+
+    - `format`: Default global matrix data format.
+
+    &#34;&#34;&#34;
+    if nthreads is not None:
+        nthreads = ffi.cast(&#34;int&#34;, nthreads)
+        _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_NTHREADS, nthreads))
+    if chunk is not None:
+        chunk = ffi.cast(&#34;double&#34;, chunk)
+        _check(lib.GxB_Global_Option_set(lib.GxB_GLOBAL_CHUNK, chunk))
+    if burble is not None:
+        burble = ffi.cast(&#34;int&#34;, burble)
+        _check(lib.GxB_Global_Option_set(lib.GxB_BURBLE, burble))
+    if hyper_switch is not None:
+        hyper_switch = ffi.cast(&#34;double&#34;, hyper_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_HYPER_SWITCH, hyper_switch))
+    if bitmap_switch is not None:
+        bitmap_switch = ffi.new(&#34;double[8]&#34;, bitmap_switch)
+        _check(lib.GxB_Global_Option_set(lib.GxB_BITMAP_SWITCH, bitmap_switch))
+    if format is not None:
+        format = ffi.cast(&#34;GxB_Format_Value*&#34;, format)
+        _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
 </article>
 <nav id="sidebar">
 <h1>Index</h1>
@@ -17948,7 +17928,6 @@ outside the resized vector are deleted.</p></div>
 <ul>
 <li><code><a title="pygraphblas.descriptor" href="descriptor.html">pygraphblas.descriptor</a></code></li>
 <li><code><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></li>
-<li><code><a title="pygraphblas.types" href="types.html">pygraphblas.types</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
@@ -17956,8 +17935,6 @@ outside the resized vector are deleted.</p></div>
 <li><code><a title="pygraphblas.GxB_IMPLEMENTATION" href="#pygraphblas.GxB_IMPLEMENTATION">GxB_IMPLEMENTATION</a></code></li>
 <li><code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code></li>
 <li><code><a title="pygraphblas.GxB_SPEC" href="#pygraphblas.GxB_SPEC">GxB_SPEC</a></code></li>
-<li><code><a title="pygraphblas.ffi" href="#pygraphblas.ffi">ffi</a></code></li>
-<li><code><a title="pygraphblas.lib" href="#pygraphblas.lib">lib</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>

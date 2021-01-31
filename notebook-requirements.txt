@@ -18,4 +18,4 @@ imageio
 imageio-ffmpeg
 pygifsicle
 pdoc3
-
+cyjupyter

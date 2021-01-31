@@ -106,6 +106,7 @@ __pdoc__ = {
     "matrix": False,
     "vector": False,
     "scalar": False,
+    "types": False,
 }
 
 build_semirings(__pdoc__)
@@ -130,8 +131,6 @@ from .types import (
 )
 
 __all__ = [
-    "lib",
-    "ffi",
     "GxB_INDEX_MAX",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
@@ -155,12 +154,6 @@ __all__ = [
     "BOOL",
     "descriptor",
 ]
-
-ffi = ffi  # global assign hack to fool pdoc
-""" CFFI C Foreign Function Interface.  For internal low-level use only. """
-
-lib = lib
-""" Raw interface to SuiteSparse library. For internal low-level use only.  """
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""

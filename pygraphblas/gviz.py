@@ -4,6 +4,7 @@ doctests and Jupyter notebooks.
 """
 from graphviz import Digraph, Source
 from PIL import Image, ImageDraw
+from json import dumps
 
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "draw_vector",
     "draw_layers",
     "draw_op",
+    "draw_cy",
 ]
 
 
@@ -190,3 +192,48 @@ def draw_matrix(
     if filename is not None:
         im.save(filename + ".png", "PNG")
     return im
+
+def cy_matrix(M):
+    nodes = dict()
+    edges = []
+
+    for i, j, v in M:
+        edges.append({'data': {'id': f'{i}:{j}:{v}', 'source': str(i), 'target': str(j)}})
+        if i not in nodes:
+            nodes[i] = {'data': {'id': str(i)}}
+        if j not in nodes:
+            nodes[j] = {'data': {'id': str(j)}}
+
+    return {'directed': True, 'elements': {'nodes': list(nodes.values()), 'edges': edges}}
+
+
+my_style = [
+    {
+        'selector': 'node',
+        'style': {
+            'background-color': 'blue',
+            'label': 'data(name)',
+            'width': 2,
+            'height': 2,
+            'shape': 'circle',
+            'color': '#EEEEEE',
+            'font-weight': 400,
+            'text-halign': 'right',
+            'text-valign': 'bottom',
+            'font-size': 12
+        }
+    },
+    {
+        'selector': 'edge',
+        'style': {
+            'width': 0.2,
+            'opacity': 1,
+            'line-color': 'green',
+        }
+    }
+]
+
+def draw_cy(M, visual_style=my_style):
+    from cyjupyter import Cytoscape
+    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)
+

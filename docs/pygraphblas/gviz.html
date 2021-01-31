@@ -38,6 +38,7 @@ doctests and Jupyter notebooks.
 &#34;&#34;&#34;
 from graphviz import Digraph, Source
 from PIL import Image, ImageDraw
+from json import dumps
 
 
 __all__ = [
@@ -47,6 +48,7 @@ __all__ = [
     &#34;draw_vector&#34;,
     &#34;draw_layers&#34;,
     &#34;draw_op&#34;,
+    &#34;draw_cy&#34;,
 ]
 
 
@@ -223,8 +225,54 @@ def draw_matrix(
             d.text((scale / 5, ((j + 1) * scale) + scale / 5), str(j), fill=&#34;black&#34;)
     if filename is not None:
         im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
-    return im</code></pre>
+    return im
+
+def cy_matrix(M):
+    nodes = dict()
+    edges = []
+
+    for i, j, v in M:
+        edges.append({&#39;data&#39;: {&#39;id&#39;: f&#39;{i}:{j}:{v}&#39;, &#39;source&#39;: str(i), &#39;target&#39;: str(j)}})
+        if i not in nodes:
+            nodes[i] = {&#39;data&#39;: {&#39;id&#39;: str(i)}}
+        if j not in nodes:
+            nodes[j] = {&#39;data&#39;: {&#39;id&#39;: str(j)}}
+
+    return {&#39;directed&#39;: True, &#39;elements&#39;: {&#39;nodes&#39;: list(nodes.values()), &#39;edges&#39;: edges}}
+
+
+my_style = [
+    {
+        &#39;selector&#39;: &#39;node&#39;,
+        &#39;style&#39;: {
+            &#39;background-color&#39;: &#39;blue&#39;,
+            &#39;label&#39;: &#39;data(name)&#39;,
+            &#39;width&#39;: 2,
+            &#39;height&#39;: 2,
+            &#39;shape&#39;: &#39;circle&#39;,
+            &#39;color&#39;: &#39;#EEEEEE&#39;,
+            &#39;font-weight&#39;: 400,
+            &#39;text-halign&#39;: &#39;right&#39;,
+            &#39;text-valign&#39;: &#39;bottom&#39;,
+            &#39;font-size&#39;: 12
+        }
+    },
+    {
+        &#39;selector&#39;: &#39;edge&#39;,
+        &#39;style&#39;: {
+            &#39;width&#39;: 0.2,
+            &#39;opacity&#39;: 1,
+            &#39;line-color&#39;: &#39;green&#39;,
+        }
+    }
+]
+
+def draw_cy(M, visual_style=my_style):
+    from cyjupyter import Cytoscape
+    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
 </details>
+</section>
+<section>
 </section>
 <section>
 </section>
@@ -249,6 +297,20 @@ def draw_matrix(
         return draw_graph(obj, name, **kws)
     if isinstance(obj, Vector):
         return draw_vector(obj, name, **kws)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.gviz.draw_cy"><code class="name flex">
+<span>def <span class="ident">draw_cy</span></span>(<span>M, visual_style=[{'selector': 'node', 'style': {'background-color': 'blue', 'label': 'data(name)', 'width': 2, 'height': 2, 'shape': 'circle', 'color': '#EEEEEE', 'font-weight': 400, 'text-halign': 'right', 'text-valign': 'bottom', 'font-size': 12}}, {'selector': 'edge', 'style': {'width': 0.2, 'opacity': 1, 'line-color': 'green'}}])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_cy(M, visual_style=my_style):
+    from cyjupyter import Cytoscape
+    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_graph"><code class="name flex">
@@ -461,8 +523,6 @@ def draw_matrix(
 </dd>
 </dl>
 </section>
-<section>
-</section>
 </article>
 <nav id="sidebar">
 <h1>Index</h1>
@@ -478,6 +538,7 @@ def draw_matrix(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="pygraphblas.gviz.draw" href="#pygraphblas.gviz.draw">draw</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_cy" href="#pygraphblas.gviz.draw_cy">draw_cy</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_graph" href="#pygraphblas.gviz.draw_graph">draw_graph</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_layers" href="#pygraphblas.gviz.draw_layers">draw_layers</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_matrix" href="#pygraphblas.gviz.draw_matrix">draw_matrix</a></code></li>
