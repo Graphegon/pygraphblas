@@ -24,7 +24,7 @@ from . import types
 from .vector import Vector
 from .scalar import Scalar
 from .semiring import current_semiring
-from .binaryop import current_accum, current_binop
+from .binaryop import current_accum, current_binop, Accum
 from .unaryop import current_uop
 from .monoid import current_monoid
 from .descriptor import Descriptor, Default, T0, current_desc
@@ -83,7 +83,7 @@ class Matrix:
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError # pragma: nocover
+                raise KeyError  # pragma: nocover
 
             error_string = ffi.new("char**")
             lib.GrB_Matrix_error(error_string, self._matrix[0])
@@ -1028,7 +1028,7 @@ class Matrix:
         op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op) # pragma: nocover
+        return other.eadd(self, op)  # pragma: nocover
 
     def __iadd__(self, other):
         op = current_binop.get(self.type.PLUS)
@@ -1046,7 +1046,7 @@ class Matrix:
         op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op) # pragma: nocover
+        return other.eadd(self, op)  # pragma: nocover
 
     def __isub__(self, other):
         op = current_binop.get(self.type.MINUS)
@@ -1064,7 +1064,7 @@ class Matrix:
         op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op) # pragma: nocover
+        return other.emult(self, op)  # pragma: nocover
 
     def __imul__(self, other):
         op = current_binop.get(self.type.TIMES)
@@ -1082,7 +1082,7 @@ class Matrix:
         op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op) # pragma: nocover
+        return other.emult(self, op)  # pragma: nocover
 
     def __itruediv__(self, other):
         op = current_binop.get(self.type.DIV)
@@ -1529,10 +1529,120 @@ class Matrix:
     ):
         """Matrix-matrix multiply.
 
-        Multiply this matrix by `other`.  See Section 9.6 in the
-        [SuiteSparse User
+        Multiply this matrix by `other` matrix.
+
+        See Section 9.6 in the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
         for details.
+
+        `mxm` can be called directly or with the `@` operator:
+
+        >>> m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+        >>> print(m)
+              0  1  2
+          0|     1   |  0
+          1|        2|  1
+          2|  3      |  2
+              0  1  2
+
+        >>> print(n)
+              0  1  2
+          0|     2   |  0
+          1|        3|  1
+          2|  4      |  2
+              0  1  2
+
+        >>> o = m.mxm(n)
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        >>> o = m @ n
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        By default, `mxm` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.  This is also supported by the `@=` syntax:
+
+        >>> o = m.dup()
+        >>> o.mxm(n, accum=types.INT64.MIN, out=o) is o
+        True
+        >>> print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        >>> o = m.dup()
+        >>> with Accum(types.INT64.MIN):
+        ...     o @= n
+        >>> print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+        >>> print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        >>> with types.INT64.MIN_PLUS:
+        ...     o = m @ n
+        >>> print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        >>> o = m.mxm(n, desc=descriptor.T0)
+        >>> print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        >>> with descriptor.T0:
+        ...     o = m @ n
+        >>> print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        The accumulator context manager requires an extra `Accum`
+        helper class to distinguish it from binary ops used in `eadd`
+        and `emult`.
 
         """
         if semiring is None:
@@ -1575,7 +1685,64 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Matrix-vector multiply.
+        """Matrix-matrix multiply.
+
+        Multiply this matrix by `other` vector.
+
+        See Section 9.6 in the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+        for details.
+
+        `mxv` can also be called directly or with the `@` operator:
+
+        >>> m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+        >>> o = m.mxv(v)
+        >>> print(o)
+        0| 3
+        1| 8
+        2| 6
+        >>> o = m @ v
+        >>> print(o)
+        0| 3
+        1| 8
+        2| 6
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+        >>> print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        >>> with types.INT64.MIN_PLUS:
+        ...     o = m @ v
+        >>> print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        >>> o = m.mxv(v, desc=descriptor.T0)
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        >>> with descriptor.T0:
+        ...     o = m @ v
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
 
         """
 

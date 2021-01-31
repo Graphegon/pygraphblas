@@ -30,7 +30,7 @@ class BinaryOp:
     _auto_binaryops = defaultdict(dict)
 
     def __init__(self, op, typ, binaryop, udt=None, boolean=False):
-        if udt is not None:   # pragma: no cover
+        if udt is not None:  # pragma: no cover
             o = ffi.new("GrB_BinaryOp*")
             udt = udt.gb_type
             lib.GrB_BinaryOp_new(
@@ -104,6 +104,7 @@ def build_binaryops(__pdoc__):
         this.__all__.append(r.name)
         op, typ = r.name.split("_")
         __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
+
 
 def binary_op(arg_type, result_type=None):
     if result_type is None:  # pragma: no cover

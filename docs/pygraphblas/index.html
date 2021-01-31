@@ -195,7 +195,7 @@ from .base import (
 lib.LAGraph_init()
 
 from .semiring import build_semirings
-from .binaryop import build_binaryops
+from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops
 from .monoid import build_monoids
 from .matrix import Matrix
@@ -260,6 +260,9 @@ __all__ = [
     &#34;UINT8&#34;,
     &#34;BOOL&#34;,
     &#34;descriptor&#34;,
+    &#34;Accum&#34;,
+    &#34;binary_op&#34;,
+    &#34;run_doctests&#34;,
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -272,17 +275,59 @@ GxB_SPEC = GxB_SPEC
 &#34;&#34;&#34; Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) &#34;&#34;&#34;
 
 
-def run_doctests():   # pragma: no cover
+def run_doctests(raise_on_error=False):
+    from . import matrix
+    from . import descriptor
+    from . import base
     import sys, doctest
 
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)</code></pre>
+        doctest.testmod(
+            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
+        )</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Types</h2>
 <dl>
+<dt id="pygraphblas.Accum"><code class="flex name class">
+<span>class <span class="ident">Accum</span></span>
+<span>(</span><span>binaryop)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Accum:
+
+    __slots__ = (&#34;binaryop&#34;, &#34;token&#34;)
+
+    def __init__(self, binaryop):
+        self.binaryop = binaryop
+
+    def __enter__(self):
+        self.token = current_accum.set(self.binaryop)
+        return self
+
+    def __exit__(self, *errors):
+        current_accum.reset(self.token)
+        return False</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pygraphblas.Accum.binaryop"><code class="name">var <span class="ident">binaryop</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+<dt id="pygraphblas.Accum.token"><code class="name">var <span class="ident">token</span></code></dt>
+<dd>
+<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+</dl>
+</dd>
 <dt id="pygraphblas.BOOL"><code class="flex name class">
 <span>class <span class="ident">BOOL</span></span>
 </code></dt>
@@ -301,6 +346,14 @@ def run_doctests():   # pragma: no cover
     zero = False
     typecode = &#34;B&#34;
     numba_t = numba.boolean
+
+    @classmethod
+    def default_addop(self):
+        return self.LOR
+
+    @classmethod
+    def default_multop(self):
+        return self.LAND
 
     @classmethod
     def default_semiring(self):
@@ -7678,7 +7731,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError
+                raise KeyError  # pragma: nocover
 
             error_string = ffi.new(&#34;char**&#34;)
             lib.GrB_Matrix_error(error_string, self._matrix[0])
@@ -7698,7 +7751,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
         &gt;&gt;&gt; M.type == types.INT8
         True
-
         &#34;&#34;&#34;
         self._keep_alives = weakref.WeakKeyDictionary()
 
@@ -7772,7 +7824,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         assert nrows &gt; 0 and ncols &gt; 0, &#34;dense matrix must be at least 1x1&#34;
         m = cls.sparse(typ, nrows, ncols)
         if sparsity is not None:
-            v.sparsity = sparsity
+            m.sparsity = sparsity
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
@@ -8366,7 +8418,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             out = Matrix(_out, typ)
 
         if add_op is NULL:
-            add_op = out.type.PLUS
+            add_op = out.type.default_addop()
         add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
@@ -8459,7 +8511,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             out = Matrix(_out, typ)
 
         if mult_op is NULL:
-            mult_op = out.type.TIMES
+            mult_op = out.type.default_multop()
         mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
@@ -8624,7 +8676,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op)
+        return other.eadd(self, op)  # pragma: nocover
 
     def __iadd__(self, other):
         op = current_binop.get(self.type.PLUS)
@@ -8642,7 +8694,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.eadd(self, op)
+        return other.eadd(self, op)  # pragma: nocover
 
     def __isub__(self, other):
         op = current_binop.get(self.type.MINUS)
@@ -8660,7 +8712,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op)
+        return other.emult(self, op)  # pragma: nocover
 
     def __imul__(self, other):
         op = current_binop.get(self.type.TIMES)
@@ -8678,7 +8730,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
             return self.apply_first(other, op)
-        return other.emult(self, op)
+        return other.emult(self, op)  # pragma: nocover
 
     def __itruediv__(self, other):
         op = current_binop.get(self.type.DIV)
@@ -9125,10 +9177,120 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     ):
         &#34;&#34;&#34;Matrix-matrix multiply.
 
-        Multiply this matrix by `other`.  See Section 9.6 in the
-        [SuiteSparse User
+        Multiply this matrix by `other` matrix.
+
+        See Section 9.6 in the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
         for details.
+
+        `mxm` can be called directly or with the `@` operator:
+
+        &gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        &gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+        &gt;&gt;&gt; print(m)
+              0  1  2
+          0|     1   |  0
+          1|        2|  1
+          2|  3      |  2
+              0  1  2
+
+        &gt;&gt;&gt; print(n)
+              0  1  2
+          0|     2   |  0
+          1|        3|  1
+          2|  4      |  2
+              0  1  2
+
+        &gt;&gt;&gt; o = m.mxm(n)
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        &gt;&gt;&gt; o = m @ n
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        By default, `mxm` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.  This is also supported by the `@=` syntax:
+
+        &gt;&gt;&gt; o = m.dup()
+        &gt;&gt;&gt; o.mxm(n, accum=types.INT64.MIN, out=o) is o
+        True
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        &gt;&gt;&gt; o = m.dup()
+        &gt;&gt;&gt; with Accum(types.INT64.MIN):
+        ...     o @= n
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        &gt;&gt;&gt; o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+        ...     o = m @ n
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        &gt;&gt;&gt; with descriptor.T0:
+        ...     o = m @ n
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        The accumulator context manager requires an extra `Accum`
+        helper class to distinguish it from binary ops used in `eadd`
+        and `emult`.
 
         &#34;&#34;&#34;
         if semiring is None:
@@ -9144,7 +9306,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -9171,7 +9333,66 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         accum=None,
         desc=Default,
     ):
-        &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
+        &#34;&#34;&#34;Matrix-matrix multiply.
+
+        Multiply this matrix by `other` vector.
+
+        See Section 9.6 in the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+        for details.
+
+        `mxv` can also be called directly or with the `@` operator:
+
+        &gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        &gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+        &gt;&gt;&gt; o = m.mxv(v)
+        &gt;&gt;&gt; print(o)
+        0| 3
+        1| 8
+        2| 6
+        &gt;&gt;&gt; o = m @ v
+        &gt;&gt;&gt; print(o)
+        0| 3
+        1| 8
+        2| 6
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        &gt;&gt;&gt; o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+        &gt;&gt;&gt; print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+        ...     o = m @ v
+        &gt;&gt;&gt; print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        &gt;&gt;&gt; o = m.mxv(v, desc=descriptor.T0)
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+
+        &gt;&gt;&gt; with descriptor.T0:
+        ...     o = m @ v
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+
+        &#34;&#34;&#34;
 
         if semiring is None:
             semiring = current_semiring.get(NULL)
@@ -9187,7 +9408,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -10914,7 +11135,7 @@ interchangeably for either operation.</p>
         out = Matrix(_out, typ)
 
     if add_op is NULL:
-        add_op = out.type.PLUS
+        add_op = out.type.default_addop()
     add_op = add_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Matrix_eWiseAdd_BinaryOp(
@@ -11063,7 +11284,7 @@ interchangeably for either operation.</p>
         out = Matrix(_out, typ)
 
     if mult_op is NULL:
-        mult_op = out.type.TIMES
+        mult_op = out.type.default_multop()
     mult_op = mult_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Matrix_eWiseMult_BinaryOp(
@@ -11431,11 +11652,118 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-matrix multiply.</p>
-<p>Multiply this matrix by <code>other</code>.
-See Section 9.6 in the
-<a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
+<p>Multiply this matrix by <code>other</code> matrix.</p>
+<p>See Section 9.6 in the <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
 Guide</a>
-for details.</p></div>
+for details.</p>
+<p><code>mxm</code> can be called directly or with the <code>@</code> operator:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+&gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+&gt;&gt;&gt; print(m)
+      0  1  2
+  0|     1   |  0
+  1|        2|  1
+  2|  3      |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(n)
+      0  1  2
+  0|     2   |  0
+  1|        3|  1
+  2|  4      |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n)
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        3|  0
+  1|  8      |  1
+  2|     6   |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m @ n
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        3|  0
+  1|  8      |  1
+  2|     6   |  2
+      0  1  2
+</code></pre>
+<p>By default, <code>mxm</code> and <code>@</code> create a new result matrix of the
+correct type and dimensions if one is not provided.
+If you
+want to provide your own matrix to put the result in, you can
+pass it in the <code>out</code> parameter.
+This is useful for
+accumulating results into a single matrix with minimal
+copying.
+This is also supported by the <code>@=</code> syntax:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.dup()
+&gt;&gt;&gt; o.mxm(n, accum=types.INT64.MIN, out=o) is o
+True
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|     1  3|  0
+  1|  8     2|  1
+  2|  3  6   |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.dup()
+&gt;&gt;&gt; with Accum(types.INT64.MIN):
+...     o @= n
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|     1  3|  0
+  1|  8     2|  1
+  2|  3  6   |  2
+      0  1  2
+</code></pre>
+<p>The default semiring depends on the infered result type.
+In
+the case of numbers, the default semiring is <code>PLUS_TIMES</code>.
+In
+the case of type <code><a title="pygraphblas.BOOL" href="#pygraphblas.BOOL">BOOL</a></code>, it is <code><a title="pygraphblas.BOOL.LOR_LAND" href="#pygraphblas.BOOL.LOR_LAND">BOOL.LOR_LAND</a></code>.</p>
+<p>An explicit semiring can be passed to the method or provided
+with a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        4|  0
+  1|  6      |  1
+  2|     5   |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN_PLUS:
+...     o = m @ n
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        4|  0
+  1|  6      |  1
+  2|     5   |  2
+      0  1  2
+</code></pre>
+<p>Descriptors and accumulators can also be provided as an
+argument or a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0| 12      |  0
+  1|     2   |  1
+  2|        6|  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with descriptor.T0:
+...     o = m @ n
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0| 12      |  0
+  1|     2   |  1
+  2|        6|  2
+      0  1  2
+</code></pre>
+<p>The accumulator context manager requires an extra <code><a title="pygraphblas.Accum" href="#pygraphblas.Accum">Accum</a></code>
+helper class to distinguish it from binary ops used in <code>eadd</code>
+and <code>emult</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11452,10 +11780,120 @@ for details.</p></div>
 ):
     &#34;&#34;&#34;Matrix-matrix multiply.
 
-    Multiply this matrix by `other`.  See Section 9.6 in the
-    [SuiteSparse User
+    Multiply this matrix by `other` matrix.
+
+    See Section 9.6 in the [SuiteSparse User
     Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
     for details.
+
+    `mxm` can be called directly or with the `@` operator:
+
+    &gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+    &gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+    &gt;&gt;&gt; print(m)
+          0  1  2
+      0|     1   |  0
+      1|        2|  1
+      2|  3      |  2
+          0  1  2
+
+    &gt;&gt;&gt; print(n)
+          0  1  2
+      0|     2   |  0
+      1|        3|  1
+      2|  4      |  2
+          0  1  2
+
+    &gt;&gt;&gt; o = m.mxm(n)
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        3|  0
+      1|  8      |  1
+      2|     6   |  2
+          0  1  2
+
+    &gt;&gt;&gt; o = m @ n
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        3|  0
+      1|  8      |  1
+      2|     6   |  2
+          0  1  2
+
+    By default, `mxm` and `@` create a new result matrix of the
+    correct type and dimensions if one is not provided.  If you
+    want to provide your own matrix to put the result in, you can
+    pass it in the `out` parameter.  This is useful for
+    accumulating results into a single matrix with minimal
+    copying.  This is also supported by the `@=` syntax:
+
+    &gt;&gt;&gt; o = m.dup()
+    &gt;&gt;&gt; o.mxm(n, accum=types.INT64.MIN, out=o) is o
+    True
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|     1  3|  0
+      1|  8     2|  1
+      2|  3  6   |  2
+          0  1  2
+
+    &gt;&gt;&gt; o = m.dup()
+    &gt;&gt;&gt; with Accum(types.INT64.MIN):
+    ...     o @= n
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|     1  3|  0
+      1|  8     2|  1
+      2|  3  6   |  2
+          0  1  2
+
+    The default semiring depends on the infered result type.  In
+    the case of numbers, the default semiring is `PLUS_TIMES`.  In
+    the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+    An explicit semiring can be passed to the method or provided
+    with a context manager:
+
+    &gt;&gt;&gt; o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        4|  0
+      1|  6      |  1
+      2|     5   |  2
+          0  1  2
+
+    &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+    ...     o = m @ n
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        4|  0
+      1|  6      |  1
+      2|     5   |  2
+          0  1  2
+
+    Descriptors and accumulators can also be provided as an
+    argument or a context manager:
+
+    &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0| 12      |  0
+      1|     2   |  1
+      2|        6|  2
+          0  1  2
+
+    &gt;&gt;&gt; with descriptor.T0:
+    ...     o = m @ n
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0| 12      |  0
+      1|     2   |  1
+      2|        6|  2
+          0  1  2
+
+    The accumulator context manager requires an extra `Accum`
+    helper class to distinguish it from binary ops used in `eadd`
+    and `emult`.
 
     &#34;&#34;&#34;
     if semiring is None:
@@ -11471,7 +11909,7 @@ for details.</p></div>
         typ = out.type
 
     if semiring is NULL:
-        semiring = out.type.PLUS_TIMES
+        semiring = out.type.default_semiring()
 
     semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -11493,7 +11931,60 @@ for details.</p></div>
 <span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Matrix-vector multiply.</p></div>
+<div class="desc"><p>Matrix-matrix multiply.</p>
+<p>Multiply this matrix by <code>other</code> vector.</p>
+<p>See Section 9.6 in the <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
+Guide</a>
+for details.</p>
+<p><code>mxv</code> can also be called directly or with the <code>@</code> operator:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+&gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+&gt;&gt;&gt; o = m.mxv(v)
+&gt;&gt;&gt; print(o)
+0| 3
+1| 8
+2| 6
+&gt;&gt;&gt; o = m @ v
+&gt;&gt;&gt; print(o)
+0| 3
+1| 8
+2| 6
+</code></pre>
+<p>The default semiring depends on the infered result type.
+In
+the case of numbers, the default semiring is <code>PLUS_TIMES</code>.
+In
+the case of type <code><a title="pygraphblas.BOOL" href="#pygraphblas.BOOL">BOOL</a></code>, it is <code><a title="pygraphblas.BOOL.LOR_LAND" href="#pygraphblas.BOOL.LOR_LAND">BOOL.LOR_LAND</a></code>.</p>
+<p>An explicit semiring can be passed to the method or provided
+with a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+&gt;&gt;&gt; print(o)
+0| 4
+1| 6
+2| 5
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN_PLUS:
+...     o = m @ v
+&gt;&gt;&gt; print(o)
+0| 4
+1| 6
+2| 5
+</code></pre>
+<p>Descriptors and accumulators can also be provided as an
+argument or a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxv(v, desc=descriptor.T0)
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with descriptor.T0:
+...     o = m @ v
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11508,7 +11999,66 @@ for details.</p></div>
     accum=None,
     desc=Default,
 ):
-    &#34;&#34;&#34;Matrix-vector multiply.&#34;&#34;&#34;
+    &#34;&#34;&#34;Matrix-matrix multiply.
+
+    Multiply this matrix by `other` vector.
+
+    See Section 9.6 in the [SuiteSparse User
+    Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+    for details.
+
+    `mxv` can also be called directly or with the `@` operator:
+
+    &gt;&gt;&gt; m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+    &gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+    &gt;&gt;&gt; o = m.mxv(v)
+    &gt;&gt;&gt; print(o)
+    0| 3
+    1| 8
+    2| 6
+    &gt;&gt;&gt; o = m @ v
+    &gt;&gt;&gt; print(o)
+    0| 3
+    1| 8
+    2| 6
+
+    The default semiring depends on the infered result type.  In
+    the case of numbers, the default semiring is `PLUS_TIMES`.  In
+    the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+    An explicit semiring can be passed to the method or provided
+    with a context manager:
+
+    &gt;&gt;&gt; o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+    &gt;&gt;&gt; print(o)
+    0| 4
+    1| 6
+    2| 5
+
+    &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+    ...     o = m @ v
+    &gt;&gt;&gt; print(o)
+    0| 4
+    1| 6
+    2| 5
+
+    Descriptors and accumulators can also be provided as an
+    argument or a context manager:
+
+    &gt;&gt;&gt; o = m.mxv(v, desc=descriptor.T0)
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+
+    &gt;&gt;&gt; with descriptor.T0:
+    ...     o = m @ v
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+
+    &#34;&#34;&#34;
 
     if semiring is None:
         semiring = current_semiring.get(NULL)
@@ -11524,7 +12074,7 @@ for details.</p></div>
         typ = out.type
 
     if semiring is NULL:
-        semiring = out.type.PLUS_TIMES
+        semiring = out.type.default_semiring()
 
     semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -16651,7 +17201,7 @@ def nvals(self):
             out = self.__class__(_out, typ)
 
         if add_op is NULL:
-            add_op = out.type.PLUS
+            add_op = out.type.default_addop()
         add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Vector_eWiseAdd_BinaryOp(
@@ -16701,7 +17251,7 @@ def nvals(self):
             out = self.__class__(_out, typ)
 
         if mult_op is NULL:
-            mult_op = out.type.TIMES
+            mult_op = out.type.default_multop()
 
         mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
@@ -16743,7 +17293,7 @@ def nvals(self):
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.PLUS_TIMES
+            semiring = out.type.default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -17386,7 +17936,7 @@ A nor in B do not appear in the result.</p></div>
         out = self.__class__(_out, typ)
 
     if add_op is NULL:
-        add_op = out.type.PLUS
+        add_op = out.type.default_addop()
     add_op = add_op.get_binaryop(self.type, other.type)
     self._check(
         lib.GrB_Vector_eWiseAdd_BinaryOp(
@@ -17453,7 +18003,7 @@ visa versa, do not appear in the result.</p></div>
         out = self.__class__(_out, typ)
 
     if mult_op is NULL:
-        mult_op = out.type.TIMES
+        mult_op = out.type.default_multop()
 
     mult_op = mult_op.get_binaryop(self.type, other.type)
     self._check(
@@ -17842,7 +18392,7 @@ outside the resized vector are deleted.</p></div>
         typ = out.type
 
     if semiring is NULL:
-        semiring = out.type.PLUS_TIMES
+        semiring = out.type.default_semiring()
 
     semiring = semiring.get_semiring()
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -17912,6 +18462,49 @@ doctests and Jupyter notebooks.</p></div>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pygraphblas.binary_op"><code class="name flex">
+<span>def <span class="ident">binary_op</span></span>(<span>arg_type, result_type=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def binary_op(arg_type, result_type=None):
+    if result_type is None:  # pragma: no cover
+        result_type = arg_type
+
+    def inner(func):
+        func_name = func.__name__
+        sig = numba.void(
+            numba.types.CPointer(numba.boolean)
+            if result_type is types.BOOL
+            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
+        )
+        jitfunc = numba.jit(func, nopython=True)
+
+        @numba.cfunc(sig, nopython=True)
+        def wrapper(z, x, y):  # pragma: no cover
+            result = jitfunc(x[0], y[0])
+            z[0] = result
+
+        out = ffi.new(&#34;GrB_BinaryOp*&#34;)
+        lib.GrB_BinaryOp_new(
+            out,
+            ffi.cast(&#34;GxB_binary_function&#34;, wrapper.address),
+            result_type.gb_type,
+            arg_type.gb_type,
+            arg_type.gb_type,
+        )
+
+        return BinaryOp(func_name, arg_type.__name__, out[0])
+
+    return inner</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.options_get"><code class="name flex">
 <span>def <span class="ident">options_get</span></span>(<span>)</span>
 </code></dt>
@@ -18050,6 +18643,28 @@ The parameter is typically in the range
         _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.run_doctests"><code class="name flex">
+<span>def <span class="ident">run_doctests</span></span>(<span>raise_on_error=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_doctests(raise_on_error=False):
+    from . import matrix
+    from . import descriptor
+    from . import base
+    import sys, doctest
+
+    this = sys.modules[__name__]
+    for mod in (this, matrix, descriptor, base):
+        doctest.testmod(
+            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
+        )</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 </article>
@@ -18074,12 +18689,17 @@ The parameter is typically in the range
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="pygraphblas.binary_op" href="#pygraphblas.binary_op">binary_op</a></code></li>
 <li><code><a title="pygraphblas.options_get" href="#pygraphblas.options_get">options_get</a></code></li>
 <li><code><a title="pygraphblas.options_set" href="#pygraphblas.options_set">options_set</a></code></li>
+<li><code><a title="pygraphblas.run_doctests" href="#pygraphblas.run_doctests">run_doctests</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Types</a></h3>
 <ul>
+<li>
+<code><a title="pygraphblas.Accum" href="#pygraphblas.Accum">Accum</a></code>
+</li>
 <li>
 <code><a title="pygraphblas.BOOL" href="#pygraphblas.BOOL">BOOL</a></code>
 </li>

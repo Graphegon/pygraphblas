@@ -173,11 +173,14 @@ GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
-def run_doctests():
+def run_doctests(raise_on_error=False):
     from . import matrix
     from . import descriptor
     from . import base
     import sys, doctest
+
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS, raise_on_error=True)
+        doctest.testmod(
+            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
+        )

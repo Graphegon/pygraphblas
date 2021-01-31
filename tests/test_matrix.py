@@ -43,6 +43,7 @@ def test_matrix_create():
     assert m.nvals == 1
     m = Matrix.dense(INT8, 1, 1, sparsity=lib.GxB_FULL + lib.GxB_BITMAP)
 
+
 def test_matrix_get_set_element():
     m = Matrix.sparse(INT8, 10, 10)
     m[3, 3] = 3
@@ -903,6 +904,7 @@ def test_add():
     assert (m + n).to_lists() == [[0, 1], [0, 1], [10, 2]]
     assert (3 + m).to_lists() == [[0, 1], [0, 1], [8, 4]]
 
+
 def test_iadd_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
@@ -930,6 +932,7 @@ def test_isub_scalar():
     m -= n
     assert m.to_lists() == [[0, 1], [0, 1], [3, 3]]
 
+
 def test_mul_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (m * 3).to_lists() == [[0, 1], [0, 1], [15, 3]]
@@ -948,6 +951,7 @@ def test_imul_scalar():
     m *= n
     assert m.to_lists() == [[0, 1], [0, 1], [75, 3]]
 
+
 def test_truediv_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [15, 3])
     assert (m / 3).to_lists() == [[0, 1], [0, 1], [5, 1]]
@@ -965,6 +969,7 @@ def test_itruediv_scalar():
     assert m.to_lists() == [[0, 1], [0, 1], [5, 1]]
     m /= n
     assert m.to_lists() == [[0, 1], [0, 1], [1, 1]]
+
 
 def test_delitem():
     m = Matrix.from_lists([0, 1], [0, 1], [4, 2])
