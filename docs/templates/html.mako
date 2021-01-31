@@ -348,7 +348,7 @@
             if sort_identifiers:
               members = sorted(members)
         %>
-        % if members : # and module.supermodule:
+        % if members and module.supermodule:
           ${show_column_list(members)}
         % endif
         </li>
