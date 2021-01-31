@@ -19,10 +19,7 @@ def pagerank(A, d, damping, itermax):
         temp = t ; t = r ; r = temp
         w = t / d
         r[:] = teleport
-        A.mxv(w,
-              out=r,
-              accum=FP32.PLUS,
-              semiring=FP32.PLUS_SECOND,
+        A.mxv(w, out=r, accum=FP32.PLUS, semiring=FP32.PLUS_SECOND,
               desc=TransposeA)
         t -= r
         t.apply(FP32.ABS, out=t)
