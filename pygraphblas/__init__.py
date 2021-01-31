@@ -103,6 +103,9 @@ __pdoc__ = {
     "binaryop": False,
     "monoid": False,
     "semiring": False,
+    "matrix": False,
+    "vector": False,
+    "scalar": False,
 }
 
 build_semirings(__pdoc__)

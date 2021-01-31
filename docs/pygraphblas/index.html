@@ -205,6 +205,9 @@ __pdoc__ = {
     &#34;binaryop&#34;: False,
     &#34;monoid&#34;: False,
     &#34;semiring&#34;: False,
+    &#34;matrix&#34;: False,
+    &#34;vector&#34;: False,
+    &#34;scalar&#34;: False,
 }
 
 build_semirings(__pdoc__)
@@ -291,21 +294,9 @@ def run_doctests():
 <div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz in
 doctests and Jupyter notebooks.</p></div>
 </dd>
-<dt><code class="name"><a title="pygraphblas.matrix" href="matrix.html">pygraphblas.matrix</a></code></dt>
-<dd>
-<div class="desc"><p>High level wrapper around GraphBLAS Matrices.</p></div>
-</dd>
-<dt><code class="name"><a title="pygraphblas.scalar" href="scalar.html">pygraphblas.scalar</a></code></dt>
-<dd>
-<div class="desc"><p>GraphBLAS Scalar (SuiteSparse Only)</p></div>
-</dd>
 <dt><code class="name"><a title="pygraphblas.types" href="types.html">pygraphblas.types</a></code></dt>
 <dd>
 <div class="desc"><p>Pythonic GraphBLAS type wrappers including User Defined Types …</p></div>
-</dd>
-<dt><code class="name"><a title="pygraphblas.vector" href="vector.html">pygraphblas.vector</a></code></dt>
-<dd>
-<div class="desc"><p>High level wrapper around GraphBLAS Vectors.</p></div>
 </dd>
 </dl>
 </section>
@@ -7819,7 +7810,7 @@ B</td>
 </table>
 <p>Note that all the above operator syntax is mearly sugar over
 various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#pygraphblas.Matrix.mxm">Matrix.mxm()</a></code>, <code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">Matrix.mxv()</a></code>,
-<code><a title="pygraphblas.vector.Vector.vxm" href="vector.html#pygraphblas.vector.Vector.vxm">Vector.vxm()</a></code>, <code><a title="pygraphblas.Matrix.eadd" href="#pygraphblas.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.Matrix.emult" href="#pygraphblas.Matrix.emult">Matrix.emult()</a></code>.</p></div>
+<code>pygraphblas.vector.Vector.vxm</code>, <code><a title="pygraphblas.Matrix.eadd" href="#pygraphblas.Matrix.eadd">Matrix.eadd()</a></code>, and <code><a title="pygraphblas.Matrix.emult" href="#pygraphblas.Matrix.emult">Matrix.emult()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -12579,7 +12570,7 @@ change it.</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>GraphBLAS Scalar</p>
-<p>Used for now mostly for the <code><a title="pygraphblas.matrix.Matrix.select" href="matrix.html#pygraphblas.matrix.Matrix.select">Matrix.select()</a></code>.</p></div>
+<p>Used for now mostly for the <code>pygraphblas.matrix.Matrix.select</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -17957,10 +17948,7 @@ outside the resized vector are deleted.</p></div>
 <ul>
 <li><code><a title="pygraphblas.descriptor" href="descriptor.html">pygraphblas.descriptor</a></code></li>
 <li><code><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></li>
-<li><code><a title="pygraphblas.matrix" href="matrix.html">pygraphblas.matrix</a></code></li>
-<li><code><a title="pygraphblas.scalar" href="scalar.html">pygraphblas.scalar</a></code></li>
 <li><code><a title="pygraphblas.types" href="types.html">pygraphblas.types</a></code></li>
-<li><code><a title="pygraphblas.vector" href="vector.html">pygraphblas.vector</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
