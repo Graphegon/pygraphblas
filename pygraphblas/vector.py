@@ -70,7 +70,7 @@ class Vector:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = ffi.new("%s[%s]" % (self.type.C, nvals))
-        self._check(self.type.Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
     def iseq(self, other, eq_op=None):
@@ -162,7 +162,7 @@ class Vector:
         V = self.type.ffi.new(self.type.C + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
-        self._check(self.type.Vector_extractTuples(I, V, n, self._vector[0]))
+        self._check(self.type._Vector_extractTuples(I, V, n, self._vector[0]))
         return [list(I), list(map(self.type.to_value, V))]
 
     def to_arrays(self):
@@ -173,7 +173,7 @@ class Vector:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
-        self._check(self.type.Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return array("L", I), array(self.type.typecode, X)
 
     @property
@@ -203,7 +203,7 @@ class Vector:
             identity = self.type.one
 
         self._check(
-            self.type.Vector_assignScalar(
+            self.type._Vector_assignScalar(
                 B._vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
             )
         )
@@ -282,7 +282,7 @@ class Vector:
             out = self.__class__(_out, typ)
 
         if add_op is NULL:
-            add_op = out.type.default_addop()
+            add_op = out.type._default_addop()
         add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Vector_eWiseAdd_BinaryOp(
@@ -332,7 +332,7 @@ class Vector:
             out = self.__class__(_out, typ)
 
         if mult_op is NULL:
-            mult_op = out.type.default_multop()
+            mult_op = out.type._default_multop()
 
         mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
@@ -374,7 +374,7 @@ class Vector:
             typ = out.type
 
         if semiring is NULL:
-            semiring = out.type.default_semiring()
+            semiring = out.type._default_semiring()
 
         semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -571,7 +571,7 @@ class Vector:
             f = lib.GxB_Vector_apply_BinaryOp1st
             first = first.scalar[0]
         else:
-            f = self.type.Vector_apply_BinaryOp1st
+            f = self.type._Vector_apply_BinaryOp1st
         self._check(
             f(out._vector[0], mask, accum, op, first, self._vector[0], desc.desc[0])
         )
@@ -591,7 +591,7 @@ class Vector:
             f = lib.GxB_Vector_apply_BinaryOp2nd
             second = second.scalar[0]
         else:
-            f = self.type.Vector_apply_BinaryOp2nd
+            f = self.type._Vector_apply_BinaryOp2nd
         self._check(
             f(out._vector[0], mask, accum, op, self._vector[0], second, desc.desc[0])
         )
@@ -636,14 +636,14 @@ class Vector:
         """Convert to dense vector."""
         out = ffi.new("GrB_Vector*")
         if _id is None:
-            _id = ffi.new(self.type.ptr, 0)
+            _id = ffi.new(self.type._ptr, 0)
         self._check(lib.LAGraph_Vector_to_dense(out, self._vector[0], _id))
         return Vector(out, self.type)
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
             val = self.type.from_value(value)
-            self._check(self.type.Vector_setElement(self._vector[0], val, index))
+            self._check(self.type._Vector_setElement(self._vector[0], val, index))
             return
 
         if isinstance(index, slice):
@@ -671,7 +671,7 @@ class Vector:
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
-            scalar_type.Vector_assignScalar(
+            scalar_type._Vector_assignScalar(
                 self._vector[0], mask, accum, value, I, ni, desc.desc[0]
             )
         )
@@ -691,9 +691,9 @@ class Vector:
 
     def extract_element(self, index):
         """Extract element from vector."""
-        result = self.type.ffi.new(self.type.ptr)
+        result = self.type.ffi.new(self.type._ptr)
         self._check(
-            self.type.Vector_extractElement(
+            self.type._Vector_extractElement(
                 result, self._vector[0], ffi.cast("GrB_Index", index)
             )
         )

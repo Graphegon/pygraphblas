@@ -84,11 +84,11 @@
 % endif
 </%def>
 
-<%def name="show_column_list(items)">
+<%def name="show_column_list(items, active=False)">
   <%
-      two_column = len(items) >= 6 and all(len(i.name) < 20 for i in items)
+      two_column = len(items) >= 6 and all(len(i.name) < 50 for i in items)
   %>
-  <ul class="${'two-column' if two_column else ''}">
+  <ul class="${'two-column' if two_column else ''} nested ${'active' if active else ''}">
   % for item in items:
     <li><code>${link(item, item.name)}</code></li>
   % endfor
@@ -137,8 +137,8 @@
 
   <section>
     % if classes:
-    <h2 class="section-title" id="header-classes">Types</h2>
-    <dl>
+    <h2 class="section-title caret" id="header-classes">Types</h2>
+    <dl class="nested active">
     % for c in classes:
       <%
       class_vars = c.class_variables(show_inherited_members, sort=sort_identifiers)
@@ -158,14 +158,14 @@
 
       <dd>${show_desc(c)}
 
-      % if mro and module.supermodule:
-          <h3>Ancestors</h3>
-          <ul class="hlist">
-          % for cls in mro:
-              <li>${link(cls)}</li>
-          % endfor
-          </ul>
-      %endif
+      ## % if mro and module.supermodule:
+      ##     <h3>Ancestors</h3>
+      ##     <ul class="hlist">
+      ##     % for cls in mro:
+      ##         <li>${link(cls)}</li>
+      ##     % endfor
+      ##     </ul>
+      ## %endif
 
       % if subclasses:
           <h3>Subclasses</h3>
@@ -175,9 +175,9 @@
           % endfor
           </ul>
       % endif
-      % if class_vars : # and module.supermodule:
-          <h3>Class variables</h3>
-          <dl>
+      % if class_vars :
+          <h3 class="caret">Class variables</h3>
+          <dl class="nested active">
           % for v in class_vars:
               <% return_type = get_annotation(v.type_annotation) %>
               <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
@@ -185,17 +185,17 @@
           % endfor
           </dl>
       % endif
-      % if smethods and module.supermodule:
-          <h3>Static methods</h3>
-          <dl>
+      % if smethods:
+          <h3 class="caret">Static methods</h3>
+          <dl class="nested active">
           % for f in smethods:
               ${show_func(f)}
           % endfor
           </dl>
       % endif
-      % if inst_vars : # and module.supermodule:
-          <h3>Instance variables</h3>
-          <dl>
+      % if inst_vars :
+          <h3 class="caret">Instance variables</h3>
+          <dl class="nested active">
           % for v in inst_vars:
               <% return_type = get_annotation(v.type_annotation) %>
               <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
@@ -203,9 +203,9 @@
           % endfor
           </dl>
       % endif
-      % if methods : # and module.supermodule:
-          <h3>Methods</h3>
-          <dl>
+      % if methods :
+          <h3 class="caret">Methods</h3>
+          <dl class="nested active">
           % for f in methods:
               ${show_func(f)}
           % endfor
@@ -241,8 +241,8 @@
 
   <section>
     % if submodules:
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-    <dl>
+    <h2 class="section-title caret" id="header-submodules">Sub-modules</h2>
+    <dl class="nested active">
     % for m in submodules:
       <dt><code class="name">${link(m)}</code></dt>
       <dd>${show_desc(m, short=True)}</dd>
@@ -253,8 +253,8 @@
 
   <section>
     % if variables:
-    <h2 class="section-title" id="header-variables">Global variables</h2>
-    <dl>
+    <h2 class="section-title caret" id="header-variables">Global variables</h2>
+    <dl class="nested active">
     % for v in variables:
       <% return_type = get_annotation(v.type_annotation) %>
       <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
@@ -266,8 +266,8 @@
 
   <section>
     % if functions:
-    <h2 class="section-title" id="header-functions">Functions</h2>
-    <dl>
+    <h2 class="section-title caret" id="header-functions">Functions</h2>
+    <dl class="nested active">
     % for f in functions:
       ${show_func(f)}
     % endfor
@@ -299,6 +299,7 @@
       <%include file="_lunr_search.inc.mako"/>
     % endif
 
+    <h1><a href="#top">Back To Top ^</a></h1>
     <h1>Index</h1>
     ${extract_toc(module.docstring) if extract_module_toc_into_sidebar else ''}
     <ul id="index">
@@ -310,34 +311,24 @@
     </li>
     % endif
 
-    % if submodules:
-    <li><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-      % for m in submodules:
-        <li><code>${link(m)}</code></li>
-      % endfor
-      </ul>
-    </li>
-    % endif
-
     % if variables:
-    <li><h3><a href="#header-variables">Global variables</a></h3>
-      ${show_column_list(variables)}
+    <li><h3 class="caret"><a href="#header-variables">Global variables</a></h3>
+      ${show_column_list(variables, True)}
     </li>
     % endif
 
     % if functions:
-    <li><h3><a href="#header-functions">Functions</a></h3>
-      ${show_column_list(functions)}
+    <li><h3 class="caret"><a href="#header-functions">Functions</a></h3>
+      ${show_column_list(functions, True)}
     </li>
     % endif
 
     % if classes:
-    <li><h3><a href="#header-classes">Types</a></h3>
-      <ul>
+    <li><h3 class="caret"><a href="#header-classes">Types</a></h3>
+      <ul class="nested active">
       % for c in classes:
         <li>
-        <code>${link(c)}</code>
+        <code class="caret">${link(c)}</code>
         <%
             members = c.functions(sort=sort_identifiers) + c.methods(sort=sort_identifiers)
             if list_class_variables_in_index:
@@ -348,10 +339,20 @@
             if sort_identifiers:
               members = sorted(members)
         %>
-        % if members and module.supermodule:
-          ${show_column_list(members)}
+        % if members:
+          ${show_column_list(members, False)}
         % endif
         </li>
+      % endfor
+      </ul>
+    </li>
+    % endif
+
+    % if submodules:
+    <li><h3 class="caret"><a href="#header-submodules">Sub-modules</a></h3>
+      <ul class="nested active">
+      % for m in submodules:
+        <li><code>${link(m)}</code></li>
       % endfor
       </ul>
     </li>

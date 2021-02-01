@@ -20,11 +20,11 @@ class Scalar:
 
     """
 
-    __slots__ = ("scalar", "_type")
+    __slots__ = ("scalar", "type")
 
     def __init__(self, s, typ):
         self.scalar = s
-        self._type = typ
+        self.type = typ
 
     def __del__(self):
         _check(lib.GxB_Scalar_free(self.scalar))
@@ -36,7 +36,7 @@ class Scalar:
         """Create an duplicate Scalar from the given argument."""
         new_sca = ffi.new("GxB_Scalar*")
         _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
-        return self.__class__(new_sca, self._type)
+        return self.__class__(new_sca, self.type)
 
     @classmethod
     def from_type(cls, typ):
@@ -67,15 +67,15 @@ class Scalar:
         _check(lib.GxB_Scalar_clear(self.scalar[0]))
 
     def __getitem__(self, index):
-        result = ffi.new(self._type.C + "*")
+        result = ffi.new(self.type.C + "*")
         _check(
-            self._type.Scalar_extractElement(result, self.scalar[0]), raise_no_val=True
+            self.type._Scalar_extractElement(result, self.scalar[0]), raise_no_val=True
         )
         return result[0]
 
     def __setitem__(self, index, value):
         _check(
-            self._type.Scalar_setElement(self.scalar[0], ffi.cast(self._type.C, value))
+            self.type._Scalar_setElement(self.scalar[0], ffi.cast(self.type.C, value))
         )
 
     def wait(self):

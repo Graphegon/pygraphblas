@@ -77,43 +77,47 @@ class MetaType(type):
         meta._gb_name_type_map[type_name] = cls
         meta._gb_name_type_map[cls.C] = cls
 
-        cls.ptr = cls.C + "*"
+        cls._ptr = cls.C + "*"
         cls.zero = getattr(cls, "zero", core_ffi.NULL)
         cls.one = getattr(cls, "one", core_ffi.NULL)
         get = partial(getattr, lib)
-        cls.base_name = base_name = getattr(cls, "base_name", cls.__name__)
-        cls.prefix = prefix = getattr(cls, "prefix", "GrB")
-        cls.Monoid_new = get("{}_Monoid_new_{}".format(prefix, base_name))
-        cls.Matrix_setElement = get("{}_Matrix_setElement_{}".format(prefix, base_name))
-        cls.Matrix_extractElement = get(
+        cls._base_name = base_name = getattr(cls, "_base_name", cls.__name__)
+        cls._prefix = prefix = getattr(cls, "_prefix", "GrB")
+        cls._Monoid_new = get("{}_Monoid_new_{}".format(prefix, base_name))
+        cls._Matrix_setElement = get(
+            "{}_Matrix_setElement_{}".format(prefix, base_name)
+        )
+        cls._Matrix_extractElement = get(
             "{}_Matrix_extractElement_{}".format(prefix, base_name)
         )
-        cls.Matrix_extractTuples = get(
+        cls._Matrix_extractTuples = get(
             "{}_Matrix_extractTuples_{}".format(prefix, base_name)
         )
-        cls.Matrix_assignScalar = get("{}_Matrix_assign_{}".format(prefix, base_name))
-        cls.Matrix_apply_BinaryOp1st = get(
+        cls._Matrix_assignScalar = get("{}_Matrix_assign_{}".format(prefix, base_name))
+        cls._Matrix_apply_BinaryOp1st = get(
             "{}_Matrix_apply_BinaryOp1st_{}".format(prefix, base_name)
         )
-        cls.Matrix_apply_BinaryOp2nd = get(
+        cls._Matrix_apply_BinaryOp2nd = get(
             "{}_Matrix_apply_BinaryOp2nd_{}".format(prefix, base_name)
         )
-        cls.Vector_setElement = get("{}_Vector_setElement_{}".format(prefix, base_name))
-        cls.Vector_extractElement = get(
+        cls._Vector_setElement = get(
+            "{}_Vector_setElement_{}".format(prefix, base_name)
+        )
+        cls._Vector_extractElement = get(
             "{}_Vector_extractElement_{}".format(prefix, base_name)
         )
-        cls.Vector_extractTuples = get(
+        cls._Vector_extractTuples = get(
             "{}_Vector_extractTuples_{}".format(prefix, base_name)
         )
-        cls.Vector_assignScalar = get("{}_Vector_assign_{}".format(prefix, base_name))
-        cls.Vector_apply_BinaryOp1st = get(
+        cls._Vector_assignScalar = get("{}_Vector_assign_{}".format(prefix, base_name))
+        cls._Vector_apply_BinaryOp1st = get(
             "{}_Vector_apply_BinaryOp1st_{}".format(prefix, base_name)
         )
-        cls.Vector_apply_BinaryOp2nd = get(
+        cls._Vector_apply_BinaryOp2nd = get(
             "{}_Vector_apply_BinaryOp2nd_{}".format(prefix, base_name)
         )
-        cls.Scalar_setElement = get("GxB_Scalar_setElement_{}".format(base_name))
-        cls.Scalar_extractElement = get(
+        cls._Scalar_setElement = get("GxB_Scalar_setElement_{}".format(base_name))
+        cls._Scalar_extractElement = get(
             "GxB_Scalar_extractElement_{}".format(base_name)
         )
         return cls
@@ -122,11 +126,11 @@ class MetaType(type):
         from .monoid import Monoid
 
         monoid = core_ffi.new("GrB_Monoid[1]")
-        if cls.base_name == "UDT":
-            i = cls.ffi.new(cls.ptr)
+        if cls._base_name == "UDT":
+            i = cls.ffi.new(cls._ptr)
             i[0] = identity
             identity = i
-        _check(cls.Monoid_new(monoid, op.binaryop, identity))
+        _check(cls._Monoid_new(monoid, op.binaryop, identity))
         return Monoid("PLUS", cls.__name__, monoid[0], udt=cls)
 
     def new_semiring(cls, monoid, op):
@@ -158,20 +162,20 @@ class Type(metaclass=MetaType):
         return ("{:>%s}" % width).format(val)
 
     @classmethod
-    def default_addop(cls):
+    def _default_addop(cls):
         return cls.PLUS
 
     @classmethod
-    def default_multop(cls):
+    def _default_multop(cls):
         return cls.TIMES
 
     @classmethod
-    def default_semiring(cls):
+    def _default_semiring(cls):
         return cls.PLUS_TIMES
 
     @classmethod
     def from_value(cls, value):
-        if cls.base_name != "UDT":
+        if cls._base_name != "UDT":
             return value
         data = cls.ffi.new("%s[1]" % cls.__name__)
         for (_, name), val in zip(cls.member_def, value):
@@ -180,7 +184,7 @@ class Type(metaclass=MetaType):
 
     @classmethod
     def to_value(cls, cdata):
-        if cls.base_name != "UDT":
+        if cls._base_name != "UDT":
             return cdata
         return tuple(getattr(cdata, name) for (_, name) in cls.member_def)
 
@@ -196,15 +200,15 @@ class BOOL(Type):
     numba_t = numba.boolean
 
     @classmethod
-    def default_addop(self):
+    def _default_addop(self):
         return self.LOR
 
     @classmethod
-    def default_multop(self):
+    def _default_multop(self):
         return self.LAND
 
     @classmethod
-    def default_semiring(self):
+    def _default_semiring(self):
         return self.LOR_LAND
 
     @classmethod
@@ -316,7 +320,7 @@ class FP64(Type):
 class FC32(Type):
     """GraphBLAS 32 bit float complex."""
 
-    prefix = "GxB"
+    _prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)
     gb_type = lib.GxB_FC32
@@ -327,7 +331,7 @@ class FC32(Type):
 class FC64(Type):
     """GraphBLAS 64 bit float complex."""
 
-    prefix = "GxB"
+    _prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)
     gb_type = lib.GxB_FC64
@@ -348,7 +352,7 @@ class FC64(Type):
 
 #     @classmethod
 #     def from_value(cls, value):
-#         return ffi.new(cls.ptr, value)
+#         return ffi.new(cls._ptr, value)
 
 #     @classmethod
 #     def to_value(cls, data):
@@ -425,7 +429,7 @@ def binop(boolean=False):
         def __set_name__(self, cls, name):
             func_name = self.func.__name__
             cls_name = cls.__name__
-            if cls.base_name == "UDT":
+            if cls._base_name == "UDT":
                 cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
                 sig = cffi_support.map_type(
                     cls.ffi.typeof(binop_name(cls_name, func_name)),

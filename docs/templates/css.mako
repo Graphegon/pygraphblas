@@ -56,7 +56,6 @@
 
   h1, h2, h3, h4, h5 {
     font-weight: 300;
-	text-align: center;
   }
   h1 {
     font-size: 2.5em;
@@ -82,6 +81,14 @@
   h6:target {
     background: var(--highlight-color);
     padding: .2em 0;
+  }
+  h1.header,
+  h2.header,
+  h3.header,
+  h4.header,
+  h5.header,
+  h6.header {
+	text-align: center;
   }
 
   a {
@@ -299,6 +306,35 @@
     .admonition.caution {
       background: lightpink;
     }
+
+	/* Style the caret/arrow */
+	.caret {
+	  cursor: pointer;
+	  user-select: none; /* Prevent text selection */
+	}
+
+	/* Create the caret/arrow with a unicode, and style it */
+	.caret::before {
+	  content: "\25B6";
+	  color: black;
+	  display: inline-block;
+	  margin-right: 10px;
+	}
+
+	/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+	.caret-down::before {
+	  transform: rotate(90deg);
+	}
+
+	/* Hide the nested list */
+	.nested {
+	  display: none;
+	}
+
+	/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+	.active {
+	  display: block;
+	} 	
 </%def>
 
 <%def name="desktop()" filter="minify_css">
