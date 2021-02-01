@@ -72,18 +72,18 @@ def draw_graph(
         ioff=0,
         joff=0,
         filename=None,
-        graph_args=None,
-        node_args=None,
-        edge_args=None,
+        graph_attr=None,
+        node_attr=None,
+        edge_attr=None,
 ):
     g = Digraph(name)
-    g.attr(rankdir=rankdir, ranksep="1", overlap="false", concentrate="true")
-    if graph_args:
-        g.attr('graph', **graph_args)
-    if node_args:
-        g.attr('node', **node_args)
-    if edge_args:
-        g.attr('edge', **edge_args)
+    g.attr(rankdir=rankdir, overlap="false", concentrate="true")
+    if graph_attr:
+        g.attr(**graph_attr)
+    if node_attr:
+        g.attr('node', **node_attr)
+    if edge_attr:
+        g.attr('edge', **edge_attr)
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i]
     else:
@@ -97,8 +97,8 @@ def draw_graph(
 
         inode = g.node(str(i + ioff), width=size, height=size, label=ilabel)
         jnode = g.node(str(j + joff), width=size, height=size, label=jlabel)
-        if node_args:
-            jnode.attr(**node_args)
+        if node_attr:
+            jnode.attr(**node_attr)
         w = str(v)
         g.edge(
             str(i + ioff),
