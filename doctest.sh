@@ -5,6 +5,7 @@ then
 fi
 docker run --rm \
        -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
+       -v `pwd`/demo:/pygraphblas/demo \
        -v `pwd`/docs:/docs \
        -it graphblas/pygraphblas-minimal:test \
        python3 -c 'import pygraphblas; pygraphblas.run_doctests()'

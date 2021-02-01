@@ -54,7 +54,7 @@ class BinaryOp:
         self.token = current_binop.set(self)
         return self
 
-    def __exit__(self, *errors):
+    def __exit__(self, *errors):  # pragma: nocover
         current_binop.reset(self.token)
         return False
 

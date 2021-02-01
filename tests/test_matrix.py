@@ -52,6 +52,10 @@ def test_matrix_get_set_element():
     assert m.nvals == 1
     assert len(m) == 1
     assert m[3, 3] == 3
+    with pytest.raises(TypeError):
+        m[2.0] = 3
+    with pytest.raises(TypeError):
+        _ = m[2.0]
 
 
 def test_matrix_slice_vector():
@@ -1043,3 +1047,5 @@ def test_to_scipy_sparse():
     assert (s.data == [63, 105, 17, 20]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
+    with pytest.raises(TypeError):
+        s = v.to_scipy_sparse("boef")

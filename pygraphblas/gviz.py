@@ -1,6 +1,29 @@
 """Helper functions for drawing graphs and matrices with graphviz in
 doctests and Jupyter notebooks.
 
+>>> from pygraphblas import *
+>>> M = Matrix.random(UINT8, 4, 4, 15, seed=8)
+
+>>> g = draw_graph(M, show_weight=False, 
+...     filename='/docs/imgs/Matrix_from_lists3')
+
+![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
+
+>>> g = draw_matrix(M, scale=50, 
+...     filename='/docs/imgs/Matrix_from_lists4')
+
+![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
+
+>>> V = Vector.from_lists([0, 2], [3.14, 1.2])
+>>> g = draw_vector(V, scale=50, 
+...     filename='/docs/imgs/Vector_from_lists_1')
+
+![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
+
+>>> g = draw_matrix_op(M, '@', M, (M@M), scale=50, 
+...     filename='/docs/imgs/mxm1')
+
+![mxm1](../imgs/mxm1.png)
 """
 import operator
 from itertools import accumulate
@@ -8,6 +31,7 @@ from graphviz import Digraph, Source
 from PIL import Image, ImageDraw, ImageFont
 from PIL import Image, ImageDraw
 from json import dumps
+from pathlib import Path
 
 __all__ = [
     "draw",
@@ -168,10 +192,13 @@ def draw_matrix(
     cmap="rainbow",
     filename=None,
     column=True,
+    font_path=Path("/pygraphblas/demo"),
 ):
     from pygraphblas import BOOL, Vector
 
-    cosmic_font = ImageFont.truetype("FantasqueSansMono-Bold.ttf", int(scale * 0.5))
+    cosmic_font = ImageFont.truetype(
+        str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
+    )
 
     if isinstance(M, Vector):
         return draw_vector(
@@ -255,9 +282,20 @@ def draw_vector(V, column=True, *args, **kwargs):
     return draw_matrix(A, *args, **kwargs)
 
 
-def draw_matrix_op(left, op, right, result, **kwargs):
+def draw_matrix_op(
+    left,
+    op,
+    right,
+    result,
+    font_path=Path("/pygraphblas/demo"),
+    filename=None,
+    **kwargs,
+):
     scale = kwargs["scale"]
-    cosmic_font = ImageFont.truetype("FantasqueSansMono-Bold.ttf", scale)
+    cosmic_font = ImageFont.truetype(
+        str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
+    )
+    kwargs["font_path"] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
@@ -279,6 +317,8 @@ def draw_matrix_op(left, op, right, result, **kwargs):
         font=cosmic_font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
+    if filename is not None:
+        im.save(filename + ".png", "PNG")
     return im
 
 

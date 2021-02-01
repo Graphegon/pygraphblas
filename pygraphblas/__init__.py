@@ -35,11 +35,16 @@ the third list is the weight for that edge:
   5|        t            |  5
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
->>> from pygraphblas.gviz import draw_graph
+>>> from pygraphblas.gviz import *
 >>> g = draw_graph(M, show_weight=False, 
 ...     filename='/docs/imgs/Matrix_from_lists2')
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)
+
+>>> g = draw_matrix(M, scale=40, 
+...     filename='/docs/imgs/Matrix_from_lists_matrix')
+
+![Matrix_from_lists_matrix.png](../imgs/Matrix_from_lists_matrix.png)
 
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
@@ -177,10 +182,11 @@ def run_doctests(raise_on_error=False):
     from . import matrix
     from . import descriptor
     from . import base
+    from . import gviz
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, descriptor, base):
+    for mod in (this, matrix, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

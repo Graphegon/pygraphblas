@@ -6,7 +6,7 @@
 <meta name="generator" content="pdoc 0.9.2" />
 <title>pygraphblas.gviz API documentation</title>
 <meta name="description" content="Helper functions for drawing graphs and matrices with graphviz in
-doctests and Jupyter notebooks." />
+doctests and Jupyter notebooks …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -29,6 +29,26 @@ doctests and Jupyter notebooks." />
 <section id="section-intro">
 <p>Helper functions for drawing graphs and matrices with graphviz in
 doctests and Jupyter notebooks.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
+&gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
+...     filename='/docs/imgs/Matrix_from_lists3')
+</code></pre>
+<p><img alt="Matrix_from_lists3.png" src="../imgs/Matrix_from_lists3.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix(M, scale=50, 
+...     filename='/docs/imgs/Matrix_from_lists4')
+</code></pre>
+<p><img alt="Matrix_from_lists3.png" src="../imgs/Matrix_from_lists4.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; V = Vector.from_lists([0, 2], [3.14, 1.2])
+&gt;&gt;&gt; g = draw_vector(V, scale=50, 
+...     filename='/docs/imgs/Vector_from_lists_1')
+</code></pre>
+<p><img alt="Vector_from_lists_1" src="../imgs/Vector_from_lists_1.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix_op(M, '@', M, (M@M), scale=50, 
+...     filename='/docs/imgs/mxm1')
+</code></pre>
+<p><img alt="mxm1" src="../imgs/mxm1.png"></p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -36,6 +56,29 @@ doctests and Jupyter notebooks.</p>
 <pre><code class="python">&#34;&#34;&#34;Helper functions for drawing graphs and matrices with graphviz in
 doctests and Jupyter notebooks.
 
+&gt;&gt;&gt; from pygraphblas import *
+&gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
+
+&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
+...     filename=&#39;/docs/imgs/Matrix_from_lists3&#39;)
+
+![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
+
+&gt;&gt;&gt; g = draw_matrix(M, scale=50, 
+...     filename=&#39;/docs/imgs/Matrix_from_lists4&#39;)
+
+![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
+
+&gt;&gt;&gt; V = Vector.from_lists([0, 2], [3.14, 1.2])
+&gt;&gt;&gt; g = draw_vector(V, scale=50, 
+...     filename=&#39;/docs/imgs/Vector_from_lists_1&#39;)
+
+![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
+
+&gt;&gt;&gt; g = draw_matrix_op(M, &#39;@&#39;, M, (M@M), scale=50, 
+...     filename=&#39;/docs/imgs/mxm1&#39;)
+
+![mxm1](../imgs/mxm1.png)
 &#34;&#34;&#34;
 import operator
 from itertools import accumulate
@@ -43,6 +86,7 @@ from graphviz import Digraph, Source
 from PIL import Image, ImageDraw, ImageFont
 from PIL import Image, ImageDraw
 from json import dumps
+from pathlib import Path
 
 __all__ = [
     &#34;draw&#34;,
@@ -203,10 +247,13 @@ def draw_matrix(
     cmap=&#34;rainbow&#34;,
     filename=None,
     column=True,
+    font_path=Path(&#34;/pygraphblas/demo&#34;),
 ):
     from pygraphblas import BOOL, Vector
 
-    cosmic_font = ImageFont.truetype(&#34;FantasqueSansMono-Bold.ttf&#34;, int(scale * 0.5))
+    cosmic_font = ImageFont.truetype(
+        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+    )
 
     if isinstance(M, Vector):
         return draw_vector(
@@ -290,9 +337,20 @@ def draw_vector(V, column=True, *args, **kwargs):
     return draw_matrix(A, *args, **kwargs)
 
 
-def draw_matrix_op(left, op, right, result, **kwargs):
+def draw_matrix_op(
+    left,
+    op,
+    right,
+    result,
+    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    filename=None,
+    **kwargs,
+):
     scale = kwargs[&#34;scale&#34;]
-    cosmic_font = ImageFont.truetype(&#34;FantasqueSansMono-Bold.ttf&#34;, scale)
+    cosmic_font = ImageFont.truetype(
+        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+    )
+    kwargs[&#34;font_path&#34;] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
@@ -314,6 +372,8 @@ def draw_matrix_op(left, op, right, result, **kwargs):
         font=cosmic_font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
+    if filename is not None:
+        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
     return im
 
 
@@ -562,7 +622,7 @@ def draw_cy(M, visual_style=my_style):
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix"><code class="name flex">
-<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow', filename=None, column=True)</span>
+<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, labels=False, mode=None, cmap='rainbow', filename=None, column=True, font_path=PosixPath('/pygraphblas/demo'))</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -579,10 +639,13 @@ def draw_cy(M, visual_style=my_style):
     cmap=&#34;rainbow&#34;,
     filename=None,
     column=True,
+    font_path=Path(&#34;/pygraphblas/demo&#34;),
 ):
     from pygraphblas import BOOL, Vector
 
-    cosmic_font = ImageFont.truetype(&#34;FantasqueSansMono-Bold.ttf&#34;, int(scale * 0.5))
+    cosmic_font = ImageFont.truetype(
+        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+    )
 
     if isinstance(M, Vector):
         return draw_vector(
@@ -677,7 +740,7 @@ def draw_cy(M, visual_style=my_style):
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix_op"><code class="name flex">
-<span>def <span class="ident">draw_matrix_op</span></span>(<span>left, op, right, result, **kwargs)</span>
+<span>def <span class="ident">draw_matrix_op</span></span>(<span>left, op, right, result, font_path=PosixPath('/pygraphblas/demo'), filename=None, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -685,9 +748,20 @@ def draw_cy(M, visual_style=my_style):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_matrix_op(left, op, right, result, **kwargs):
+<pre><code class="python">def draw_matrix_op(
+    left,
+    op,
+    right,
+    result,
+    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    filename=None,
+    **kwargs,
+):
     scale = kwargs[&#34;scale&#34;]
-    cosmic_font = ImageFont.truetype(&#34;FantasqueSansMono-Bold.ttf&#34;, scale)
+    cosmic_font = ImageFont.truetype(
+        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+    )
+    kwargs[&#34;font_path&#34;] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
@@ -709,6 +783,8 @@ def draw_cy(M, visual_style=my_style):
         font=cosmic_font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
+    if filename is not None:
+        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
     return im</code></pre>
 </details>
 </dd>

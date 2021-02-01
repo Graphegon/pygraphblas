@@ -1875,6 +1875,14 @@ class Matrix:
           0|    42|  0
               0  1
 
+        >>> N = Matrix.from_lists([1, 2], [2, 0], [True, True])
+        >>> print(M[N])
+              0  1  2
+          0|         |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+
         """
         ta = T0 in desc
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -2062,6 +2070,19 @@ class Matrix:
           2|         |  2
               0  1  2
 
+        >>> M.clear()
+
+        Masked assignment with `M[key] = value` syntax can be done
+        with if the index and value arguments are type `Matrix`:
+
+        >>> M[S] = S
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|     t   |  1
+          2|         |  2
+              0  1  2
+
         """
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
@@ -2211,7 +2232,8 @@ class Matrix:
         if isinstance(index, Matrix):
             if isinstance(value, Matrix):
                 # A[M] = B masked matrix assignment
-                raise NotImplementedError
+                self.assign_matrix(value, mask=index)
+                return
             if not isinstance(value, (bool, int, float, complex)):
                 raise TypeError
             # A[M] = s masked scalar assignment
@@ -2346,7 +2368,7 @@ class Matrix:
         if format == "coo":
             return s
         if format not in {"bsr", "csr", "csc", "coo", "lil", "dia", "dok"}:
-            raise Exception(f"Invalid format: {format}")
+            raise TypeError(f"Invalid format: {format}")
         return s.asformat(format)
 
     def to_numpy(self):

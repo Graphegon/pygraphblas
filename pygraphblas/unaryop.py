@@ -40,7 +40,7 @@ class UnaryOp:
         self.token = current_uop.set(self)
         return self
 
-    def __exit__(self, *errors):
+    def __exit__(self, *errors):  # pragma: nocover
         current_uop.reset(self.token)
         return False
 
@@ -74,11 +74,11 @@ def build_unaryops(__pdoc__):
         __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
 
 
-def _uop_name(name):
+def _uop_name(name):  # pragma: nocover
     return "_{0}_uop_function".format(name)
 
 
-def _build_uop_def(name, arg_type, result_type):
+def _build_uop_def(name, arg_type, result_type):  # pragma: nocover
     decl = dedent(
         """
     typedef void (*{0})({1}*, {1}*);
@@ -89,7 +89,7 @@ def _build_uop_def(name, arg_type, result_type):
     return decl
 
 
-def unary_op(arg_type, result_type=None, boolean=False):
+def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
     if result_type is None:
         result_type = arg_type
 

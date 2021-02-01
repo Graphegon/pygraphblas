@@ -55,7 +55,7 @@ class MetaType(type):
         if attrs.get("base", False):
             cls = super().__new__(meta, type_name, bases, attrs)
             return cls
-        if "members" in attrs:
+        if "members" in attrs:  # pragma: nocover
             m = attrs["members"]
             cls_ffi = FFI()
             cls_ffi.cdef(build_udt_def(type_name, m))
@@ -126,7 +126,7 @@ class MetaType(type):
         from .monoid import Monoid
 
         monoid = core_ffi.new("GrB_Monoid[1]")
-        if cls._base_name == "UDT":
+        if cls._base_name == "UDT":  # pragma: nocover
             i = cls.ffi.new(cls._ptr)
             i[0] = identity
             identity = i
@@ -146,9 +146,6 @@ class MetaType(type):
 
     def gb_from_name(cls, name):
         return cls._gb_name_type_map[name].gb_type
-
-    def type_from_name(cls, name):
-        return cls._gb_name_type_map[name]
 
 
 class Type(metaclass=MetaType):
@@ -177,16 +174,18 @@ class Type(metaclass=MetaType):
     def from_value(cls, value):
         if cls._base_name != "UDT":
             return value
-        data = cls.ffi.new("%s[1]" % cls.__name__)
-        for (_, name), val in zip(cls.member_def, value):
-            setattr(data[0], name, val)
-        return data
+        else:  # pragma: nocover
+            data = cls.ffi.new("%s[1]" % cls.__name__)
+            for (_, name), val in zip(cls.member_def, value):
+                setattr(data[0], name, val)
+            return data
 
     @classmethod
     def to_value(cls, cdata):
         if cls._base_name != "UDT":
             return cdata
-        return tuple(getattr(cdata, name) for (_, name) in cls.member_def)
+        else:  # pragma: nocover
+            return tuple(getattr(cdata, name) for (_, name) in cls.member_def)
 
 
 class BOOL(Type):
@@ -359,7 +358,7 @@ class FC64(Type):
 #         return data
 
 
-def _gb_from_type(typ):
+def _gb_from_type(typ):  # pragma: nocover
     if typ is int:
         return INT64
     if typ is float:
@@ -371,7 +370,7 @@ def _gb_from_type(typ):
     raise TypeError
 
 
-def udt_head(name):
+def udt_head(name):  # pragma: nocover
     return dedent(
         """
     typedef struct %s {
@@ -380,11 +379,11 @@ def udt_head(name):
     )
 
 
-def udt_body(members):
+def udt_body(members):  # pragma: nocover
     return ";\n".join(members) + ";"
 
 
-def udt_tail(name):
+def udt_tail(name):  # pragma: nocover
     return dedent(
         """
     } %s;
@@ -393,15 +392,15 @@ def udt_tail(name):
     )
 
 
-def build_udt_def(typ, members):
+def build_udt_def(typ, members):  # pragma: nocover
     return udt_head(typ) + udt_body(members) + udt_tail(typ)
 
 
-def binop_name(typ, name):
+def binop_name(typ, name):  # pragma: nocover
     return "{0}_{1}_binop_function".format(typ, name)
 
 
-def build_binop_def(typ, name, boolean=False):
+def build_binop_def(typ, name, boolean=False):  # pragma: nocover
     if boolean:
         return dedent(
             """
@@ -419,7 +418,7 @@ def build_binop_def(typ, name, boolean=False):
     )
 
 
-def binop(boolean=False):
+def binop(boolean=False):  # pragma: nocover
     from .binaryop import BinaryOp
 
     class inner:

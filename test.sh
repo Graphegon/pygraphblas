@@ -5,6 +5,7 @@ then
 fi
 docker run --rm \
        -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
+       -v `pwd`/demo:/pygraphblas/demo \
        -v `pwd`/docs:/docs \
        -v `pwd`/tests:/pygraphblas/tests \
        -it graphblas/pygraphblas-minimal:test \
