@@ -99,7 +99,7 @@ lib.LAGraph_init()
 
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
-from .unaryop import build_unaryops
+from .unaryop import build_unaryops, unary_op
 from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
@@ -165,6 +165,7 @@ __all__ = [
     "descriptor",
     "Accum",
     "binary_op",
+    "unary_op",
     "run_doctests",
 ]
 
