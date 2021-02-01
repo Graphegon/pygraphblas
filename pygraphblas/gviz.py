@@ -60,24 +60,30 @@ def draw_vector_dot(V, name="", rankdir="LR", ioff=0, joff=0):
 
 
 def draw_graph(
-    M,
-    name="",
-    rankdir="LR",
-    show_weight=True,
-    concentrate=True,
-    label_vector=None,
-    label_width=None,
-    size_vector=None,
-    size_scale=1.0,
-    ioff=0,
-    joff=0,
-    filename=None,
-    size=None,
+        M,
+        name="",
+        rankdir="LR",
+        show_weight=True,
+        concentrate=True,
+        label_vector=None,
+        label_width=None,
+        size_vector=None,
+        size_scale=1.0,
+        ioff=0,
+        joff=0,
+        filename=None,
+        graph_args=None,
+        node_args=None,
+        edge_args=None,
 ):
     g = Digraph(name)
     g.attr(rankdir=rankdir, ranksep="1", overlap="false", concentrate="true")
-    if size is not None:
-        g.attr(size=size)
+    if graph_args:
+        g.attr('graph', **graph_args)
+    if node_args:
+        g.attr('node', **node_args)
+    if edge_args:
+        g.attr('edge', **edge_args)
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i]
     else:
@@ -89,8 +95,10 @@ def draw_graph(
         jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j)
         vlabel = _str(v, label_width) if show_weight else None
 
-        g.node(str(i + ioff), width=size, height=size, label=ilabel)
-        g.node(str(j + joff), width=size, height=size, label=jlabel)
+        inode = g.node(str(i + ioff), width=size, height=size, label=ilabel)
+        jnode = g.node(str(j + joff), width=size, height=size, label=jlabel)
+        if node_args:
+            jnode.attr(**node_args)
         w = str(v)
         g.edge(
             str(i + ioff),
@@ -232,14 +240,14 @@ def draw_matrix(
         if M.type is BOOL:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
-                fill="AliceBlue",
+                fill="#3333ff",
                 outline="black",
             )
         else:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
                 outline="black",
-                fill="AliceBlue",
+                fill="#3333ff",
             )
             d.text(
                 ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
