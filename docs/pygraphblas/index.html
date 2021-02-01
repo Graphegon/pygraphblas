@@ -7258,7 +7258,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+                (self.nrows, self.ncols)
+                if T0 in desc
+                else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -7848,6 +7850,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
+            first = first._scalar[0]
         else:
             f = self.type._Matrix_apply_BinaryOp1st
         self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
@@ -7870,9 +7873,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
+        if isinstance(second, Scalar):
+            f = lib.GxB_Matrix_apply_BinaryOp2nd
+            second = second._scalar[0]
+        else:
+            f = self.type._Matrix_apply_BinaryOp2nd
         self._check(
-            self.type._Matrix_apply_BinaryOp2nd(
-                out._matrix[0], mask, accum, op, self._matrix[0], second, desc
+            f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc
             )
         )
         return out
@@ -7908,7 +7915,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self._matrix] = thunk
-            thunk = thunk.scalar[0]
+            thunk = thunk._scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -8310,6 +8317,21 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         0| 3
         1| 8
         2| 6
+
+        By default, `mxv` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.
+
+        &gt;&gt;&gt; o = v.dup()
+        &gt;&gt;&gt; m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+        True
+        &gt;&gt;&gt; print(o)
+        0| 5
+        1|11
+        2|10
 
         The default semiring depends on the infered result type.  In
         the case of numbers, the default semiring is `PLUS_TIMES`.  In
@@ -9811,6 +9833,7 @@ first input to a scalar first.</p>
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(first, Scalar):
         f = lib.GxB_Matrix_apply_BinaryOp1st
+        first = first._scalar[0]
     else:
         f = self.type._Matrix_apply_BinaryOp1st
     self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
@@ -9852,9 +9875,13 @@ second input to a scalar second.</p>
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     op = op.get_binaryop(self.type)
     mask, accum, desc = self._get_args(mask, accum, desc)
+    if isinstance(second, Scalar):
+        f = lib.GxB_Matrix_apply_BinaryOp2nd
+        second = second._scalar[0]
+    else:
+        f = self.type._Matrix_apply_BinaryOp2nd
     self._check(
-        self.type._Matrix_apply_BinaryOp2nd(
-            out._matrix[0], mask, accum, op, self._matrix[0], second, desc
+        f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc
         )
     )
     return out</code></pre>
@@ -11337,6 +11364,22 @@ for details.</p>
 1| 8
 2| 6
 </code></pre>
+<p>By default, <code>mxv</code> and <code>@</code> create a new result matrix of the
+correct type and dimensions if one is not provided.
+If you
+want to provide your own matrix to put the result in, you can
+pass it in the <code>out</code> parameter.
+This is useful for
+accumulating results into a single matrix with minimal
+copying.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = v.dup()
+&gt;&gt;&gt; m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+True
+&gt;&gt;&gt; print(o)
+0| 5
+1|11
+2|10
+</code></pre>
 <p>The default semiring depends on the infered result type.
 In
 the case of numbers, the default semiring is <code>PLUS_TIMES</code>.
@@ -11408,6 +11451,21 @@ argument or a context manager:</p>
     0| 3
     1| 8
     2| 6
+
+    By default, `mxv` and `@` create a new result matrix of the
+    correct type and dimensions if one is not provided.  If you
+    want to provide your own matrix to put the result in, you can
+    pass it in the `out` parameter.  This is useful for
+    accumulating results into a single matrix with minimal
+    copying.
+
+    &gt;&gt;&gt; o = v.dup()
+    &gt;&gt;&gt; m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+    True
+    &gt;&gt;&gt; print(o)
+    0| 5
+    1|11
+    2|10
 
     The default semiring depends on the infered result type.  In
     the case of numbers, the default semiring is `PLUS_TIMES`.  In
@@ -11987,7 +12045,7 @@ Can be a string mapping to following operators:</p>
         thunk = Scalar.from_value(thunk)
     if isinstance(thunk, Scalar):
         self._keep_alives[self._matrix] = thunk
-        thunk = thunk.scalar[0]
+        thunk = thunk._scalar[0]
 
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -12258,7 +12316,9 @@ Guide</a></p>
     &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
-            (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+            (self.nrows, self.ncols)
+            if T0 in desc
+            else (self.ncols, self.nrows)
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
         if cast is not None:
@@ -12438,14 +12498,14 @@ change it.</p></div>
 
     &#34;&#34;&#34;
 
-    __slots__ = (&#34;scalar&#34;, &#34;type&#34;)
+    __slots__ = (&#34;_scalar&#34;, &#34;type&#34;)
 
     def __init__(self, s, typ):
-        self.scalar = s
+        self._scalar = s
         self.type = typ
 
     def __del__(self):
-        _check(lib.GxB_Scalar_free(self.scalar))
+        _check(lib.GxB_Scalar_free(self._scalar))
 
     def __len__(self):
         return self.nvals
@@ -12453,7 +12513,7 @@ change it.</p></div>
     def dup(self):
         &#34;&#34;&#34;Create an duplicate Scalar from the given argument.&#34;&#34;&#34;
         new_sca = ffi.new(&#34;GxB_Scalar*&#34;)
-        _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
+        _check(lib.GxB_Scalar_dup(new_sca, self._scalar[0]))
         return self.__class__(new_sca, self.type)
 
     @classmethod
@@ -12477,33 +12537,33 @@ change it.</p></div>
     def gb_type(self):
         &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Scalar.&#34;&#34;&#34;
         typ = ffi.new(&#34;GrB_Type*&#34;)
-        _check(lib.GxB_Scalar_type(typ, self.scalar[0]))
+        _check(lib.GxB_Scalar_type(typ, self._scalar[0]))
         return typ[0]
 
     def clear(self):
         &#34;&#34;&#34;Clear the scalar.&#34;&#34;&#34;
-        _check(lib.GxB_Scalar_clear(self.scalar[0]))
+        _check(lib.GxB_Scalar_clear(self._scalar[0]))
 
     def __getitem__(self, index):
         result = ffi.new(self.type.C + &#34;*&#34;)
         _check(
-            self.type._Scalar_extractElement(result, self.scalar[0]), raise_no_val=True
+            self.type._Scalar_extractElement(result, self._scalar[0]), raise_no_val=True
         )
         return result[0]
 
     def __setitem__(self, index, value):
         _check(
-            self.type._Scalar_setElement(self.scalar[0], ffi.cast(self.type.C, value))
+            self.type._Scalar_setElement(self._scalar[0], ffi.cast(self.type.C, value))
         )
 
     def wait(self):
-        _check(lib.GxB_Scalar_wait(self.scalar))
+        _check(lib.GxB_Scalar_wait(self._scalar))
 
     @property
     def nvals(self):
         &#34;&#34;&#34;Return the number of values in the scalar (0 or 1).&#34;&#34;&#34;
         n = ffi.new(&#34;GrB_Index*&#34;)
-        _check(lib.GxB_Scalar_nvals(n, self.scalar[0]))
+        _check(lib.GxB_Scalar_nvals(n, self._scalar[0]))
         return n[0]
 
     def __bool__(self):
@@ -12562,7 +12622,7 @@ def from_value(cls, value):
 def gb_type(self):
     &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Scalar.&#34;&#34;&#34;
     typ = ffi.new(&#34;GrB_Type*&#34;)
-    _check(lib.GxB_Scalar_type(typ, self.scalar[0]))
+    _check(lib.GxB_Scalar_type(typ, self._scalar[0]))
     return typ[0]</code></pre>
 </details>
 </dd>
@@ -12577,13 +12637,9 @@ def gb_type(self):
 def nvals(self):
     &#34;&#34;&#34;Return the number of values in the scalar (0 or 1).&#34;&#34;&#34;
     n = ffi.new(&#34;GrB_Index*&#34;)
-    _check(lib.GxB_Scalar_nvals(n, self.scalar[0]))
+    _check(lib.GxB_Scalar_nvals(n, self._scalar[0]))
     return n[0]</code></pre>
 </details>
-</dd>
-<dt id="pygraphblas.Scalar.scalar"><code class="name">var <span class="ident">scalar</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
 </dd>
 <dt id="pygraphblas.Scalar.type"><code class="name">var <span class="ident">type</span></code></dt>
 <dd>
@@ -12603,7 +12659,7 @@ def nvals(self):
 </summary>
 <pre><code class="python">def clear(self):
     &#34;&#34;&#34;Clear the scalar.&#34;&#34;&#34;
-    _check(lib.GxB_Scalar_clear(self.scalar[0]))</code></pre>
+    _check(lib.GxB_Scalar_clear(self._scalar[0]))</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Scalar.dup"><code class="name flex">
@@ -12618,7 +12674,7 @@ def nvals(self):
 <pre><code class="python">def dup(self):
     &#34;&#34;&#34;Create an duplicate Scalar from the given argument.&#34;&#34;&#34;
     new_sca = ffi.new(&#34;GxB_Scalar*&#34;)
-    _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
+    _check(lib.GxB_Scalar_dup(new_sca, self._scalar[0]))
     return self.__class__(new_sca, self.type)</code></pre>
 </details>
 </dd>
@@ -12632,7 +12688,7 @@ def nvals(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wait(self):
-    _check(lib.GxB_Scalar_wait(self.scalar))</code></pre>
+    _check(lib.GxB_Scalar_wait(self._scalar))</code></pre>
 </details>
 </dd>
 </dl>
@@ -16439,7 +16495,7 @@ def nvals(self):
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp1st
-            first = first.scalar[0]
+            first = first._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp1st
         self._check(
@@ -16459,7 +16515,7 @@ def nvals(self):
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(second, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp2nd
-            second = second.scalar[0]
+            second = second._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp2nd
         self._check(
@@ -16479,7 +16535,7 @@ def nvals(self):
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self._vector] = thunk
-            thunk = thunk.scalar[0]
+            thunk = thunk._scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
@@ -16846,7 +16902,7 @@ to a scalar first.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(first, Scalar):
         f = lib.GxB_Vector_apply_BinaryOp1st
-        first = first.scalar[0]
+        first = first._scalar[0]
     else:
         f = self.type._Vector_apply_BinaryOp1st
     self._check(
@@ -16877,7 +16933,7 @@ to a scalar second.</p></div>
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(second, Scalar):
         f = lib.GxB_Vector_apply_BinaryOp2nd
-        second = second.scalar[0]
+        second = second._scalar[0]
     else:
         f = self.type._Vector_apply_BinaryOp2nd
     self._check(
@@ -17338,7 +17394,7 @@ outside the resized vector are deleted.</p></div>
         thunk = Scalar.from_value(thunk)
     if isinstance(thunk, Scalar):
         self._keep_alives[self._vector] = thunk
-        thunk = thunk.scalar[0]
+        thunk = thunk._scalar[0]
 
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
@@ -19369,7 +19425,6 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Scalar.from_value" href="#pygraphblas.Scalar.from_value">from_value</a></code></li>
 <li><code><a title="pygraphblas.Scalar.gb_type" href="#pygraphblas.Scalar.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.Scalar.nvals" href="#pygraphblas.Scalar.nvals">nvals</a></code></li>
-<li><code><a title="pygraphblas.Scalar.scalar" href="#pygraphblas.Scalar.scalar">scalar</a></code></li>
 <li><code><a title="pygraphblas.Scalar.type" href="#pygraphblas.Scalar.type">type</a></code></li>
 <li><code><a title="pygraphblas.Scalar.wait" href="#pygraphblas.Scalar.wait">wait</a></code></li>
 </ul>

@@ -29,6 +29,7 @@ from .unaryop import current_uop
 from .monoid import current_monoid
 from .descriptor import Descriptor, Default, T0, current_desc
 from . import descriptor
+from .descriptor import Descriptor, Default, T0, current_desc
 from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
@@ -1245,6 +1246,7 @@ class Matrix:
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
+            first = first._scalar[0]
         else:
             f = self.type._Matrix_apply_BinaryOp1st
         self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
@@ -1267,11 +1269,12 @@ class Matrix:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
-        self._check(
-            self.type._Matrix_apply_BinaryOp2nd(
-                out._matrix[0], mask, accum, op, self._matrix[0], second, desc
-            )
-        )
+        if isinstance(second, Scalar):
+            f = lib.GxB_Matrix_apply_BinaryOp2nd
+            second = second._scalar[0]
+        else:
+            f = self.type._Matrix_apply_BinaryOp2nd
+        self._check(f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc))
         return out
 
     def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
@@ -1305,7 +1308,7 @@ class Matrix:
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self._matrix] = thunk
-            thunk = thunk.scalar[0]
+            thunk = thunk._scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -1707,6 +1710,21 @@ class Matrix:
         0| 3
         1| 8
         2| 6
+
+        By default, `mxv` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.
+
+        >>> o = v.dup()
+        >>> m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+        True
+        >>> print(o)
+        0| 5
+        1|11
+        2|10
 
         The default semiring depends on the infered result type.  In
         the case of numbers, the default semiring is `PLUS_TIMES`.  In

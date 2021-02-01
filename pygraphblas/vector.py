@@ -569,7 +569,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp1st
-            first = first.scalar[0]
+            first = first._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp1st
         self._check(
@@ -589,7 +589,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(second, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp2nd
-            second = second.scalar[0]
+            second = second._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp2nd
         self._check(
@@ -609,7 +609,7 @@ class Vector:
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self._vector] = thunk
-            thunk = thunk.scalar[0]
+            thunk = thunk._scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(

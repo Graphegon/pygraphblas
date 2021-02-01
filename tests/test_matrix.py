@@ -914,13 +914,11 @@ def test_iadd_scalar():
     assert m.to_lists() == [[0, 1], [0, 1], [13, 5]]
 
 
-def test_sub_scalar():
+def test_sub():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (m - 3).to_lists() == [[0, 1], [0, 1], [2, -2]]
-
-
-def test_rsub_scalar_second():
-    m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    assert (m - n).to_lists() == [[0, 1], [0, 1], [0, 0]]
     assert (3 - m).to_lists() == [[0, 1], [0, 1], [-2, 2]]
 
 
@@ -935,12 +933,16 @@ def test_isub_scalar():
 
 def test_mul_scalar():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
+    n = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (m * 3).to_lists() == [[0, 1], [0, 1], [15, 3]]
+    assert (m * Scalar.from_value(3)).to_lists() == [[0, 1], [0, 1], [15, 3]]
+    assert (m * n).to_lists() == [[0, 1], [0, 1], [25, 1]]
 
 
 def test_rmul_scalar_second():
     m = Matrix.from_lists([0, 1], [0, 1], [5, 1])
     assert (3 * m).to_lists() == [[0, 1], [0, 1], [15, 3]]
+    assert (Scalar.from_value(3) * m).to_lists() == [[0, 1], [0, 1], [15, 3]]
 
 
 def test_imul_scalar():

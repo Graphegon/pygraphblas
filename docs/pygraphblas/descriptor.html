@@ -39,7 +39,6 @@ from .base import lib, ffi, _check
 
 current_desc = contextvars.ContextVar(&#34;current_desc&#34;)
 
-
 class Descriptor:
     &#34;&#34;&#34;Wrapper class around GraphBLAS Descriptors.
 
@@ -156,15 +155,15 @@ RT0 = R &amp; T0
 RT1 = R &amp; T1
 RT0T1 = R &amp; T0 &amp; T1
 
-S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, &#34;S&#34;)
-ST1 = S &amp; T1
-ST0 = S &amp; T0
-ST0T1 = S &amp; T0 &amp; T1
-
 RC = R &amp; C
 RCT0 = R &amp; C &amp; T0
 RCT1 = R &amp; C &amp; T1
 RCT0T1 = R &amp; C &amp; T0 &amp; T1
+
+S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, &#34;S&#34;)
+ST1 = S &amp; T1
+ST0 = S &amp; T0
+ST0T1 = S &amp; T0 &amp; T1
 
 RS = R &amp; S
 RST1 = R &amp; S &amp; T1

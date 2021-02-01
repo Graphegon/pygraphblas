@@ -675,7 +675,13 @@ class Matrix:
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
+<<<<<<< HEAD
+                (self.nrows, self.ncols)
+                if T0 in desc
+                else (self.ncols, self.nrows)
+=======
                 (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+>>>>>>> main
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -1747,7 +1753,11 @@ class Matrix:
         2|
 
         &#34;&#34;&#34;
+<<<<<<< HEAD
+        desc = desc | T0
+=======
         desc = desc &amp; T0
+>>>>>>> main
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -2944,7 +2954,13 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
+<<<<<<< HEAD
+                (self.nrows, self.ncols)
+                if T0 in desc
+                else (self.ncols, self.nrows)
+=======
                 (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+>>>>>>> main
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -4016,7 +4032,11 @@ various combinations of calling <code><a title="pygraphblas.matrix.Matrix.mxm" h
         2|
 
         &#34;&#34;&#34;
+<<<<<<< HEAD
+        desc = desc | T0
+=======
         desc = desc &amp; T0
+>>>>>>> main
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -6370,7 +6390,11 @@ in the computation.</p>
     2|
 
     &#34;&#34;&#34;
+<<<<<<< HEAD
+    desc = desc | T0
+=======
     desc = desc &amp; T0
+>>>>>>> main
     return self.extract_col(
         row_index, col_slice, out, desc=desc, mask=None, accum=None
     )</code></pre>
@@ -7351,7 +7375,13 @@ Guide</a></p>
     &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
+<<<<<<< HEAD
+            (self.nrows, self.ncols)
+            if T0 in desc
+            else (self.ncols, self.nrows)
+=======
             (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+>>>>>>> main
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
         if cast is not None:
