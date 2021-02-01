@@ -186,7 +186,7 @@ def draw_graph_op(left, op, right, result):
 
 
 def draw_vector(
-    V, scale=10, axes=True, labels=False, mode=None, cmap="rainbow", filename=None
+    V, scale=10, axes=True, labels=False, mode=None, cmap="viridis", filename=None
 ):
     if not isinstance(V, Vector):
         raise TypeError
@@ -198,12 +198,12 @@ def draw_matrix(
     axes=True,
     labels=False,
     mode=None,
-    cmap="rainbow",
+    cmap="viridis",
     filename=None,
     column=True,
     font_path=Path("/pygraphblas/demo"),
 ):
-    from pygraphblas import BOOL, Vector
+    from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
     cosmic_font = ImageFont.truetype(
         str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
@@ -226,7 +226,7 @@ def draw_matrix(
 
     if cmap is not None:
         import matplotlib.pyplot as plt
-
+        from matplotlib.colors import rgb2hex
         cmap = plt.get_cmap(cmap)
 
     sx = ((M.ncols + 1) * scale) + 1
@@ -241,6 +241,12 @@ def draw_matrix(
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
                 fill="#3333ff",
+                outline="black",
+            )
+        elif M.type in [FP32, FP64] and cmap:
+            d.rectangle(
+                (x - offset, y - offset, x + scale - offset, y + scale - offset),
+                fill=rgb2hex(cmap(v)),
                 outline="black",
             )
         else:
