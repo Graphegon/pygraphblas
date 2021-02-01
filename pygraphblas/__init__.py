@@ -2,7 +2,7 @@
 API](http://graphblas.org) with the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provides high level `pygraphblas.matrix.Matrix` and
+level GraphBLAS API and provides high level `pygraphblas.Matrix` and
 `pygraphblas.Vector` Python types that make GraphBLAS simple and easy.
 
 See the [Github README](https://github.com/Graphegon/pygraphblas) for
@@ -12,10 +12,10 @@ be imported for use:
 >>> from pygraphblas import *
 
 The core idea of the GraphBLAS is the mathematical duality between a
-graph and a `pygraphblas.matrix.Matrix`.  As illustrated here, a graph can be
-expressed as a `pygraphblas.matrix.Matrix` and vice versa.
+graph and a `pygraphblas.Matrix`.  As illustrated here, a graph can be
+expressed as a `pygraphblas.Matrix` and vice versa.
 
-`pygraphblas.matrix.Matrix` is the primary object of The GraphBLAS API.
+`pygraphblas.Matrix` is the primary object of The GraphBLAS API.
 There are many ways to contstruct them, but a simple approach is to
 provide three lists of data, the first are are lists of the row and
 column positions that define the begining and end of a graph edge, and
@@ -44,7 +44,7 @@ the third list is the weight for that edge:
 GraphBLAS is a sparse [Linear
 Algebra](https://en.wikipedia.org/wiki/Linear_algebra) API optimized
 for processing graphs encoded as sparse matrices and vectors.  In
-addition to common real/integer `pygraphblas.matrix.Matrix` algebra
+addition to common real/integer `pygraphblas.Matrix` algebra
 operations, GraphBLAS supports over a thousand different
 [Semiring](https://en.wikipedia.org/wiki/Semiring) algebra operations,
 that can be used as basic building blocks to implement a wide variety
@@ -75,6 +75,11 @@ you with a lot more background information.
 
 """
 
+__pdoc__ = {
+    "base": False,
+    "build": False,
+}
+
 from .base import (
     lib,
     ffi,
@@ -87,24 +92,32 @@ from .base import (
 
 lib.LAGraph_init()
 
-from . import matrix
-from . import vector
-from . import scalar
-from . import semiring
-from . import binaryop
-from . import unaryop
-from . import monoid
-from . import descriptor
-from . import gviz
-
+from .semiring import build_semirings
+from .binaryop import build_binaryops, Accum, binary_op
+from .unaryop import build_unaryops
+from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
+from . import descriptor
 
-semiring.build_semirings()
-binaryop.build_binaryops()
-unaryop.build_unaryops()
-monoid.build_monoids()
+__pdoc__ = {
+    "base": False,
+    "build": False,
+    "unaryop": False,
+    "binaryop": False,
+    "monoid": False,
+    "semiring": False,
+    "matrix": False,
+    "vector": False,
+    "scalar": False,
+    "types": False,
+}
+
+build_semirings(__pdoc__)
+build_binaryops(__pdoc__)
+build_unaryops(__pdoc__)
+build_monoids(__pdoc__)
 
 from .types import (
     FP64,
@@ -123,8 +136,6 @@ from .types import (
 )
 
 __all__ = [
-    "lib",
-    "ffi",
     "GxB_INDEX_MAX",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
@@ -146,20 +157,11 @@ __all__ = [
     "UINT16",
     "UINT8",
     "BOOL",
-    "monoid",
-    "unaryop",
-    "binaryop",
-    "semiring",
-    "types",
     "descriptor",
-    "gviz",
+    "Accum",
+    "binary_op",
+    "run_doctests",
 ]
-
-ffi = ffi  # global assign hack to fool pdoc
-""" CFFI C Foreign Function Interface.  For internal low-level use only. """
-
-lib = lib
-""" Raw interface to SuiteSparse library. For internal low-level use only.  """
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
 """Maximum key size for SuiteSparse, defaults to `2**60`."""
@@ -171,15 +173,15 @@ GxB_SPEC = GxB_SPEC
 """ Tuple containing GxB_SPEC (MAJOR, MINOR, SUB) """
 
 
-def run_doctests():
+def run_doctests(raise_on_error=False):
+    from . import matrix
+    from . import descriptor
+    from . import base
     import sys, doctest
 
     this = sys.modules[__name__]
     for mod in (this, matrix, descriptor, base):
-        doctest.testmod(mod, optionflags=doctest.ELLIPSIS)
+        doctest.testmod(
+            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
+        )
 
-
-__pdoc__ = {
-    "base": False,
-    "build": False,
-}

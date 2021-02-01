@@ -20,13 +20,14 @@ from .base import (
     GxB_INDEX_MAX,
 )
 
-from . import types, binaryop, monoid, unaryop, semiring as _semiring
+from . import types
 from .vector import Vector
 from .scalar import Scalar
-from .semiring import Semiring, current_semiring
-from .binaryop import BinaryOp, current_accum, current_binop
-from .unaryop import UnaryOp
-from .monoid import Monoid, current_monoid
+from .semiring import current_semiring
+from .binaryop import current_accum, current_binop, Accum
+from .unaryop import current_uop
+from .monoid import current_monoid
+from .descriptor import Descriptor, Default, T0, current_desc
 from . import descriptor
 from .descriptor import Descriptor, Default, T0, current_desc
 from .gviz import draw_graph, draw_matrix
@@ -74,7 +75,7 @@ class Matrix:
 
     Note that all the above operator syntax is mearly sugar over
     various combinations of calling `Matrix.mxm`, `Matrix.mxv`,
-    `pygraphblas.vector.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
+    `pygraphblas.Vector.vxm`, `Matrix.eadd`, and `Matrix.emult`.
 
     """
 
@@ -83,7 +84,7 @@ class Matrix:
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError
+                raise KeyError  # pragma: nocover
 
             error_string = ffi.new("char**")
             lib.GrB_Matrix_error(error_string, self._matrix[0])
@@ -103,7 +104,6 @@ class Matrix:
         >>> M = Matrix.sparse(types.INT8)
         >>> M.type == types.INT8
         True
-
         """
         self._keep_alives = weakref.WeakKeyDictionary()
 
@@ -146,11 +146,13 @@ class Matrix:
         return m
 
     @classmethod
-    def dense(cls, typ, nrows, ncols, fill=None, sparsity_control=None):
+    def dense(cls, typ, nrows, ncols, fill=None, sparsity=None):
         """Return a dense Matrix nrows by ncols.
 
-        If `sparsity_control` is provided it is used for the new
-        matrix (See SuiteSparse User Guide)
+        If `sparsity` is provided it is used for the sparsity of the
+        new matrix See the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+        for details.
 
         >>> M = Matrix.dense(types.UINT8, 3, 3)
         >>> print(M)
@@ -174,8 +176,8 @@ class Matrix:
         """
         assert nrows > 0 and ncols > 0, "dense matrix must be at least 1x1"
         m = cls.sparse(typ, nrows, ncols)
-        if sparsity_control is not None:
-            v.sparsity_control = sparsity_control
+        if sparsity is not None:
+            m.sparsity = sparsity
         if fill is None:
             fill = m.type.zero
         m[:, :] = fill
@@ -487,7 +489,7 @@ class Matrix:
         self._check(lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_FORMAT, format))
 
     @property
-    def sparsity_control(self):
+    def sparsity(self):
         """Get Matrix sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.new("int*")
         self._check(
@@ -497,8 +499,8 @@ class Matrix:
         )
         return sparsity[0]
 
-    @sparsity_control.setter
-    def sparsity_control(self, sparsity):
+    @sparsity.setter
+    def sparsity(self, sparsity):
         """Set Matrix sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.cast("int", sparsity)
         self._check(
@@ -516,7 +518,7 @@ class Matrix:
         )
         return status[0]
 
-    def pattern(self, typ=types.BOOL):
+    def pattern(self, typ=types.BOOL, out=None):
         """Return the pattern of the matrix where every present value in this
         matrix is set to identity value for the provided type which
         defaults to BOOL.
@@ -536,11 +538,22 @@ class Matrix:
           2|  t      |  2
               0  1  2
 
+        Pre-constructed matrix can be passed as the `out` parameter:
+
+        >>> C = Matrix.dense(types.BOOL, 3, 3)
+        >>> P = M.pattern(out=C)
+        >>> print(C)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
+
         """
 
-        r = ffi.new("GrB_Matrix*")
-        self._check(lib.LAGraph_pattern(r, self._matrix[0], typ.gb_type))
-        return Matrix(r, typ)
+        if out is None:
+            out = Matrix.sparse(typ, self.nrows, self.ncols)
+        return self.apply(typ.ONE, out=out)
 
     def to_mm(self, fileobj):
         """Write this matrix to a file using the Matrix Market format."""
@@ -565,7 +578,7 @@ class Matrix:
         V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
-        self._check(self.type.Matrix_extractTuples(I, J, V, n, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, V, n, self._matrix[0]))
         return [list(I), list(J), list(map(self.type.to_value, V))]
 
     def clear(self):
@@ -748,11 +761,10 @@ class Matrix:
 
         """
         if add_op is None:
-            add_op = current_binop.get(binaryop.PLUS)
+            add_op = current_binop.get(NULL)
         elif isinstance(add_op, str):
             add_op = _get_bin_op(add_op, self.type)
 
-        add_op = add_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -760,6 +772,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if add_op is NULL:
+            add_op = out.type._default_addop()
+        add_op = add_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseAdd_BinaryOp(
                 out._matrix[0],
@@ -839,11 +854,10 @@ class Matrix:
 
         """
         if mult_op is None:
-            mult_op = current_binop.get(binaryop.TIMES)
+            mult_op = current_binop.get(NULL)
         elif isinstance(mult_op, str):
             mult_op = _get_bin_op(mult_op, self.type)
 
-        mult_op = mult_op.get_binaryop(self.type, other.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if out is None:
             typ = cast or types.promote(self.type, other.type)
@@ -851,6 +865,9 @@ class Matrix:
             self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
+        if mult_op is NULL:
+            mult_op = out.type._default_multop()
+        mult_op = mult_op.get_binaryop(self.type, other.type)
         self._check(
             lib.GrB_Matrix_eWiseMult_BinaryOp(
                 out._matrix[0],
@@ -905,11 +922,12 @@ class Matrix:
         I = ffi.new("GrB_Index[%s]" % nvals)
         J = ffi.new("GrB_Index[%s]" % nvals)
         X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return zip(I, J, map(self.type.to_value, X))
 
     def to_arrays(self):
-        """Convert Matrix to tuple of three dense array objects.
+        """Convert Matrix to tuple of three dense
+        [array](https://docs.python.org/3/library/array.html) objects.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.to_arrays()
@@ -923,7 +941,7 @@ class Matrix:
         I = ffi.new("GrB_Index[%s]" % nvals)
         J = ffi.new("GrB_Index[%s]" % nvals)
         X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return array("L", I), array("L", J), array(self.type.typecode, X)
 
     @property
@@ -940,7 +958,7 @@ class Matrix:
         I = ffi.new("GrB_Index[%s]" % nvals)
         J = NULL
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(I)
 
     @property
@@ -957,7 +975,7 @@ class Matrix:
         I = NULL
         J = ffi.new("GrB_Index[%s]" % nvals)
         X = NULL
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(J)
 
     @property
@@ -974,7 +992,7 @@ class Matrix:
         I = NULL
         J = NULL
         X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
-        self._check(self.type.Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
+        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
 
     def __len__(self):
@@ -988,85 +1006,101 @@ class Matrix:
         return self.nvals
 
     def __and__(self, other):
-        return self.emult(other, self.type.SECOND)
+        op = current_binop.get(self.type.SECOND)
+        return self.emult(other, op)
 
     def __iand__(self, other):
-        return self.emult(other, self.type.SECOND, out=self)
+        op = current_binop.get(self.type.SECOND)
+        return self.emult(other, op, out=self)
 
     def __or__(self, other):
-        return self.eadd(other, self.type.SECOND)
+        op = current_binop.get(self.type.SECOND)
+        return self.eadd(other, op)
 
     def __ior__(self, other):
-        return self.eadd(other, self.type.SECOND, out=self)
+        op = current_binop.get(self.type.SECOND)
+        return self.eadd(other, op, out=self)
 
     def __add__(self, other):
+        op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.PLUS, other)
-        return self.eadd(other)
+            return self.apply_second(op, other)
+        return self.eadd(other, op)
 
     def __radd__(self, other):
+        op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
-            return self.apply_first(other, self.type.PLUS)
-        return other.eadd(self)
+            return self.apply_first(other, op)
+        return other.eadd(self, op)  # pragma: nocover
 
     def __iadd__(self, other):
+        op = current_binop.get(self.type.PLUS)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.PLUS, other, out=self)
-        return self.eadd(other, out=self)
+            return self.apply_second(op, other, out=self)
+        return self.eadd(other, op, out=self)
 
     def __sub__(self, other):
+        op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.MINUS, other)
-        return self.eadd(other, add_op=self.type.MINUS)
+            return self.apply_second(op, other)
+        return self.eadd(other, op)
 
     def __rsub__(self, other):
+        op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
-            return self.apply_first(other, self.type.MINUS)
-        return other.eadd(self, add_op=self.type.MINUS)
+            return self.apply_first(other, op)
+        return other.eadd(self, op)  # pragma: nocover
 
     def __isub__(self, other):
+        op = current_binop.get(self.type.MINUS)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.MINUS, other, out=self)
-        return other.eadd(self, out=self, add_op=self.type.MINUS)
+            return self.apply_second(op, other, out=self)
+        return other.eadd(self, op, out=self)
 
     def __mul__(self, other):
+        op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.TIMES, other)
-        return self.eadd(other, add_op=self.type.TIMES)
+            return self.apply_second(op, other)
+        return self.emult(other, op)
 
     def __rmul__(self, other):
+        op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
-            return self.apply_first(other, self.type.TIMES)
-        return other.eadd(self, add_op=self.type.TIMES)
+            return self.apply_first(other, op)
+        return other.emult(self, op)  # pragma: nocover
 
     def __imul__(self, other):
+        op = current_binop.get(self.type.TIMES)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.TIMES, other)
-        return other.eadd(self, out=self, add_op=self.type.TIMES)
+            return self.apply_second(op, other)
+        return other.emult(self, op, out=self)
 
     def __truediv__(self, other):
+        op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.DIV, other)
-        return self.eadd(other, add_op=self.type.DIV)
+            return self.apply_second(op, other)
+        return self.emult(other, op)
 
     def __rtruediv__(self, other):
+        op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
-            return self.apply_first(other, self.type.DIV)
-        return other.eadd(self, add_op=self.type.DIV)
+            return self.apply_first(other, op)
+        return other.emult(self, op)  # pragma: nocover
 
     def __itruediv__(self, other):
+        op = current_binop.get(self.type.DIV)
         if not isinstance(other, Matrix):
-            return self.apply_second(self.type.DIV, other)
-        return other.eadd(self, out=self, add_op=self.type.DIV)
+            return self.apply_second(op, other)
+        return other.emult(self, op, out=self)
 
     def __invert__(self):
-        return self.apply(unaryop.MINV)
+        return self.apply(self.type.MINV)
 
     def __neg__(self):
-        return self.apply(unaryop.AINV)
+        return self.apply(self.type.AINV)
 
     def __abs__(self):
-        return self.apply(unaryop.ABS)
+        return self.apply(self.type.ABS)
 
     def __pow__(self, exponent):
         if exponent == 0:
@@ -1177,7 +1211,7 @@ class Matrix:
         """Apply Unary op to matrix elements.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply(unaryop.ABS))
+        >>> print(M.apply(types.INT64.ABS))
               0  1  2
           0|    42   |  0
           1|        0|  1
@@ -1187,8 +1221,8 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, UnaryOp):
-            op = op.get_unaryop(self.type)
+
+        op = op.get_unaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Matrix_apply(out._matrix[0], mask, accum, op, self._matrix[0], desc)
@@ -1200,7 +1234,7 @@ class Matrix:
         first input to a scalar first.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply_first(1, binaryop.PLUS))
+        >>> print(M.apply_first(1, types.INT64.PLUS))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1210,13 +1244,13 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Matrix_apply_BinaryOp1st
+            first = first._scalar[0]
         else:
-            f = self.type.Matrix_apply_BinaryOp1st
+            f = self.type._Matrix_apply_BinaryOp1st
         self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
         return out
 
@@ -1225,7 +1259,7 @@ class Matrix:
         second input to a scalar second.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> print(M.apply_second(binaryop.PLUS, 1))
+        >>> print(M.apply_second(types.INT64.PLUS, 1))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1235,12 +1269,15 @@ class Matrix:
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type)
+        op = op.get_binaryop(self.type)
         mask, accum, desc = self._get_args(mask, accum, desc)
+        if isinstance(second, Scalar):
+            f = lib.GxB_Matrix_apply_BinaryOp2nd
+            second = second._scalar[0]
+        else:
+            f = self.type._Matrix_apply_BinaryOp2nd
         self._check(
-            self.type.Matrix_apply_BinaryOp2nd(
-                out._matrix[0], mask, accum, op, self._matrix[0], second, desc
+            f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc
             )
         )
         return out
@@ -1250,19 +1287,19 @@ class Matrix:
         Can be a string mapping to following operators:
 
         Operator | Library Operation | Definition
-        --- | --- | ---
-        >   | lib.GxB_GT_THUNK | Select greater than 'thunk'.
-        <   | lib.GxB_LT_THUNK | Select less than 'thunk'.
-        >=  | lib.GxB_GE_THUNK | Select greater than or equal to 'thunk'.
-        <=  | lib.GxB_LE_THUNK | Select less than or equal to 'thunk'.
-        !=  | lib.GxB_NE_THUNK | Select not equal to 'thunk'.
-        ==  | lib.GxB_EQ_THUNK | Select equal to 'thunk'.
-        >0  | lib.GxB_GT_ZERO  | Select greater than zero.
-        <0  | lib.GxB_LT_ZERO  | Select less than zero.
-        >=0 | lib.GxB_GE_ZERO  | Select greater than or equal to zero.
-        <=0 | lib.GxB_LE_ZERO  | Select less than or equal to zero.
-        !=0 | lib.GxB_NONZERO  | Select nonzero value.
-        ==0 | lib.GxB_EQ_ZERO  | Select equal to zero.
+        ---   | --- | ---
+        `>`   | lib.GxB_GT_THUNK | Select greater than 'thunk'.
+        `<`   | lib.GxB_LT_THUNK | Select less than 'thunk'.
+        `>=`  | lib.GxB_GE_THUNK | Select greater than or equal to 'thunk'.
+        `<=`  | lib.GxB_LE_THUNK | Select less than or equal to 'thunk'.
+        `!=`  | lib.GxB_NE_THUNK | Select not equal to 'thunk'.
+        `==`  | lib.GxB_EQ_THUNK | Select equal to 'thunk'.
+        `>0`  | lib.GxB_GT_ZERO  | Select greater than zero.
+        `<0`  | lib.GxB_LT_ZERO  | Select less than zero.
+        `>=0` | lib.GxB_GE_ZERO  | Select greater than or equal to zero.
+        `<=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
+        `!=0` | lib.GxB_NONZERO  | Select nonzero value.
+        `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
 
         """
         if out is None:
@@ -1276,7 +1313,7 @@ class Matrix:
             thunk = Scalar.from_value(thunk)
         if isinstance(thunk, Scalar):
             self._keep_alives[self._matrix] = thunk
-            thunk = thunk.scalar[0]
+            thunk = thunk._scalar[0]
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -1428,7 +1465,7 @@ class Matrix:
             identity = self.type.one
 
         self._check(
-            self.type.Matrix_assignScalar(
+            self.type._Matrix_assignScalar(
                 B._matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
             )
         )
@@ -1480,7 +1517,7 @@ class Matrix:
             mask = NULL
         if accum is None:
             accum = current_accum.get(NULL)
-        if isinstance(accum, BinaryOp):
+        if accum is not NULL:
             accum = accum.get_binaryop(self.type)
         if desc is None or desc == Default:
             desc = current_desc.get(Default)
@@ -1498,24 +1535,147 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Matrix-matrix multiply."""
-        if semiring is None:
-            semiring = current_semiring.get(None)
+        """Matrix-matrix multiply.
 
-        typ = cast or types.promote(self.type, other.type, semiring)
+        Multiply this matrix by `other` matrix.
+
+        See Section 9.6 in the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+        for details.
+
+        `mxm` can be called directly or with the `@` operator:
+
+        >>> m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+        >>> print(m)
+              0  1  2
+          0|     1   |  0
+          1|        2|  1
+          2|  3      |  2
+              0  1  2
+
+        >>> print(n)
+              0  1  2
+          0|     2   |  0
+          1|        3|  1
+          2|  4      |  2
+              0  1  2
+
+        >>> o = m.mxm(n)
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        >>> o = m @ n
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        By default, `mxm` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.  This is also supported by the `@=` syntax:
+
+        >>> o = m.dup()
+        >>> o.mxm(n, accum=types.INT64.MIN, out=o) is o
+        True
+        >>> print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        >>> o = m.dup()
+        >>> with Accum(types.INT64.MIN):
+        ...     o @= n
+        >>> print(o)
+              0  1  2
+          0|     1  3|  0
+          1|  8     2|  1
+          2|  3  6   |  2
+              0  1  2
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+        >>> print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        >>> with types.INT64.MIN_PLUS:
+        ...     o = m @ n
+        >>> print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        >>> o = m.mxm(n, desc=descriptor.T0)
+        >>> print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        >>> with descriptor.T0:
+        ...     o = m @ n
+        >>> print(o)
+              0  1  2
+          0| 12      |  0
+          1|     2   |  1
+          2|        6|  2
+              0  1  2
+
+        The accumulator context manager requires an extra `Accum`
+        helper class to distinguish it from binary ops used in `eadd`
+        and `emult`.
+
+        """
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
+        else:
+            typ = out.type
 
-        if semiring is None:
-            semiring = typ.PLUS_TIMES
+        if semiring is NULL:
+            semiring = out.type._default_semiring()
 
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_mxm(
                 out._matrix[0],
                 mask,
                 accum,
-                semiring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._matrix[0],
                 desc,
@@ -1533,25 +1693,107 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Matrix-vector multiply."""
-        if semiring is None:
-            semiring = current_semiring.get(None)
+        """Matrix-matrix multiply.
 
-        typ = cast or types.promote(self.type, other.type, semiring)
+        Multiply this matrix by `other` vector.
+
+        See Section 9.6 in the [SuiteSparse User
+        Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
+        for details.
+
+        `mxv` can also be called directly or with the `@` operator:
+
+        >>> m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+        >>> o = m.mxv(v)
+        >>> print(o)
+        0| 3
+        1| 8
+        2| 6
+        >>> o = m @ v
+        >>> print(o)
+        0| 3
+        1| 8
+        2| 6
+
+        By default, `mxv` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.
+
+        >>> o = v.dup()
+        >>> m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+        True
+        >>> print(o)
+        0| 5
+        1|11
+        2|10
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+        >>> print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        >>> with types.INT64.MIN_PLUS:
+        ...     o = m @ v
+        >>> print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        >>> o = m.mxv(v, desc=descriptor.T0)
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        >>> with descriptor.T0:
+        ...     o = m @ v
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        """
+
+        if semiring is None:
+            semiring = current_semiring.get(NULL)
+
         if out is None:
             new_dimension = self.ncols if T0 in desc else self.nrows
+            if semiring is not NULL:
+                typ = semiring.ztype
+            else:
+                typ = cast or types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
+        else:
+            typ = out.type
 
+        if semiring is NULL:
+            semiring = out.type._default_semiring()
+
+        semiring = semiring.get_semiring()
         mask, accum, desc = self._get_args(mask, accum, desc)
-        if semiring is None:
-            semiring = typ.PLUS_TIMES
 
         self._check(
             lib.GrB_mxv(
                 out._vector[0],
                 mask,
                 accum,
-                semiring.get_semiring(typ),
+                semiring,
                 self._matrix[0],
                 other._vector[0],
                 desc,
@@ -1581,9 +1823,9 @@ class Matrix:
                 typ, self.nrows * other.nrows, self.ncols * other.ncols
             )
         if op is None:
-            op = typ.TIMES
-        if isinstance(op, BinaryOp):
-            op = op.get_binaryop(self.type, other.type)
+            op = current_binop.get(self.type.TIMES)
+
+        op = op.get_binaryop(self.type, other.type)
 
         self._check(
             lib.GrB_Matrix_kronecker_BinaryOp(
@@ -1740,9 +1982,9 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
-            result = self.type.ffi.new(self.type.ptr)
+            result = self.type.ffi.new(self.type._ptr)
             self._check(
-                self.type.Matrix_extractElement(
+                self.type._Matrix_extractElement(
                     result, self._matrix[0], index[0], index[1]
                 )
             )
@@ -1949,7 +2191,7 @@ class Matrix:
             nj = 0
         scalar_type = types._gb_from_type(type(value))
         self._check(
-            scalar_type.Matrix_assignScalar(
+            scalar_type._Matrix_assignScalar(
                 self._matrix[0], mask, accum, value, I, ni, J, nj, desc
             )
         )
@@ -1988,7 +2230,7 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             val = self.type.from_value(value)
-            self._check(self.type.Matrix_setElement(self._matrix[0], val, i0, i1))
+            self._check(self.type._Matrix_setElement(self._matrix[0], val, i0, i1))
             return
 
         if isinstance(i0, int) and isinstance(i1, slice):

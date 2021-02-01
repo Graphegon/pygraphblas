@@ -16,18 +16,18 @@ __all__ = ["Scalar"]
 class Scalar:
     """GraphBLAS Scalar
 
-    Used for now mostly for the `pygraphblas.matrix.Matrix.select`.
+    Used for now mostly for the `pygraphblas.Matrix.select`.
 
     """
 
-    __slots__ = ("scalar", "_type")
+    __slots__ = ("_scalar", "type")
 
     def __init__(self, s, typ):
-        self.scalar = s
-        self._type = typ
+        self._scalar = s
+        self.type = typ
 
     def __del__(self):
-        _check(lib.GxB_Scalar_free(self.scalar))
+        _check(lib.GxB_Scalar_free(self._scalar))
 
     def __len__(self):
         return self.nvals
@@ -35,8 +35,8 @@ class Scalar:
     def dup(self):
         """Create an duplicate Scalar from the given argument."""
         new_sca = ffi.new("GxB_Scalar*")
-        _check(lib.GxB_Scalar_dup(new_sca, self.scalar[0]))
-        return self.__class__(new_sca, self._type)
+        _check(lib.GxB_Scalar_dup(new_sca, self._scalar[0]))
+        return self.__class__(new_sca, self.type)
 
     @classmethod
     def from_type(cls, typ):
@@ -59,33 +59,33 @@ class Scalar:
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Scalar."""
         typ = ffi.new("GrB_Type*")
-        _check(lib.GxB_Scalar_type(typ, self.scalar[0]))
+        _check(lib.GxB_Scalar_type(typ, self._scalar[0]))
         return typ[0]
 
     def clear(self):
         """Clear the scalar."""
-        _check(lib.GxB_Scalar_clear(self.scalar[0]))
+        _check(lib.GxB_Scalar_clear(self._scalar[0]))
 
     def __getitem__(self, index):
-        result = ffi.new(self._type.C + "*")
+        result = ffi.new(self.type.C + "*")
         _check(
-            self._type.Scalar_extractElement(result, self.scalar[0]), raise_no_val=True
+            self.type._Scalar_extractElement(result, self._scalar[0]), raise_no_val=True
         )
         return result[0]
 
     def __setitem__(self, index, value):
         _check(
-            self._type.Scalar_setElement(self.scalar[0], ffi.cast(self._type.C, value))
+            self.type._Scalar_setElement(self._scalar[0], ffi.cast(self.type.C, value))
         )
 
     def wait(self):
-        _check(lib.GxB_Scalar_wait(self.scalar))
+        _check(lib.GxB_Scalar_wait(self._scalar))
 
     @property
     def nvals(self):
         """Return the number of values in the scalar (0 or 1)."""
         n = ffi.new("GrB_Index*")
-        _check(lib.GxB_Scalar_nvals(n, self.scalar[0]))
+        _check(lib.GxB_Scalar_nvals(n, self._scalar[0]))
         return n[0]
 
     def __bool__(self):

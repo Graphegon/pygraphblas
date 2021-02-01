@@ -4,7 +4,6 @@
 
 __all__ = [
     "BinaryOp",
-    "AutoBinaryOp",
     "Accum",
     "current_binop",
     "current_accum",
@@ -31,7 +30,7 @@ class BinaryOp:
     _auto_binaryops = defaultdict(dict)
 
     def __init__(self, op, typ, binaryop, udt=None, boolean=False):
-        if udt is not None:
+        if udt is not None:  # pragma: no cover
             o = ffi.new("GrB_BinaryOp*")
             udt = udt.gb_type
             lib.GrB_BinaryOp_new(
@@ -48,6 +47,7 @@ class BinaryOp:
             cls = getattr(types, typ)
             setattr(cls, op, self)
         self.name = "_".join((op, typ))
+        self.__doc__ = self.name
         self.token = None
 
     def __enter__(self):
@@ -60,16 +60,6 @@ class BinaryOp:
 
     def get_binaryop(self, left=None, right=None):
         return self.binaryop
-
-
-class AutoBinaryOp(BinaryOp):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_binaryop(self, left=None, right=None):
-        typ = types.promote(left, right)
-        return BinaryOp._auto_binaryops[self.name][typ.gb_type]
 
 
 class Accum:
@@ -107,17 +97,13 @@ def binop_group(reg):
     return srs
 
 
-def build_binaryops():
+def build_binaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
-        r.__doc__ = f"BinaryOp {r.name}"
-    for name in BinaryOp._auto_binaryops:
-        bo = AutoBinaryOp(name)
-        setattr(this, name, bo)
-        this.__all__.append(name)
-        bo.__doc__ = f"AutoBinaryOp {name}"
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
 
 
 def binary_op(arg_type, result_type=None):

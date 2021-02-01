@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ["UnaryOp", "AutoUnaryOp", "current_uop", "unary_op"]
+__all__ = ["UnaryOp", "current_uop", "unary_op"]
 
 import re, sys
 from itertools import chain
@@ -34,6 +34,7 @@ class UnaryOp:
         self.__class__._auto_unaryops[name][types.Type.gb_from_name(typ)] = op
         cls = getattr(types, typ)
         setattr(cls, name, self)
+        types.__pdoc__[f"{typ}.{name}"] = f"UnaryOp {typ}.{name}"
 
     def __enter__(self):
         self.token = current_uop.set(self)
@@ -45,15 +46,6 @@ class UnaryOp:
 
     def get_unaryop(self, operand1=None):
         return self.unaryop
-
-
-class AutoUnaryOp(UnaryOp):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_unaryop(self, operand1=None):
-        return UnaryOp._auto_unaryops[self.name][operand1.gb_type]
 
 
 uop_re = re.compile(
@@ -74,13 +66,12 @@ def uop_group(reg):
     return srs
 
 
-def build_unaryops():
+def build_unaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
-    for name in UnaryOp._auto_unaryops:
-        bo = AutoUnaryOp(name)
-        setattr(this, name, bo)
+        op, typ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
 
 
 def _uop_name(name):

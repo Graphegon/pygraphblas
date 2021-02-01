@@ -18,7 +18,7 @@ can be defined with any associative and commutative operator that has
 an identity value.
 """
 
-__all__ = ["Monoid", "AutoMonoid", "current_monoid"]
+__all__ = ["Monoid", "current_monoid"]
 
 import os
 import sys
@@ -48,6 +48,7 @@ class Monoid:
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, op + "_MONOID", self)
+            types.__pdoc__[f"{typ}.{op}_MONOID"] = f"UnaryOp {typ}.{op}_MONOID"
         self.op = op
         self.type = typ
         self.name = "_".join((op, typ, "monoid"))
@@ -63,16 +64,6 @@ class Monoid:
 
     def get_monoid(self, left=None, right=None):
         return self.monoid
-
-
-class AutoMonoid(Monoid):
-    def __init__(self, name):
-        self.name = name
-        self.token = None
-
-    def get_monoid(self, left=None, right=None):
-        typ = types.promote(left, right)
-        return Monoid._auto_monoids[self.name][typ.gb_type]
 
 
 gxb_monoid_re = re.compile(
@@ -98,7 +89,7 @@ def monoid_group(reg):
     return srs
 
 
-def build_monoids():
+def build_monoids(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(
         monoid_group(gxb_monoid_re),
@@ -107,6 +98,3 @@ def build_monoids():
         monoid_group(pure_bool_re_v13),
     ):
         setattr(this, r.name, r)
-    for name in Monoid._auto_monoids:
-        bo = AutoMonoid(name)
-        setattr(this, name, bo)

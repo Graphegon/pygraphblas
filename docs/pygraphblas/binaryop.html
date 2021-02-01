@@ -80,6 +80,7 @@ class BinaryOp:
             cls = getattr(types, typ)
             setattr(cls, op, self)
         self.name = &#34;_&#34;.join((op, typ))
+        self.__doc__ = self.name
         self.token = None
 
     def __enter__(self):
@@ -139,17 +140,23 @@ def binop_group(reg):
     return srs
 
 
-def build_binaryops():
+def build_binaryops(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
-        r.__doc__ = f&#34;BinaryOp {r.name}&#34;
+<<<<<<< HEAD
+        __pdoc__[&#39;pygraphblas.binaryop.&#39; + r.name] = f&#34;BinaryOp {r.name}&#34;
+=======
+        op, typ = r.name.split(&#39;_&#39;)
+        __pdoc__[f&#39;{typ}.{op}&#39;] = r.__doc__ = f&#34;BinaryOp {r.name}&#34;
+        
+>>>>>>> main
     for name in BinaryOp._auto_binaryops:
         bo = AutoBinaryOp(name)
         setattr(this, name, bo)
         this.__all__.append(name)
-        bo.__doc__ = f&#34;AutoBinaryOp {name}&#34;
+        __pdoc__[&#39;pygraphblas.binaryop.&#39; + name] = f&#34;AutoBinaryOp {name}&#34;
 
 
 def binary_op(arg_type, result_type=None):
@@ -352,6 +359,7 @@ def binary_op(arg_type, result_type=None):
             cls = getattr(types, typ)
             setattr(cls, op, self)
         self.name = &#34;_&#34;.join((op, typ))
+        self.__doc__ = self.name
         self.token = None
 
     def __enter__(self):
