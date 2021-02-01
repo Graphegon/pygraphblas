@@ -6,6 +6,7 @@ from .base import lib, ffi, _check
 
 current_desc = contextvars.ContextVar("current_desc")
 
+
 class Descriptor:
     """Wrapper class around GraphBLAS Descriptors.
 

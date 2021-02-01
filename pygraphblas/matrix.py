@@ -656,9 +656,7 @@ class Matrix:
         """
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols)
-                if T0 in desc
-                else (self.ncols, self.nrows)
+                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
             )
             _out = ffi.new("GrB_Matrix*")
             if cast is not None:
@@ -1276,10 +1274,7 @@ class Matrix:
             second = second._scalar[0]
         else:
             f = self.type._Matrix_apply_BinaryOp2nd
-        self._check(
-            f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc
-            )
-        )
+        self._check(f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc))
         return out
 
     def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):

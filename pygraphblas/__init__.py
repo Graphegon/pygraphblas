@@ -184,4 +184,3 @@ def run_doctests(raise_on_error=False):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )
-
