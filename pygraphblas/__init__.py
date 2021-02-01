@@ -80,11 +80,6 @@ you with a lot more background information.
 
 """
 
-__pdoc__ = {
-    "base": False,
-    "build": False,
-}
-
 from .base import (
     lib,
     ffi,
@@ -117,6 +112,7 @@ __pdoc__ = {
     "vector": False,
     "scalar": False,
     "types": False,
+    "run_doctests": False,
 }
 
 build_semirings(__pdoc__)
@@ -166,7 +162,6 @@ __all__ = [
     "Accum",
     "binary_op",
     "unary_op",
-    "run_doctests",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
