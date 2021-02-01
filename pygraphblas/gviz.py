@@ -43,6 +43,7 @@ __all__ = [
     "draw_matrix_op",
     "draw_matrix_layers",
     "draw_cy",
+    "draw_vis",
 ]
 
 
@@ -386,3 +387,12 @@ def draw_cy(M, visual_style=my_style):
     from cyjupyter import Cytoscape
 
     return Cytoscape(data=cy_matrix(M), visual_style=visual_style)
+
+def draw_vis(M, **kwargs):
+    from pyvis import network as net
+    N = net.Network(**kwargs)
+    for i, j, v in M:
+        N.add_node(i, i, title=str(i))
+        N.add_node(j, j, title=str(j))
+        N.add_edge(i, j, value=str(v))
+    return N
