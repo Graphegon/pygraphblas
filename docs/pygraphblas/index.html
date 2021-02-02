@@ -187,11 +187,6 @@ you with a lot more background information.
 
 &#34;&#34;&#34;
 
-__pdoc__ = {
-    &#34;base&#34;: False,
-    &#34;build&#34;: False,
-}
-
 from .base import (
     lib,
     ffi,
@@ -206,7 +201,7 @@ lib.LAGraph_init()
 
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
-from .unaryop import build_unaryops
+from .unaryop import build_unaryops, unary_op
 from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
@@ -224,6 +219,7 @@ __pdoc__ = {
     &#34;vector&#34;: False,
     &#34;scalar&#34;: False,
     &#34;types&#34;: False,
+    &#34;run_doctests&#34;: False,
 }
 
 build_semirings(__pdoc__)
@@ -272,7 +268,7 @@ __all__ = [
     &#34;descriptor&#34;,
     &#34;Accum&#34;,
     &#34;binary_op&#34;,
-    &#34;run_doctests&#34;,
+    &#34;unary_op&#34;,
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -287,13 +283,14 @@ GxB_SPEC = GxB_SPEC
 
 def run_doctests(raise_on_error=False):
     from . import matrix
+    from . import vector
     from . import descriptor
     from . import base
     from . import gviz
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, descriptor, gviz, base):
+    for mod in (this, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )</code></pre>
@@ -359,19 +356,19 @@ def run_doctests(raise_on_error=False):
     numba_t = numba.boolean
 
     @classmethod
-    def _default_addop(self):
+    def _default_addop(self):  # pragma: nocover
         return self.LOR
 
     @classmethod
-    def _default_multop(self):
+    def _default_multop(self):  # pragma: nocover
         return self.LAND
 
     @classmethod
-    def _default_semiring(self):
+    def _default_semiring(self):  # pragma: nocover
         return self.LOR_LAND
 
     @classmethod
-    def format_value(cls, val, width=2):
+    def format_value(cls, val, width=2, prec=None):
         f = &#34;{:&gt;%s}&#34; % width
         if not isinstance(val, bool):
             return f.format(val)
@@ -771,7 +768,7 @@ def run_doctests(raise_on_error=False):
 <h3 class="caret">Static methods</h3>
 <dl class="nested active">
 <dt id="pygraphblas.BOOL.format_value"><code class="name flex">
-<span>def <span class="ident">format_value</span></span>(<span>val, width=2)</span>
+<span>def <span class="ident">format_value</span></span>(<span>val, width=2, prec=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -780,7 +777,7 @@ def run_doctests(raise_on_error=False):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def format_value(cls, val, width=2):
+def format_value(cls, val, width=2, prec=None):
     f = &#34;{:&gt;%s}&#34; % width
     if not isinstance(val, bool):
         return f.format(val)
@@ -1418,7 +1415,11 @@ def to_value(cls, cdata):
     gb_type = lib.GrB_FP32
     C = &#34;float&#34;
     typecode = &#34;f&#34;
-    numba_t = numba.float32</code></pre>
+    numba_t = numba.float32
+
+    @classmethod
+    def format_value(cls, val, width=2, prec=2):
+        return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
 </details>
 <h3 class="caret">Class variables</h3>
 <dl class="nested active">
@@ -2263,6 +2264,23 @@ def to_value(cls, cdata):
 <div class="desc"></div>
 </dd>
 </dl>
+<h3 class="caret">Static methods</h3>
+<dl class="nested active">
+<dt id="pygraphblas.FP32.format_value"><code class="name flex">
+<span>def <span class="ident">format_value</span></span>(<span>val, width=2, prec=2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def format_value(cls, val, width=2, prec=2):
+    return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 <dt id="pygraphblas.FP64"><code class="flex name class">
 <span>class <span class="ident">FP64</span></span>
@@ -2281,7 +2299,11 @@ def to_value(cls, cdata):
     gb_type = lib.GrB_FP64
     C = &#34;double&#34;
     typecode = &#34;d&#34;
-    numba_t = numba.float64</code></pre>
+    numba_t = numba.float64
+
+    @classmethod
+    def format_value(cls, val, width=2, prec=2):
+        return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
 </details>
 <h3 class="caret">Class variables</h3>
 <dl class="nested active">
@@ -3124,6 +3146,23 @@ def to_value(cls, cdata):
 <dt id="pygraphblas.FP64.zero"><code class="name">var <span class="ident">zero</span></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+</dl>
+<h3 class="caret">Static methods</h3>
+<dl class="nested active">
+<dt id="pygraphblas.FP64.format_value"><code class="name flex">
+<span>def <span class="ident">format_value</span></span>(<span>val, width=2, prec=2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def format_value(cls, val, width=2, prec=2):
+    return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -7054,6 +7093,28 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         return self.transpose()
 
+    @property
+    def M(self):
+        &#34;&#34;&#34;Return the structural &#34;mask&#34; pattern of this matrix.  See
+        `pattern()`.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|142      |  2
+              0  1  2
+        &gt;&gt;&gt; print(M.M)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
+
+        &#34;&#34;&#34;
+        return self.pattern()
+
     def dup(self):
         &#34;&#34;&#34;Create an duplicate Matrix.
 
@@ -7295,7 +7356,15 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|149      |  2
               0  1  2
         &gt;&gt;&gt; N = M.cast(types.FP32)
-        &gt;&gt;&gt; print(N.to_string(width=5))
+        &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+                  0    1    2
+            0|      42.0     |  0
+            1|          314.0|  1
+            2|149.0          |  2
+                  0    1    2
+
+        &gt;&gt;&gt; N = M.cast(types.FP64)
+        &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
                   0    1    2
             0|      42.0     |  0
             1|          314.0|  1
@@ -7315,16 +7384,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         accum=None,
         desc=Default,
     ):
-        &#34;&#34;&#34;Element-wise addition with other matrix.
+        &#34;&#34;&#34;Element-wise addition with other matrix
 
-        Element-wise addition applies a binary operator element-wise
-        on two matrices A and B, for all entries that appear in the
-        set intersection of the patterns of A and B.  Other operators
-        other than addition can be used.
-
-        The pattern of the result of the element-wise addition is
-        the set union of the pattern of A and B. Entries in neither in
-        A nor in B do not appear in the result.
+        Element-wise addition takes the set union of the patterns of A
+        and B and applies a binary operator for all entries that
+        appear in the set intersection of the patterns of A and B.
+        The default operators is the `PLUS` binary operator of the
+        output type.
 
         The only difference between element-wise multiplication and
         addition is the pattern of the result, and what happens to
@@ -7368,6 +7434,45 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2  3  4  5  6
 
         ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
+
+        This can also be accomplished with the `+` operators:
+
+        &gt;&gt;&gt; print(A + B)
+              0  1  2  3  4  5  6
+          0|     9     1         |  0
+          1|           1  2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                11   |  4
+          5|        8            |  5
+          6|        9 10 11  7   |  6
+              0  1  2  3  4  5  6
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        &gt;&gt;&gt; with types.INT64.MIN:
+        ...     print(A + B)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|           1  2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 4   |  4
+          5|        8            |  5
+          6|        9 10 11  7   |  6
+              0  1  2  3  4  5  6
+
+        The following operators default to use `eadd`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        A \\|  B | Matrix Union | type default SECOND combiner
+        A \\|= B | In-place Matrix Union | type default SECOND combiner
+        A +    B | Matrix Element-Wise Union | type default PLUS combiner
+        A +=   B | In-place Matrix Element-Wise Union | type default PLUS combiner
+        A -    B | Matrix Element-Wise Union | type default MINUS combiner
+        A -=   B | In-place Matrix Element-Wise Union | type default MINUS combiner
 
         &#34;&#34;&#34;
         if add_op is None:
@@ -7461,6 +7566,45 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2  3  4  5  6
 
         ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
+        This can also be accomplished with the `+` operators:
+
+        &gt;&gt;&gt; print(A * B)
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              2    12|  1
+          2|                     |  2
+          3|                     |  3
+          4|                     |  4
+          5|                     |  5
+          6|          70         |  6
+              0  1  2  3  4  5  6
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        &gt;&gt;&gt; with types.INT64.MIN:
+        ...     print(A * B)
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              1     3|  1
+          2|                     |  2
+          3|                     |  3
+          4|                     |  4
+          5|                     |  5
+          6|           7         |  6
+              0  1  2  3  4  5  6
+
+        The following operators default to using `emult`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        A &amp;    B | Matrix Intersection | type default SECOND combiner
+        A &amp;=   B | In-place Matrix Intersection | type default SECOND combiner
+        A *    B | Matrix Element-Wise Intersection | type default TIMES combiner
+        A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
+        A /    B | Matrix Element-Wise Intersection | type default DIV combiner
+        A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
         &#34;&#34;&#34;
         if mult_op is None:
@@ -7828,6 +7972,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|149      |  2
               0  1  2
 
+        &gt;&gt;&gt; print(M.apply(types.INT64.ABS))
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -8184,6 +8334,22 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|     6   |  2
               0  1  2
 
+        &gt;&gt;&gt; p = m.pattern() @ n
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        &gt;&gt;&gt; p = m @ n.pattern()
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
         By default, `mxm` and `@` create a new result matrix of the
         correct type and dimensions if one is not provided.  If you
         want to provide your own matrix to put the result in, you can
@@ -8237,6 +8403,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         Descriptors and accumulators can also be provided as an
         argument or a context manager:
+
+        &gt;&gt;&gt; descriptor.T0
+        &lt;Descriptor T0&gt;
 
         &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
         &gt;&gt;&gt; print(o)
@@ -8300,9 +8469,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         accum=None,
         desc=Default,
     ):
-        &#34;&#34;&#34;Matrix-matrix multiply.
+        &#34;&#34;&#34;Matrix-vector multiply.
 
-        Multiply this matrix by `other` vector.
+        Multiply this matrix by `other` column vector &#34;on the right&#34;.
+        For row vector multiplication &#34;on the left&#34; see `Vector.vxm`.
 
         See Section 9.6 in the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
@@ -8372,6 +8542,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; print(o)
         0|12
         1| 2
+        2| 6
+
+        &gt;&gt;&gt; del o[1]
+        &gt;&gt;&gt; o = m.mxv(v, mask=o)
+        &gt;&gt;&gt; print(o)
+        0| 3
+        1|
         2| 6
 
         &#34;&#34;&#34;
@@ -8930,7 +9107,93 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_wait(self._matrix))
 
-    def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
+    def to_markdown_table(self, title=&#34;A&#34;, width=2):
+        &#34;&#34;&#34;Return a string markdown table representation of the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+        &gt;&gt;&gt; print(M.to_markdown_table())
+        A|0|1|2
+        ---|---|---|---
+        0|   |42| 2
+        1|   |  | 0
+        2| 149|  |
+
+        &#34;&#34;&#34;
+        rows = set(self.rows)
+        cols = set(self.cols)
+        result = f&#34;&#34;&#34;\
+{title}|{&#39;|&#39;.join(map(str, cols))}
+---|{&#34;|&#34;.join([&#39;---&#39;] * len(cols))}
+&#34;&#34;&#34;
+        for i, row in enumerate(rows):
+            result += f&#34;{row}| &#34; + &#34;|&#34;.join(
+                self.type.format_value(self.get(row, col, &#34;&#34;), width) for col in cols
+            )
+            if i != len(rows) - 1:
+                result += &#34;\n&#34;
+        return result
+
+    def to_html_table(self, title=&#34;A&#34;, width=2):
+        &#34;&#34;&#34;Return a string markdown table representation of the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+        &gt;&gt;&gt; print(M.to_html_table())
+                &lt;table&gt;
+                    &lt;th&gt;A&lt;/th&gt;
+                        &lt;th&gt;0&lt;/th&gt;
+                        &lt;th&gt;1&lt;/th&gt;
+                        &lt;th&gt;2&lt;/th&gt;
+        &lt;BLANKLINE&gt;
+                    &lt;tr&gt;
+                    &lt;th&gt;0&lt;/th&gt;
+                        &lt;td&gt;  &lt;/td&gt;
+                        &lt;td&gt;42&lt;/td&gt;
+                        &lt;td&gt; 2&lt;/td&gt;
+                    &lt;/tr&gt;
+        &lt;BLANKLINE&gt;
+                    &lt;tr&gt;
+                    &lt;th&gt;1&lt;/th&gt;
+                        &lt;td&gt;  &lt;/td&gt;
+                        &lt;td&gt;  &lt;/td&gt;
+                        &lt;td&gt; 0&lt;/td&gt;
+                    &lt;/tr&gt;
+        &lt;BLANKLINE&gt;
+                    &lt;tr&gt;
+                    &lt;th&gt;2&lt;/th&gt;
+                        &lt;td&gt;149&lt;/td&gt;
+                        &lt;td&gt;  &lt;/td&gt;
+                        &lt;td&gt;  &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+        &#34;&#34;&#34;
+        from mako.template import Template
+
+        t = Template(
+            &#34;&#34;&#34;\
+        &lt;%
+            rows = set(A.rows)
+            cols = set(A.cols)
+        %&gt;&lt;table&gt;
+            &lt;th&gt;${title}&lt;/th&gt;
+            % for col in cols:
+                &lt;th&gt;${col}&lt;/th&gt;
+            % endfor
+            % for row in rows:
+                ${makerow(row)}
+            % endfor
+        &lt;/table&gt;&lt;%def name=&#34;makerow(row)&#34;&gt;
+            &lt;tr&gt;
+            &lt;th&gt;${row}&lt;/th&gt;
+            % for col in cols:
+                &lt;td&gt;${A.type.format_value(A.get(row, col, &#39;&#39;))}&lt;/td&gt;
+            % endfor
+            &lt;/tr&gt;&lt;/%def&gt;&#34;&#34;&#34;
+        )
+        return t.render(A=self, title=title)
+
+    def to_string(
+        self, format_string=&#34;{:&gt;%s}&#34;, width=3, prec=5, empty_char=&#34;&#34;, cell_sep=&#34;&#34;
+    ):
         &#34;&#34;&#34;Return a string representation of the Matrix.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
@@ -8948,7 +9211,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             result += format_string.format(row) + &#34;|&#34;
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
-                result += self.type.format_value(value, width)
+                result += cell_sep + self.type.format_value(value, width, prec)
             result += &#34;|  &#34; + str(row) + &#34;\n&#34;
         result += header
 
@@ -9429,6 +9692,52 @@ def sparse(cls, typ, nrows=None, ncols=None):
 </dl>
 <h3 class="caret">Instance variables</h3>
 <dl class="nested active">
+<dt id="pygraphblas.Matrix.M"><code class="name">var <span class="ident">M</span></code></dt>
+<dd>
+<div class="desc"><p>Return the structural "mask" pattern of this matrix.
+See
+<code>pattern()</code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|    42   |  0
+  1|      314|  1
+  2|142      |  2
+      0  1  2
+&gt;&gt;&gt; print(M.M)
+      0  1  2
+  0|     t   |  0
+  1|        t|  1
+  2|  t      |  2
+      0  1  2
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def M(self):
+    &#34;&#34;&#34;Return the structural &#34;mask&#34; pattern of this matrix.  See
+    `pattern()`.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|    42   |  0
+      1|      314|  1
+      2|142      |  2
+          0  1  2
+    &gt;&gt;&gt; print(M.M)
+          0  1  2
+      0|     t   |  0
+      1|        t|  1
+      2|  t      |  2
+          0  1  2
+
+    &#34;&#34;&#34;
+    return self.pattern()</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Matrix.T"><code class="name">var <span class="ident">T</span></code></dt>
 <dd>
 <div class="desc"><p>Compute transpose of the Matrix.
@@ -9795,6 +10104,13 @@ def vals(self):
   1|        0|  1
   2|149      |  2
       0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.apply(types.INT64.ABS))
+      0  1  2
+  0|    42   |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -9811,6 +10127,12 @@ def vals(self):
       2|149      |  2
           0  1  2
 
+    &gt;&gt;&gt; print(M.apply(types.INT64.ABS))
+          0  1  2
+      0|    42   |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -10292,7 +10614,15 @@ new matrix is of the cast type is created.</p>
   2|149      |  2
       0  1  2
 &gt;&gt;&gt; N = M.cast(types.FP32)
-&gt;&gt;&gt; print(N.to_string(width=5))
+&gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+          0    1    2
+    0|      42.0     |  0
+    1|          314.0|  1
+    2|149.0          |  2
+          0    1    2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; N = M.cast(types.FP64)
+&gt;&gt;&gt; print(N.to_string(width=5, prec=4))
           0    1    2
     0|      42.0     |  0
     1|          314.0|  1
@@ -10315,7 +10645,15 @@ new matrix is of the cast type is created.</p>
       2|149      |  2
           0  1  2
     &gt;&gt;&gt; N = M.cast(types.FP32)
-    &gt;&gt;&gt; print(N.to_string(width=5))
+    &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+              0    1    2
+        0|      42.0     |  0
+        1|          314.0|  1
+        2|149.0          |  2
+              0    1    2
+
+    &gt;&gt;&gt; N = M.cast(types.FP64)
+    &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
               0    1    2
         0|      42.0     |  0
         1|          314.0|  1
@@ -10468,15 +10806,12 @@ True
 <span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Element-wise addition with other matrix.</p>
-<p>Element-wise addition applies a binary operator element-wise
-on two matrices A and B, for all entries that appear in the
-set intersection of the patterns of A and B.
-Other operators
-other than addition can be used.</p>
-<p>The pattern of the result of the element-wise addition is
-the set union of the pattern of A and B. Entries in neither in
-A nor in B do not appear in the result.</p>
+<div class="desc"><p>Element-wise addition with other matrix</p>
+<p>Element-wise addition takes the set union of the patterns of A
+and B and applies a binary operator for all entries that
+appear in the set intersection of the patterns of A and B.
+The default operators is the <code>PLUS</code> binary operator of the
+output type.</p>
 <p>The only difference between element-wise multiplication and
 addition is the pattern of the result, and what happens to
 entries outside the intersection. With multiplication the
@@ -10515,7 +10850,80 @@ interchangeably for either operation.</p>
   6|        9 10 11  7   |  6
       0  1  2  3  4  5  6
 </code></pre>
-<p><img alt="Matrix_eadd_C.png" src="../imgs/Matrix_eadd_C.png"></p></div>
+<p><img alt="Matrix_eadd_C.png" src="../imgs/Matrix_eadd_C.png"></p>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(A + B)
+      0  1  2  3  4  5  6
+  0|     9     1         |  0
+  1|           1  2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                11   |  4
+  5|        8            |  5
+  6|        9 10 11  7   |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN:
+...     print(A + B)
+      0  1  2  3  4  5  6
+  0|     0     1         |  0
+  1|           1  2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                 4   |  4
+  5|        8            |  5
+  6|        9 10 11  7   |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The following operators default to use <code>eadd</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A |
+B</td>
+<td>Matrix Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A |= B</td>
+<td>In-place Matrix Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A +
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A +=
+B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A -
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>A -=
+B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+</tbody>
+</table></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10530,16 +10938,13 @@ interchangeably for either operation.</p>
     accum=None,
     desc=Default,
 ):
-    &#34;&#34;&#34;Element-wise addition with other matrix.
+    &#34;&#34;&#34;Element-wise addition with other matrix
 
-    Element-wise addition applies a binary operator element-wise
-    on two matrices A and B, for all entries that appear in the
-    set intersection of the patterns of A and B.  Other operators
-    other than addition can be used.
-
-    The pattern of the result of the element-wise addition is
-    the set union of the pattern of A and B. Entries in neither in
-    A nor in B do not appear in the result.
+    Element-wise addition takes the set union of the patterns of A
+    and B and applies a binary operator for all entries that
+    appear in the set intersection of the patterns of A and B.
+    The default operators is the `PLUS` binary operator of the
+    output type.
 
     The only difference between element-wise multiplication and
     addition is the pattern of the result, and what happens to
@@ -10583,6 +10988,45 @@ interchangeably for either operation.</p>
           0  1  2  3  4  5  6
 
     ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(A + B)
+          0  1  2  3  4  5  6
+      0|     9     1         |  0
+      1|           1  2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                11   |  4
+      5|        8            |  5
+      6|        9 10 11  7   |  6
+          0  1  2  3  4  5  6
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MIN:
+    ...     print(A + B)
+          0  1  2  3  4  5  6
+      0|     0     1         |  0
+      1|           1  2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                 4   |  4
+      5|        8            |  5
+      6|        9 10 11  7   |  6
+          0  1  2  3  4  5  6
+
+    The following operators default to use `eadd`:
+
+    Operator | Description | Default
+    --- | --- | ---
+    A \\|  B | Matrix Union | type default SECOND combiner
+    A \\|= B | In-place Matrix Union | type default SECOND combiner
+    A +    B | Matrix Element-Wise Union | type default PLUS combiner
+    A +=   B | In-place Matrix Element-Wise Union | type default PLUS combiner
+    A -    B | Matrix Element-Wise Union | type default MINUS combiner
+    A -=   B | In-place Matrix Element-Wise Union | type default MINUS combiner
 
     &#34;&#34;&#34;
     if add_op is None:
@@ -10664,7 +11108,81 @@ interchangeably for either operation.</p>
   6|          70         |  6
       0  1  2  3  4  5  6
 </code></pre>
-<p><img alt="Matrix_emult_C.png" src="../imgs/Matrix_emult_C.png"></p></div>
+<p><img alt="Matrix_emult_C.png" src="../imgs/Matrix_emult_C.png"></p>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(A * B)
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              2    12|  1
+  2|                     |  2
+  3|                     |  3
+  4|                     |  4
+  5|                     |  5
+  6|          70         |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN:
+...     print(A * B)
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              1     3|  1
+  2|                     |  2
+  3|                     |  3
+  4|                     |  4
+  5|                     |  5
+  6|           7         |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The following operators default to using <code>emult</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A &amp;
+B</td>
+<td>Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A &amp;=
+B</td>
+<td>In-place Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A *
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A *=
+B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A /
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+<tr>
+<td>A /=
+B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+</tbody>
+</table></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -10732,6 +11250,45 @@ interchangeably for either operation.</p>
           0  1  2  3  4  5  6
 
     ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(A * B)
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              2    12|  1
+      2|                     |  2
+      3|                     |  3
+      4|                     |  4
+      5|                     |  5
+      6|          70         |  6
+          0  1  2  3  4  5  6
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MIN:
+    ...     print(A * B)
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              1     3|  1
+      2|                     |  2
+      3|                     |  3
+      4|                     |  4
+      5|                     |  5
+      6|           7         |  6
+          0  1  2  3  4  5  6
+
+    The following operators default to using `emult`:
+
+    Operator | Description | Default
+    --- | --- | ---
+    A &amp;    B | Matrix Intersection | type default SECOND combiner
+    A &amp;=   B | In-place Matrix Intersection | type default SECOND combiner
+    A *    B | Matrix Element-Wise Intersection | type default TIMES combiner
+    A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
+    A /    B | Matrix Element-Wise Intersection | type default DIV combiner
+    A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
     &#34;&#34;&#34;
     if mult_op is None:
@@ -11168,6 +11725,22 @@ for details.</p>
   2|     6   |  2
       0  1  2
 </code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; p = m.pattern() @ n
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        3|  0
+  1|  8      |  1
+  2|     6   |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; p = m @ n.pattern()
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|        3|  0
+  1|  8      |  1
+  2|     6   |  2
+      0  1  2
+</code></pre>
 <p>By default, <code>mxm</code> and <code>@</code> create a new result matrix of the
 correct type and dimensions if one is not provided.
 If you
@@ -11223,6 +11796,9 @@ with a context manager:</p>
 </code></pre>
 <p>Descriptors and accumulators can also be provided as an
 argument or a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; descriptor.T0
+&lt;Descriptor T0&gt;
+</code></pre>
 <pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
 &gt;&gt;&gt; print(o)
       0  1  2
@@ -11299,6 +11875,22 @@ and <code>emult</code>.</p></div>
       2|     6   |  2
           0  1  2
 
+    &gt;&gt;&gt; p = m.pattern() @ n
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        3|  0
+      1|  8      |  1
+      2|     6   |  2
+          0  1  2
+
+    &gt;&gt;&gt; p = m @ n.pattern()
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|        3|  0
+      1|  8      |  1
+      2|     6   |  2
+          0  1  2
+
     By default, `mxm` and `@` create a new result matrix of the
     correct type and dimensions if one is not provided.  If you
     want to provide your own matrix to put the result in, you can
@@ -11352,6 +11944,9 @@ and <code>emult</code>.</p></div>
 
     Descriptors and accumulators can also be provided as an
     argument or a context manager:
+
+    &gt;&gt;&gt; descriptor.T0
+    &lt;Descriptor T0&gt;
 
     &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
     &gt;&gt;&gt; print(o)
@@ -11410,8 +12005,9 @@ and <code>emult</code>.</p></div>
 <span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Matrix-matrix multiply.</p>
-<p>Multiply this matrix by <code>other</code> vector.</p>
+<div class="desc"><p>Matrix-vector multiply.</p>
+<p>Multiply this matrix by <code>other</code> column vector "on the right".
+For row vector multiplication "on the left" see <code><a title="pygraphblas.Vector.vxm" href="#pygraphblas.Vector.vxm">Vector.vxm()</a></code>.</p>
 <p>See Section 9.6 in the <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse User
 Guide</a>
 for details.</p>
@@ -11479,6 +12075,13 @@ argument or a context manager:</p>
 0|12
 1| 2
 2| 6
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; del o[1]
+&gt;&gt;&gt; o = m.mxv(v, mask=o)
+&gt;&gt;&gt; print(o)
+0| 3
+1|
+2| 6
 </code></pre></div>
 <details class="source">
 <summary>
@@ -11494,9 +12097,10 @@ argument or a context manager:</p>
     accum=None,
     desc=Default,
 ):
-    &#34;&#34;&#34;Matrix-matrix multiply.
+    &#34;&#34;&#34;Matrix-vector multiply.
 
-    Multiply this matrix by `other` vector.
+    Multiply this matrix by `other` column vector &#34;on the right&#34;.
+    For row vector multiplication &#34;on the left&#34; see `Vector.vxm`.
 
     See Section 9.6 in the [SuiteSparse User
     Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
@@ -11566,6 +12170,13 @@ argument or a context manager:</p>
     &gt;&gt;&gt; print(o)
     0|12
     1| 2
+    2| 6
+
+    &gt;&gt;&gt; del o[1]
+    &gt;&gt;&gt; o = m.mxv(v, mask=o)
+    &gt;&gt;&gt; print(o)
+    0| 3
+    1|
     2| 6
 
     &#34;&#34;&#34;
@@ -12172,6 +12783,104 @@ Can be a string mapping to following operators:</p>
     )</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Matrix.to_html_table"><code class="name flex">
+<span>def <span class="ident">to_html_table</span></span>(<span>self, title='A', width=2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a string markdown table representation of the Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+&gt;&gt;&gt; print(M.to_html_table())
+        &lt;table&gt;
+            &lt;th&gt;A&lt;/th&gt;
+                &lt;th&gt;0&lt;/th&gt;
+                &lt;th&gt;1&lt;/th&gt;
+                &lt;th&gt;2&lt;/th&gt;
+&lt;BLANKLINE&gt;
+            &lt;tr&gt;
+            &lt;th&gt;0&lt;/th&gt;
+                &lt;td&gt;  &lt;/td&gt;
+                &lt;td&gt;42&lt;/td&gt;
+                &lt;td&gt; 2&lt;/td&gt;
+            &lt;/tr&gt;
+&lt;BLANKLINE&gt;
+            &lt;tr&gt;
+            &lt;th&gt;1&lt;/th&gt;
+                &lt;td&gt;  &lt;/td&gt;
+                &lt;td&gt;  &lt;/td&gt;
+                &lt;td&gt; 0&lt;/td&gt;
+            &lt;/tr&gt;
+&lt;BLANKLINE&gt;
+            &lt;tr&gt;
+            &lt;th&gt;2&lt;/th&gt;
+                &lt;td&gt;149&lt;/td&gt;
+                &lt;td&gt;  &lt;/td&gt;
+                &lt;td&gt;  &lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_html_table(self, title=&#34;A&#34;, width=2):
+    &#34;&#34;&#34;Return a string markdown table representation of the Matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+    &gt;&gt;&gt; print(M.to_html_table())
+            &lt;table&gt;
+                &lt;th&gt;A&lt;/th&gt;
+                    &lt;th&gt;0&lt;/th&gt;
+                    &lt;th&gt;1&lt;/th&gt;
+                    &lt;th&gt;2&lt;/th&gt;
+    &lt;BLANKLINE&gt;
+                &lt;tr&gt;
+                &lt;th&gt;0&lt;/th&gt;
+                    &lt;td&gt;  &lt;/td&gt;
+                    &lt;td&gt;42&lt;/td&gt;
+                    &lt;td&gt; 2&lt;/td&gt;
+                &lt;/tr&gt;
+    &lt;BLANKLINE&gt;
+                &lt;tr&gt;
+                &lt;th&gt;1&lt;/th&gt;
+                    &lt;td&gt;  &lt;/td&gt;
+                    &lt;td&gt;  &lt;/td&gt;
+                    &lt;td&gt; 0&lt;/td&gt;
+                &lt;/tr&gt;
+    &lt;BLANKLINE&gt;
+                &lt;tr&gt;
+                &lt;th&gt;2&lt;/th&gt;
+                    &lt;td&gt;149&lt;/td&gt;
+                    &lt;td&gt;  &lt;/td&gt;
+                    &lt;td&gt;  &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+    &#34;&#34;&#34;
+    from mako.template import Template
+
+    t = Template(
+        &#34;&#34;&#34;\
+    &lt;%
+        rows = set(A.rows)
+        cols = set(A.cols)
+    %&gt;&lt;table&gt;
+        &lt;th&gt;${title}&lt;/th&gt;
+        % for col in cols:
+            &lt;th&gt;${col}&lt;/th&gt;
+        % endfor
+        % for row in rows:
+            ${makerow(row)}
+        % endfor
+    &lt;/table&gt;&lt;%def name=&#34;makerow(row)&#34;&gt;
+        &lt;tr&gt;
+        &lt;th&gt;${row}&lt;/th&gt;
+        % for col in cols:
+            &lt;td&gt;${A.type.format_value(A.get(row, col, &#39;&#39;))}&lt;/td&gt;
+        % endfor
+        &lt;/tr&gt;&lt;/%def&gt;&#34;&#34;&#34;
+    )
+    return t.render(A=self, title=title)</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Matrix.to_lists"><code class="name flex">
 <span>def <span class="ident">to_lists</span></span>(<span>self)</span>
 </code></dt>
@@ -12200,6 +12909,50 @@ Can be a string mapping to following operators:</p>
     n[0] = self.nvals
     self._check(self.type._Matrix_extractTuples(I, J, V, n, self._matrix[0]))
     return [list(I), list(J), list(map(self.type.to_value, V))]</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.to_markdown_table"><code class="name flex">
+<span>def <span class="ident">to_markdown_table</span></span>(<span>self, title='A', width=2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a string markdown table representation of the Matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+&gt;&gt;&gt; print(M.to_markdown_table())
+A|0|1|2
+---|---|---|---
+0|   |42| 2
+1|   |  | 0
+2| 149|  |
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def to_markdown_table(self, title=&#34;A&#34;, width=2):
+        &#34;&#34;&#34;Return a string markdown table representation of the Matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+        &gt;&gt;&gt; print(M.to_markdown_table())
+        A|0|1|2
+        ---|---|---|---
+        0|   |42| 2
+        1|   |  | 0
+        2| 149|  |
+
+        &#34;&#34;&#34;
+        rows = set(self.rows)
+        cols = set(self.cols)
+        result = f&#34;&#34;&#34;\
+{title}|{&#39;|&#39;.join(map(str, cols))}
+---|{&#34;|&#34;.join([&#39;---&#39;] * len(cols))}
+&#34;&#34;&#34;
+        for i, row in enumerate(rows):
+            result += f&#34;{row}| &#34; + &#34;|&#34;.join(
+                self.type.format_value(self.get(row, col, &#34;&#34;), width) for col in cols
+            )
+            if i != len(rows) - 1:
+                result += &#34;\n&#34;
+        return result</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.to_mm"><code class="name flex">
@@ -12277,7 +13030,7 @@ array([[  0,  42,   0],
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.to_string"><code class="name flex">
-<span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=3, empty_char='')</span>
+<span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=3, prec=5, empty_char='', cell_sep='')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a string representation of the Matrix.</p>
@@ -12289,7 +13042,9 @@ array([[  0,  42,   0],
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=3, empty_char=&#34;&#34;):
+<pre><code class="python">def to_string(
+    self, format_string=&#34;{:&gt;%s}&#34;, width=3, prec=5, empty_char=&#34;&#34;, cell_sep=&#34;&#34;
+):
     &#34;&#34;&#34;Return a string representation of the Matrix.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
@@ -12307,7 +13062,7 @@ array([[  0,  42,   0],
         result += format_string.format(row) + &#34;|&#34;
         for col in range(self.ncols):
             value = self.get(row, col, empty_char)
-            result += self.type.format_value(value, width)
+            result += cell_sep + self.type.format_value(value, width, prec)
         result += &#34;|  &#34; + str(row) + &#34;\n&#34;
     result += header
 
@@ -16014,7 +16769,144 @@ def nvals(self):
 </code></dt>
 <dd>
 <div class="desc"><p>GraphBLAS Sparse Vector</p>
-<p>This is a high-level wrapper around the low-level GrB_Vector type.</p></div>
+<p>This is a high-level wrapper around the low-level GrB_Vector type.</p>
+<p>A Vector supports many possible operations according to the
+GraphBLAS API.
+Many of those operations have overloaded
+operators.</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v @
+A</td>
+<td>Vector Vector Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>v @=
+A</td>
+<td>In-place Vector Vector Multiplication</td>
+<td>type default PLUS_TIMES semiring</td>
+</tr>
+<tr>
+<td>v |
+w</td>
+<td>Vector Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v |= w</td>
+<td>In-place Vector Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v &amp;
+w</td>
+<td>Vector Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v &amp;=
+w</td>
+<td>In-place Vector Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v +
+w</td>
+<td>Vector Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>v +=
+w</td>
+<td>In-place Vector Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>v -
+w</td>
+<td>Vector Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>v -=
+w</td>
+<td>In-place Vector Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>v *
+w</td>
+<td>Vector Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>v *=
+w</td>
+<td>In-place Vector Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>v /
+w</td>
+<td>Vector Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+<tr>
+<td>v /=
+w</td>
+<td>In-place Vector Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+<tr>
+<td>v ==
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default EQ operator</td>
+</tr>
+<tr>
+<td>v !=
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default NE operator</td>
+</tr>
+<tr>
+<td>v &lt;
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default LT operator</td>
+</tr>
+<tr>
+<td>v &gt;
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default GT operator</td>
+</tr>
+<tr>
+<td>v &lt;=
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default LE operator</td>
+</tr>
+<tr>
+<td>v &gt;=
+w</td>
+<td>Compare Element-Wise Union</td>
+<td>type default GE operator</td>
+</tr>
+</tbody>
+</table>
+<p>Note that all the above operator syntax is mearly sugar over
+various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">Matrix.mxv()</a></code>, <code><a title="pygraphblas.Vector.vxm" href="#pygraphblas.Vector.vxm">Vector.vxm()</a></code>,
+<code><a title="pygraphblas.Vector.eadd" href="#pygraphblas.Vector.eadd">Vector.eadd()</a></code>, and <code><a title="pygraphblas.Vector.emult" href="#pygraphblas.Vector.emult">Vector.emult()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -16024,6 +16916,37 @@ def nvals(self):
 
     This is a high-level wrapper around the low-level GrB_Vector type.
 
+    A Vector supports many possible operations according to the
+    GraphBLAS API.  Many of those operations have overloaded
+    operators.
+
+    Operator | Description | Default
+    --- | --- | ---
+    v @    A | Vector Vector Multiplication | type default PLUS_TIMES semiring
+    v @=   A | In-place Vector Vector Multiplication | type default PLUS_TIMES semiring
+    v \\|  w | Vector Union | type default SECOND combiner
+    v \\|= w | In-place Vector Union | type default SECOND combiner
+    v &amp;    w | Vector Intersection | type default SECOND combiner
+    v &amp;=   w | In-place Vector Intersection | type default SECOND combiner
+    v +    w | Vector Element-Wise Union | type default PLUS combiner
+    v +=   w | In-place Vector Element-Wise Union | type default PLUS combiner
+    v -    w | Vector Element-Wise Union | type default MINUS combiner
+    v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
+    v *    w | Vector Element-Wise Intersection | type default TIMES combiner
+    v *=   w | In-place Vector Element-Wise Intersection | type default TIMES combiner
+    v /    w | Vector Element-Wise Intersection | type default DIV combiner
+    v /=   w | In-place Vector Element-Wise Intersection | type default DIV combiner
+    v ==   w | Compare Element-Wise Union | type default EQ operator
+    v !=   w | Compare Element-Wise Union | type default NE operator
+    v &lt;    w | Compare Element-Wise Union | type default LT operator
+    v &gt;    w | Compare Element-Wise Union | type default GT operator
+    v &lt;=   w | Compare Element-Wise Union | type default LE operator
+    v &gt;=   w | Compare Element-Wise Union | type default GE operator
+
+    Note that all the above operator syntax is mearly sugar over
+    various combinations of calling `Matrix.mxv`, `Vector.vxm`,
+    `Vector.eadd`, and `Vector.emult`.
+
     &#34;&#34;&#34;
 
     __slots__ = (&#34;_vector&#34;, &#34;type&#34;, &#34;_keep_alives&#34;)
@@ -16031,7 +16954,7 @@ def nvals(self):
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError
+                raise KeyError  # pragma: nocover
 
             error_string = ffi.new(&#34;char**&#34;)
             lib.GrB_Vector_error(error_string, self._vector[0])
@@ -16063,7 +16986,17 @@ def nvals(self):
         return zip(I, X)
 
     def iseq(self, other, eq_op=None):
-        &#34;&#34;&#34;Compare two vectors for equality.&#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two vectors for equality.
+
+        Note to be confused with the `==` operator which does
+        element-wise comparison and returns a `Vector`.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+        &gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+        &gt;&gt;&gt; v.iseq(w)
+        True
+
+        &#34;&#34;&#34;
         if eq_op is None:
             eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         result = ffi.new(&#34;_Bool*&#34;)
@@ -16073,7 +17006,16 @@ def nvals(self):
         return result[0]
 
     def isne(self, other):
-        &#34;&#34;&#34;Compare two vectors for inequality.&#34;&#34;&#34;
+        &#34;&#34;&#34;Compare two vectors for inequality.
+        Note to be confused with the `==` operator which does
+        element-wise comparison and returns a `Vector`.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+        &gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+        &gt;&gt;&gt; v.isne(w)
+        False
+
+        &#34;&#34;&#34;
         return not self.iseq(other)
 
     @classmethod
@@ -16248,19 +17190,74 @@ def nvals(self):
         &#34;&#34;&#34;Element-wise addition with other vector.
 
         Element-wise addition applies a binary operator element-wise
-        on two vectors A and B, for all entries that appear in the set
-        intersection of the patterns of A and B.  Other operators
-        other than addition can be used.
+        on two vectors `v` and `w`, for all entries that appear in the
+        set union of the patterns of `A` and `B`.
 
-        The pattern of the result of the element-wise addition is
-        the set union of the pattern of A and B. Entries in neither in
-        A nor in B do not appear in the result.
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
+        &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        &gt;&gt;&gt; V = list(range(len(I)))
+        &gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+
+        &gt;&gt;&gt; w = Vector.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [9, 1, 4, 7], 7)
+
+        &gt;&gt;&gt; print(v.eadd(w))
+        0|10
+        1| 4
+        2| 4
+        3| 6
+        4|11
+        5| 8
+        6|18
+
+        This can also be accomplished with the `+` operators:
+
+        &gt;&gt;&gt; print(v + w)
+        0|10
+        1| 4
+        2| 4
+        3| 6
+        4|11
+        5| 8
+        6|18
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        &gt;&gt;&gt; with types.INT64.MIN:
+        ...     print(v + w)
+        0| 1
+        1| 1
+        2| 4
+        3| 6
+        4| 4
+        5| 8
+        6| 7
+
+        The following operators default to use `eadd`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        v \\|  w | Vector Union | type default SECOND combiner
+        v \\|= w | In-place Vector Union | type default SECOND combiner
+        v +    w | Vector Element-Wise Union | type default PLUS combiner
+        v +=   w | In-place Vector Element-Wise Union | type default PLUS combiner
+        v -    w | Vector Element-Wise Union | type default MINUS combiner
+        v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
 
         &#34;&#34;&#34;
         if add_op is None:
             add_op = current_binop.get(NULL)
-        elif isinstance(add_op, str):
-            add_op = _get_bin_op(add_op, self.type)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -16301,11 +17298,59 @@ def nvals(self):
         Element-wise multiplication applies a binary operator
         element-wise on two vectors A and B, for all entries that
         appear in the set intersection of the patterns of A and B.
-        Other operators other than addition can be used.
 
-        The pattern of the result of the element-wise multiplication
-        is exactly this set intersection. Entries in A but not B, or
-        visa versa, do not appear in the result.
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
+        &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        &gt;&gt;&gt; V = list(range(len(I)))
+        &gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+
+        &gt;&gt;&gt; w = Vector.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [9, 1, 4, 7], 7)
+
+        &gt;&gt;&gt; print(v.emult(w))
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        This can also be accomplished with the `+` operators:
+
+        &gt;&gt;&gt; print(v * w)
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        &gt;&gt;&gt; with types.INT64.MAX:
+        ...     print(v * w)
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        The following operators default to use `eadd`:
 
         &#34;&#34;&#34;
         if mult_op is None:
@@ -16347,7 +17392,96 @@ def nvals(self):
         accum=None,
         desc=Default,
     ):
-        &#34;&#34;&#34;Vector-Matrix multiply.&#34;&#34;&#34;
+        &#34;&#34;&#34;Vector-Matrix multiply.
+
+
+        Multiply this row vector by `other` matrix &#34;on the left&#34;.  For
+        column matrix/vector multiplication &#34;on the right&#34; see
+        `Matrix.mxv`.
+
+        `vxm` can also be called directly or with the `@` operator:
+
+        &gt;&gt;&gt; from . import Matrix
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        &gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+        &gt;&gt;&gt; o = v.vxm(M)
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+        &gt;&gt;&gt; o = v @ M
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+
+        By default, `mxv` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.  This is also supported by the `@=` syntax:
+
+        &gt;&gt;&gt; o = v.dup()
+        &gt;&gt;&gt; v.vxm(M, accum=types.INT64.PLUS, out=o) is o
+        True
+        &gt;&gt;&gt; print(o)
+        0|14
+        1| 5
+        2|10
+
+        &gt;&gt;&gt; o = v.dup()
+        &gt;&gt;&gt; with Accum(types.INT64.MIN):
+        ...     o @= M
+        &gt;&gt;&gt; print(o)
+        0| 2
+        1| 2
+        2| 4
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        &gt;&gt;&gt; o = v.vxm(M, semiring=types.INT64.MIN_PLUS)
+        &gt;&gt;&gt; print(o)
+        0| 7
+        1| 3
+        2| 5
+
+        &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+        ...     o = v @ M
+        &gt;&gt;&gt; print(o)
+        0| 7
+        1| 3
+        2| 5
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        &gt;&gt;&gt; o = v.vxm(M, desc=descriptor.T0)
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+
+        &gt;&gt;&gt; with descriptor.T0:
+        ...     o = v @ M
+        &gt;&gt;&gt; print(o)
+        0|12
+        1| 2
+        2| 6
+
+        &gt;&gt;&gt; del o[1]
+        &gt;&gt;&gt; o = v.vxm(M, mask=o)
+        &gt;&gt;&gt; print(o)
+        0|12
+        1|
+        2| 6
+
+        &#34;&#34;&#34;
 
         if semiring is None:
             semiring = current_semiring.get(NULL)
@@ -16406,7 +17540,7 @@ def nvals(self):
     def __radd__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.PLUS)
-        return other.eadd(self)
+        return other.eadd(self)  # pragma: nocover
 
     def __iadd__(self, other):
         if not isinstance(other, Vector):
@@ -16421,7 +17555,7 @@ def nvals(self):
     def __rsub__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.MINUS)
-        return other.eadd(self, self.type.MINUS)
+        return other.eadd(self, self.type.MINUS)  # pragma: nocover
 
     def __isub__(self, other):
         if not isinstance(other, Vector):
@@ -16431,32 +17565,32 @@ def nvals(self):
     def __mul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.TIMES, other)
-        return self.eadd(other, self.type.TIMES)
+        return self.emult(other, self.type.TIMES)
 
     def __rmul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.TIMES)
-        return other.eadd(self, add_op=self.type.TIMES)
+        return other.emult(self, add_op=self.type.TIMES)  # pragma: nocover
 
     def __imul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.TIMES, other, out=self)
-        return other.eadd(self, self.type.TIMES, out=self)
+        return other.emult(self, self.type.TIMES, out=self)
 
     def __truediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.DIV, other)
-        return self.eadd(other, self.type.DIV)
+        return self.emult(other, self.type.DIV)
 
     def __rtruediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.DIV)
-        return other.eadd(self, self.type.DIV)
+        return other.emult(self, self.type.DIV)  # pragma: nocover
 
     def __itruediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.DIV, other, out=self)
-        return other.eadd(self, self.type.DIV, out=self)
+        return other.emult(self, self.type.DIV, out=self)
 
     def __invert__(self):
         return self.apply(self.type.MINV)
@@ -16713,7 +17847,18 @@ def nvals(self):
             return False
 
     def get(self, i, default=None):
-        &#34;&#34;&#34;Get element at `i` or return `default` if not present.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get element at `i` or return `default` if not present.
+
+
+        &gt;&gt;&gt; M = Vector.from_lists([1, 2], [42, 149])
+        &gt;&gt;&gt; M.get(1)
+        42
+        &gt;&gt;&gt; M.get(0) is None
+        True
+        &gt;&gt;&gt; M.get(0, &#39;foo&#39;)
+        &#39;foo&#39;
+
+        &#34;&#34;&#34;
         try:
             return self[i]
         except NoValue:
@@ -16723,7 +17868,7 @@ def nvals(self):
         &#34;&#34;&#34;Wait for vector to complete.&#34;&#34;&#34;
         self._check(lib.GrB_Vector_wait(self._vector))
 
-    def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=2, empty_char=&#34;&#34;):
+    def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=2, prec=3, empty_char=&#34;&#34;):
         &#34;&#34;&#34;Return string representation of vector.&#34;&#34;&#34;
         format_string = format_string % width
         result = &#34;&#34;
@@ -16731,7 +17876,7 @@ def nvals(self):
             value = self.get(row, empty_char)
             result += str(row) + &#34;|&#34;
             result += format_string.format(
-                self.type.format_value(value, width)
+                self.type.format_value(value, width, prec)
             ).rstrip()
             if row &lt; self.size - 1:
                 result += &#34;\n&#34;
@@ -17082,13 +18227,103 @@ to a scalar second.</p></div>
 <dd>
 <div class="desc"><p>Element-wise addition with other vector.</p>
 <p>Element-wise addition applies a binary operator element-wise
-on two vectors A and B, for all entries that appear in the set
-intersection of the patterns of A and B.
-Other operators
-other than addition can be used.</p>
-<p>The pattern of the result of the element-wise addition is
-the set union of the pattern of A and B. Entries in neither in
-A nor in B do not appear in the result.</p></div>
+on two vectors <code>v</code> and <code>w</code>, for all entries that appear in the
+set union of the patterns of <code>A</code> and <code>B</code>.</p>
+<p>The only difference between element-wise multiplication and
+addition is the pattern of the result, and what happens to
+entries outside the intersection. With multiplication the
+pattern of T is the intersection; with addition it is the set
+union. Entries outside the set intersection are dropped for
+multiplication, and kept for addition; in both cases the
+operator is only applied to those (and only those) entries in
+the intersection. Any binary operator can be used
+interchangeably for either operation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; V = list(range(len(I)))
+&gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; w = Vector.from_lists(
+...    [0, 1, 4, 6],
+...    [9, 1, 4, 7], 7)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(v.eadd(w))
+0|10
+1| 4
+2| 4
+3| 6
+4|11
+5| 8
+6|18
+</code></pre>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(v + w)
+0|10
+1| 4
+2| 4
+3| 6
+4|11
+5| 8
+6|18
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN:
+...     print(v + w)
+0| 1
+1| 1
+2| 4
+3| 6
+4| 4
+5| 8
+6| 7
+</code></pre>
+<p>The following operators default to use <code>eadd</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v |
+w</td>
+<td>Vector Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v |= w</td>
+<td>In-place Vector Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>v +
+w</td>
+<td>Vector Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>v +=
+w</td>
+<td>In-place Vector Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>v -
+w</td>
+<td>Vector Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>v -=
+w</td>
+<td>In-place Vector Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+</tbody>
+</table></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -17106,19 +18341,74 @@ A nor in B do not appear in the result.</p></div>
     &#34;&#34;&#34;Element-wise addition with other vector.
 
     Element-wise addition applies a binary operator element-wise
-    on two vectors A and B, for all entries that appear in the set
-    intersection of the patterns of A and B.  Other operators
-    other than addition can be used.
+    on two vectors `v` and `w`, for all entries that appear in the
+    set union of the patterns of `A` and `B`.
 
-    The pattern of the result of the element-wise addition is
-    the set union of the pattern of A and B. Entries in neither in
-    A nor in B do not appear in the result.
+    The only difference between element-wise multiplication and
+    addition is the pattern of the result, and what happens to
+    entries outside the intersection. With multiplication the
+    pattern of T is the intersection; with addition it is the set
+    union. Entries outside the set intersection are dropped for
+    multiplication, and kept for addition; in both cases the
+    operator is only applied to those (and only those) entries in
+    the intersection. Any binary operator can be used
+    interchangeably for either operation.
+
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; V = list(range(len(I)))
+    &gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+
+    &gt;&gt;&gt; w = Vector.from_lists(
+    ...    [0, 1, 4, 6],
+    ...    [9, 1, 4, 7], 7)
+
+    &gt;&gt;&gt; print(v.eadd(w))
+    0|10
+    1| 4
+    2| 4
+    3| 6
+    4|11
+    5| 8
+    6|18
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(v + w)
+    0|10
+    1| 4
+    2| 4
+    3| 6
+    4|11
+    5| 8
+    6|18
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MIN:
+    ...     print(v + w)
+    0| 1
+    1| 1
+    2| 4
+    3| 6
+    4| 4
+    5| 8
+    6| 7
+
+    The following operators default to use `eadd`:
+
+    Operator | Description | Default
+    --- | --- | ---
+    v \\|  w | Vector Union | type default SECOND combiner
+    v \\|= w | In-place Vector Union | type default SECOND combiner
+    v +    w | Vector Element-Wise Union | type default PLUS combiner
+    v +=   w | In-place Vector Element-Wise Union | type default PLUS combiner
+    v -    w | Vector Element-Wise Union | type default MINUS combiner
+    v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
 
     &#34;&#34;&#34;
     if add_op is None:
         add_op = current_binop.get(NULL)
-    elif isinstance(add_op, str):
-        add_op = _get_bin_op(add_op, self.type)
 
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -17152,11 +18442,56 @@ A nor in B do not appear in the result.</p></div>
 <div class="desc"><p>Element-wise multiplication with other vector.</p>
 <p>Element-wise multiplication applies a binary operator
 element-wise on two vectors A and B, for all entries that
-appear in the set intersection of the patterns of A and B.
-Other operators other than addition can be used.</p>
-<p>The pattern of the result of the element-wise multiplication
-is exactly this set intersection. Entries in A but not B, or
-visa versa, do not appear in the result.</p></div>
+appear in the set intersection of the patterns of A and B.</p>
+<p>The only difference between element-wise multiplication and
+addition is the pattern of the result, and what happens to
+entries outside the intersection. With multiplication the
+pattern of T is the intersection; with addition it is the set
+union. Entries outside the set intersection are dropped for
+multiplication, and kept for addition; in both cases the
+operator is only applied to those (and only those) entries in
+the intersection. Any binary operator can be used
+interchangeably for either operation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; V = list(range(len(I)))
+&gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; w = Vector.from_lists(
+...    [0, 1, 4, 6],
+...    [9, 1, 4, 7], 7)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(v.emult(w))
+0| 9
+1| 3
+2|
+3|
+4|28
+5|
+6|77
+</code></pre>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(v * w)
+0| 9
+1| 3
+2|
+3|
+4|28
+5|
+6|77
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MAX:
+...     print(v * w)
+0| 9
+1| 3
+2|
+3|
+4|28
+5|
+6|77
+</code></pre>
+<p>The following operators default to use <code>eadd</code>:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -17176,11 +18511,59 @@ visa versa, do not appear in the result.</p></div>
     Element-wise multiplication applies a binary operator
     element-wise on two vectors A and B, for all entries that
     appear in the set intersection of the patterns of A and B.
-    Other operators other than addition can be used.
 
-    The pattern of the result of the element-wise multiplication
-    is exactly this set intersection. Entries in A but not B, or
-    visa versa, do not appear in the result.
+    The only difference between element-wise multiplication and
+    addition is the pattern of the result, and what happens to
+    entries outside the intersection. With multiplication the
+    pattern of T is the intersection; with addition it is the set
+    union. Entries outside the set intersection are dropped for
+    multiplication, and kept for addition; in both cases the
+    operator is only applied to those (and only those) entries in
+    the intersection. Any binary operator can be used
+    interchangeably for either operation.
+
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; V = list(range(len(I)))
+    &gt;&gt;&gt; v = Vector.from_lists(I, V, 7)
+
+    &gt;&gt;&gt; w = Vector.from_lists(
+    ...    [0, 1, 4, 6],
+    ...    [9, 1, 4, 7], 7)
+
+    &gt;&gt;&gt; print(v.emult(w))
+    0| 9
+    1| 3
+    2|
+    3|
+    4|28
+    5|
+    6|77
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(v * w)
+    0| 9
+    1| 3
+    2|
+    3|
+    4|28
+    5|
+    6|77
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MAX:
+    ...     print(v * w)
+    0| 9
+    1| 3
+    2|
+    3|
+    4|28
+    5|
+    6|77
+
+    The following operators default to use `eadd`:
 
     &#34;&#34;&#34;
     if mult_op is None:
@@ -17264,13 +18647,32 @@ visa versa, do not appear in the result.</p></div>
 <span>def <span class="ident">get</span></span>(<span>self, i, default=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get element at <code>i</code> or return <code>default</code> if not present.</p></div>
+<div class="desc"><p>Get element at <code>i</code> or return <code>default</code> if not present.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Vector.from_lists([1, 2], [42, 149])
+&gt;&gt;&gt; M.get(1)
+42
+&gt;&gt;&gt; M.get(0) is None
+True
+&gt;&gt;&gt; M.get(0, 'foo')
+'foo'
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self, i, default=None):
-    &#34;&#34;&#34;Get element at `i` or return `default` if not present.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get element at `i` or return `default` if not present.
+
+
+    &gt;&gt;&gt; M = Vector.from_lists([1, 2], [42, 149])
+    &gt;&gt;&gt; M.get(1)
+    42
+    &gt;&gt;&gt; M.get(0) is None
+    True
+    &gt;&gt;&gt; M.get(0, &#39;foo&#39;)
+    &#39;foo&#39;
+
+    &#34;&#34;&#34;
     try:
         return self[i]
     except NoValue:
@@ -17281,13 +18683,30 @@ visa versa, do not appear in the result.</p></div>
 <span>def <span class="ident">iseq</span></span>(<span>self, other, eq_op=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two vectors for equality.</p></div>
+<div class="desc"><p>Compare two vectors for equality.</p>
+<p>Note to be confused with the <code>==</code> operator which does
+element-wise comparison and returns a <code><a title="pygraphblas.Vector" href="#pygraphblas.Vector">Vector</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+&gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+&gt;&gt;&gt; v.iseq(w)
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def iseq(self, other, eq_op=None):
-    &#34;&#34;&#34;Compare two vectors for equality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two vectors for equality.
+
+    Note to be confused with the `==` operator which does
+    element-wise comparison and returns a `Vector`.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+    &gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+    &gt;&gt;&gt; v.iseq(w)
+    True
+
+    &#34;&#34;&#34;
     if eq_op is None:
         eq_op = self.type.EQ.get_binaryop(self.type, other.type)
     result = ffi.new(&#34;_Bool*&#34;)
@@ -17301,13 +18720,29 @@ visa versa, do not appear in the result.</p></div>
 <span>def <span class="ident">isne</span></span>(<span>self, other)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Compare two vectors for inequality.</p></div>
+<div class="desc"><p>Compare two vectors for inequality.
+Note to be confused with the <code>==</code> operator which does
+element-wise comparison and returns a <code><a title="pygraphblas.Vector" href="#pygraphblas.Vector">Vector</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+&gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+&gt;&gt;&gt; v.isne(w)
+False
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isne(self, other):
-    &#34;&#34;&#34;Compare two vectors for inequality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Compare two vectors for inequality.
+    Note to be confused with the `==` operator which does
+    element-wise comparison and returns a `Vector`.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+    &gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
+    &gt;&gt;&gt; v.isne(w)
+    False
+
+    &#34;&#34;&#34;
     return not self.iseq(other)</code></pre>
 </details>
 </dd>
@@ -17527,7 +18962,7 @@ outside the resized vector are deleted.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.to_string"><code class="name flex">
-<span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=2, empty_char='')</span>
+<span>def <span class="ident">to_string</span></span>(<span>self, format_string=&#x27;{:&gt;%s}&#x27;, width=2, prec=3, empty_char='')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return string representation of vector.</p></div>
@@ -17535,7 +18970,7 @@ outside the resized vector are deleted.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=2, empty_char=&#34;&#34;):
+<pre><code class="python">def to_string(self, format_string=&#34;{:&gt;%s}&#34;, width=2, prec=3, empty_char=&#34;&#34;):
     &#34;&#34;&#34;Return string representation of vector.&#34;&#34;&#34;
     format_string = format_string % width
     result = &#34;&#34;
@@ -17543,7 +18978,7 @@ outside the resized vector are deleted.</p></div>
         value = self.get(row, empty_char)
         result += str(row) + &#34;|&#34;
         result += format_string.format(
-            self.type.format_value(value, width)
+            self.type.format_value(value, width, prec)
         ).rstrip()
         if row &lt; self.size - 1:
             result += &#34;\n&#34;
@@ -17554,7 +18989,93 @@ outside the resized vector are deleted.</p></div>
 <span>def <span class="ident">vxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Vector-Matrix multiply.</p></div>
+<div class="desc"><p>Vector-Matrix multiply.</p>
+<p>Multiply this row vector by <code>other</code> matrix "on the left".
+For
+column matrix/vector multiplication "on the right" see
+<code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">Matrix.mxv()</a></code>.</p>
+<p><code>vxm</code> can also be called directly or with the <code>@</code> operator:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from . import Matrix
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+&gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+&gt;&gt;&gt; o = v.vxm(M)
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+&gt;&gt;&gt; o = v @ M
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+</code></pre>
+<p>By default, <code>mxv</code> and <code>@</code> create a new result matrix of the
+correct type and dimensions if one is not provided.
+If you
+want to provide your own matrix to put the result in, you can
+pass it in the <code>out</code> parameter.
+This is useful for
+accumulating results into a single matrix with minimal
+copying.
+This is also supported by the <code>@=</code> syntax:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = v.dup()
+&gt;&gt;&gt; v.vxm(M, accum=types.INT64.PLUS, out=o) is o
+True
+&gt;&gt;&gt; print(o)
+0|14
+1| 5
+2|10
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = v.dup()
+&gt;&gt;&gt; with Accum(types.INT64.MIN):
+...     o @= M
+&gt;&gt;&gt; print(o)
+0| 2
+1| 2
+2| 4
+</code></pre>
+<p>The default semiring depends on the infered result type.
+In
+the case of numbers, the default semiring is <code>PLUS_TIMES</code>.
+In
+the case of type <code><a title="pygraphblas.BOOL" href="#pygraphblas.BOOL">BOOL</a></code>, it is <code><a title="pygraphblas.BOOL.LOR_LAND" href="#pygraphblas.BOOL.LOR_LAND">BOOL.LOR_LAND</a></code>.</p>
+<p>An explicit semiring can be passed to the method or provided
+with a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = v.vxm(M, semiring=types.INT64.MIN_PLUS)
+&gt;&gt;&gt; print(o)
+0| 7
+1| 3
+2| 5
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN_PLUS:
+...     o = v @ M
+&gt;&gt;&gt; print(o)
+0| 7
+1| 3
+2| 5
+</code></pre>
+<p>Descriptors and accumulators can also be provided as an
+argument or a context manager:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = v.vxm(M, desc=descriptor.T0)
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with descriptor.T0:
+...     o = v @ M
+&gt;&gt;&gt; print(o)
+0|12
+1| 2
+2| 6
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; del o[1]
+&gt;&gt;&gt; o = v.vxm(M, mask=o)
+&gt;&gt;&gt; print(o)
+0|12
+1|
+2| 6
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -17569,7 +19090,96 @@ outside the resized vector are deleted.</p></div>
     accum=None,
     desc=Default,
 ):
-    &#34;&#34;&#34;Vector-Matrix multiply.&#34;&#34;&#34;
+    &#34;&#34;&#34;Vector-Matrix multiply.
+
+
+    Multiply this row vector by `other` matrix &#34;on the left&#34;.  For
+    column matrix/vector multiplication &#34;on the right&#34; see
+    `Matrix.mxv`.
+
+    `vxm` can also be called directly or with the `@` operator:
+
+    &gt;&gt;&gt; from . import Matrix
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+    &gt;&gt;&gt; v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+    &gt;&gt;&gt; o = v.vxm(M)
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+    &gt;&gt;&gt; o = v @ M
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+
+    By default, `mxv` and `@` create a new result matrix of the
+    correct type and dimensions if one is not provided.  If you
+    want to provide your own matrix to put the result in, you can
+    pass it in the `out` parameter.  This is useful for
+    accumulating results into a single matrix with minimal
+    copying.  This is also supported by the `@=` syntax:
+
+    &gt;&gt;&gt; o = v.dup()
+    &gt;&gt;&gt; v.vxm(M, accum=types.INT64.PLUS, out=o) is o
+    True
+    &gt;&gt;&gt; print(o)
+    0|14
+    1| 5
+    2|10
+
+    &gt;&gt;&gt; o = v.dup()
+    &gt;&gt;&gt; with Accum(types.INT64.MIN):
+    ...     o @= M
+    &gt;&gt;&gt; print(o)
+    0| 2
+    1| 2
+    2| 4
+
+    The default semiring depends on the infered result type.  In
+    the case of numbers, the default semiring is `PLUS_TIMES`.  In
+    the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+    An explicit semiring can be passed to the method or provided
+    with a context manager:
+
+    &gt;&gt;&gt; o = v.vxm(M, semiring=types.INT64.MIN_PLUS)
+    &gt;&gt;&gt; print(o)
+    0| 7
+    1| 3
+    2| 5
+
+    &gt;&gt;&gt; with types.INT64.MIN_PLUS:
+    ...     o = v @ M
+    &gt;&gt;&gt; print(o)
+    0| 7
+    1| 3
+    2| 5
+
+    Descriptors and accumulators can also be provided as an
+    argument or a context manager:
+
+    &gt;&gt;&gt; o = v.vxm(M, desc=descriptor.T0)
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+
+    &gt;&gt;&gt; with descriptor.T0:
+    ...     o = v @ M
+    &gt;&gt;&gt; print(o)
+    0|12
+    1| 2
+    2| 6
+
+    &gt;&gt;&gt; del o[1]
+    &gt;&gt;&gt; o = v.vxm(M, mask=o)
+    &gt;&gt;&gt; print(o)
+    0|12
+    1|
+    2| 6
+
+    &#34;&#34;&#34;
 
     if semiring is None:
         semiring = current_semiring.get(NULL)
@@ -17836,8 +19446,8 @@ The parameter is typically in the range
         _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.run_doctests"><code class="name flex">
-<span>def <span class="ident">run_doctests</span></span>(<span>raise_on_error=False)</span>
+<dt id="pygraphblas.unary_op"><code class="name flex">
+<span>def <span class="ident">unary_op</span></span>(<span>arg_type, result_type=None, boolean=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -17845,18 +19455,36 @@ The parameter is typically in the range
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_doctests(raise_on_error=False):
-    from . import matrix
-    from . import descriptor
-    from . import base
-    from . import gviz
-    import sys, doctest
+<pre><code class="python">def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
+    if result_type is None:
+        result_type = arg_type
 
-    this = sys.modules[__name__]
-    for mod in (this, matrix, descriptor, gviz, base):
-        doctest.testmod(
-            mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
-        )</code></pre>
+    def inner(func):
+        func_name = func.__name__
+        sig = numba.void(
+            numba.types.CPointer(numba.boolean)
+            if boolean
+            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
+        )
+        jitfunc = jit(func, nopython=True)
+
+        @cfunc(sig, nopython=True)
+        def wrapper(z, x):
+            result = jitfunc(x[0])
+            z[0] = result
+
+        out = core_ffi.new(&#34;GrB_UnaryOp*&#34;)
+        lib.GrB_UnaryOp_new(
+            out,
+            core_ffi.cast(&#34;GxB_unary_function&#34;, wrapper.address),
+            result_type.gb_type,
+            arg_type.gb_type,
+        )
+
+        return UnaryOp(func_name, arg_type.C, out[0])
+
+    return inner</code></pre>
 </details>
 </dd>
 </dl>
@@ -17881,7 +19509,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.binary_op" href="#pygraphblas.binary_op">binary_op</a></code></li>
 <li><code><a title="pygraphblas.options_get" href="#pygraphblas.options_get">options_get</a></code></li>
 <li><code><a title="pygraphblas.options_set" href="#pygraphblas.options_set">options_set</a></code></li>
-<li><code><a title="pygraphblas.run_doctests" href="#pygraphblas.run_doctests">run_doctests</a></code></li>
+<li><code><a title="pygraphblas.unary_op" href="#pygraphblas.unary_op">unary_op</a></code></li>
 </ul>
 </li>
 <li><h3 class="caret"><a href="#header-classes">Types</a></h3>
@@ -18352,6 +19980,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.FP32.TIMES_TIMES" href="#pygraphblas.FP32.TIMES_TIMES">TIMES_TIMES</a></code></li>
 <li><code><a title="pygraphblas.FP32.TRUNC" href="#pygraphblas.FP32.TRUNC">TRUNC</a></code></li>
 <li><code><a title="pygraphblas.FP32.ffi" href="#pygraphblas.FP32.ffi">ffi</a></code></li>
+<li><code><a title="pygraphblas.FP32.format_value" href="#pygraphblas.FP32.format_value">format_value</a></code></li>
 <li><code><a title="pygraphblas.FP32.gb_type" href="#pygraphblas.FP32.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.FP32.numba_t" href="#pygraphblas.FP32.numba_t">numba_t</a></code></li>
 <li><code><a title="pygraphblas.FP32.one" href="#pygraphblas.FP32.one">one</a></code></li>
@@ -18567,6 +20196,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.FP64.TIMES_TIMES" href="#pygraphblas.FP64.TIMES_TIMES">TIMES_TIMES</a></code></li>
 <li><code><a title="pygraphblas.FP64.TRUNC" href="#pygraphblas.FP64.TRUNC">TRUNC</a></code></li>
 <li><code><a title="pygraphblas.FP64.ffi" href="#pygraphblas.FP64.ffi">ffi</a></code></li>
+<li><code><a title="pygraphblas.FP64.format_value" href="#pygraphblas.FP64.format_value">format_value</a></code></li>
 <li><code><a title="pygraphblas.FP64.gb_type" href="#pygraphblas.FP64.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.FP64.numba_t" href="#pygraphblas.FP64.numba_t">numba_t</a></code></li>
 <li><code><a title="pygraphblas.FP64.one" href="#pygraphblas.FP64.one">one</a></code></li>
@@ -19413,6 +21043,7 @@ The parameter is typically in the range
 <li>
 <code class="caret"><a title="pygraphblas.Matrix" href="#pygraphblas.Matrix">Matrix</a></code>
 <ul class="two-column nested ">
+<li><code><a title="pygraphblas.Matrix.M" href="#pygraphblas.Matrix.M">M</a></code></li>
 <li><code><a title="pygraphblas.Matrix.T" href="#pygraphblas.Matrix.T">T</a></code></li>
 <li><code><a title="pygraphblas.Matrix.apply" href="#pygraphblas.Matrix.apply">apply</a></code></li>
 <li><code><a title="pygraphblas.Matrix.apply_first" href="#pygraphblas.Matrix.apply_first">apply_first</a></code></li>
@@ -19467,7 +21098,9 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Matrix.square" href="#pygraphblas.Matrix.square">square</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_arrays" href="#pygraphblas.Matrix.to_arrays">to_arrays</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_binfile" href="#pygraphblas.Matrix.to_binfile">to_binfile</a></code></li>
+<li><code><a title="pygraphblas.Matrix.to_html_table" href="#pygraphblas.Matrix.to_html_table">to_html_table</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_lists" href="#pygraphblas.Matrix.to_lists">to_lists</a></code></li>
+<li><code><a title="pygraphblas.Matrix.to_markdown_table" href="#pygraphblas.Matrix.to_markdown_table">to_markdown_table</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_mm" href="#pygraphblas.Matrix.to_mm">to_mm</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_numpy" href="#pygraphblas.Matrix.to_numpy">to_numpy</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_scipy_sparse" href="#pygraphblas.Matrix.to_scipy_sparse">to_scipy_sparse</a></code></li>

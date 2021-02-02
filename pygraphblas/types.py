@@ -155,8 +155,8 @@ class Type(metaclass=MetaType):
     typecode = None
 
     @classmethod
-    def format_value(cls, val, width=2):
-        return ("{:>%s}" % width).format(val)
+    def format_value(cls, val, width=2, prec=None):
+        return f"{val:{width}}"
 
     @classmethod
     def _default_addop(cls):
@@ -199,19 +199,19 @@ class BOOL(Type):
     numba_t = numba.boolean
 
     @classmethod
-    def _default_addop(self):
+    def _default_addop(self):  # pragma: nocover
         return self.LOR
 
     @classmethod
-    def _default_multop(self):
+    def _default_multop(self):  # pragma: nocover
         return self.LAND
 
     @classmethod
-    def _default_semiring(self):
+    def _default_semiring(self):  # pragma: nocover
         return self.LOR_LAND
 
     @classmethod
-    def format_value(cls, val, width=2):
+    def format_value(cls, val, width=2, prec=None):
         f = "{:>%s}" % width
         if not isinstance(val, bool):
             return f.format(val)
@@ -304,6 +304,10 @@ class FP32(Type):
     typecode = "f"
     numba_t = numba.float32
 
+    @classmethod
+    def format_value(cls, val, width=2, prec=2):
+        return f"{val:>{width}.{prec}}"
+
 
 class FP64(Type):
     """GraphBLAS 64 bit float."""
@@ -314,6 +318,10 @@ class FP64(Type):
     C = "double"
     typecode = "d"
     numba_t = numba.float64
+
+    @classmethod
+    def format_value(cls, val, width=2, prec=2):
+        return f"{val:>{width}.{prec}}"
 
 
 class FC32(Type):
@@ -497,10 +505,6 @@ def promote(left, right):
     """
     if left == right:
         return left
-    elif left is None:
-        return right
-    elif right is None:
-        return left
     elif left == BOOL:
         return right
     elif right == BOOL:
@@ -508,4 +512,6 @@ def promote(left, right):
     for t in _promotion_order:
         if left == t or right == t:
             return t
-    raise TypeError("inconvertable types %s and %s" % (repr(left), repr(right)))
+    raise TypeError(
+        "inconvertable types %s and %s" % (repr(left), repr(right))
+    )  # pragma: nocover

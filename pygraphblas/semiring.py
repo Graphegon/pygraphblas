@@ -103,6 +103,28 @@ def semiring_group(reg):
     return srs
 
 
+def semiring_template(r):  # pragma: nocover
+    from .matrix import Matrix
+
+    if r.ztype in (types.FC32, types.FC64):
+        return f"Semiring {r.name}"
+    A = Matrix.from_lists([0, 0, 1, 1], [0, 1, 0, 1], [1, 0, 1, 0])
+    B = A.dup()
+    if r.ztype is types.BOOL:
+        A = A.pattern()
+        B = B.pattern()
+    C = A.mxm(B, semiring=r)
+    return f"""\
+Semiring {r.name}
+
+<table>
+<tr>
+<td>{A.to_html_table('A')}</td><td> {B.to_html_table('B')}</td><td> {C.to_html_table('A @ B')}</td>
+</tr>
+</table>
+"""
+
+
 def build_semirings(__pdoc__):
     this = sys.modules[__name__]
     for r in chain(

@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ["UnaryOp", "current_uop", "unary_op"]
+__all__ = ["UnaryOp", "unary_op"]
 
 import re, sys
 from itertools import chain
@@ -16,8 +16,6 @@ from collections import defaultdict
 
 from .base import lib, ffi as core_ffi, _check
 from . import types
-
-current_uop = contextvars.ContextVar("current_uop")
 
 
 class UnaryOp:
@@ -35,14 +33,6 @@ class UnaryOp:
         cls = getattr(types, typ)
         setattr(cls, name, self)
         types.__pdoc__[f"{typ}.{name}"] = f"UnaryOp {typ}.{name}"
-
-    def __enter__(self):
-        self.token = current_uop.set(self)
-        return self
-
-    def __exit__(self, *errors):  # pragma: nocover
-        current_uop.reset(self.token)
-        return False
 
     def get_unaryop(self, operand1=None):
         return self.unaryop

@@ -25,7 +25,6 @@ from .vector import Vector
 from .scalar import Scalar
 from .semiring import current_semiring
 from .binaryop import current_accum, current_binop, Accum
-from .unaryop import current_uop
 from .monoid import current_monoid
 from .descriptor import Descriptor, Default, T0, current_desc
 from . import descriptor
@@ -442,6 +441,28 @@ class Matrix:
         """
         return self.transpose()
 
+    @property
+    def M(self):
+        """Return the structural "mask" pattern of this matrix.  See
+        `pattern()`.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 142])
+        >>> print(M)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|142      |  2
+              0  1  2
+        >>> print(M.M)
+              0  1  2
+          0|     t   |  0
+          1|        t|  1
+          2|  t      |  2
+              0  1  2
+
+        """
+        return self.pattern()
+
     def dup(self):
         """Create an duplicate Matrix.
 
@@ -683,7 +704,15 @@ class Matrix:
           2|149      |  2
               0  1  2
         >>> N = M.cast(types.FP32)
-        >>> print(N.to_string(width=5))
+        >>> print(N.to_string(width=5, prec=4))
+                  0    1    2
+            0|      42.0     |  0
+            1|          314.0|  1
+            2|149.0          |  2
+                  0    1    2
+
+        >>> N = M.cast(types.FP64)
+        >>> print(N.to_string(width=5, prec=4))
                   0    1    2
             0|      42.0     |  0
             1|          314.0|  1
@@ -703,16 +732,13 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Element-wise addition with other matrix.
+        """Element-wise addition with other matrix
 
-        Element-wise addition applies a binary operator element-wise
-        on two matrices A and B, for all entries that appear in the
-        set intersection of the patterns of A and B.  Other operators
-        other than addition can be used.
-
-        The pattern of the result of the element-wise addition is
-        the set union of the pattern of A and B. Entries in neither in
-        A nor in B do not appear in the result.
+        Element-wise addition takes the set union of the patterns of A
+        and B and applies a binary operator for all entries that
+        appear in the set intersection of the patterns of A and B.
+        The default operators is the `PLUS` binary operator of the
+        output type.
 
         The only difference between element-wise multiplication and
         addition is the pattern of the result, and what happens to
@@ -756,6 +782,45 @@ class Matrix:
               0  1  2  3  4  5  6
 
         ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
+
+        This can also be accomplished with the `+` operators:
+
+        >>> print(A + B)
+              0  1  2  3  4  5  6
+          0|     9     1         |  0
+          1|           1  2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                11   |  4
+          5|        8            |  5
+          6|        9 10 11  7   |  6
+              0  1  2  3  4  5  6
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        >>> with types.INT64.MIN:
+        ...     print(A + B)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|           1  2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 4   |  4
+          5|        8            |  5
+          6|        9 10 11  7   |  6
+              0  1  2  3  4  5  6
+
+        The following operators default to use `eadd`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        A \\|  B | Matrix Union | type default SECOND combiner
+        A \\|= B | In-place Matrix Union | type default SECOND combiner
+        A +    B | Matrix Element-Wise Union | type default PLUS combiner
+        A +=   B | In-place Matrix Element-Wise Union | type default PLUS combiner
+        A -    B | Matrix Element-Wise Union | type default MINUS combiner
+        A -=   B | In-place Matrix Element-Wise Union | type default MINUS combiner
 
         """
         if add_op is None:
@@ -849,6 +914,45 @@ class Matrix:
               0  1  2  3  4  5  6
 
         ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
+        This can also be accomplished with the `+` operators:
+
+        >>> print(A * B)
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              2    12|  1
+          2|                     |  2
+          3|                     |  3
+          4|                     |  4
+          5|                     |  5
+          6|          70         |  6
+              0  1  2  3  4  5  6
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        >>> with types.INT64.MIN:
+        ...     print(A * B)
+              0  1  2  3  4  5  6
+          0|     0               |  0
+          1|              1     3|  1
+          2|                     |  2
+          3|                     |  3
+          4|                     |  4
+          5|                     |  5
+          6|           7         |  6
+              0  1  2  3  4  5  6
+
+        The following operators default to using `emult`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        A &    B | Matrix Intersection | type default SECOND combiner
+        A &=   B | In-place Matrix Intersection | type default SECOND combiner
+        A *    B | Matrix Element-Wise Intersection | type default TIMES combiner
+        A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
+        A /    B | Matrix Element-Wise Intersection | type default DIV combiner
+        A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
 
         """
         if mult_op is None:
@@ -1216,6 +1320,12 @@ class Matrix:
           2|149      |  2
               0  1  2
 
+        >>> print(M.apply(types.INT64.ABS))
+              0  1  2
+          0|    42   |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -1572,6 +1682,22 @@ class Matrix:
           2|     6   |  2
               0  1  2
 
+        >>> p = m.pattern() @ n
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
+        >>> p = m @ n.pattern()
+        >>> print(o)
+              0  1  2
+          0|        3|  0
+          1|  8      |  1
+          2|     6   |  2
+              0  1  2
+
         By default, `mxm` and `@` create a new result matrix of the
         correct type and dimensions if one is not provided.  If you
         want to provide your own matrix to put the result in, you can
@@ -1625,6 +1751,9 @@ class Matrix:
 
         Descriptors and accumulators can also be provided as an
         argument or a context manager:
+
+        >>> descriptor.T0
+        <Descriptor T0>
 
         >>> o = m.mxm(n, desc=descriptor.T0)
         >>> print(o)
@@ -1688,9 +1817,10 @@ class Matrix:
         accum=None,
         desc=Default,
     ):
-        """Matrix-matrix multiply.
+        """Matrix-vector multiply.
 
-        Multiply this matrix by `other` vector.
+        Multiply this matrix by `other` column vector "on the right".
+        For row vector multiplication "on the left" see `Vector.vxm`.
 
         See Section 9.6 in the [SuiteSparse User
         Guide](https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf)
@@ -1760,6 +1890,13 @@ class Matrix:
         >>> print(o)
         0|12
         1| 2
+        2| 6
+
+        >>> del o[1]
+        >>> o = m.mxv(v, mask=o)
+        >>> print(o)
+        0| 3
+        1|
         2| 6
 
         """
@@ -2318,7 +2455,93 @@ class Matrix:
         """
         self._check(lib.GrB_Matrix_wait(self._matrix))
 
-    def to_string(self, format_string="{:>%s}", width=3, empty_char=""):
+    def to_markdown_table(self, title="A", width=2):
+        """Return a string markdown table representation of the Matrix.
+
+        >>> M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+        >>> print(M.to_markdown_table())
+        A|0|1|2
+        ---|---|---|---
+        0|   |42| 2
+        1|   |  | 0
+        2| 149|  |
+
+        """
+        rows = set(self.rows)
+        cols = set(self.cols)
+        result = f"""\
+{title}|{'|'.join(map(str, cols))}
+---|{"|".join(['---'] * len(cols))}
+"""
+        for i, row in enumerate(rows):
+            result += f"{row}| " + "|".join(
+                self.type.format_value(self.get(row, col, ""), width) for col in cols
+            )
+            if i != len(rows) - 1:
+                result += "\n"
+        return result
+
+    def to_html_table(self, title="A", width=2):
+        """Return a string markdown table representation of the Matrix.
+
+        >>> M = Matrix.from_lists([0, 0, 1, 2], [1, 2, 2, 0], [42, 2, 0, 149])
+        >>> print(M.to_html_table())
+                <table>
+                    <th>A</th>
+                        <th>0</th>
+                        <th>1</th>
+                        <th>2</th>
+        <BLANKLINE>
+                    <tr>
+                    <th>0</th>
+                        <td>  </td>
+                        <td>42</td>
+                        <td> 2</td>
+                    </tr>
+        <BLANKLINE>
+                    <tr>
+                    <th>1</th>
+                        <td>  </td>
+                        <td>  </td>
+                        <td> 0</td>
+                    </tr>
+        <BLANKLINE>
+                    <tr>
+                    <th>2</th>
+                        <td>149</td>
+                        <td>  </td>
+                        <td>  </td>
+                    </tr>
+                </table>
+        """
+        from mako.template import Template
+
+        t = Template(
+            """\
+        <%
+            rows = set(A.rows)
+            cols = set(A.cols)
+        %><table>
+            <th>${title}</th>
+            % for col in cols:
+                <th>${col}</th>
+            % endfor
+            % for row in rows:
+                ${makerow(row)}
+            % endfor
+        </table><%def name="makerow(row)">
+            <tr>
+            <th>${row}</th>
+            % for col in cols:
+                <td>${A.type.format_value(A.get(row, col, ''))}</td>
+            % endfor
+            </tr></%def>"""
+        )
+        return t.render(A=self, title=title)
+
+    def to_string(
+        self, format_string="{:>%s}", width=3, prec=5, empty_char="", cell_sep=""
+    ):
         """Return a string representation of the Matrix.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 0, 149])
@@ -2336,7 +2559,7 @@ class Matrix:
             result += format_string.format(row) + "|"
             for col in range(self.ncols):
                 value = self.get(row, col, empty_char)
-                result += self.type.format_value(value, width)
+                result += cell_sep + self.type.format_value(value, width, prec)
             result += "|  " + str(row) + "\n"
         result += header
 

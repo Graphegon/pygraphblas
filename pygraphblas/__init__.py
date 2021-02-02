@@ -176,13 +176,14 @@ GxB_SPEC = GxB_SPEC
 
 def run_doctests(raise_on_error=False):
     from . import matrix
+    from . import vector
     from . import descriptor
     from . import base
     from . import gviz
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, descriptor, gviz, base):
+    for mod in (this, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

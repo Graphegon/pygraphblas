@@ -20,8 +20,7 @@ from .base import (
 from . import types
 from .scalar import Scalar
 from .semiring import current_semiring
-from .binaryop import current_accum, current_binop
-from .unaryop import current_uop
+from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
 from . import descriptor
 from .descriptor import Descriptor, Default, T1
@@ -35,6 +34,37 @@ class Vector:
 
     This is a high-level wrapper around the low-level GrB_Vector type.
 
+    A Vector supports many possible operations according to the
+    GraphBLAS API.  Many of those operations have overloaded
+    operators.
+
+    Operator | Description | Default
+    --- | --- | ---
+    v @    A | Vector Vector Multiplication | type default PLUS_TIMES semiring
+    v @=   A | In-place Vector Vector Multiplication | type default PLUS_TIMES semiring
+    v \\|  w | Vector Union | type default SECOND combiner
+    v \\|= w | In-place Vector Union | type default SECOND combiner
+    v &    w | Vector Intersection | type default SECOND combiner
+    v &=   w | In-place Vector Intersection | type default SECOND combiner
+    v +    w | Vector Element-Wise Union | type default PLUS combiner
+    v +=   w | In-place Vector Element-Wise Union | type default PLUS combiner
+    v -    w | Vector Element-Wise Union | type default MINUS combiner
+    v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
+    v *    w | Vector Element-Wise Intersection | type default TIMES combiner
+    v *=   w | In-place Vector Element-Wise Intersection | type default TIMES combiner
+    v /    w | Vector Element-Wise Intersection | type default DIV combiner
+    v /=   w | In-place Vector Element-Wise Intersection | type default DIV combiner
+    v ==   w | Compare Element-Wise Union | type default EQ operator
+    v !=   w | Compare Element-Wise Union | type default NE operator
+    v <    w | Compare Element-Wise Union | type default LT operator
+    v >    w | Compare Element-Wise Union | type default GT operator
+    v <=   w | Compare Element-Wise Union | type default LE operator
+    v >=   w | Compare Element-Wise Union | type default GE operator
+
+    Note that all the above operator syntax is mearly sugar over
+    various combinations of calling `Matrix.mxv`, `Vector.vxm`,
+    `Vector.eadd`, and `Vector.emult`.
+
     """
 
     __slots__ = ("_vector", "type", "_keep_alives")
@@ -42,7 +72,7 @@ class Vector:
     def _check(self, res, raise_no_val=False):
         if res != lib.GrB_SUCCESS:
             if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError
+                raise KeyError  # pragma: nocover
 
             error_string = ffi.new("char**")
             lib.GrB_Vector_error(error_string, self._vector[0])
@@ -74,7 +104,17 @@ class Vector:
         return zip(I, X)
 
     def iseq(self, other, eq_op=None):
-        """Compare two vectors for equality."""
+        """Compare two vectors for equality.
+
+        Note to be confused with the `==` operator which does
+        element-wise comparison and returns a `Vector`.
+
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> w = Vector.from_lists([0,1], [1, 1])
+        >>> v.iseq(w)
+        True
+
+        """
         if eq_op is None:
             eq_op = self.type.EQ.get_binaryop(self.type, other.type)
         result = ffi.new("_Bool*")
@@ -84,7 +124,16 @@ class Vector:
         return result[0]
 
     def isne(self, other):
-        """Compare two vectors for inequality."""
+        """Compare two vectors for inequality.
+        Note to be confused with the `==` operator which does
+        element-wise comparison and returns a `Vector`.
+
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> w = Vector.from_lists([0,1], [1, 1])
+        >>> v.isne(w)
+        False
+
+        """
         return not self.iseq(other)
 
     @classmethod
@@ -259,19 +308,74 @@ class Vector:
         """Element-wise addition with other vector.
 
         Element-wise addition applies a binary operator element-wise
-        on two vectors A and B, for all entries that appear in the set
-        intersection of the patterns of A and B.  Other operators
-        other than addition can be used.
+        on two vectors `v` and `w`, for all entries that appear in the
+        set union of the patterns of `A` and `B`.
 
-        The pattern of the result of the element-wise addition is
-        the set union of the pattern of A and B. Entries in neither in
-        A nor in B do not appear in the result.
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> V = list(range(len(I)))
+        >>> v = Vector.from_lists(I, V, 7)
+
+        >>> w = Vector.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [9, 1, 4, 7], 7)
+
+        >>> print(v.eadd(w))
+        0|10
+        1| 4
+        2| 4
+        3| 6
+        4|11
+        5| 8
+        6|18
+
+        This can also be accomplished with the `+` operators:
+
+        >>> print(v + w)
+        0|10
+        1| 4
+        2| 4
+        3| 6
+        4|11
+        5| 8
+        6|18
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        >>> with types.INT64.MIN:
+        ...     print(v + w)
+        0| 1
+        1| 1
+        2| 4
+        3| 6
+        4| 4
+        5| 8
+        6| 7
+
+        The following operators default to use `eadd`:
+
+        Operator | Description | Default
+        --- | --- | ---
+        v \\|  w | Vector Union | type default SECOND combiner
+        v \\|= w | In-place Vector Union | type default SECOND combiner
+        v +    w | Vector Element-Wise Union | type default PLUS combiner
+        v +=   w | In-place Vector Element-Wise Union | type default PLUS combiner
+        v -    w | Vector Element-Wise Union | type default MINUS combiner
+        v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
 
         """
         if add_op is None:
             add_op = current_binop.get(NULL)
-        elif isinstance(add_op, str):
-            add_op = _get_bin_op(add_op, self.type)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -312,11 +416,59 @@ class Vector:
         Element-wise multiplication applies a binary operator
         element-wise on two vectors A and B, for all entries that
         appear in the set intersection of the patterns of A and B.
-        Other operators other than addition can be used.
 
-        The pattern of the result of the element-wise multiplication
-        is exactly this set intersection. Entries in A but not B, or
-        visa versa, do not appear in the result.
+        The only difference between element-wise multiplication and
+        addition is the pattern of the result, and what happens to
+        entries outside the intersection. With multiplication the
+        pattern of T is the intersection; with addition it is the set
+        union. Entries outside the set intersection are dropped for
+        multiplication, and kept for addition; in both cases the
+        operator is only applied to those (and only those) entries in
+        the intersection. Any binary operator can be used
+        interchangeably for either operation.
+
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> V = list(range(len(I)))
+        >>> v = Vector.from_lists(I, V, 7)
+
+        >>> w = Vector.from_lists(
+        ...    [0, 1, 4, 6],
+        ...    [9, 1, 4, 7], 7)
+
+        >>> print(v.emult(w))
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        This can also be accomplished with the `+` operators:
+
+        >>> print(v * w)
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        The combining operator used can be provided either as a
+        context manager or passed to `mxv` as the `add_op` argument.
+
+        >>> with types.INT64.MAX:
+        ...     print(v * w)
+        0| 9
+        1| 3
+        2|
+        3|
+        4|28
+        5|
+        6|77
+
+        The following operators default to use `eadd`:
 
         """
         if mult_op is None:
@@ -358,7 +510,96 @@ class Vector:
         accum=None,
         desc=Default,
     ):
-        """Vector-Matrix multiply."""
+        """Vector-Matrix multiply.
+
+
+        Multiply this row vector by `other` matrix "on the left".  For
+        column matrix/vector multiplication "on the right" see
+        `Matrix.mxv`.
+
+        `vxm` can also be called directly or with the `@` operator:
+
+        >>> from . import Matrix
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> v = Vector.from_lists([0, 1, 2], [2, 3, 4])
+        >>> o = v.vxm(M)
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+        >>> o = v @ M
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        By default, `mxv` and `@` create a new result matrix of the
+        correct type and dimensions if one is not provided.  If you
+        want to provide your own matrix to put the result in, you can
+        pass it in the `out` parameter.  This is useful for
+        accumulating results into a single matrix with minimal
+        copying.  This is also supported by the `@=` syntax:
+
+        >>> o = v.dup()
+        >>> v.vxm(M, accum=types.INT64.PLUS, out=o) is o
+        True
+        >>> print(o)
+        0|14
+        1| 5
+        2|10
+
+        >>> o = v.dup()
+        >>> with Accum(types.INT64.MIN):
+        ...     o @= M
+        >>> print(o)
+        0| 2
+        1| 2
+        2| 4
+
+        The default semiring depends on the infered result type.  In
+        the case of numbers, the default semiring is `PLUS_TIMES`.  In
+        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> o = v.vxm(M, semiring=types.INT64.MIN_PLUS)
+        >>> print(o)
+        0| 7
+        1| 3
+        2| 5
+
+        >>> with types.INT64.MIN_PLUS:
+        ...     o = v @ M
+        >>> print(o)
+        0| 7
+        1| 3
+        2| 5
+
+        Descriptors and accumulators can also be provided as an
+        argument or a context manager:
+
+        >>> o = v.vxm(M, desc=descriptor.T0)
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        >>> with descriptor.T0:
+        ...     o = v @ M
+        >>> print(o)
+        0|12
+        1| 2
+        2| 6
+
+        >>> del o[1]
+        >>> o = v.vxm(M, mask=o)
+        >>> print(o)
+        0|12
+        1|
+        2| 6
+
+        """
 
         if semiring is None:
             semiring = current_semiring.get(NULL)
@@ -417,7 +658,7 @@ class Vector:
     def __radd__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.PLUS)
-        return other.eadd(self)
+        return other.eadd(self)  # pragma: nocover
 
     def __iadd__(self, other):
         if not isinstance(other, Vector):
@@ -432,7 +673,7 @@ class Vector:
     def __rsub__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.MINUS)
-        return other.eadd(self, self.type.MINUS)
+        return other.eadd(self, self.type.MINUS)  # pragma: nocover
 
     def __isub__(self, other):
         if not isinstance(other, Vector):
@@ -442,32 +683,32 @@ class Vector:
     def __mul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.TIMES, other)
-        return self.eadd(other, self.type.TIMES)
+        return self.emult(other, self.type.TIMES)
 
     def __rmul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.TIMES)
-        return other.eadd(self, add_op=self.type.TIMES)
+        return other.emult(self, add_op=self.type.TIMES)  # pragma: nocover
 
     def __imul__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.TIMES, other, out=self)
-        return other.eadd(self, self.type.TIMES, out=self)
+        return other.emult(self, self.type.TIMES, out=self)
 
     def __truediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.DIV, other)
-        return self.eadd(other, self.type.DIV)
+        return self.emult(other, self.type.DIV)
 
     def __rtruediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_first(other, self.type.DIV)
-        return other.eadd(self, self.type.DIV)
+        return other.emult(self, self.type.DIV)  # pragma: nocover
 
     def __itruediv__(self, other):
         if not isinstance(other, Vector):
             return self.apply_second(self.type.DIV, other, out=self)
-        return other.eadd(self, self.type.DIV, out=self)
+        return other.emult(self, self.type.DIV, out=self)
 
     def __invert__(self):
         return self.apply(self.type.MINV)
@@ -724,7 +965,18 @@ class Vector:
             return False
 
     def get(self, i, default=None):
-        """Get element at `i` or return `default` if not present."""
+        """Get element at `i` or return `default` if not present.
+
+
+        >>> M = Vector.from_lists([1, 2], [42, 149])
+        >>> M.get(1)
+        42
+        >>> M.get(0) is None
+        True
+        >>> M.get(0, 'foo')
+        'foo'
+
+        """
         try:
             return self[i]
         except NoValue:
@@ -734,7 +986,7 @@ class Vector:
         """Wait for vector to complete."""
         self._check(lib.GrB_Vector_wait(self._vector))
 
-    def to_string(self, format_string="{:>%s}", width=2, empty_char=""):
+    def to_string(self, format_string="{:>%s}", width=2, prec=3, empty_char=""):
         """Return string representation of vector."""
         format_string = format_string % width
         result = ""
@@ -742,7 +994,7 @@ class Vector:
             value = self.get(row, empty_char)
             result += str(row) + "|"
             result += format_string.format(
-                self.type.format_value(value, width)
+                self.type.format_value(value, width, prec)
             ).rstrip()
             if row < self.size - 1:
                 result += "\n"

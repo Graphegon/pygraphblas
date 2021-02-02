@@ -126,6 +126,42 @@ def test_vector_eadd():
     diff2 -= w
     assert diff2.iseq(subtraction_ref)
 
+    assert (1 - v).iseq(
+        Vector.from_lists(
+            [0, 2, 3, 4, 5, 6, 7, 8, 9], [0, -1, -2, -3, -4, -5, -6, -7, -8]
+        )
+    )
+
+    assert (v - 1).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 2, 3, 4, 5, 6, 7, 8])
+    )
+
+    assert (1 + v).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [2, 3, 4, 5, 6, 7, 8, 9, 10])
+    )
+
+    assert (v + 1).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [2, 3, 4, 5, 6, 7, 8, 9, 10])
+    )
+
+    w = v.dup()
+    w -= 1
+    assert (w).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 2, 3, 4, 5, 6, 7, 8])
+    )
+
+    w = v.dup()
+    w += 1
+    assert (w).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [2, 3, 4, 5, 6, 7, 8, 9, 10])
+    )
+
+    w = v.dup()
+    w += v
+    assert (w).iseq(
+        Vector.from_lists([0, 2, 3, 4, 5, 6, 7, 8, 9], [2, 4, 6, 8, 10, 12, 14, 16, 18])
+    )
+
 
 def test_vector_emult():
     V = list(range(1, 10 + 1))
@@ -149,6 +185,14 @@ def test_vector_emult():
     div2 = v.dup()
     div2 /= w
     assert div2.iseq(division_ref)
+
+    w = v.dup()
+    w *= v
+    assert (w).iseq(
+        Vector.from_lists(
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+        )
+    )
 
 
 def test_vector_pattern():
@@ -314,6 +358,9 @@ def test_compare():
     v = Vector.from_lists([0, 1, 2], [0, 1, 3])
     assert (v > 2).iseq(Vector.from_lists([0, 1, 2], [False, False, True]))
     assert (v >= 3).iseq(Vector.from_lists([0, 1, 2], [False, False, True]))
+
+    assert (v < 2).iseq(Vector.from_lists([0, 1], [True, True], 3))
+    assert (v <= 3).iseq(Vector.from_lists([0, 1, 2], [True, True, True]))
 
     assert (v < 2).iseq(Vector.from_lists([0, 1], [True, True], 3))
 
@@ -510,3 +557,13 @@ def test_str_and_repr():
 def test_nonzero():
     m = Vector.from_lists([0, 1], [0, 2])
     assert m.nonzero().iseq(Vector.from_lists([1], [2]))
+
+
+def test_neg_abs():
+    m = Vector.from_lists([0, 1], [0, 2])
+    assert (-m).iseq(Vector.from_lists([0, 1], [0, -2]))
+
+    m = Vector.from_lists([0, 1], [0, -2])
+    assert abs(m).iseq(Vector.from_lists([0, 1], [0, 2]))
+    m.clear()
+    assert not m
