@@ -33,6 +33,9 @@ jobs:
                -e COVERAGE_FILE=/pygraphblas/tests/.coverage \
                graphblas/pygraphblas-minimal:test \
                coverage run --branch -m pytest
+        cp tests/.coverage .
+        sudo ln -s . /pygraphblas
+        coveralls
 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
