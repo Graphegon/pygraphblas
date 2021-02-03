@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: run tests
+    - uses: actions/checkout@v2
       run: |
         ./github_test.sh
 
