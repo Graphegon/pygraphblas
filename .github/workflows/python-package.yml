@@ -23,13 +23,12 @@ jobs:
     - name: tests
       run: |
         ./github_test.sh
-        mv tests/.coverage .
+        mv tests/.coverage .coverage
     - name: coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.github_token }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
         COVERALLS_PARALLEL: true
 
