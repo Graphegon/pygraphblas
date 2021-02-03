@@ -10,3 +10,4 @@ pdoc3
 graphviz
 Pillow
 matplotlib
+coveralls

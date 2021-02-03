@@ -18,7 +18,8 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v2
-    - name:
+      with:
+        fetch-depth: 1
       run: |
         ./github_test.sh
 
