@@ -6,4 +6,4 @@ docker run --rm \
        -v `pwd`/tests:/pygraphblas/tests \
 	   -e COVERAGE_FILE=/pygraphblas/tests/.coverage \
        graphblas/pygraphblas-minimal:test \
-	   coverage run --branch -m pytest tests/
+	   coverage run --branch -m pytest
