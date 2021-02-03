@@ -23,7 +23,7 @@ jobs:
     - name: tests
       run: |
         ./github_test.sh
-    - name: tests
+    - name: coveralls
       uses: coverallsapp/github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
