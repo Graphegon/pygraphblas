@@ -23,6 +23,7 @@ jobs:
     - name: tests
       run: |
         ./github_test.sh
+        mv tests/.coverage .
     - name: coveralls
       uses: coverallsapp/github-action@master
       env:
