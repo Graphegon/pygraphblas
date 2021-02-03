@@ -1,25 +1,24 @@
-"""pygraphblas is a python extension that bridges [The GraphBLAS
-API](http://graphblas.org) with the [Python](https://python.org)
+"""pygraphblas is a python package that exposes [The GraphBLAS
+API](http://graphblas.org) to the [Python](https://python.org)
 programming language.  It uses the
 [CFFI](https://cffi.readthedocs.io/en/latest/) library to wrap the low
-level GraphBLAS API and provides high level `pygraphblas.Matrix` and
-`pygraphblas.Vector` Python types that make GraphBLAS simple and easy.
+level GraphBLAS API from
+[SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html). The
+`pygraphblas` module provides high level types like
+`pygraphblas.Matrix` and `pygraphblas.Vector` that make working with
+the GraphBLAS in Python extremely simple and easy.
 
 See the [Github README](https://github.com/Graphegon/pygraphblas) for
-details on how to install pygraphblas. Once installed, the library can
-be imported for use:
-
->>> from pygraphblas import *
+details on how to install pygraphblas. 
 
 The core idea of the GraphBLAS is the mathematical duality between a
-graph and a `pygraphblas.Matrix`.  As illustrated here, a graph can be
-expressed as a `pygraphblas.Matrix` and vice versa.
+graph and a `pygraphblas.Matrix`.  There are a few ways to contstruct
+matricies, but a simple approach is to provide three lists of data,
+the first are are lists of the row and column positions that define
+the begining and end of a graph edge, and the third list is the weight
+for that edge:
 
-`pygraphblas.Matrix` is the primary object of The GraphBLAS API.
-There are many ways to contstruct them, but a simple approach is to
-provide three lists of data, the first are are lists of the row and
-column positions that define the begining and end of a graph edge, and
-the third list is the weight for that edge:
+>>> from pygraphblas import *
 
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
@@ -65,7 +64,11 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
+>>> v = Vector.from_lists([0], [True], M.nrows)
+>>> y = v @ M
+>>> g = draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
 
+![bfs_step.png](../imgs/bfs_step.png)
 
 pygraphblas leverages the expertise in the field of sparse matrix
 programming by [The GraphBLAS Forum](http://graphblas.org) and uses
