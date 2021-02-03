@@ -24,8 +24,6 @@ jobs:
         
     - name: run tests
       run: |
-        sudo apt-get -y install python3-setuptools
-        sudo python3 -m pip install --upgrade coveralls
         SS_COMPACT=1 ./docker_build.sh v4.0.3 test minimal
         docker run --rm \
                -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
@@ -37,29 +35,24 @@ jobs:
                coverage run --branch -m pytest
         cp tests/.coverage .
         sudo ln -s . /pygraphblas
-        coveralls
+        
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        flag-name: run-${{ matrix.test_number }}
+        parallel: true
 
+  coveralls:
+    name: Indicate completion to coveralls.io
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Finished
+      run: |
+        pip3 install --upgrade coveralls
+        coveralls --finish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
-        COVERALLS_PARALLEL: true
 
-  # coveralls:
-  #   name: Indicate completion to coveralls.io
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   container: python:3-slim
-  #   steps:
-  #   - name: Finished
-  #     run: |
-  #       pip3 install --upgrade coveralls
-  #       coveralls --finish
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        # sudo apt-get -y install python3-setuptools
-        # pip3 install --upgrade coveralls
-  
-        # mv tests/.coverage .coverage
-        # sudo ln -s . /pygraphblas
-        # python3 -m coveralls --service=github
