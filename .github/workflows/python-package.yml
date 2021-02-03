@@ -20,8 +20,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 1
-    - name: tests
-      with:
         github-token: ${{ secrets.github_token }}
       env:
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
