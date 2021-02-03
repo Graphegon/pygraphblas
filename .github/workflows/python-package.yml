@@ -10,7 +10,6 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
-    container: python:3-slim
     strategy:
       max-parallel: 4
       matrix:
@@ -25,6 +24,7 @@ jobs:
         
     - name: run tests
       run: |
+        apt install python3-setuptools
         pip3 install --upgrade coveralls
         ./github_test.sh
         mv tests/.coverage .coverage
