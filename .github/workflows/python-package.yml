@@ -18,8 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: run tests
       run: |
-        SS_COMPACT=1 ./docker_build.sh v4.0.2 test minimal
-        docker run -v `pwd`/demo:/pygraphblas/demo -v `pwd`/docs:/docs graphblas/pygraphblas-minimal:test pytest
+        ./github_test.sh
 
     # - name: Set up Python ${{ matrix.python-version }}
     #   uses: actions/setup-python@v2
