@@ -24,9 +24,7 @@ jobs:
         
     - name: run tests
       run: |
-        ./github_test.sh
-        mv tests/.coverage .coverage
-        coveralls
+        ./github_test.sh && mv tests/.coverage .coverage && coveralls
       with:
         github-token: ${{ secrets.github_token }}
       env:
