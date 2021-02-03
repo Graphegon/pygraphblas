@@ -8,5 +8,5 @@ docker run --rm \
        -v `pwd`/demo:/pygraphblas/demo \
        -v `pwd`/docs:/docs \
        -v `pwd`/tests:/pygraphblas/tests \
-       graphblas/pygraphblas-minimal:test \
+       -it graphblas/pygraphblas-minimal:test \
        pytest --cov=pygraphblas --cov-report=term-missing --cov-branch $@
