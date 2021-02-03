@@ -24,8 +24,7 @@ jobs:
       run: |
         ./github_test.sh
         mv tests/.coverage .coverage
-    - name: coveralls
-      uses: coverallsapp/github-action@master
+        coveralls
       with:
         github-token: ${{ secrets.github_token }}
       env:
