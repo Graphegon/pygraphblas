@@ -24,6 +24,8 @@ jobs:
         
     - name: run tests
       run: |
+        sudo apt-get -y install python3-setuptools
+        sudo python3 -m pip install --upgrade coveralls
         SS_COMPACT=1 ./docker_build.sh v4.0.3 test minimal
         docker run --rm \
                -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
@@ -35,7 +37,6 @@ jobs:
                coverage run --branch -m pytest
         cp tests/.coverage .
         sudo ln -s . /pygraphblas
-        sudo python3 -m pip install --upgrade coveralls
         coveralls
 
       env:
