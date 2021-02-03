@@ -28,6 +28,7 @@ jobs:
         pip3 install --upgrade coveralls
         ./github_test.sh
         mv tests/.coverage .coverage
+        sudo ln -s pygraphblas /pygraphblas
         python3 -m coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
