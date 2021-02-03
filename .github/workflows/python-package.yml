@@ -20,16 +20,17 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 1
+        github-token: ${{ secrets.github_token }}
     - name: tests
+      run: |
+        ./github_test.sh
+        mv tests/.coverage .coverage
+        coveralls
       with:
         github-token: ${{ secrets.github_token }}
       env:
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
         COVERALLS_PARALLEL: true
-      run: |
-        ./github_test.sh
-        mv tests/.coverage .coverage
-        coveralls
 
   coveralls:
     name: Indicate completion to coveralls.io
