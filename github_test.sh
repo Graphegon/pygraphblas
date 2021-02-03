@@ -1,4 +1,4 @@
-#SS_COMPACT=1 ./docker_build.sh v4.0.3 test minimal
+SS_COMPACT=1 ./docker_build.sh v4.0.3 test minimal
 docker run --rm \
        -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
        -v `pwd`/demo:/pygraphblas/demo               \
