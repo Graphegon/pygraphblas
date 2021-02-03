@@ -80,11 +80,8 @@ class Matrix:
 
     __slots__ = ("_matrix", "type", "_funcs", "_keep_alives")
 
-    def _check(self, res, raise_no_val=False):
+    def _check(self, res):
         if res != lib.GrB_SUCCESS:
-            if raise_no_val and res == lib.GrB_NO_VALUE:
-                raise KeyError  # pragma: nocover
-
             error_string = ffi.new("char**")
             lib.GrB_Matrix_error(error_string, self._matrix[0])
             raise _error_codes[res](ffi.string(error_string[0]))
