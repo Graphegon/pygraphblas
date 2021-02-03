@@ -35,6 +35,7 @@ jobs:
                coverage run --branch -m pytest
         cp tests/.coverage .
         sudo ln -s . /pygraphblas
+        sudo python3 -m pip install --upgrade coveralls
         coveralls
 
       env:
