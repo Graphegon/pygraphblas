@@ -24,7 +24,7 @@ jobs:
         
     - name: run tests
       run: |
-        apt install python3-setuptools
+        sudo apt-get -y install python3-setuptools
         pip3 install --upgrade coveralls
         ./github_test.sh
         mv tests/.coverage .coverage
