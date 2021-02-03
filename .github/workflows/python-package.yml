@@ -16,7 +16,9 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
 
     steps:
-    - name: run tests
+    - name: checkout
+      uses: actions/checkout@v2
+    - name:
       run: |
         ./github_test.sh
 
