@@ -24,26 +24,28 @@ jobs:
         
     - name: run tests
       run: |
-        sudo apt-get -y install python3-setuptools
-        pip3 install --upgrade coveralls
         ./github_test.sh
-        mv tests/.coverage .coverage
-        sudo ln -s . /pygraphblas
-        python3 -m coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
         COVERALLS_PARALLEL: true
 
-  coveralls:
-    name: Indicate completion to coveralls.io
-    needs: test
-    runs-on: ubuntu-latest
-    container: python:3-slim
-    steps:
-    - name: Finished
-      run: |
-        pip3 install --upgrade coveralls
-        coveralls --finish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # coveralls:
+  #   name: Indicate completion to coveralls.io
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   container: python:3-slim
+  #   steps:
+  #   - name: Finished
+  #     run: |
+  #       pip3 install --upgrade coveralls
+  #       coveralls --finish
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        # sudo apt-get -y install python3-setuptools
+        # pip3 install --upgrade coveralls
+  
+        # mv tests/.coverage .coverage
+        # sudo ln -s . /pygraphblas
+        # python3 -m coveralls --service=github
