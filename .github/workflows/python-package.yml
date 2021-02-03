@@ -21,12 +21,14 @@ jobs:
       with:
         fetch-depth: 1
     - name: tests
+      run: |
+        ./github_test.sh
+    - name: tests
+      uses: coverallsapp/github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
         COVERALLS_PARALLEL: true
-      run: |
-        ./github_test.sh
 
   coveralls:
     name: Indicate completion to coveralls.io
