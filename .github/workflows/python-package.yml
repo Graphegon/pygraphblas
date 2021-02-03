@@ -28,7 +28,7 @@ jobs:
         pip3 install --upgrade coveralls
         ./github_test.sh
         mv tests/.coverage .coverage
-        python3 -m coveralls
+        python3 -m coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
