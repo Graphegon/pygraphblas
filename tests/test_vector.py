@@ -291,6 +291,9 @@ def test_vector_assign():
     v[1:] = 0
     assert v.iseq(Vector.from_lists(list(range(10)), [3] + list(repeat(0, 9))))
 
+    with pytest.raises(TypeError):
+        v[1:] = "foo"
+
 
 def test_vxm():
     m = Matrix.from_lists([0, 1, 2, 0], [1, 2, 0, 3], [1, 2, 3, 4])

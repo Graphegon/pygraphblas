@@ -463,8 +463,10 @@ class Matrix:
         """
         return self.pattern()
 
-    def dup(self):
+    def dup(self, clear=False):
         """Create an duplicate Matrix.
+
+        If `clear` is true return an empty duplicate.
 
         >>> A = Matrix.sparse(types.UINT8)
         >>> A[1,1] = 42
@@ -473,8 +475,12 @@ class Matrix:
         42
         >>> B is not A
         True
+        >>> C = A.dup(True)
+        >>> assert not C
 
         """
+        if clear:
+            return self.__class__.sparse(self.type, self.nrows, self.ncols)
         new_mat = ffi.new("GrB_Matrix*")
         self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
@@ -659,6 +665,7 @@ class Matrix:
           1|      314|  1
           2|149      |  2
               0  1  2
+
         >>> MT = M.transpose()
         >>> print(MT)
               0  1  2
@@ -666,12 +673,22 @@ class Matrix:
           1| 42      |  1
           2|   314   |  2
               0  1  2
+
         >>> MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
         >>> print(MT)
               0  1  2
           0|     t   |  0
           1|        t|  1
           2|  t      |  2
+              0  1  2
+
+        >>> N = M.dup(True)
+        >>> MT = M.transpose(desc=descriptor.T0, out=N)
+        >>> print(MT)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
               0  1  2
 
         """
@@ -1224,6 +1241,8 @@ class Matrix:
         >>> M.reduce_bool()
         True
 
+        >>> M.reduce_bool(types.BOOL.LOR_MONOID)
+        True
         """
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -1245,6 +1264,8 @@ class Matrix:
         >>> M[0,2] = 42
         >>> M.reduce_int()
         84
+        >>> M.reduce_int(types.INT8.MIN_MONOID)
+        42
 
         """
         if mon is None:
@@ -1295,6 +1316,16 @@ class Matrix:
         1|
         2|-42.0
 
+        >>> print(M.reduce_vector(types.FP32.MIN_MONOID))
+        0|42.0
+        1|
+        2|-42.0
+
+        >>> v = Vector.sparse(types.FP32, M.nrows)
+        >>> print(M.reduce_vector(out=v))
+        0|84.0
+        1|
+        2|-42.0
         """
         if mon is None:
             mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
@@ -1343,6 +1374,14 @@ class Matrix:
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         >>> print(M.apply_first(1, types.INT64.PLUS))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
+        >>> N = Matrix.sparse(M.type, M.nrows, M.ncols)
+        >>> print(M.apply_first(1, types.INT64.PLUS, out=N))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1405,6 +1444,38 @@ class Matrix:
         `<=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
         `!=0` | lib.GxB_NONZERO  | Select nonzero value.
         `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> print(M.select('>', 0))
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
+
+        >>> print(M.select('>=', 0))
+              0  1  2
+          0|         |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+
+        >>> print(M.select('<', 0))
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
+
+        >>> N = M.dup(clear=True)
+        >>> M.select('<', 0, out=N) is N
+        True
+        >>> print(N)
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
 
         """
         if out is None:
@@ -1563,15 +1634,21 @@ class Matrix:
         """
         return self.select(lib.GxB_NONZERO)
 
-    def _full(self, identity=None):
+    def _full(self):
         """"""
         B = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if identity is None:
-            identity = self.type.one
 
         self._check(
             self.type._Matrix_assignScalar(
-                B._matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
+                B._matrix[0],
+                NULL,
+                NULL,
+                self.type.one,
+                lib.GrB_ALL,
+                0,
+                lib.GrB_ALL,
+                0,
+                NULL,
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -1626,8 +1703,8 @@ class Matrix:
             accum = accum.get_binaryop(self.type)
         if desc is None or desc == Default:
             desc = current_desc.get(Default)
-        if isinstance(desc, Descriptor):
-            desc = desc.desc[0]
+
+        desc = desc.desc[0]
         return mask, accum, desc
 
     def mxm(
@@ -1947,7 +2024,53 @@ class Matrix:
     def kronecker(
         self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
     ):
-        """[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product)."""
+        """[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
+
+        >>> n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+        >>> m = Matrix.dense(types.UINT64, 3, 3, fill=1)
+        >>> print(n.kronecker(m))
+              0  1  2  3  4  5  6  7  8
+          0|           2  2  2         |  0
+          1|           2  2  2         |  1
+          2|           2  2  2         |  2
+          3|                    3  3  3|  3
+          4|                    3  3  3|  4
+          5|                    3  3  3|  5
+          6|  4  4  4                  |  6
+          7|  4  4  4                  |  7
+          8|  4  4  4                  |  8
+              0  1  2  3  4  5  6  7  8
+
+        >>> o = Matrix.sparse(types.UINT64, 9, 9)
+        >>> m.kronecker(n, out=o) is o
+        True
+        >>> print(o)
+              0  1  2  3  4  5  6  7  8
+          0|     2        2        2   |  0
+          1|        3        3        3|  1
+          2|  4        4        4      |  2
+          3|     2        2        2   |  3
+          4|        3        3        3|  4
+          5|  4        4        4      |  5
+          6|     2        2        2   |  6
+          7|        3        3        3|  7
+          8|  4        4        4      |  8
+              0  1  2  3  4  5  6  7  8
+
+        >>>
+        >>> print(m.kronecker(n, op=types.UINT64.MIN))
+              0  1  2  3  4  5  6  7  8
+          0|     1        1        1   |  0
+          1|        1        1        1|  1
+          2|  1        1        1      |  2
+          3|     1        1        1   |  3
+          4|        1        1        1|  4
+          5|  1        1        1      |  5
+          6|     1        1        1   |  6
+          7|        1        1        1|  7
+          8|  1        1        1      |  8
+              0  1  2  3  4  5  6  7  8
+        """
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -1998,15 +2121,26 @@ class Matrix:
           1|        0|  1
           2|149      |  2
               0  1  2
+
         >>> print(M.extract_matrix(0, 1))
               0
           0| 42|  0
               0
+
+        >>> O = Matrix.sparse(types.UINT64, 1, 1)
+        >>> M.extract_matrix(0, 1, out=O) is O
+        True
+        >>> print(O)
+              0
+          0| 42|  0
+              0
+
         >>> print(M.extract_matrix(slice(1,2), 2))
               0
           0|  0|  0
           1|   |  1
               0
+
         >>> print(M.extract_matrix(0, slice(0,1)))
               0  1
           0|    42|  0
@@ -2065,6 +2199,15 @@ class Matrix:
         0|
         1|
         2|149
+
+        >>> v = Vector.sparse(types.UINT64, M.ncols)
+        >>> M.extract_col(0, out=v) is v
+        True
+        >>> print(v)
+        0|
+        1|
+        2|149
+
         """
         stop_val = self.ncols if T0 in desc else self.nrows
         if out is None:
@@ -2223,10 +2366,8 @@ class Matrix:
         """
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
-        if isize is None:
-            isize = self.nrows
-        if jsize is None:
-            jsize = self.ncols
+        isize = self.nrows
+        jsize = self.ncols
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -2324,6 +2465,27 @@ class Matrix:
               0  1  2
         >>> M.clear()
 
+        Just an integer index does a row assignment:
+
+        >>> M.clear()
+        >>> M[1] = Vector.from_lists([0,1], [True, True],3)
+        >>> print(M)
+              0  1  2
+          0|         |  0
+          1|  t  t   |  1
+          2|         |  2
+              0  1  2
+        >>> M.clear()
+
+        >>> M[0:1,0:1] = True
+        >>> print(M)
+              0  1  2
+          0|  t  t   |  0
+          1|  t  t   |  1
+          2|         |  2
+              0  1  2
+        >>> M.clear()
+
         """
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice is not None:
@@ -2351,22 +2513,27 @@ class Matrix:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            # A[3] = assign single row  vector
+            # A[3]
             if isinstance(value, Vector):
+                # A[3] = Vector
                 return self.assign_row(index, value)
-            elif isinstance(value, (bool, int, float, complex)):
+            if isinstance(value, (bool, int, float, complex)):
+                # A[3] = scalar
                 return self.assign_scalar(value, index)
+            raise TypeError
 
-        if isinstance(index, slice):
-            # A[3:] = assign submatrix to rows
+        elif isinstance(index, slice):
             if isinstance(value, Matrix):
+                # A[3:] = assign submatrix to rows
                 self.assign_matrix(value, index, None)
                 return
             if isinstance(value, (bool, int, float, complex)):
+                # A[3:] = 3 assign scalar to rows
                 self.assign_scalar(value, index, None)
                 return
+            raise TypeError
 
-        if isinstance(index, Matrix):
+        elif isinstance(index, Matrix):
             if isinstance(value, Matrix):
                 # A[M] = B masked matrix assignment
                 self.assign_matrix(value, mask=index)
@@ -2377,7 +2544,7 @@ class Matrix:
             self.assign_scalar(value, mask=index)
             return
 
-        if not isinstance(index, (tuple, list)):
+        elif not isinstance(index, (tuple, list)):
             raise TypeError
 
         i0 = index[0]
@@ -2407,10 +2574,11 @@ class Matrix:
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, i0, i1)
                 return
-
-            # a[:,:] assign submatrix
-            self.assign_matrix(value, i0, i1)
-            return
+            else:
+                # a[:,:] assign submatrix
+                self.assign_matrix(value, i0, i1)
+                return
+        raise TypeError
 
     def __delitem__(self, index):
         if (
@@ -2479,7 +2647,7 @@ class Matrix:
             )
             if i != len(rows) - 1:
                 result += "\n"
-        return result
+        return result.rstrip()
 
     def to_html_table(self, title="A", width=2):
         """Return a string markdown table representation of the Matrix.

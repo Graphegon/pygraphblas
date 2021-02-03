@@ -7115,8 +7115,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         return self.pattern()
 
-    def dup(self):
+    def dup(self, clear=False):
         &#34;&#34;&#34;Create an duplicate Matrix.
+
+        If `clear` is true return an empty duplicate.
 
         &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
         &gt;&gt;&gt; A[1,1] = 42
@@ -7125,8 +7127,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         42
         &gt;&gt;&gt; B is not A
         True
+        &gt;&gt;&gt; C = A.dup(True)
+        &gt;&gt;&gt; assert not C
 
         &#34;&#34;&#34;
+        if clear:
+            return self.__class__.sparse(self.type, self.nrows, self.ncols)
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
         self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
         return self.__class__(new_mat, self.type)
@@ -7311,6 +7317,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|      314|  1
           2|149      |  2
               0  1  2
+
         &gt;&gt;&gt; MT = M.transpose()
         &gt;&gt;&gt; print(MT)
               0  1  2
@@ -7318,12 +7325,22 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1| 42      |  1
           2|   314   |  2
               0  1  2
+
         &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
         &gt;&gt;&gt; print(MT)
               0  1  2
           0|     t   |  0
           1|        t|  1
           2|  t      |  2
+              0  1  2
+
+        &gt;&gt;&gt; N = M.dup(True)
+        &gt;&gt;&gt; MT = M.transpose(desc=descriptor.T0, out=N)
+        &gt;&gt;&gt; print(MT)
+              0  1  2
+          0|    42   |  0
+          1|      314|  1
+          2|149      |  2
               0  1  2
 
         &#34;&#34;&#34;
@@ -7876,6 +7893,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M.reduce_bool()
         True
 
+        &gt;&gt;&gt; M.reduce_bool(types.BOOL.LOR_MONOID)
+        True
         &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -7897,6 +7916,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; M[0,2] = 42
         &gt;&gt;&gt; M.reduce_int()
         84
+        &gt;&gt;&gt; M.reduce_int(types.INT8.MIN_MONOID)
+        42
 
         &#34;&#34;&#34;
         if mon is None:
@@ -7947,6 +7968,16 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         1|
         2|-42.0
 
+        &gt;&gt;&gt; print(M.reduce_vector(types.FP32.MIN_MONOID))
+        0|42.0
+        1|
+        2|-42.0
+
+        &gt;&gt;&gt; v = Vector.sparse(types.FP32, M.nrows)
+        &gt;&gt;&gt; print(M.reduce_vector(out=v))
+        0|84.0
+        1|
+        2|-42.0
         &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
@@ -7995,6 +8026,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
+        &gt;&gt;&gt; N = Matrix.sparse(M.type, M.nrows, M.ncols)
+        &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS, out=N))
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -8057,6 +8096,38 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         `&lt;=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
         `!=0` | lib.GxB_NONZERO  | Select nonzero value.
         `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; print(M.select(&#39;&gt;&#39;, 0))
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
+
+        &gt;&gt;&gt; print(M.select(&#39;&gt;=&#39;, 0))
+              0  1  2
+          0|         |  0
+          1|        0|  1
+          2|149      |  2
+              0  1  2
+
+        &gt;&gt;&gt; print(M.select(&#39;&lt;&#39;, 0))
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
+
+        &gt;&gt;&gt; N = M.dup(clear=True)
+        &gt;&gt;&gt; M.select(&#39;&lt;&#39;, 0, out=N) is N
+        True
+        &gt;&gt;&gt; print(N)
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
 
         &#34;&#34;&#34;
         if out is None:
@@ -8215,15 +8286,21 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
-    def _full(self, identity=None):
+    def _full(self):
         &#34;&#34;&#34;&#34;&#34;&#34;
         B = self.__class__.sparse(self.type, self.nrows, self.ncols)
-        if identity is None:
-            identity = self.type.one
 
         self._check(
             self.type._Matrix_assignScalar(
-                B._matrix[0], NULL, NULL, identity, lib.GrB_ALL, 0, lib.GrB_ALL, 0, NULL
+                B._matrix[0],
+                NULL,
+                NULL,
+                self.type.one,
+                lib.GrB_ALL,
+                0,
+                lib.GrB_ALL,
+                0,
+                NULL,
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -8278,8 +8355,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             accum = accum.get_binaryop(self.type)
         if desc is None or desc == Default:
             desc = current_desc.get(Default)
-        if isinstance(desc, Descriptor):
-            desc = desc.desc[0]
+
+        desc = desc.desc[0]
         return mask, accum, desc
 
     def mxm(
@@ -8599,7 +8676,53 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def kronecker(
         self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
     ):
-        &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).&#34;&#34;&#34;
+        &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
+
+        &gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+        &gt;&gt;&gt; m = Matrix.dense(types.UINT64, 3, 3, fill=1)
+        &gt;&gt;&gt; print(n.kronecker(m))
+              0  1  2  3  4  5  6  7  8
+          0|           2  2  2         |  0
+          1|           2  2  2         |  1
+          2|           2  2  2         |  2
+          3|                    3  3  3|  3
+          4|                    3  3  3|  4
+          5|                    3  3  3|  5
+          6|  4  4  4                  |  6
+          7|  4  4  4                  |  7
+          8|  4  4  4                  |  8
+              0  1  2  3  4  5  6  7  8
+
+        &gt;&gt;&gt; o = Matrix.sparse(types.UINT64, 9, 9)
+        &gt;&gt;&gt; m.kronecker(n, out=o) is o
+        True
+        &gt;&gt;&gt; print(o)
+              0  1  2  3  4  5  6  7  8
+          0|     2        2        2   |  0
+          1|        3        3        3|  1
+          2|  4        4        4      |  2
+          3|     2        2        2   |  3
+          4|        3        3        3|  4
+          5|  4        4        4      |  5
+          6|     2        2        2   |  6
+          7|        3        3        3|  7
+          8|  4        4        4      |  8
+              0  1  2  3  4  5  6  7  8
+
+        &gt;&gt;&gt;
+        &gt;&gt;&gt; print(m.kronecker(n, op=types.UINT64.MIN))
+              0  1  2  3  4  5  6  7  8
+          0|     1        1        1   |  0
+          1|        1        1        1|  1
+          2|  1        1        1      |  2
+          3|     1        1        1   |  3
+          4|        1        1        1|  4
+          5|  1        1        1      |  5
+          6|     1        1        1   |  6
+          7|        1        1        1|  7
+          8|  1        1        1      |  8
+              0  1  2  3  4  5  6  7  8
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         typ = cast or types.promote(self.type, other.type)
         if out is None:
@@ -8650,15 +8773,26 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|        0|  1
           2|149      |  2
               0  1  2
+
         &gt;&gt;&gt; print(M.extract_matrix(0, 1))
               0
           0| 42|  0
               0
+
+        &gt;&gt;&gt; O = Matrix.sparse(types.UINT64, 1, 1)
+        &gt;&gt;&gt; M.extract_matrix(0, 1, out=O) is O
+        True
+        &gt;&gt;&gt; print(O)
+              0
+          0| 42|  0
+              0
+
         &gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
               0
           0|  0|  0
           1|   |  1
               0
+
         &gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
               0  1
           0|    42|  0
@@ -8717,6 +8851,15 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         0|
         1|
         2|149
+
+        &gt;&gt;&gt; v = Vector.sparse(types.UINT64, M.ncols)
+        &gt;&gt;&gt; M.extract_col(0, out=v) is v
+        True
+        &gt;&gt;&gt; print(v)
+        0|
+        1|
+        2|149
+
         &#34;&#34;&#34;
         stop_val = self.ncols if T0 in desc else self.nrows
         if out is None:
@@ -8875,10 +9018,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         I, ni, isize = _build_range(rindex, self.nrows - 1)
         J, nj, jsize = _build_range(cindex, self.ncols - 1)
-        if isize is None:
-            isize = self.nrows
-        if jsize is None:
-            jsize = self.ncols
+        isize = self.nrows
+        jsize = self.ncols
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -8976,6 +9117,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2
         &gt;&gt;&gt; M.clear()
 
+        Just an integer index does a row assignment:
+
+        &gt;&gt;&gt; M.clear()
+        &gt;&gt;&gt; M[1] = Vector.from_lists([0,1], [True, True],3)
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|         |  0
+          1|  t  t   |  1
+          2|         |  2
+              0  1  2
+        &gt;&gt;&gt; M.clear()
+
+        &gt;&gt;&gt; M[0:1,0:1] = True
+        &gt;&gt;&gt; print(M)
+              0  1  2
+          0|  t  t   |  0
+          1|  t  t   |  1
+          2|         |  2
+              0  1  2
+        &gt;&gt;&gt; M.clear()
+
         &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if row_slice is not None:
@@ -9003,22 +9165,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            # A[3] = assign single row  vector
+            # A[3]
             if isinstance(value, Vector):
+                # A[3] = Vector
                 return self.assign_row(index, value)
-            elif isinstance(value, (bool, int, float, complex)):
+            if isinstance(value, (bool, int, float, complex)):
+                # A[3] = scalar
                 return self.assign_scalar(value, index)
+            raise TypeError
 
-        if isinstance(index, slice):
-            # A[3:] = assign submatrix to rows
+        elif isinstance(index, slice):
             if isinstance(value, Matrix):
+                # A[3:] = assign submatrix to rows
                 self.assign_matrix(value, index, None)
                 return
             if isinstance(value, (bool, int, float, complex)):
+                # A[3:] = 3 assign scalar to rows
                 self.assign_scalar(value, index, None)
                 return
+            raise TypeError
 
-        if isinstance(index, Matrix):
+        elif isinstance(index, Matrix):
             if isinstance(value, Matrix):
                 # A[M] = B masked matrix assignment
                 self.assign_matrix(value, mask=index)
@@ -9029,7 +9196,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             self.assign_scalar(value, mask=index)
             return
 
-        if not isinstance(index, (tuple, list)):
+        elif not isinstance(index, (tuple, list)):
             raise TypeError
 
         i0 = index[0]
@@ -9059,10 +9226,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, i0, i1)
                 return
-
-            # a[:,:] assign submatrix
-            self.assign_matrix(value, i0, i1)
-            return
+            else:
+                # a[:,:] assign submatrix
+                self.assign_matrix(value, i0, i1)
+                return
+        raise TypeError
 
     def __delitem__(self, index):
         if (
@@ -9131,7 +9299,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
             if i != len(rows) - 1:
                 result += &#34;\n&#34;
-        return result
+        return result.rstrip()
 
     def to_html_table(self, title=&#34;A&#34;, width=2):
         &#34;&#34;&#34;Return a string markdown table representation of the Matrix.
@@ -10158,6 +10326,14 @@ first input to a scalar first.</p>
   1|        1|  1
   2|150      |  2
       0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; N = Matrix.sparse(M.type, M.nrows, M.ncols)
+&gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS, out=N))
+      0  1  2
+  0|   -41   |  0
+  1|        1|  1
+  2|150      |  2
+      0  1  2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -10169,6 +10345,14 @@ first input to a scalar first.</p>
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
     &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS))
+          0  1  2
+      0|   -41   |  0
+      1|        1|  1
+      2|150      |  2
+          0  1  2
+
+    &gt;&gt;&gt; N = Matrix.sparse(M.type, M.nrows, M.ncols)
+    &gt;&gt;&gt; print(M.apply_first(1, types.INT64.PLUS, out=N))
           0  1  2
       0|   -41   |  0
       1|        1|  1
@@ -10341,10 +10525,8 @@ with if the index and value arguments are type <code><a title="pygraphblas.Matri
     &#34;&#34;&#34;
     I, ni, isize = _build_range(rindex, self.nrows - 1)
     J, nj, jsize = _build_range(cindex, self.ncols - 1)
-    if isize is None:
-        isize = self.nrows
-    if jsize is None:
-        jsize = self.ncols
+    isize = self.nrows
+    jsize = self.ncols
 
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -10480,6 +10662,26 @@ index to one row or column:</p>
   2|     t   |  2
       0  1  2
 &gt;&gt;&gt; M.clear()
+</code></pre>
+<p>Just an integer index does a row assignment:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M.clear()
+&gt;&gt;&gt; M[1] = Vector.from_lists([0,1], [True, True],3)
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|         |  0
+  1|  t  t   |  1
+  2|         |  2
+      0  1  2
+&gt;&gt;&gt; M.clear()
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M[0:1,0:1] = True
+&gt;&gt;&gt; print(M)
+      0  1  2
+  0|  t  t   |  0
+  1|  t  t   |  1
+  2|         |  2
+      0  1  2
+&gt;&gt;&gt; M.clear()
 </code></pre></div>
 <details class="source">
 <summary>
@@ -10570,6 +10772,27 @@ index to one row or column:</p>
       0|     t   |  0
       1|     t   |  1
       2|     t   |  2
+          0  1  2
+    &gt;&gt;&gt; M.clear()
+
+    Just an integer index does a row assignment:
+
+    &gt;&gt;&gt; M.clear()
+    &gt;&gt;&gt; M[1] = Vector.from_lists([0,1], [True, True],3)
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|         |  0
+      1|  t  t   |  1
+      2|         |  2
+          0  1  2
+    &gt;&gt;&gt; M.clear()
+
+    &gt;&gt;&gt; M[0:1,0:1] = True
+    &gt;&gt;&gt; print(M)
+          0  1  2
+      0|  t  t   |  0
+      1|  t  t   |  1
+      2|         |  2
           0  1  2
     &gt;&gt;&gt; M.clear()
 
@@ -10769,10 +10992,11 @@ lower left.</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.dup"><code class="name flex">
-<span>def <span class="ident">dup</span></span>(<span>self)</span>
+<span>def <span class="ident">dup</span></span>(<span>self, clear=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create an duplicate Matrix.</p>
+<p>If <code>clear</code> is true return an empty duplicate.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
 &gt;&gt;&gt; A[1,1] = 42
 &gt;&gt;&gt; B = A.dup()
@@ -10780,13 +11004,17 @@ lower left.</p>
 42
 &gt;&gt;&gt; B is not A
 True
+&gt;&gt;&gt; C = A.dup(True)
+&gt;&gt;&gt; assert not C
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def dup(self):
+<pre><code class="python">def dup(self, clear=False):
     &#34;&#34;&#34;Create an duplicate Matrix.
+
+    If `clear` is true return an empty duplicate.
 
     &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
     &gt;&gt;&gt; A[1,1] = 42
@@ -10795,8 +11023,12 @@ True
     42
     &gt;&gt;&gt; B is not A
     True
+    &gt;&gt;&gt; C = A.dup(True)
+    &gt;&gt;&gt; assert not C
 
     &#34;&#34;&#34;
+    if clear:
+        return self.__class__.sparse(self.type, self.nrows, self.ncols)
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
     self._check(lib.GrB_Matrix_dup(new_mat, self._matrix[0]))
     return self.__class__(new_mat, self.type)</code></pre>
@@ -11336,6 +11568,14 @@ B</td>
 0|
 1|
 2|149
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.sparse(types.UINT64, M.ncols)
+&gt;&gt;&gt; M.extract_col(0, out=v) is v
+True
+&gt;&gt;&gt; print(v)
+0|
+1|
+2|149
 </code></pre></div>
 <details class="source">
 <summary>
@@ -11357,6 +11597,15 @@ B</td>
     0|
     1|
     2|149
+
+    &gt;&gt;&gt; v = Vector.sparse(types.UINT64, M.ncols)
+    &gt;&gt;&gt; M.extract_col(0, out=v) is v
+    True
+    &gt;&gt;&gt; print(v)
+    0|
+    1|
+    2|149
+
     &#34;&#34;&#34;
     stop_val = self.ncols if T0 in desc else self.nrows
     if out is None:
@@ -11398,16 +11647,27 @@ in the computation.</p>
   1|        0|  1
   2|149      |  2
       0  1  2
-&gt;&gt;&gt; print(M.extract_matrix(0, 1))
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.extract_matrix(0, 1))
       0
   0| 42|  0
       0
-&gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; O = Matrix.sparse(types.UINT64, 1, 1)
+&gt;&gt;&gt; M.extract_matrix(0, 1, out=O) is O
+True
+&gt;&gt;&gt; print(O)
+      0
+  0| 42|  0
+      0
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
       0
   0|  0|  0
   1|   |  1
       0
-&gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
       0  1
   0|    42|  0
       0  1
@@ -11456,15 +11716,26 @@ in the computation.</p>
       1|        0|  1
       2|149      |  2
           0  1  2
+
     &gt;&gt;&gt; print(M.extract_matrix(0, 1))
           0
       0| 42|  0
           0
+
+    &gt;&gt;&gt; O = Matrix.sparse(types.UINT64, 1, 1)
+    &gt;&gt;&gt; M.extract_matrix(0, 1, out=O) is O
+    True
+    &gt;&gt;&gt; print(O)
+          0
+      0| 42|  0
+          0
+
     &gt;&gt;&gt; print(M.extract_matrix(slice(1,2), 2))
           0
       0|  0|  0
       1|   |  1
           0
+
     &gt;&gt;&gt; print(M.extract_matrix(0, slice(0,1)))
           0  1
       0|    42|  0
@@ -11655,7 +11926,56 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a>.</p></div>
+<div class="desc"><p><a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+&gt;&gt;&gt; m = Matrix.dense(types.UINT64, 3, 3, fill=1)
+&gt;&gt;&gt; print(n.kronecker(m))
+      0  1  2  3  4  5  6  7  8
+  0|           2  2  2         |  0
+  1|           2  2  2         |  1
+  2|           2  2  2         |  2
+  3|                    3  3  3|  3
+  4|                    3  3  3|  4
+  5|                    3  3  3|  5
+  6|  4  4  4                  |  6
+  7|  4  4  4                  |  7
+  8|  4  4  4                  |  8
+      0  1  2  3  4  5  6  7  8
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = Matrix.sparse(types.UINT64, 9, 9)
+&gt;&gt;&gt; m.kronecker(n, out=o) is o
+True
+&gt;&gt;&gt; print(o)
+      0  1  2  3  4  5  6  7  8
+  0|     2        2        2   |  0
+  1|        3        3        3|  1
+  2|  4        4        4      |  2
+  3|     2        2        2   |  3
+  4|        3        3        3|  4
+  5|  4        4        4      |  5
+  6|     2        2        2   |  6
+  7|        3        3        3|  7
+  8|  4        4        4      |  8
+      0  1  2  3  4  5  6  7  8
+</code></pre>
+<blockquote>
+<blockquote>
+<blockquote></blockquote>
+</blockquote>
+</blockquote>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(m.kronecker(n, op=types.UINT64.MIN))
+      0  1  2  3  4  5  6  7  8
+  0|     1        1        1   |  0
+  1|        1        1        1|  1
+  2|  1        1        1      |  2
+  3|     1        1        1   |  3
+  4|        1        1        1|  4
+  5|  1        1        1      |  5
+  6|     1        1        1   |  6
+  7|        1        1        1|  7
+  8|  1        1        1      |  8
+      0  1  2  3  4  5  6  7  8
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11663,7 +11983,53 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <pre><code class="python">def kronecker(
     self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
 ):
-    &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).&#34;&#34;&#34;
+    &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
+
+    &gt;&gt;&gt; n = Matrix.from_lists([0, 1, 2], [1, 2, 0], [2, 3, 4])
+    &gt;&gt;&gt; m = Matrix.dense(types.UINT64, 3, 3, fill=1)
+    &gt;&gt;&gt; print(n.kronecker(m))
+          0  1  2  3  4  5  6  7  8
+      0|           2  2  2         |  0
+      1|           2  2  2         |  1
+      2|           2  2  2         |  2
+      3|                    3  3  3|  3
+      4|                    3  3  3|  4
+      5|                    3  3  3|  5
+      6|  4  4  4                  |  6
+      7|  4  4  4                  |  7
+      8|  4  4  4                  |  8
+          0  1  2  3  4  5  6  7  8
+
+    &gt;&gt;&gt; o = Matrix.sparse(types.UINT64, 9, 9)
+    &gt;&gt;&gt; m.kronecker(n, out=o) is o
+    True
+    &gt;&gt;&gt; print(o)
+          0  1  2  3  4  5  6  7  8
+      0|     2        2        2   |  0
+      1|        3        3        3|  1
+      2|  4        4        4      |  2
+      3|     2        2        2   |  3
+      4|        3        3        3|  4
+      5|  4        4        4      |  5
+      6|     2        2        2   |  6
+      7|        3        3        3|  7
+      8|  4        4        4      |  8
+          0  1  2  3  4  5  6  7  8
+
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; print(m.kronecker(n, op=types.UINT64.MIN))
+          0  1  2  3  4  5  6  7  8
+      0|     1        1        1   |  0
+      1|        1        1        1|  1
+      2|  1        1        1      |  2
+      3|     1        1        1   |  3
+      4|        1        1        1|  4
+      5|  1        1        1      |  5
+      6|     1        1        1   |  6
+      7|        1        1        1|  7
+      8|  1        1        1      |  8
+          0  1  2  3  4  5  6  7  8
+    &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     typ = cast or types.promote(self.type, other.type)
     if out is None:
@@ -12394,6 +12760,9 @@ False
 &gt;&gt;&gt; M[0,1] = True
 &gt;&gt;&gt; M.reduce_bool()
 True
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M.reduce_bool(types.BOOL.LOR_MONOID)
+True
 </code></pre></div>
 <details class="source">
 <summary>
@@ -12409,6 +12778,8 @@ True
     &gt;&gt;&gt; M.reduce_bool()
     True
 
+    &gt;&gt;&gt; M.reduce_bool(types.BOOL.LOR_MONOID)
+    True
     &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.BOOL.LOR_MONOID)
@@ -12473,6 +12844,8 @@ True
 &gt;&gt;&gt; M[0,2] = 42
 &gt;&gt;&gt; M.reduce_int()
 84
+&gt;&gt;&gt; M.reduce_int(types.INT8.MIN_MONOID)
+42
 </code></pre></div>
 <details class="source">
 <summary>
@@ -12488,6 +12861,8 @@ True
     &gt;&gt;&gt; M[0,2] = 42
     &gt;&gt;&gt; M.reduce_int()
     84
+    &gt;&gt;&gt; M.reduce_int(types.INT8.MIN_MONOID)
+    42
 
     &#34;&#34;&#34;
     if mon is None:
@@ -12518,6 +12893,17 @@ True
 0|84.0
 1|
 2|-42.0
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.reduce_vector(types.FP32.MIN_MONOID))
+0|42.0
+1|
+2|-42.0
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.sparse(types.FP32, M.nrows)
+&gt;&gt;&gt; print(M.reduce_vector(out=v))
+0|84.0
+1|
+2|-42.0
 </code></pre></div>
 <details class="source">
 <summary>
@@ -12539,6 +12925,16 @@ True
     1|
     2|-42.0
 
+    &gt;&gt;&gt; print(M.reduce_vector(types.FP32.MIN_MONOID))
+    0|42.0
+    1|
+    2|-42.0
+
+    &gt;&gt;&gt; v = Vector.sparse(types.FP32, M.nrows)
+    &gt;&gt;&gt; print(M.reduce_vector(out=v))
+    0|84.0
+    1|
+    2|-42.0
     &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(getattr(self.type, &#34;PLUS_MONOID&#34;, NULL))
@@ -12685,7 +13081,39 @@ Can be a string mapping to following operators:</p>
 <td>Select equal to zero.</td>
 </tr>
 </tbody>
-</table></div>
+</table>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; print(M.select('&gt;', 0))
+      0  1  2
+  0|         |  0
+  1|         |  1
+  2|149      |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.select('&gt;=', 0))
+      0  1  2
+  0|         |  0
+  1|        0|  1
+  2|149      |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.select('&lt;', 0))
+      0  1  2
+  0|   -42   |  0
+  1|         |  1
+  2|         |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; N = M.dup(clear=True)
+&gt;&gt;&gt; M.select('&lt;', 0, out=N) is N
+True
+&gt;&gt;&gt; print(N)
+      0  1  2
+  0|   -42   |  0
+  1|         |  1
+  2|         |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -12708,6 +13136,38 @@ Can be a string mapping to following operators:</p>
     `&lt;=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
     `!=0` | lib.GxB_NONZERO  | Select nonzero value.
     `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; print(M.select(&#39;&gt;&#39;, 0))
+          0  1  2
+      0|         |  0
+      1|         |  1
+      2|149      |  2
+          0  1  2
+
+    &gt;&gt;&gt; print(M.select(&#39;&gt;=&#39;, 0))
+          0  1  2
+      0|         |  0
+      1|        0|  1
+      2|149      |  2
+          0  1  2
+
+    &gt;&gt;&gt; print(M.select(&#39;&lt;&#39;, 0))
+          0  1  2
+      0|   -42   |  0
+      1|         |  1
+      2|         |  2
+          0  1  2
+
+    &gt;&gt;&gt; N = M.dup(clear=True)
+    &gt;&gt;&gt; M.select(&#39;&lt;&#39;, 0, out=N) is N
+    True
+    &gt;&gt;&gt; print(N)
+          0  1  2
+      0|   -42   |  0
+      1|         |  1
+      2|         |  2
+          0  1  2
 
     &#34;&#34;&#34;
     if out is None:
@@ -12952,7 +13412,7 @@ A|0|1|2
             )
             if i != len(rows) - 1:
                 result += &#34;\n&#34;
-        return result</code></pre>
+        return result.rstrip()</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.to_mm"><code class="name flex">
@@ -13085,19 +13545,30 @@ Guide</a></p>
   1|      314|  1
   2|149      |  2
       0  1  2
-&gt;&gt;&gt; MT = M.transpose()
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; MT = M.transpose()
 &gt;&gt;&gt; print(MT)
       0  1  2
   0|      149|  0
   1| 42      |  1
   2|   314   |  2
       0  1  2
-&gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
 &gt;&gt;&gt; print(MT)
       0  1  2
   0|     t   |  0
   1|        t|  1
   2|  t      |  2
+      0  1  2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; N = M.dup(True)
+&gt;&gt;&gt; MT = M.transpose(desc=descriptor.T0, out=N)
+&gt;&gt;&gt; print(MT)
+      0  1  2
+  0|    42   |  0
+  1|      314|  1
+  2|149      |  2
       0  1  2
 </code></pre></div>
 <details class="source">
@@ -13118,6 +13589,7 @@ Guide</a></p>
       1|      314|  1
       2|149      |  2
           0  1  2
+
     &gt;&gt;&gt; MT = M.transpose()
     &gt;&gt;&gt; print(MT)
           0  1  2
@@ -13125,12 +13597,22 @@ Guide</a></p>
       1| 42      |  1
       2|   314   |  2
           0  1  2
+
     &gt;&gt;&gt; MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
     &gt;&gt;&gt; print(MT)
           0  1  2
       0|     t   |  0
       1|        t|  1
       2|  t      |  2
+          0  1  2
+
+    &gt;&gt;&gt; N = M.dup(True)
+    &gt;&gt;&gt; MT = M.transpose(desc=descriptor.T0, out=N)
+    &gt;&gt;&gt; print(MT)
+          0  1  2
+      0|    42   |  0
+      1|      314|  1
+      2|149      |  2
           0  1  2
 
     &#34;&#34;&#34;
@@ -16996,9 +17478,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         &gt;&gt;&gt; v.iseq(w)
         True
 
+        &gt;&gt;&gt; v.iseq(w, eq_op=types.UINT64.GE)
+        True
         &#34;&#34;&#34;
         if eq_op is None:
-            eq_op = self.type.EQ.get_binaryop(self.type, other.type)
+            eq_op = self.type.EQ
+
+        eq_op = eq_op.get_binaryop()
         result = ffi.new(&#34;_Bool*&#34;)
         self._check(
             lib.LAGraph_Vector_isequal(result, self._vector[0], other._vector[0], eq_op)
@@ -17128,14 +17614,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         self._check(lib.GxB_Vector_type(typ, self._vector[0]))
         return typ[0]
 
-    def _full(self, identity=None):
+    def _full(self):
         B = self.__class__.sparse(self.type, self.size)
-        if identity is None:
-            identity = self.type.one
 
         self._check(
             self.type._Vector_assignScalar(
-                B._vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
+                B._vector[0], NULL, NULL, self.type.one, lib.GrB_ALL, 0, NULL
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -17626,7 +18110,19 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return mask, accum, desc
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce vector to a boolean.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce vector to a boolean.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0, 1], [True, False])
+        &gt;&gt;&gt; v.reduce_bool()
+        True
+        &gt;&gt;&gt; v[0] = False
+        &gt;&gt;&gt; v.reduce_bool()
+        False
+        &gt;&gt;&gt; v[1] = True
+        &gt;&gt;&gt; v.reduce_bool(types.BOOL.LAND_MONOID)
+        False
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
@@ -17640,7 +18136,19 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return result[0]
 
     def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce vector to a integer.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce vector to a integer.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1, 1])
+        &gt;&gt;&gt; v.reduce_int()
+        2
+        &gt;&gt;&gt; v[0] = 0
+        &gt;&gt;&gt; v.reduce_int()
+        1
+        &gt;&gt;&gt; v[1] = 2
+        &gt;&gt;&gt; v.reduce_int(types.INT64.MIN_MONOID)
+        0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -17654,7 +18162,19 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return result[0]
 
     def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Reduce vector to a float.&#34;&#34;&#34;
+        &#34;&#34;&#34;Reduce vector to a float.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1.2, 1.1])
+        &gt;&gt;&gt; v.reduce_float()
+        2.3
+        &gt;&gt;&gt; v[0] = 0
+        &gt;&gt;&gt; v.reduce_float()
+        1.1
+        &gt;&gt;&gt; v[1] = 2.2
+        &gt;&gt;&gt; v.reduce_float(types.FP64.MIN_MONOID)
+        0.0
+
+        &#34;&#34;&#34;
         if mon is None:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -17684,6 +18204,16 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
     def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the first input
         to a scalar first.
+
+
+        &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+        &gt;&gt;&gt; print(v.apply_first(3, types.UINT64.PLUS))
+        0| 4
+        1| 4
+
+        &gt;&gt;&gt; w = Vector.sparse(v.type, v.size)
+        &gt;&gt;&gt; v.apply_first(3, types.UINT64.PLUS, out=w) is w
+        True
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -17721,6 +18251,19 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return out
 
     def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+        &#34;&#34;&#34;Select elements that match the given select operation condition.
+        See `Matrix.select` for possible operators.
+
+        &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 0])
+        &gt;&gt;&gt; print(v.select(&#39;&gt;&#39;, 0))
+        0| 1
+        1|
+
+        &gt;&gt;&gt; w = Vector.sparse(types.UINT8, 2)
+        &gt;&gt;&gt; v.select(&#39;&gt;&#39;, 0, out=w) is w
+        True
+
+        &#34;&#34;&#34;
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, str):
@@ -17755,11 +18298,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         &#34;&#34;&#34;Select vector of nonzero entries.&#34;&#34;&#34;
         return self.select(lib.GxB_NONZERO)
 
-    def to_dense(self, _id=None):
+    def to_dense(self):
         &#34;&#34;&#34;Convert to dense vector.&#34;&#34;&#34;
         out = ffi.new(&#34;GrB_Vector*&#34;)
-        if _id is None:
-            _id = ffi.new(self.type._ptr, 0)
+        _id = ffi.new(self.type._ptr, 0)
         self._check(lib.LAGraph_Vector_to_dense(out, self._vector[0], _id))
         return Vector(out, self.type)
 
@@ -18094,7 +18636,16 @@ def size(self):
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a vector, binding the first input
-to a scalar first.</p></div>
+to a scalar first.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+&gt;&gt;&gt; print(v.apply_first(3, types.UINT64.PLUS))
+0| 4
+1| 4
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; w = Vector.sparse(v.type, v.size)
+&gt;&gt;&gt; v.apply_first(3, types.UINT64.PLUS, out=w) is w
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -18102,6 +18653,16 @@ to a scalar first.</p></div>
 <pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
     &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the first input
     to a scalar first.
+
+
+    &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
+    &gt;&gt;&gt; print(v.apply_first(3, types.UINT64.PLUS))
+    0| 4
+    1| 4
+
+    &gt;&gt;&gt; w = Vector.sparse(v.type, v.size)
+    &gt;&gt;&gt; v.apply_first(3, types.UINT64.PLUS, out=w) is w
+    True
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.size)
@@ -18690,6 +19251,9 @@ element-wise comparison and returns a <code><a title="pygraphblas.Vector" href="
 &gt;&gt;&gt; w = Vector.from_lists([0,1], [1, 1])
 &gt;&gt;&gt; v.iseq(w)
 True
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v.iseq(w, eq_op=types.UINT64.GE)
+True
 </code></pre></div>
 <details class="source">
 <summary>
@@ -18706,9 +19270,13 @@ True
     &gt;&gt;&gt; v.iseq(w)
     True
 
+    &gt;&gt;&gt; v.iseq(w, eq_op=types.UINT64.GE)
+    True
     &#34;&#34;&#34;
     if eq_op is None:
-        eq_op = self.type.EQ.get_binaryop(self.type, other.type)
+        eq_op = self.type.EQ
+
+    eq_op = eq_op.get_binaryop()
     result = ffi.new(&#34;_Bool*&#34;)
     self._check(
         lib.LAGraph_Vector_isequal(result, self._vector[0], other._vector[0], eq_op)
@@ -18784,13 +19352,35 @@ every present value in this vector is set to True.</p></div>
 <span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce vector to a boolean.</p></div>
+<div class="desc"><p>Reduce vector to a boolean.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0, 1], [True, False])
+&gt;&gt;&gt; v.reduce_bool()
+True
+&gt;&gt;&gt; v[0] = False
+&gt;&gt;&gt; v.reduce_bool()
+False
+&gt;&gt;&gt; v[1] = True
+&gt;&gt;&gt; v.reduce_bool(types.BOOL.LAND_MONOID)
+False
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce vector to a boolean.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce vector to a boolean.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0, 1], [True, False])
+    &gt;&gt;&gt; v.reduce_bool()
+    True
+    &gt;&gt;&gt; v[0] = False
+    &gt;&gt;&gt; v.reduce_bool()
+    False
+    &gt;&gt;&gt; v[1] = True
+    &gt;&gt;&gt; v.reduce_bool(types.BOOL.LAND_MONOID)
+    False
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.BOOL.LOR_MONOID)
     mon = mon.get_monoid(self.type)
@@ -18808,13 +19398,35 @@ every present value in this vector is set to True.</p></div>
 <span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce vector to a float.</p></div>
+<div class="desc"><p>Reduce vector to a float.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0, 1], [1.2, 1.1])
+&gt;&gt;&gt; v.reduce_float()
+2.3
+&gt;&gt;&gt; v[0] = 0
+&gt;&gt;&gt; v.reduce_float()
+1.1
+&gt;&gt;&gt; v[1] = 2.2
+&gt;&gt;&gt; v.reduce_float(types.FP64.MIN_MONOID)
+0.0
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce vector to a float.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce vector to a float.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1.2, 1.1])
+    &gt;&gt;&gt; v.reduce_float()
+    2.3
+    &gt;&gt;&gt; v[0] = 0
+    &gt;&gt;&gt; v.reduce_float()
+    1.1
+    &gt;&gt;&gt; v[1] = 2.2
+    &gt;&gt;&gt; v.reduce_float(types.FP64.MIN_MONOID)
+    0.0
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.FP64.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
@@ -18832,13 +19444,35 @@ every present value in this vector is set to True.</p></div>
 <span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Reduce vector to a integer.</p></div>
+<div class="desc"><p>Reduce vector to a integer.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0, 1], [1, 1])
+&gt;&gt;&gt; v.reduce_int()
+2
+&gt;&gt;&gt; v[0] = 0
+&gt;&gt;&gt; v.reduce_int()
+1
+&gt;&gt;&gt; v[1] = 2
+&gt;&gt;&gt; v.reduce_int(types.INT64.MIN_MONOID)
+0
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Reduce vector to a integer.&#34;&#34;&#34;
+    &#34;&#34;&#34;Reduce vector to a integer.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1, 1])
+    &gt;&gt;&gt; v.reduce_int()
+    2
+    &gt;&gt;&gt; v[0] = 0
+    &gt;&gt;&gt; v.reduce_int()
+    1
+    &gt;&gt;&gt; v[1] = 2
+    &gt;&gt;&gt; v.reduce_int(types.INT64.MIN_MONOID)
+    0
+
+    &#34;&#34;&#34;
     if mon is None:
         mon = current_monoid.get(types.INT64.PLUS_MONOID)
     mon = mon.get_monoid(self.type)
@@ -18875,12 +19509,35 @@ outside the resized vector are deleted.</p></div>
 <span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select elements that match the given select operation condition.
+See <code><a title="pygraphblas.Matrix.select" href="#pygraphblas.Matrix.select">Matrix.select()</a></code> for possible operators.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 0])
+&gt;&gt;&gt; print(v.select('&gt;', 0))
+0| 1
+1|
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; w = Vector.sparse(types.UINT8, 2)
+&gt;&gt;&gt; v.select('&gt;', 0, out=w) is w
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+    &#34;&#34;&#34;Select elements that match the given select operation condition.
+    See `Matrix.select` for possible operators.
+
+    &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 0])
+    &gt;&gt;&gt; print(v.select(&#39;&gt;&#39;, 0))
+    0| 1
+    1|
+
+    &gt;&gt;&gt; w = Vector.sparse(types.UINT8, 2)
+    &gt;&gt;&gt; v.select(&#39;&gt;&#39;, 0, out=w) is w
+    True
+
+    &#34;&#34;&#34;
     if out is None:
         out = Vector.sparse(self.type, self.size)
     if isinstance(op, str):
@@ -18933,11 +19590,10 @@ outside the resized vector are deleted.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dense(self, _id=None):
+<pre><code class="python">def to_dense(self):
     &#34;&#34;&#34;Convert to dense vector.&#34;&#34;&#34;
     out = ffi.new(&#34;GrB_Vector*&#34;)
-    if _id is None:
-        _id = ffi.new(self.type._ptr, 0)
+    _id = ffi.new(self.type._ptr, 0)
     self._check(lib.LAGraph_Vector_to_dense(out, self._vector[0], _id))
     return Vector(out, self.type)</code></pre>
 </details>

@@ -503,6 +503,15 @@ def test_matrix_assign():
     with pytest.raises(TypeError):
         m[""] = n
 
+    with pytest.raises(TypeError):
+        m[1] = "foo"
+
+    with pytest.raises(TypeError):
+        m[1:2] = "foo"
+
+    with pytest.raises(TypeError):
+        m["foo", "bar"] = 3
+
 
 def test_kronecker():
     n = Matrix.from_lists(list(range(3)), list(range(3)), list(range(3)))

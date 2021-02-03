@@ -114,9 +114,13 @@ class Vector:
         >>> v.iseq(w)
         True
 
+        >>> v.iseq(w, eq_op=types.UINT64.GE)
+        True
         """
         if eq_op is None:
-            eq_op = self.type.EQ.get_binaryop(self.type, other.type)
+            eq_op = self.type.EQ
+
+        eq_op = eq_op.get_binaryop()
         result = ffi.new("_Bool*")
         self._check(
             lib.LAGraph_Vector_isequal(result, self._vector[0], other._vector[0], eq_op)
@@ -246,14 +250,12 @@ class Vector:
         self._check(lib.GxB_Vector_type(typ, self._vector[0]))
         return typ[0]
 
-    def _full(self, identity=None):
+    def _full(self):
         B = self.__class__.sparse(self.type, self.size)
-        if identity is None:
-            identity = self.type.one
 
         self._check(
             self.type._Vector_assignScalar(
-                B._vector[0], NULL, NULL, identity, lib.GrB_ALL, 0, NULL
+                B._vector[0], NULL, NULL, self.type.one, lib.GrB_ALL, 0, NULL
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -744,7 +746,19 @@ class Vector:
         return mask, accum, desc
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce vector to a boolean."""
+        """Reduce vector to a boolean.
+
+        >>> v = Vector.from_lists([0, 1], [True, False])
+        >>> v.reduce_bool()
+        True
+        >>> v[0] = False
+        >>> v.reduce_bool()
+        False
+        >>> v[1] = True
+        >>> v.reduce_bool(types.BOOL.LAND_MONOID)
+        False
+
+        """
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
         mon = mon.get_monoid(self.type)
@@ -758,7 +772,19 @@ class Vector:
         return result[0]
 
     def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce vector to a integer."""
+        """Reduce vector to a integer.
+
+        >>> v = Vector.from_lists([0, 1], [1, 1])
+        >>> v.reduce_int()
+        2
+        >>> v[0] = 0
+        >>> v.reduce_int()
+        1
+        >>> v[1] = 2
+        >>> v.reduce_int(types.INT64.MIN_MONOID)
+        0
+
+        """
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -772,7 +798,19 @@ class Vector:
         return result[0]
 
     def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
-        """Reduce vector to a float."""
+        """Reduce vector to a float.
+
+        >>> v = Vector.from_lists([0, 1], [1.2, 1.1])
+        >>> v.reduce_float()
+        2.3
+        >>> v[0] = 0
+        >>> v.reduce_float()
+        1.1
+        >>> v[1] = 2.2
+        >>> v.reduce_float(types.FP64.MIN_MONOID)
+        0.0
+
+        """
         if mon is None:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
         mon = mon.get_monoid(self.type)
@@ -802,6 +840,16 @@ class Vector:
     def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
         """Apply a binary operator to the entries in a vector, binding the first input
         to a scalar first.
+
+
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> print(v.apply_first(3, types.UINT64.PLUS))
+        0| 4
+        1| 4
+
+        >>> w = Vector.sparse(v.type, v.size)
+        >>> v.apply_first(3, types.UINT64.PLUS, out=w) is w
+        True
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -839,6 +887,19 @@ class Vector:
         return out
 
     def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+        """Select elements that match the given select operation condition.
+        See `Matrix.select` for possible operators.
+
+        >>> v = Vector.from_lists([0,1], [1, 0])
+        >>> print(v.select('>', 0))
+        0| 1
+        1|
+
+        >>> w = Vector.sparse(types.UINT8, 2)
+        >>> v.select('>', 0, out=w) is w
+        True
+
+        """
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, str):
@@ -873,11 +934,10 @@ class Vector:
         """Select vector of nonzero entries."""
         return self.select(lib.GxB_NONZERO)
 
-    def to_dense(self, _id=None):
+    def to_dense(self):
         """Convert to dense vector."""
         out = ffi.new("GrB_Vector*")
-        if _id is None:
-            _id = ffi.new(self.type._ptr, 0)
+        _id = ffi.new(self.type._ptr, 0)
         self._check(lib.LAGraph_Vector_to_dense(out, self._vector[0], _id))
         return Vector(out, self.type)
 
