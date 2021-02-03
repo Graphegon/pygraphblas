@@ -3,6 +3,7 @@ docker run --rm \
 	   -e GITHUB_TOKEN=${GITHUB_TOKEN} \
 	   -e COVERALLS_FLAG_NAME=${COVERALLS_FLAG_NAME} \
 	   -e COVERALLS_PARALLEL=${COVERALLS_PARALLEL} \
+	   -e COVERALLS_REPO_TOKEN=${GITHUB_TOKEN} \
        -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
        -v `pwd`/demo:/pygraphblas/demo \
        -v `pwd`/docs:/docs \
