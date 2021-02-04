@@ -65,6 +65,7 @@ def draw_graph(
     rankdir="LR",
     show_weight=True,
     concentrate=True,
+        labels=True,
     label_vector=None,
     label_width=None,
     size_vector=None,
@@ -85,20 +86,19 @@ def draw_graph(
     if edge_attr:
         g.attr("edge", **edge_attr)
     if isinstance(label_vector, list):
-        labeler = lambda v, i: v[i]
+        labeler = lambda v, i: v[i] if labels else None
     else:
-        labeler = lambda v, i: v.get(i)
+        labeler = lambda v, i: v.get(i) if labels else None
 
+    breakpoint()
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
-        ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i)
-        jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j)
+        ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i) if labels else None
+        jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j) if labels else None
         vlabel = _str(v, label_width) if show_weight else None
 
         inode = g.node(str(i + ioff), width=size, height=size, label=ilabel)
         jnode = g.node(str(j + joff), width=size, height=size, label=jlabel)
-        if node_attr:
-            jnode.attr(**node_attr)
         w = str(v)
         g.edge(
             str(i + ioff),
