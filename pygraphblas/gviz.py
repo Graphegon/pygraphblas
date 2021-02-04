@@ -90,7 +90,6 @@ def draw_graph(
     else:
         labeler = lambda v, i: v.get(i) if labels else None
 
-    breakpoint()
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
         ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i) if labels else None
