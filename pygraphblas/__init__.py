@@ -19,7 +19,6 @@ the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
 >>> from pygraphblas import *
-
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True for _ in range(len(I))]

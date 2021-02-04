@@ -917,7 +917,7 @@ def test_add():
     assert (m + n).to_lists() == [[0, 1], [0, 1], [10, 2]]
     assert (3 + m).to_lists() == [[0, 1], [0, 1], [8, 4]]
     with pytest.raises(TypeError):
-        'foo' + m
+        "foo" + m
 
 
 def test_iadd_scalar():
