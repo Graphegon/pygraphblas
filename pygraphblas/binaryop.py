@@ -108,12 +108,17 @@ def binop_group(reg):
 
 
 def build_binaryops(__pdoc__):
+    import tempfile
+
     this = sys.modules[__name__]
     for r in chain(binop_group(grb_binop_re), binop_group(pure_bool_re)):
         setattr(this, r.name, r)
         this.__all__.append(r.name)
         op, typ = r.name.split("_")
-        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
+        f = tempfile.TemporaryFile()
+        r.print(f=f)
+        f.seek(0)
+        __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
 def binary_op(arg_type, result_type=None):

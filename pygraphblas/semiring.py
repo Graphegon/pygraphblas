@@ -134,6 +134,8 @@ Semiring {r.name}
 
 
 def build_semirings(__pdoc__):
+    import tempfile
+
     this = sys.modules[__name__]
     for r in chain(
         semiring_group(non_boolean_re),
@@ -144,4 +146,7 @@ def build_semirings(__pdoc__):
     ):
         setattr(this, r.name, r)
         pls, mul, typ = r.name.split("_")
-        __pdoc__[f"{typ}.{pls}_{mul}"] = f"Semiring {r.name}"
+        f = tempfile.TemporaryFile()
+        r.print(f=f)
+        f.seek(0)
+        __pdoc__[f"{typ}.{pls}_{mul}"] = f"""```{str(f.read(), 'utf8')}```"""

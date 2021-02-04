@@ -98,6 +98,8 @@ def monoid_group(reg):
 
 
 def build_monoids(__pdoc__):
+    import tempfile
+
     this = sys.modules[__name__]
     for r in chain(
         monoid_group(gxb_monoid_re),
@@ -106,3 +108,9 @@ def build_monoids(__pdoc__):
         monoid_group(pure_bool_re_v13),
     ):
         setattr(this, r.name, r)
+        f = tempfile.TemporaryFile()
+        r.print(f=f)
+        f.seek(0)
+        this.__all__.append(r.name)
+        op, typ, _ = r.name.split("_")
+        __pdoc__[f"{typ}.{op}_MONOID"] = f"""```{str(f.read(), 'utf8')}```"""

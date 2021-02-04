@@ -67,11 +67,16 @@ def uop_group(reg):
 
 
 def build_unaryops(__pdoc__):
+    import tempfile
+
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
         op, typ = r.name.split("_")
-        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
+        f = tempfile.TemporaryFile()
+        r.print(f=f)
+        f.seek(0)
+        __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
 def _uop_name(name):  # pragma: nocover
