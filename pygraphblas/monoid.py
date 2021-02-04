@@ -36,15 +36,10 @@ current_monoid = contextvars.ContextVar("current_monoid")
 
 class Monoid:
 
-    _auto_monoids = defaultdict(dict)
-
     __slots__ = ("name", "monoid", "token", "op", "type")
 
     def __init__(self, op, typ, monoid, udt=None, boolean=False):
         self.monoid = monoid
-        self.__class__._auto_monoids[op + "_MONOID"][
-            types.Type.gb_from_name(typ)
-        ] = monoid
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, op + "_MONOID", self)
@@ -64,6 +59,19 @@ class Monoid:
 
     def get_monoid(self, left=None, right=None):
         return self.monoid
+
+    def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover
+        """Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`.
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        """
+        _check(lib.GxB_Monoid_fprint(self.monoid, bytes(name, "utf8"), level, f))
 
 
 gxb_monoid_re = re.compile(

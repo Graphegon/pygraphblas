@@ -2704,6 +2704,21 @@ class Matrix:
         )
         return t.render(A=self, title=title)
 
+    def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
+        """Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`..
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        """
+        self._check(
+            lib.GxB_Matrix_fprint(self._matrix[0], bytes(name, "utf8"), level, f)
+        )
+
     def to_string(
         self, format_string="{:>%s}", width=3, prec=5, empty_char="", cell_sep=""
     ):

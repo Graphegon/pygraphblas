@@ -28,8 +28,6 @@ __all__ = ["Semiring", "current_semiring"]
 
 class Semiring:
 
-    _auto_semirings = defaultdict(dict)
-
     __slots__ = ("name", "semiring", "token", "pls", "mul", "type")
 
     def __init__(self, pls, mul, typ, semiring, udt=None):
@@ -41,9 +39,6 @@ class Semiring:
         self.token = None
         name = pls + "_" + mul
         if udt is None:
-            self.__class__._auto_semirings[name][
-                types.Type.gb_from_name(typ)
-            ] = semiring
             cls = getattr(types, typ)
             setattr(cls, name, self)
             types.__pdoc__[f"{typ}.{pls}_{mul}"] = f"UnaryOp {typ}.{pls}_{mul}"
@@ -62,6 +57,19 @@ class Semiring:
     @property
     def ztype(self):
         return types.get_semiring_ztype(self.semiring)
+
+    def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover
+        """Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`.
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        """
+        _check(lib.GxB_Semiring_fprint(self.semiring, bytes(name, "utf8"), level, f))
 
 
 non_boolean_re = re.compile(

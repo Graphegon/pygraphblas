@@ -9363,6 +9363,21 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return t.render(A=self, title=title)
 
+    def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
+        &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`..
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        &#34;&#34;&#34;
+        self._check(
+            lib.GxB_Matrix_fprint(self._matrix[0], bytes(name, &#34;utf8&#34;), level, f)
+        )
+
     def to_string(
         self, format_string=&#34;{:&gt;%s}&#34;, width=3, prec=5, empty_char=&#34;&#34;, cell_sep=&#34;&#34;
     ):
@@ -12751,6 +12766,37 @@ defaults to BOOL.</p>
     if out is None:
         out = Matrix.sparse(typ, self.nrows, self.ncols)
     return self.apply(typ.ONE, out=out)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.print"><code class="name flex">
+<span>def <span class="ident">print</span></span>(<span>self, level=2, name='A', f=sys.stdout)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print the matrix using <code>GxB_Matrix_fprint()</code>, by default to
+<code>sys.stdout</code>..</p>
+<p>Level 1: Short description
+Level 2: Short list, short numbers
+Level 3: Long list, short number
+Level 4: Short list, long numbers
+Level 5: Long list, long numbers</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
+    &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
+    `sys.stdout`..
+
+    Level 1: Short description
+    Level 2: Short list, short numbers
+    Level 3: Long list, short number
+    Level 4: Short list, long numbers
+    Level 5: Long list, long numbers
+
+    &#34;&#34;&#34;
+    self._check(
+        lib.GxB_Matrix_fprint(self._matrix[0], bytes(name, &#34;utf8&#34;), level, f)
+    )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.reduce_bool"><code class="name flex">
@@ -18429,7 +18475,22 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return self.to_string()
 
     def __repr__(self):
-        return &#34;&lt;Vector (%s: %s:%s)&gt;&#34; % (self.size, self.nvals, self.type.__name__)</code></pre>
+        return &#34;&lt;Vector (%s: %s:%s)&gt;&#34; % (self.size, self.nvals, self.type.__name__)
+
+    def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
+        &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`..
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        &#34;&#34;&#34;
+        self._check(
+            lib.GxB_Vector_fprint(self._vector[0], bytes(name, &#34;utf8&#34;), level, f)
+        )</code></pre>
 </details>
 <h3 class="caret">Static methods</h3>
 <dl class="nested active">
@@ -19347,6 +19408,37 @@ every present value in this vector is set to True.</p></div>
     result = Vector.sparse(typ, self.size)
     self.apply(types.BOOL.ONE, out=result)
     return result</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.print"><code class="name flex">
+<span>def <span class="ident">print</span></span>(<span>self, level=2, name='A', f=sys.stdout)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print the matrix using <code>GxB_Matrix_fprint()</code>, by default to
+<code>sys.stdout</code>..</p>
+<p>Level 1: Short description
+Level 2: Short list, short numbers
+Level 3: Long list, short number
+Level 4: Short list, long numbers
+Level 5: Long list, long numbers</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
+    &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
+    `sys.stdout`..
+
+    Level 1: Short description
+    Level 2: Short list, short numbers
+    Level 3: Long list, short number
+    Level 4: Short list, long numbers
+    Level 5: Long list, long numbers
+
+    &#34;&#34;&#34;
+    self._check(
+        lib.GxB_Vector_fprint(self._vector[0], bytes(name, &#34;utf8&#34;), level, f)
+    )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.reduce_bool"><code class="name flex">
@@ -21740,6 +21832,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Matrix.nvals" href="#pygraphblas.Matrix.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.Matrix.offdiag" href="#pygraphblas.Matrix.offdiag">offdiag</a></code></li>
 <li><code><a title="pygraphblas.Matrix.pattern" href="#pygraphblas.Matrix.pattern">pattern</a></code></li>
+<li><code><a title="pygraphblas.Matrix.print" href="#pygraphblas.Matrix.print">print</a></code></li>
 <li><code><a title="pygraphblas.Matrix.random" href="#pygraphblas.Matrix.random">random</a></code></li>
 <li><code><a title="pygraphblas.Matrix.reduce_bool" href="#pygraphblas.Matrix.reduce_bool">reduce_bool</a></code></li>
 <li><code><a title="pygraphblas.Matrix.reduce_float" href="#pygraphblas.Matrix.reduce_float">reduce_float</a></code></li>
@@ -22620,6 +22713,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Vector.nonzero" href="#pygraphblas.Vector.nonzero">nonzero</a></code></li>
 <li><code><a title="pygraphblas.Vector.nvals" href="#pygraphblas.Vector.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.Vector.pattern" href="#pygraphblas.Vector.pattern">pattern</a></code></li>
+<li><code><a title="pygraphblas.Vector.print" href="#pygraphblas.Vector.print">print</a></code></li>
 <li><code><a title="pygraphblas.Vector.reduce_bool" href="#pygraphblas.Vector.reduce_bool">reduce_bool</a></code></li>
 <li><code><a title="pygraphblas.Vector.reduce_float" href="#pygraphblas.Vector.reduce_float">reduce_float</a></code></li>
 <li><code><a title="pygraphblas.Vector.reduce_int" href="#pygraphblas.Vector.reduce_int">reduce_int</a></code></li>
