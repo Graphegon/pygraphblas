@@ -20,3 +20,4 @@ pygifsicle
 pdoc3
 cyjupyter
 pyvis
+ssgetpy

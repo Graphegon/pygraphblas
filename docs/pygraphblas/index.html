@@ -19874,6 +19874,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             result[i, i] = one
         return result
 
+    @classmethod
+    def ssget(cls, name_or_id=None):
+        &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+
+        See [the ssgetpy
+        library](https://github.com/drdarshan/ssgetpy) for options:
+
+        &gt;&gt;&gt; r = Matrix.ssget(1)
+        &gt;&gt;&gt; r.nvals
+        4054
+
+        &#34;&#34;&#34;
+        import ssgetpy, pathlib
+
+        results = []
+        result = ssgetpy.search(name_or_id)[0]
+        mm_path, _ = result.download(extract=True)
+        mm_path = pathlib.Path(mm_path)
+        with open(mm_path / (result.name + &#34;.mtx&#34;), &#34;r&#34;) as f:
+            return cls.from_mm(f, types.FP64)
+
     @property
     def gb_type(self):
         &#34;&#34;&#34;Return the GraphBLAS low-level type object of the Matrix.  This is
@@ -22745,6 +22766,43 @@ def sparse(cls, typ, nrows=None, ncols=None):
     _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
     m = cls(new_mat, typ)
     return m</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.ssget"><code class="name flex">
+<span>def <span class="ident">ssget</span></span>(<span>name_or_id=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load a matrix from the SuiteSparse Matrix Market.</p>
+<p>See <a href="https://github.com/drdarshan/ssgetpy">the ssgetpy
+library</a> for options:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; r = Matrix.ssget(1)
+&gt;&gt;&gt; r.nvals
+4054
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def ssget(cls, name_or_id=None):
+    &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+
+    See [the ssgetpy
+    library](https://github.com/drdarshan/ssgetpy) for options:
+
+    &gt;&gt;&gt; r = Matrix.ssget(1)
+    &gt;&gt;&gt; r.nvals
+    4054
+
+    &#34;&#34;&#34;
+    import ssgetpy, pathlib
+
+    results = []
+    result = ssgetpy.search(name_or_id)[0]
+    mm_path, _ = result.download(extract=True)
+    mm_path = pathlib.Path(mm_path)
+    with open(mm_path / (result.name + &#34;.mtx&#34;), &#34;r&#34;) as f:
+        return cls.from_mm(f, types.FP64)</code></pre>
 </details>
 </dd>
 </dl>
@@ -42393,6 +42451,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Matrix.sparsity" href="#pygraphblas.Matrix.sparsity">sparsity</a></code></li>
 <li><code><a title="pygraphblas.Matrix.sparsity_status" href="#pygraphblas.Matrix.sparsity_status">sparsity_status</a></code></li>
 <li><code><a title="pygraphblas.Matrix.square" href="#pygraphblas.Matrix.square">square</a></code></li>
+<li><code><a title="pygraphblas.Matrix.ssget" href="#pygraphblas.Matrix.ssget">ssget</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_arrays" href="#pygraphblas.Matrix.to_arrays">to_arrays</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_binfile" href="#pygraphblas.Matrix.to_binfile">to_binfile</a></code></li>
 <li><code><a title="pygraphblas.Matrix.to_html_table" href="#pygraphblas.Matrix.to_html_table">to_html_table</a></code></li>

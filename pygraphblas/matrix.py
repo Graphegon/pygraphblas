@@ -344,6 +344,27 @@ class Matrix:
             result[i, i] = one
         return result
 
+    @classmethod
+    def ssget(cls, name_or_id=None):
+        """Load a matrix from the SuiteSparse Matrix Market.
+
+        See [the ssgetpy
+        library](https://github.com/drdarshan/ssgetpy) for options:
+
+        >>> r = Matrix.ssget(1)
+        >>> r.nvals
+        4054
+
+        """
+        import ssgetpy, pathlib
+
+        results = []
+        result = ssgetpy.search(name_or_id)[0]
+        mm_path, _ = result.download(extract=True)
+        mm_path = pathlib.Path(mm_path)
+        with open(mm_path / (result.name + ".mtx"), "r") as f:
+            return cls.from_mm(f, types.FP64)
+
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Matrix.  This is
