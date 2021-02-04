@@ -188,7 +188,7 @@ class Matrix:
 
         >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
-        >>> V = [True for _ in range(len(I))]
+        >>> V = [True] * len(I)
         >>> M = Matrix.from_lists(I, J, V)
         >>> print(M)
               0  1  2  3  4  5  6
@@ -505,7 +505,14 @@ class Matrix:
 
     @property
     def hyper_switch(self):
-        """Get the hyper_switch threshold. (See SuiteSparse User Guide)"""
+        """Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> hs = A.hyper_switch
+        >>> 0 < hs < 1
+        True
+
+        """
         switch = ffi.new("double*")
         self._check(
             lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -514,7 +521,15 @@ class Matrix:
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
-        """Set the hyper_switch threshold. (See SuiteSparse User Guide)"""
+        """Set the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.hyper_switch = 0.5
+        >>> hs = A.hyper_switch
+        >>> hs == 0.5
+        True
+
+        """
         switch = ffi.cast("double", switch)
         self._check(
             lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -522,20 +537,39 @@ class Matrix:
 
     @property
     def format(self):
-        """Get Matrix format. (See SuiteSparse User Guide)"""
+        """Get Matrix format. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.format == lib.GxB_BY_ROW
+        True
+
+        """
         format = ffi.new("GxB_Format_Value*")
         self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
-        """Set Matrix format. (See SuiteSparse User Guide)"""
+        """Set Matrix format. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.format = lib.GxB_BY_COL
+        >>> A.format == lib.GxB_BY_COL
+        True
+
+        """
         format = ffi.cast("GxB_Format_Value", format)
         self._check(lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity(self):
-        """Get Matrix sparsity control. (See SuiteSparse User Guide)"""
+        """Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.sparsity == lib.GxB_AUTO_SPARSITY
+        True
+
+        """
         sparsity = ffi.new("int*")
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -546,7 +580,13 @@ class Matrix:
 
     @sparsity.setter
     def sparsity(self, sparsity):
-        """Set Matrix sparsity control. (See SuiteSparse User Guide)"""
+        """Set Matrix sparsity control. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.sparsity = lib.GxB_FULL + lib.GxB_BITMAP
+        >>> A.sparsity == lib.GxB_FULL + lib.GxB_BITMAP
+
+        """
         sparsity = ffi.cast("int", sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -556,7 +596,13 @@ class Matrix:
 
     @property
     def sparsity_status(self):
-        """Set Matrix sparsity status. (See SuiteSparse User Guide)"""
+        """Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+        >>> A = Matrix.sparse(types.UINT8)
+        >>> A.sparsity_status in [1,2,4,8]
+        True
+
+        """
         status = ffi.new("int*")
         self._check(
             lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)

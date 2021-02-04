@@ -48,11 +48,11 @@ matricies, but a simple approach is to provide three lists of data,
 the first are are lists of the row and column positions that define
 the begining and end of a graph edge, and the third list is the weight
 for that edge:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
+<pre><code class="language-python-repl">&gt;&gt;&gt; import pygraphblas as gb
 &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = [True] * len(I)
-&gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
+&gt;&gt;&gt; M = gb.Matrix.from_lists(I, J, V)
 &gt;&gt;&gt; print(M)
       0  1  2  3  4  5  6
   0|     t     t         |  0
@@ -63,12 +63,12 @@ for that edge:</p>
   5|        t            |  5
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
-&gt;&gt;&gt; from pygraphblas.gviz import *
-&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = gb.gviz.draw_graph(M, show_weight=False, 
 ...     filename='/docs/imgs/Matrix_from_lists2')
 </code></pre>
 <p><img alt="Matrix_from_lists2.png" src="../imgs/Matrix_from_lists2.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix(M, scale=40, 
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = gb.gviz.draw_matrix(M, scale=40, 
 ...     filename='/docs/imgs/Matrix_from_lists_matrix')
 </code></pre>
 <p><img alt="Matrix_from_lists_matrix.png" src="../imgs/Matrix_from_lists_matrix.png"></p>
@@ -90,9 +90,9 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth First
 Search</a> across the
 graph:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_lists([0], [True], M.nrows)
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = gb.Vector.from_lists([0], [True], M.nrows)
 &gt;&gt;&gt; y = v @ M
-&gt;&gt;&gt; g = draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
+&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
 </code></pre>
 <p><img alt="bfs_step.png" src="../imgs/bfs_step.png"></p>
 <p>pygraphblas leverages the expertise in the field of sparse matrix
@@ -130,11 +130,11 @@ the first are are lists of the row and column positions that define
 the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
-&gt;&gt;&gt; from pygraphblas import *
+&gt;&gt;&gt; import pygraphblas as gb
 &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = [True] * len(I)
-&gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
+&gt;&gt;&gt; M = gb.Matrix.from_lists(I, J, V)
 &gt;&gt;&gt; print(M)
       0  1  2  3  4  5  6
   0|     t     t         |  0
@@ -145,13 +145,13 @@ for that edge:
   5|        t            |  5
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
-&gt;&gt;&gt; from pygraphblas.gviz import *
-&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
+
+&gt;&gt;&gt; g = gb.gviz.draw_graph(M, show_weight=False, 
 ...     filename=&#39;/docs/imgs/Matrix_from_lists2&#39;)
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)
 
-&gt;&gt;&gt; g = draw_matrix(M, scale=40, 
+&gt;&gt;&gt; g = gb.gviz.draw_matrix(M, scale=40, 
 ...     filename=&#39;/docs/imgs/Matrix_from_lists_matrix&#39;)
 
 ![Matrix_from_lists_matrix.png](../imgs/Matrix_from_lists_matrix.png)
@@ -175,9 +175,9 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
-&gt;&gt;&gt; v = Vector.from_lists([0], [True], M.nrows)
+&gt;&gt;&gt; v = gb.Vector.from_lists([0], [True], M.nrows)
 &gt;&gt;&gt; y = v @ M
-&gt;&gt;&gt; g = draw_matrix_op(v, &#39;@&#39;, M, y, scale=40, labels=True, column=False, filename=&#39;/docs/imgs/bfs_step&#39;)
+&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, &#39;@&#39;, M, y, scale=40, labels=True, column=False, filename=&#39;/docs/imgs/bfs_step&#39;)
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
@@ -19718,7 +19718,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
-        &gt;&gt;&gt; V = [True for _ in range(len(I))]
+        &gt;&gt;&gt; V = [True] * len(I)
         &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
         &gt;&gt;&gt; print(M)
               0  1  2  3  4  5  6
@@ -20035,7 +20035,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def hyper_switch(self):
-        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; hs = A.hyper_switch
+        &gt;&gt;&gt; 0 &lt; hs &lt; 1
+        True
+
+        &#34;&#34;&#34;
         switch = ffi.new(&#34;double*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -20044,7 +20051,15 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @hyper_switch.setter
     def hyper_switch(self, switch):
-        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.hyper_switch = 0.5
+        &gt;&gt;&gt; hs = A.hyper_switch
+        &gt;&gt;&gt; hs == 0.5
+        True
+
+        &#34;&#34;&#34;
         switch = ffi.cast(&#34;double&#34;, switch)
         self._check(
             lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -20052,20 +20067,39 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def format(self):
-        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.format == lib.GxB_BY_ROW
+        True
+
+        &#34;&#34;&#34;
         format = ffi.new(&#34;GxB_Format_Value*&#34;)
         self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
         return format[0]
 
     @format.setter
     def format(self, format):
-        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix format. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.format = lib.GxB_BY_COL
+        &gt;&gt;&gt; A.format == lib.GxB_BY_COL
+        True
+
+        &#34;&#34;&#34;
         format = ffi.cast(&#34;GxB_Format_Value&#34;, format)
         self._check(lib.GxB_Matrix_Option_set(self._matrix[0], lib.GxB_FORMAT, format))
 
     @property
     def sparsity(self):
-        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.sparsity == lib.GxB_AUTO_SPARSITY
+        True
+
+        &#34;&#34;&#34;
         sparsity = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(
@@ -20076,7 +20110,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @sparsity.setter
     def sparsity(self, sparsity):
-        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity control. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.sparsity = lib.GxB_FULL + lib.GxB_BITMAP
+        &gt;&gt;&gt; A.sparsity == lib.GxB_FULL + lib.GxB_BITMAP
+
+        &#34;&#34;&#34;
         sparsity = ffi.cast(&#34;int&#34;, sparsity)
         self._check(
             lib.GxB_Matrix_Option_set(
@@ -20086,7 +20126,13 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def sparsity_status(self):
-        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+        &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+        &gt;&gt;&gt; A.sparsity_status in [1,2,4,8]
+        True
+
+        &#34;&#34;&#34;
         status = ffi.new(&#34;int*&#34;)
         self._check(
             lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)
@@ -22463,7 +22509,7 @@ are computed from the max values of the provides row and
 column indices lists.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
-&gt;&gt;&gt; V = [True for _ in range(len(I))]
+&gt;&gt;&gt; V = [True] * len(I)
 &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
 &gt;&gt;&gt; print(M)
       0  1  2  3  4  5  6
@@ -22493,7 +22539,7 @@ def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
 
     &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
     &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
-    &gt;&gt;&gt; V = [True for _ in range(len(I))]
+    &gt;&gt;&gt; V = [True] * len(I)
     &gt;&gt;&gt; M = Matrix.from_lists(I, J, V)
     &gt;&gt;&gt; print(M)
           0  1  2  3  4  5  6
@@ -22918,14 +22964,24 @@ def cols(self):
 </dd>
 <dt id="pygraphblas.Matrix.format"><code class="name">var <span class="ident">format</span></code></dt>
 <dd>
-<div class="desc"><p>Get Matrix format. (See SuiteSparse User Guide)</p></div>
+<div class="desc"><p>Get Matrix format. (See SuiteSparse User Guide)</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; A.format == lib.GxB_BY_ROW
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def format(self):
-    &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    &#34;&#34;&#34;Get Matrix format. (See SuiteSparse User Guide)
+
+    &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; A.format == lib.GxB_BY_ROW
+    True
+
+    &#34;&#34;&#34;
     format = ffi.new(&#34;GxB_Format_Value*&#34;)
     self._check(lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_FORMAT, format))
     return format[0]</code></pre>
@@ -22961,14 +23017,26 @@ def gb_type(self):
 </dd>
 <dt id="pygraphblas.Matrix.hyper_switch"><code class="name">var <span class="ident">hyper_switch</span></code></dt>
 <dd>
-<div class="desc"><p>Get the hyper_switch threshold. (See SuiteSparse User Guide)</p></div>
+<div class="desc"><p>Get the hyper_switch threshold. (See SuiteSparse User Guide)</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; hs = A.hyper_switch
+&gt;&gt;&gt; 0 &lt; hs &lt; 1
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def hyper_switch(self):
-    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+    &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; hs = A.hyper_switch
+    &gt;&gt;&gt; 0 &lt; hs &lt; 1
+    True
+
+    &#34;&#34;&#34;
     switch = ffi.new(&#34;double*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_HYPER_SWITCH, switch)
@@ -23105,14 +23173,24 @@ def shape(self):
 </dd>
 <dt id="pygraphblas.Matrix.sparsity"><code class="name">var <span class="ident">sparsity</span></code></dt>
 <dd>
-<div class="desc"><p>Get Matrix sparsity control. (See SuiteSparse User Guide)</p></div>
+<div class="desc"><p>Get Matrix sparsity control. (See SuiteSparse User Guide)</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; A.sparsity == lib.GxB_AUTO_SPARSITY
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def sparsity(self):
-    &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    &#34;&#34;&#34;Get Matrix sparsity control. (See SuiteSparse User Guide)
+
+    &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; A.sparsity == lib.GxB_AUTO_SPARSITY
+    True
+
+    &#34;&#34;&#34;
     sparsity = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(
@@ -23124,14 +23202,24 @@ def sparsity(self):
 </dd>
 <dt id="pygraphblas.Matrix.sparsity_status"><code class="name">var <span class="ident">sparsity_status</span></code></dt>
 <dd>
-<div class="desc"><p>Set Matrix sparsity status. (See SuiteSparse User Guide)</p></div>
+<div class="desc"><p>Set Matrix sparsity status. (See SuiteSparse User Guide)</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+&gt;&gt;&gt; A.sparsity_status in [1,2,4,8]
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def sparsity_status(self):
-    &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    &#34;&#34;&#34;Set Matrix sparsity status. (See SuiteSparse User Guide)
+
+    &gt;&gt;&gt; A = Matrix.sparse(types.UINT8)
+    &gt;&gt;&gt; A.sparsity_status in [1,2,4,8]
+    True
+
+    &#34;&#34;&#34;
     status = ffi.new(&#34;int*&#34;)
     self._check(
         lib.GxB_Matrix_Option_get(self._matrix[0], lib.GxB_SPARSITY_STATUS, status)

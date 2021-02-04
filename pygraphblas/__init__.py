@@ -18,11 +18,11 @@ the first are are lists of the row and column positions that define
 the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
->>> from pygraphblas import *
+>>> import pygraphblas as gb
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True] * len(I)
->>> M = Matrix.from_lists(I, J, V)
+>>> M = gb.Matrix.from_lists(I, J, V)
 >>> print(M)
       0  1  2  3  4  5  6
   0|     t     t         |  0
@@ -33,13 +33,13 @@ for that edge:
   5|        t            |  5
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
->>> from pygraphblas.gviz import *
->>> g = draw_graph(M, show_weight=False, 
+
+>>> g = gb.gviz.draw_graph(M, show_weight=False, 
 ...     filename='/docs/imgs/Matrix_from_lists2')
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)
 
->>> g = draw_matrix(M, scale=40, 
+>>> g = gb.gviz.draw_matrix(M, scale=40, 
 ...     filename='/docs/imgs/Matrix_from_lists_matrix')
 
 ![Matrix_from_lists_matrix.png](../imgs/Matrix_from_lists_matrix.png)
@@ -63,9 +63,9 @@ graph from nodes to their adjacenct neighbors, taking one step in a
 Search](https://en.wikipedia.org/wiki/Breadth-first_search) across the
 graph:
 
->>> v = Vector.from_lists([0], [True], M.nrows)
+>>> v = gb.Vector.from_lists([0], [True], M.nrows)
 >>> y = v @ M
->>> g = draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
+>>> g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
