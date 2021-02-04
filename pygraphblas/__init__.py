@@ -65,7 +65,8 @@ graph:
 
 >>> v = gb.Vector.from_lists([0], [True], M.nrows)
 >>> y = v @ M
->>> g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
+>>> g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, 
+... column=False, filename='/docs/imgs/bfs_step')
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
@@ -182,10 +183,11 @@ def run_doctests(raise_on_error=False):
     from . import descriptor
     from . import base
     from . import gviz
+    from . import binaryop
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, vector, descriptor, gviz, base):
+    for mod in (this, binaryop, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

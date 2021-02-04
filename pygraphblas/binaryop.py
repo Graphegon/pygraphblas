@@ -122,6 +122,33 @@ def build_binaryops(__pdoc__):
 
 
 def binary_op(arg_type, result_type=None):
+    """Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    >>> from random import uniform
+    >>> from pygraphblas import Matrix, binary_op, types, gviz
+    >>> @binary_op(types.FP64)
+    ... def uniform(x, y):
+    ...     return uniform(x, y)
+    >>> A = Matrix.dense(types.FP64, 3, 3, fill=0)
+    >>> B = A.dup()
+    >>> with uniform:
+    ...     A += 1
+
+    Calling `A += 1` with the `uniform` binary operator is the same as
+    calling `apply_second` with an `out` parameter:
+
+    >>> B.apply_second(uniform, 1, out=B) is B
+    True
+    >>> ga = gviz.draw_matrix(A, scale=40,
+    ...     filename='/docs/imgs/binary_op_A')
+    >>> gb = gviz.draw_matrix(B, scale=40,
+    ...     filename='/docs/imgs/binary_op_B')
+
+
+    ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
+
+    """
     if result_type is None:  # pragma: no cover
         result_type = arg_type
 
