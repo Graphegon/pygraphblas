@@ -94,7 +94,7 @@ def _build_uop_def(name, arg_type, result_type):  # pragma: nocover
     return decl
 
 
-def unary_op(arg_type, result_type=None):
+def unary_op(arg_type):
     """Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -113,21 +113,17 @@ def unary_op(arg_type, result_type=None):
     ![unary_op_A.png](../imgs/unary_op_A.png)
 
     """
-    if result_type is None:
-        result_type = arg_type
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
         jitfunc = numba.jit(func, nopython=True)
 
         @numba.cfunc(sig, nopython=True)
-        def wrapper(z, x):
+        def wrapper(z, x):  # pragma: no cover
             result = jitfunc(x[0])
             z[0] = result
 
@@ -135,7 +131,7 @@ def unary_op(arg_type, result_type=None):
         lib.GrB_UnaryOp_new(
             out,
             core_ffi.cast("GxB_unary_function", wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
         )
 

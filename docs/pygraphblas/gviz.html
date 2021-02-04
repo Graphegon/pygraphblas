@@ -86,6 +86,8 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL import Image, ImageDraw
 from json import dumps
 from pathlib import Path
+import matplotlib.pyplot as plt
+from matplotlib.colors import rgb2hex
 
 __all__ = [
     &#34;draw&#34;,
@@ -119,6 +121,7 @@ def draw_graph(
     rankdir=&#34;LR&#34;,
     show_weight=True,
     concentrate=True,
+    labels=True,
     label_vector=None,
     label_width=None,
     size_vector=None,
@@ -129,6 +132,7 @@ def draw_graph(
     graph_attr=None,
     node_attr=None,
     edge_attr=None,
+    edge_cmap=None,
 ):  # pragma: nocover
     g = Digraph(name)
     g.attr(rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34;)
@@ -138,30 +142,56 @@ def draw_graph(
         g.attr(&#34;node&#34;, **node_attr)
     if edge_attr:
         g.attr(&#34;edge&#34;, **edge_attr)
+
+    if edge_cmap is not None:
+        edge_cmap = plt.get_cmap(edge_cmap)
+
     if isinstance(label_vector, list):
-        labeler = lambda v, i: v[i]
+        labeler = lambda v, i: v[i] if labels else &#34;&#34;
     else:
-        labeler = lambda v, i: v.get(i)
+        labeler = lambda v, i: v.get(i) if labels else &#34;&#34;
 
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else &#34;0.5&#34;
-        ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i)
-        jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j)
+        ilabel = (
+            _str(labeler(label_vector, i), label_width)
+            if label_vector
+            else str(i)
+            if labels
+            else &#34;&#34;
+        )
+        jlabel = (
+            _str(labeler(label_vector, j), label_width)
+            if label_vector
+            else str(j)
+            if labels
+            else &#34;&#34;
+        )
         vlabel = _str(v, label_width) if show_weight else None
 
-        inode = g.node(str(i + ioff), width=size, height=size, label=ilabel)
-        jnode = g.node(str(j + joff), width=size, height=size, label=jlabel)
+        args = {}
         if node_attr:
-            jnode.attr(**node_attr)
+            args.update(node_attr)
+        if labels:
+            args[&#34;label&#34;] = ilabel
+        inode = g.node(str(i + ioff), **args)
+
+        args = {}
+        if node_attr:
+            args.update(node_attr)
+        if labels:
+            args[&#34;label&#34;] = jlabel
+        jnode = g.node(str(j + joff), **args)
         w = str(v)
-        g.edge(
-            str(i + ioff),
-            str(j + joff),
-            label=vlabel,
-            weight=w,
-            tooltip=vlabel,
-            len=str(0.3),
-        )
+        args = {}
+        if edge_attr:
+            args.update(edge_attr)
+        if labels:
+            args[&#34;label&#34;] = vlabel
+            args[&#34;tooltip&#34;] = vlabel
+        if edge_cmap:
+            args[&#34;color&#34;] = rgb2hex(edge_cmap(float(v)))
+        g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format=&#34;png&#34;)
     return g
@@ -279,9 +309,6 @@ def draw_matrix(
         mode = &#34;RGB&#34;
 
     if cmap is not None:
-        import matplotlib.pyplot as plt
-        from matplotlib.colors import rgb2hex
-
         cmap = plt.get_cmap(cmap)
 
     sx = ((M.ncols + 1) * scale) + 1
@@ -512,7 +539,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_graph"><code class="name flex">
-<span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', show_weight=True, concentrate=True, label_vector=None, label_width=None, size_vector=None, size_scale=1.0, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None)</span>
+<span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', show_weight=True, concentrate=True, labels=True, label_vector=None, label_width=None, size_vector=None, size_scale=1.0, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -526,6 +553,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     rankdir=&#34;LR&#34;,
     show_weight=True,
     concentrate=True,
+    labels=True,
     label_vector=None,
     label_width=None,
     size_vector=None,
@@ -536,6 +564,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     graph_attr=None,
     node_attr=None,
     edge_attr=None,
+    edge_cmap=None,
 ):  # pragma: nocover
     g = Digraph(name)
     g.attr(rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34;)
@@ -545,30 +574,56 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         g.attr(&#34;node&#34;, **node_attr)
     if edge_attr:
         g.attr(&#34;edge&#34;, **edge_attr)
+
+    if edge_cmap is not None:
+        edge_cmap = plt.get_cmap(edge_cmap)
+
     if isinstance(label_vector, list):
-        labeler = lambda v, i: v[i]
+        labeler = lambda v, i: v[i] if labels else &#34;&#34;
     else:
-        labeler = lambda v, i: v.get(i)
+        labeler = lambda v, i: v.get(i) if labels else &#34;&#34;
 
     for i, j, v in M:
         size = _str(size_vector[i] * size_scale, label_width) if size_vector else &#34;0.5&#34;
-        ilabel = _str(labeler(label_vector, i), label_width) if label_vector else str(i)
-        jlabel = _str(labeler(label_vector, j), label_width) if label_vector else str(j)
+        ilabel = (
+            _str(labeler(label_vector, i), label_width)
+            if label_vector
+            else str(i)
+            if labels
+            else &#34;&#34;
+        )
+        jlabel = (
+            _str(labeler(label_vector, j), label_width)
+            if label_vector
+            else str(j)
+            if labels
+            else &#34;&#34;
+        )
         vlabel = _str(v, label_width) if show_weight else None
 
-        inode = g.node(str(i + ioff), width=size, height=size, label=ilabel)
-        jnode = g.node(str(j + joff), width=size, height=size, label=jlabel)
+        args = {}
         if node_attr:
-            jnode.attr(**node_attr)
+            args.update(node_attr)
+        if labels:
+            args[&#34;label&#34;] = ilabel
+        inode = g.node(str(i + ioff), **args)
+
+        args = {}
+        if node_attr:
+            args.update(node_attr)
+        if labels:
+            args[&#34;label&#34;] = jlabel
+        jnode = g.node(str(j + joff), **args)
         w = str(v)
-        g.edge(
-            str(i + ioff),
-            str(j + joff),
-            label=vlabel,
-            weight=w,
-            tooltip=vlabel,
-            len=str(0.3),
-        )
+        args = {}
+        if edge_attr:
+            args.update(edge_attr)
+        if labels:
+            args[&#34;label&#34;] = vlabel
+            args[&#34;tooltip&#34;] = vlabel
+        if edge_cmap:
+            args[&#34;color&#34;] = rgb2hex(edge_cmap(float(v)))
+        g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format=&#34;png&#34;)
     return g</code></pre>
@@ -697,9 +752,6 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         mode = &#34;RGB&#34;
 
     if cmap is not None:
-        import matplotlib.pyplot as plt
-        from matplotlib.colors import rgb2hex
-
         cmap = plt.get_cmap(cmap)
 
     sx = ((M.ncols + 1) * scale) + 1

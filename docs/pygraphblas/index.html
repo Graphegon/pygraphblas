@@ -40850,7 +40850,7 @@ doctests and Jupyter notebooks …</p></div>
 <h2 class="section-title caret" id="header-functions">Functions</h2>
 <dl class="nested active">
 <dt id="pygraphblas.binary_op"><code class="name flex">
-<span>def <span class="ident">binary_op</span></span>(<span>arg_type, result_type=None)</span>
+<span>def <span class="ident">binary_op</span></span>(<span>arg_type)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
@@ -40879,7 +40879,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def binary_op(arg_type, result_type=None):
+<pre><code class="python">def binary_op(arg_type):
     &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -40907,15 +40907,11 @@ True
     ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
 
     &#34;&#34;&#34;
-    if result_type is None:  # pragma: no cover
-        result_type = arg_type
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
@@ -40930,7 +40926,7 @@ True
         lib.GrB_BinaryOp_new(
             out,
             ffi.cast(&#34;GxB_binary_function&#34;, wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
             arg_type.gb_type,
         )
@@ -41079,7 +41075,7 @@ The parameter is typically in the range
 </details>
 </dd>
 <dt id="pygraphblas.unary_op"><code class="name flex">
-<span>def <span class="ident">unary_op</span></span>(<span>arg_type, result_type=None)</span>
+<span>def <span class="ident">unary_op</span></span>(<span>arg_type)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
@@ -41101,7 +41097,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def unary_op(arg_type, result_type=None):
+<pre><code class="python">def unary_op(arg_type):
     &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -41120,21 +41116,17 @@ True
     ![unary_op_A.png](../imgs/unary_op_A.png)
 
     &#34;&#34;&#34;
-    if result_type is None:
-        result_type = arg_type
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
         jitfunc = numba.jit(func, nopython=True)
 
         @numba.cfunc(sig, nopython=True)
-        def wrapper(z, x):
+        def wrapper(z, x):  # pragma: no cover
             result = jitfunc(x[0])
             z[0] = result
 
@@ -41142,7 +41134,7 @@ True
         lib.GrB_UnaryOp_new(
             out,
             core_ffi.cast(&#34;GxB_unary_function&#34;, wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
         )
 

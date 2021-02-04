@@ -121,7 +121,7 @@ def build_binaryops(__pdoc__):
         __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
-def binary_op(arg_type, result_type=None):
+def binary_op(arg_type):
     """Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -149,15 +149,11 @@ def binary_op(arg_type, result_type=None):
     ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
 
     """
-    if result_type is None:  # pragma: no cover
-        result_type = arg_type
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
@@ -172,7 +168,7 @@ def binary_op(arg_type, result_type=None):
         lib.GrB_BinaryOp_new(
             out,
             ffi.cast("GxB_binary_function", wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
             arg_type.gb_type,
         )
