@@ -95,6 +95,24 @@ def _build_uop_def(name, arg_type, result_type):  # pragma: nocover
 
 
 def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
+    """Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    >>> from random import random
+    >>> from pygraphblas import Matrix, binary_op, types, gviz
+    >>> @unary_op(types.FP64)
+    ... def random(x, y):
+    ...     return random(x, y)
+    >>> A = Matrix.dense(types.FP64, 3, 3, fill=0)
+    >>> A.apply(random)
+
+    >>> ga = gviz.draw_matrix(A, scale=40,
+    ...     filename='/docs/imgs/unary_op_A')
+
+
+    ![![unary_op_B.png](../imgs/unary_op_B.png)
+
+    """
     if result_type is None:
         result_type = arg_type
 
