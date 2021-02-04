@@ -21,21 +21,31 @@ from . import types
 class UnaryOp:
     """Wrapper around GrB_UnaryOpl"""
 
-    _auto_unaryops = defaultdict(dict)
-
     __slots__ = ("name", "unaryop", "ffi", "token")
 
     def __init__(self, name, typ, op):
         self.name = "_".join((name, typ))
         self.unaryop = op
         self.token = None
-        self.__class__._auto_unaryops[name][types.Type.gb_from_name(typ)] = op
         cls = getattr(types, typ)
         setattr(cls, name, self)
         types.__pdoc__[f"{typ}.{name}"] = f"UnaryOp {typ}.{name}"
 
     def get_unaryop(self, operand1=None):
         return self.unaryop
+
+    def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover
+        """Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`.
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        """
+        _check(lib.GxB_UnaryOp_fprint(self.unaryop, bytes(name, "utf8"), level, f))
 
 
 uop_re = re.compile(
@@ -57,11 +67,16 @@ def uop_group(reg):
 
 
 def build_unaryops(__pdoc__):
+    import tempfile
+
     this = sys.modules[__name__]
     for r in chain(uop_group(uop_re)):
         setattr(this, r.name, r)
         op, typ = r.name.split("_")
-        __pdoc__[f"{typ}.{op}"] = f"BinaryOp {r.name}"
+        f = tempfile.TemporaryFile()
+        r.print(f=f)
+        f.seek(0)
+        __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
 def _uop_name(name):  # pragma: nocover

@@ -11,3 +11,4 @@ graphviz
 Pillow
 matplotlib
 coveralls
+ssgetpy

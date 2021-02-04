@@ -344,6 +344,27 @@ class Matrix:
             result[i, i] = one
         return result
 
+    @classmethod
+    def ssget(cls, name_or_id=None):
+        """Load a matrix from the SuiteSparse Matrix Market.
+
+        See [the ssgetpy
+        library](https://github.com/drdarshan/ssgetpy) for options:
+
+        >>> r = Matrix.ssget(1)
+        >>> r.nvals
+        4054
+
+        """
+        import ssgetpy, pathlib
+
+        results = []
+        result = ssgetpy.search(name_or_id)[0]
+        mm_path, _ = result.download(extract=True)
+        mm_path = pathlib.Path(mm_path)
+        with open(mm_path / (result.name + ".mtx"), "r") as f:
+            return cls.from_mm(f, types.FP64)
+
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Matrix.  This is
@@ -2703,6 +2724,21 @@ class Matrix:
             </tr></%def>"""
         )
         return t.render(A=self, title=title)
+
+    def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
+        """Print the matrix using `GxB_Matrix_fprint()`, by default to
+        `sys.stdout`..
+
+        Level 1: Short description
+        Level 2: Short list, short numbers
+        Level 3: Long list, short number
+        Level 4: Short list, long numbers
+        Level 5: Long list, long numbers
+
+        """
+        self._check(
+            lib.GxB_Matrix_fprint(self._matrix[0], bytes(name, "utf8"), level, f)
+        )
 
     def to_string(
         self, format_string="{:>%s}", width=3, prec=5, empty_char="", cell_sep=""
