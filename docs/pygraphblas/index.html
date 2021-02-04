@@ -295,11 +295,12 @@ def run_doctests(raise_on_error=False):
     from . import descriptor
     from . import base
     from . import gviz
+    from . import unaryop
     from . import binaryop
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, binaryop, matrix, vector, descriptor, gviz, base):
+    for mod in (this, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )</code></pre>
@@ -41078,15 +41079,47 @@ The parameter is typically in the range
 </details>
 </dd>
 <dt id="pygraphblas.unary_op"><code class="name flex">
-<span>def <span class="ident">unary_op</span></span>(<span>arg_type, result_type=None, boolean=False)</span>
+<span>def <span class="ident">unary_op</span></span>(<span>arg_type, result_type=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
+object.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from random import random
+&gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+&gt;&gt;&gt; @unary_op(types.FP64)
+... def random(x):
+...     return x * random()
+&gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+&gt;&gt;&gt; A.apply(random, out=A) is A
+True
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+...     filename='/docs/imgs/unary_op_A')
+</code></pre>
+<p><img alt="unary_op_A.png" src="../imgs/unary_op_A.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
+<pre><code class="python">def unary_op(arg_type, result_type=None):
+    &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    &gt;&gt;&gt; from random import random
+    &gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+    &gt;&gt;&gt; @unary_op(types.FP64)
+    ... def random(x):
+    ...     return x * random()
+    &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+    &gt;&gt;&gt; A.apply(random, out=A) is A
+    True
+
+    &gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+    ...     filename=&#39;/docs/imgs/unary_op_A&#39;)
+
+    ![unary_op_A.png](../imgs/unary_op_A.png)
+
+    &#34;&#34;&#34;
     if result_type is None:
         result_type = arg_type
 
@@ -41094,13 +41127,13 @@ The parameter is typically in the range
         func_name = func.__name__
         sig = numba.void(
             numba.types.CPointer(numba.boolean)
-            if boolean
+            if result_type is types.BOOL
             else numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
-        jitfunc = jit(func, nopython=True)
+        jitfunc = numba.jit(func, nopython=True)
 
-        @cfunc(sig, nopython=True)
+        @numba.cfunc(sig, nopython=True)
         def wrapper(z, x):
             result = jitfunc(x[0])
             z[0] = result
@@ -41113,7 +41146,7 @@ The parameter is typically in the range
             arg_type.gb_type,
         )
 
-        return UnaryOp(func_name, arg_type.C, out[0])
+        return UnaryOp(func_name, arg_type.__name__, out[0])
 
     return inner</code></pre>
 </details>
