@@ -19894,10 +19894,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @classmethod
     def ssget(cls, name_or_id=None):
-        &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+        &#34;&#34;&#34;Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
-        library](https://github.com/drdarshan/ssgetpy) for options:
+        library](https://github.com/drdarshan/ssgetpy) for search
+        argument:
 
         &gt;&gt;&gt; from pprint import pprint
         &gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
@@ -22899,9 +22900,10 @@ def sparse(cls, typ, nrows=None, ncols=None):
 <span>def <span class="ident">ssget</span></span>(<span>name_or_id=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Load a matrix from the SuiteSparse Matrix Market.</p>
+<div class="desc"><p>Load a matrix from the <a href="https://sparse.tamu.edu/">SuiteSparse Matrix Market</a>.</p>
 <p>See <a href="https://github.com/drdarshan/ssgetpy">the ssgetpy
-library</a> for options:</p>
+library</a> for search
+argument:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from pprint import pprint
 &gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
 [('lp_adlittle_z0.mtx', &lt;Matrix (1x1 : 1:FP64)&gt;),
@@ -22917,10 +22919,11 @@ library</a> for options:</p>
 </summary>
 <pre><code class="python">@classmethod
 def ssget(cls, name_or_id=None):
-    &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+    &#34;&#34;&#34;Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
     See [the ssgetpy
-    library](https://github.com/drdarshan/ssgetpy) for options:
+    library](https://github.com/drdarshan/ssgetpy) for search
+    argument:
 
     &gt;&gt;&gt; from pprint import pprint
     &gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
