@@ -147,7 +147,6 @@ class MetaType(type):
     def gb_from_name(cls, name):
         return cls._gb_name_type_map[name].gb_type
 
-
 class Type(metaclass=MetaType):
     one = 1
     zero = 0

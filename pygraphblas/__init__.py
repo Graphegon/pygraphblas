@@ -98,6 +98,7 @@ lib.LAGraph_init()
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops, unary_op
+from .selectop import build_selectops, select_op
 from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
@@ -122,6 +123,7 @@ build_semirings(__pdoc__)
 build_binaryops(__pdoc__)
 build_unaryops(__pdoc__)
 build_monoids(__pdoc__)
+build_selectops(__pdoc__)
 
 from .types import (
     FP64,
@@ -162,9 +164,11 @@ __all__ = [
     "UINT8",
     "BOOL",
     "descriptor",
+    "selectop",
     "Accum",
     "binary_op",
     "unary_op",
+    "select_op",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -188,7 +192,7 @@ def run_doctests(raise_on_error=False):
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
+    for mod in (this, selectop, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

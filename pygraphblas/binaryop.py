@@ -73,6 +73,14 @@ class BinaryOp:
 
 
 class Accum:
+    """Helper context manager to specify accumulator binary operator in
+    overloaded operator contexts like `@`.  This disambiguates for
+    methods like `Matrix.eadd` and `Matrix.emult` that can specify
+    both a binary operators *and* a binary accumulator.
+
+    See those methods and `Matrix.mxm` for examples.
+
+    """
 
     __slots__ = ("binaryop", "token")
 

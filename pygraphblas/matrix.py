@@ -27,6 +27,7 @@ from .scalar import Scalar
 from .semiring import current_semiring
 from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
+from .selectop import SelectOp
 from .descriptor import Descriptor, Default, T0, current_desc
 from . import descriptor
 from .descriptor import Descriptor, Default, T0, current_desc
@@ -1596,6 +1597,8 @@ class Matrix:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
             op = _get_select_op(op)
+        elif isinstance(op, SelectOp):
+            op = op.get_selectop()
 
         if thunk is None:
             thunk = NULL
