@@ -362,10 +362,11 @@ class Matrix:
 
     @classmethod
     def ssget(cls, name_or_id=None):
-        """Load a matrix from the SuiteSparse Matrix Market.
+        """Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
-        library](https://github.com/drdarshan/ssgetpy) for options:
+        library](https://github.com/drdarshan/ssgetpy) for search
+        argument:
 
         >>> from pprint import pprint
         >>> pprint(list(Matrix.ssget(596)))
