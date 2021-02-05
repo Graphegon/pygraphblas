@@ -97,8 +97,8 @@ def select_op(arg_type, thunk_type=None):
     ...         return True
     ...     return False
     >>> A = Matrix.dense(types.FP64, 3, 3, fill=1)
-    >>> A.select(random_gt, 0.5)
-    <Matrix (3x3 : ...:FP64)>
+    >>> A.select(random_gt, 0.5, out=A) is A
+    True
     >>> ga = gviz.draw_matrix(A, scale=40,
     ...     filename='/docs/imgs/select_op_A')
 
