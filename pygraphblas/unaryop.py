@@ -94,22 +94,36 @@ def _build_uop_def(name, arg_type, result_type):  # pragma: nocover
     return decl
 
 
-def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
-    if result_type is None:
-        result_type = arg_type
+def unary_op(arg_type):
+    """Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    >>> from random import random
+    >>> from pygraphblas import Matrix, binary_op, types, gviz
+    >>> @unary_op(types.FP64)
+    ... def random(x):
+    ...     return x * random()
+    >>> A = Matrix.dense(types.FP64, 3, 3, fill=1)
+    >>> A.apply(random, out=A) is A
+    True
+
+    >>> ga = gviz.draw_matrix(A, scale=40,
+    ...     filename='/docs/imgs/unary_op_A')
+
+    ![unary_op_A.png](../imgs/unary_op_A.png)
+
+    """
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if boolean
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
-        jitfunc = jit(func, nopython=True)
+        jitfunc = numba.jit(func, nopython=True)
 
-        @cfunc(sig, nopython=True)
-        def wrapper(z, x):
+        @numba.cfunc(sig, nopython=True)
+        def wrapper(z, x):  # pragma: no cover
             result = jitfunc(x[0])
             z[0] = result
 
@@ -117,10 +131,10 @@ def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
         lib.GrB_UnaryOp_new(
             out,
             core_ffi.cast("GxB_unary_function", wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
         )
 
-        return UnaryOp(func_name, arg_type.C, out[0])
+        return UnaryOp(func_name, arg_type.__name__, out[0])
 
     return inner

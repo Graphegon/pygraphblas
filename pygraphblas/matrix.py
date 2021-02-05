@@ -6,6 +6,7 @@ import weakref
 import operator
 from random import randint
 from array import array
+from pathlib import Path
 
 from .base import (
     lib,
@@ -245,17 +246,9 @@ class Matrix:
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols):
-        """Create a new matrix by reading a tab separated value file."""
-        m = ffi.new("GrB_Matrix*")
-        i = cls(m, typ)
-        _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
-        return i
+        """Create a new matrix by reading a tab separated value file.
 
-    @classmethod
-    def from_binfile(cls, bin_file):
-        """Create a new matrix by reading a SuiteSparse specific binary file.
-
-        >>> M = Matrix.from_binfile(bytes('/docs/test_binfile.grb', 'utf8'))
+        >>> M = Matrix.from_tsv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7)
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -269,7 +262,30 @@ class Matrix:
 
         """
         m = ffi.new("GrB_Matrix*")
-        _check(lib.LAGraph_binread(m, bin_file))
+        i = cls(m, typ)
+        with open(tsv_file, "r") as f:
+            _check(lib.LAGraph_tsvread(m, f, typ.gb_type, nrows, ncols))
+        return i
+
+    @classmethod
+    def from_binfile(cls, bin_file):
+        """Create a new matrix by reading a SuiteSparse specific binary file.
+
+        >>> M = Matrix.from_binfile(Path('/docs/test_binfile.grb'))
+        >>> print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        """
+        m = ffi.new("GrB_Matrix*")
+        _check(lib.LAGraph_binread(m, bytes(bin_file)))
         return cls(m)
 
     @classmethod
@@ -346,24 +362,32 @@ class Matrix:
 
     @classmethod
     def ssget(cls, name_or_id=None):
-        """Load a matrix from the SuiteSparse Matrix Market.
+        """Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
-        library](https://github.com/drdarshan/ssgetpy) for options:
+        library](https://github.com/drdarshan/ssgetpy) for search
+        argument:
 
-        >>> r = Matrix.ssget(1)
-        >>> r.nvals
-        4054
+        >>> from pprint import pprint
+        >>> from operator import itemgetter
+        >>> pprint(sorted(list(Matrix.ssget(596)), key=itemgetter(0)))
+        [('lp_adlittle.mtx', <Matrix (56x138 : 424:FP64)>),
+         ('lp_adlittle_b.mtx', <Matrix (56x1 : 56:FP64)>),
+         ('lp_adlittle_c.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_hi.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_lo.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_z0.mtx', <Matrix (1x1 : 1:FP64)>)]
 
         """
-        import ssgetpy, pathlib
+        import ssgetpy
 
         results = []
         result = ssgetpy.search(name_or_id)[0]
         mm_path, _ = result.download(extract=True)
-        mm_path = pathlib.Path(mm_path)
-        with open(mm_path / (result.name + ".mtx"), "r") as f:
-            return cls.from_mm(f, types.FP64)
+        mm_path = Path(mm_path)
+        for m in mm_path.glob("*.mtx"):
+            with open(mm_path / m, "r") as f:
+                yield m.name, cls.from_mm(f, types.FP64)
 
     @property
     def gb_type(self):
@@ -1293,6 +1317,32 @@ class Matrix:
         result = self.dup()
         for i in range(1, exponent):
             result.mxm(self, out=result)
+        return result
+
+    def kronpow(self, exponent):
+        """Do "Kronecker Power" expansion.  This is useful for graph
+        generation through expanding patterns.  And it draws pretty
+        pictures.
+
+        >>> initiator = Matrix.from_lists([0, 0, 1], [0, 1, 1], [0.77, 0.88, 0.99])
+        >>> initiator.kronpow(0).iseq(Matrix.identity(types.FP64, 2))
+        True
+        >>> initiator.kronpow(1).iseq(initiator)
+        True
+        >>> M = initiator.kronpow(3)
+        >>> g = draw_matrix(M, scale=40,
+        ...     filename='/docs/imgs/Matrix_kronpow')
+
+        ![Matrix_kronpow.png](../imgs/Matrix_kronpow.png)
+
+        """
+        if exponent == 0:
+            return self.__class__.identity(self.type, self.nrows)
+        if exponent == 1:
+            return self
+        result = self.dup()
+        for i in range(1, exponent):
+            result = result.kronecker(result)
         return result
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
@@ -2770,6 +2820,10 @@ class Matrix:
             </tr></%def>"""
         )
         return t.render(A=self, title=title)
+
+    def _repr_html_(self):  # pragma: nocover
+        """ jupyter notebook magic render method. """
+        return self.to_html_table()
 
     def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
         """Print the matrix using `GxB_Matrix_fprint()`, by default to

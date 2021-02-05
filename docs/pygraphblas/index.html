@@ -15,12 +15,11 @@ It …" />
 <style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}h1.header,h2.header,h3.header,h4.header,h5.header,h6.header{text-align:center}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}.caret{cursor:pointer;user-select:none}.caret::before{content:"\25B6";color:black;display:inline-block;margin-right:10px}.caret-down::before{transform:rotate(90deg)}.nested{display:none}.active{display:block}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script defer src="highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
 <script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
 <a name="top"/>
 <h1 class="header">pygraphblas API Reference</h1>
 <h2 class="header"> ~| <a href="http://graphblas.org">GraphBLAS.org</a> | <a href="https://github.com/Graphegon/pygraphblas">Github</a> | <a href="https://raw.githubusercontent.com/DrTimothyAldenDavis/GraphBLAS/stable/Doc/GraphBLAS_UserGuide.pdf">SuiteSparse::GraphBLAS User Guide</a> |~</h2>
-<h2 class="header"> -| <img src="https://github.com/Graphegon/pygraphblas/workflows/Tests/badge.svg"/> | <a href="https://mybinder.org/v2/gh/Graphegon/pygraphblas/v4.0.3?filepath=pygraphblas%2Fdemo%2FIntroduction-to-GraphBLAS-with-Python.ipynb"><img src="https://mybinder.org/badge_logo.svg"/></a> |-</h2>
 </head>
 <body>
 <main>
@@ -92,7 +91,8 @@ Search</a> across the
 graph:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; v = gb.Vector.from_lists([0], [True], M.nrows)
 &gt;&gt;&gt; y = v @ M
-&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, column=False, filename='/docs/imgs/bfs_step')
+&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, 
+... column=False, filename='/docs/imgs/bfs_step')
 </code></pre>
 <p><img alt="bfs_step.png" src="../imgs/bfs_step.png"></p>
 <p>pygraphblas leverages the expertise in the field of sparse matrix
@@ -177,7 +177,8 @@ graph:
 
 &gt;&gt;&gt; v = gb.Vector.from_lists([0], [True], M.nrows)
 &gt;&gt;&gt; y = v @ M
-&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, &#39;@&#39;, M, y, scale=40, labels=True, column=False, filename=&#39;/docs/imgs/bfs_step&#39;)
+&gt;&gt;&gt; g = gb.gviz.draw_matrix_op(v, &#39;@&#39;, M, y, scale=40, labels=True, 
+... column=False, filename=&#39;/docs/imgs/bfs_step&#39;)
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
@@ -294,10 +295,12 @@ def run_doctests(raise_on_error=False):
     from . import descriptor
     from . import base
     from . import gviz
+    from . import unaryop
+    from . import binaryop
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, matrix, vector, descriptor, gviz, base):
+    for mod in (this, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )</code></pre>
@@ -331,7 +334,7 @@ def run_doctests(raise_on_error=False):
         current_accum.reset(self.token)
         return False</code></pre>
 </details>
-<h3 class="caret">Instance variables</h3>
+<h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.Accum.binaryop"><code class="name">var <span class="ident">binaryop</span></code></dt>
 <dd>
@@ -385,7 +388,7 @@ def run_doctests(raise_on_error=False):
     def to_value(cls, cdata):
         return bool(cdata)</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.BOOL.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -1603,7 +1606,7 @@ def to_value(cls, cdata):
     C = &#34;float _Complex&#34;
     numba_t = numba.complex64</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.FC32.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -2321,7 +2324,7 @@ def to_value(cls, cdata):
     C = &#34;double _Complex&#34;
     numba_t = numba.complex128</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.FC64.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -3043,7 +3046,7 @@ def to_value(cls, cdata):
     def format_value(cls, val, width=2, prec=2):
         return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.FP32.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -5725,7 +5728,7 @@ def format_value(cls, val, width=2, prec=2):
     def format_value(cls, val, width=2, prec=2):
         return f&#34;{val:&gt;{width}.{prec}}&#34;</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.FP64.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -8401,7 +8404,7 @@ def format_value(cls, val, width=2, prec=2):
     typecode = &#34;i&#34;
     numba_t = numba.int16</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.INT16.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -10837,7 +10840,7 @@ def format_value(cls, val, width=2, prec=2):
     typecode = &#34;l&#34;
     numba_t = numba.int32</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.INT32.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -13905,7 +13908,7 @@ def format_value(cls, val, width=2, prec=2):
     typecode = &#34;q&#34;
     numba_t = numba.int64</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.INT64.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -16973,7 +16976,7 @@ def format_value(cls, val, width=2, prec=2):
     typecode = &#34;b&#34;
     numba_t = numba.int8</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.INT8.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -19775,17 +19778,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols):
-        &#34;&#34;&#34;Create a new matrix by reading a tab separated value file.&#34;&#34;&#34;
-        m = ffi.new(&#34;GrB_Matrix*&#34;)
-        i = cls(m, typ)
-        _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
-        return i
+        &#34;&#34;&#34;Create a new matrix by reading a tab separated value file.
 
-    @classmethod
-    def from_binfile(cls, bin_file):
-        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
-
-        &gt;&gt;&gt; M = Matrix.from_binfile(bytes(&#39;/docs/test_binfile.grb&#39;, &#39;utf8&#39;))
+        &gt;&gt;&gt; M = Matrix.from_tsv(Path(&#39;/docs/test_tsvfile.tsv&#39;), types.INT32, 7, 7)
         &gt;&gt;&gt; print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -19799,7 +19794,30 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &#34;&#34;&#34;
         m = ffi.new(&#34;GrB_Matrix*&#34;)
-        _check(lib.LAGraph_binread(m, bin_file))
+        i = cls(m, typ)
+        with open(tsv_file, &#34;r&#34;) as f:
+            _check(lib.LAGraph_tsvread(m, f, typ.gb_type, nrows, ncols))
+        return i
+
+    @classmethod
+    def from_binfile(cls, bin_file):
+        &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
+
+        &gt;&gt;&gt; M = Matrix.from_binfile(Path(&#39;/docs/test_binfile.grb&#39;))
+        &gt;&gt;&gt; print(M)
+              0  1  2  3  4  5  6
+          0|     0     1         |  0
+          1|              2     3|  1
+          2|                 4   |  2
+          3|  5     6            |  3
+          4|                 7   |  4
+          5|        8            |  5
+          6|        9 10 11      |  6
+              0  1  2  3  4  5  6
+
+        &#34;&#34;&#34;
+        m = ffi.new(&#34;GrB_Matrix*&#34;)
+        _check(lib.LAGraph_binread(m, bytes(bin_file)))
         return cls(m)
 
     @classmethod
@@ -19876,24 +19894,31 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @classmethod
     def ssget(cls, name_or_id=None):
-        &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+        &#34;&#34;&#34;Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
-        library](https://github.com/drdarshan/ssgetpy) for options:
+        library](https://github.com/drdarshan/ssgetpy) for search
+        argument:
 
-        &gt;&gt;&gt; r = Matrix.ssget(1)
-        &gt;&gt;&gt; r.nvals
-        4054
+        &gt;&gt;&gt; from pprint import pprint
+        &gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
+        [(&#39;lp_adlittle_z0.mtx&#39;, &lt;Matrix (1x1 : 1:FP64)&gt;),
+         (&#39;lp_adlittle.mtx&#39;, &lt;Matrix (56x138 : 424:FP64)&gt;),
+         (&#39;lp_adlittle_hi.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;),
+         (&#39;lp_adlittle_c.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;),
+         (&#39;lp_adlittle_b.mtx&#39;, &lt;Matrix (56x1 : 56:FP64)&gt;),
+         (&#39;lp_adlittle_lo.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;)]
 
         &#34;&#34;&#34;
-        import ssgetpy, pathlib
+        import ssgetpy
 
         results = []
         result = ssgetpy.search(name_or_id)[0]
         mm_path, _ = result.download(extract=True)
-        mm_path = pathlib.Path(mm_path)
-        with open(mm_path / (result.name + &#34;.mtx&#34;), &#34;r&#34;) as f:
-            return cls.from_mm(f, types.FP64)
+        mm_path = Path(mm_path)
+        for m in mm_path.glob(&#34;*.mtx&#34;):
+            with open(mm_path / m, &#34;r&#34;) as f:
+                yield m.name, cls.from_mm(f, types.FP64)
 
     @property
     def gb_type(self):
@@ -20823,6 +20848,32 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         result = self.dup()
         for i in range(1, exponent):
             result.mxm(self, out=result)
+        return result
+
+    def kronpow(self, exponent):
+        &#34;&#34;&#34;Do &#34;Kronecker Power&#34; expansion.  This is useful for graph
+        generation through expanding patterns.  And it draws pretty
+        pictures.
+
+        &gt;&gt;&gt; initiator = Matrix.from_lists([0, 0, 1], [0, 1, 1], [0.77, 0.88, 0.99])
+        &gt;&gt;&gt; initiator.kronpow(0).iseq(Matrix.identity(types.FP64, 2))
+        True
+        &gt;&gt;&gt; initiator.kronpow(1).iseq(initiator)
+        True
+        &gt;&gt;&gt; M = initiator.kronpow(3)
+        &gt;&gt;&gt; g = draw_matrix(M, scale=40,
+        ...     filename=&#39;/docs/imgs/Matrix_kronpow&#39;)
+
+        ![Matrix_kronpow.png](../imgs/Matrix_kronpow.png)
+
+        &#34;&#34;&#34;
+        if exponent == 0:
+            return self.__class__.identity(self.type, self.nrows)
+        if exponent == 1:
+            return self
+        result = self.dup()
+        for i in range(1, exponent):
+            result = result.kronecker(result)
         return result
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
@@ -22301,6 +22352,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return t.render(A=self, title=title)
 
+    def _repr_html_(self):  # pragma: nocover
+        &#34;&#34;&#34; jupyter notebook magic render method. &#34;&#34;&#34;
+        return self.to_html_table()
+
     def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
         &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
         `sys.stdout`..
@@ -22460,7 +22515,7 @@ def dense(cls, typ, nrows, ncols, fill=None, sparsity=None):
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new matrix by reading a SuiteSparse specific binary file.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_binfile(bytes('/docs/test_binfile.grb', 'utf8'))
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_binfile(Path('/docs/test_binfile.grb'))
 &gt;&gt;&gt; print(M)
       0  1  2  3  4  5  6
   0|     0     1         |  0
@@ -22480,7 +22535,7 @@ def dense(cls, typ, nrows, ncols, fill=None, sparsity=None):
 def from_binfile(cls, bin_file):
     &#34;&#34;&#34;Create a new matrix by reading a SuiteSparse specific binary file.
 
-    &gt;&gt;&gt; M = Matrix.from_binfile(bytes(&#39;/docs/test_binfile.grb&#39;, &#39;utf8&#39;))
+    &gt;&gt;&gt; M = Matrix.from_binfile(Path(&#39;/docs/test_binfile.grb&#39;))
     &gt;&gt;&gt; print(M)
           0  1  2  3  4  5  6
       0|     0     1         |  0
@@ -22494,7 +22549,7 @@ def from_binfile(cls, bin_file):
 
     &#34;&#34;&#34;
     m = ffi.new(&#34;GrB_Matrix*&#34;)
-    _check(lib.LAGraph_binread(m, bin_file))
+    _check(lib.LAGraph_binread(m, bytes(bin_file)))
     return cls(m)</code></pre>
 </details>
 </dd>
@@ -22622,17 +22677,44 @@ def from_mm(cls, mm_file, typ):
 <span>def <span class="ident">from_tsv</span></span>(<span>tsv_file, typ, nrows, ncols)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new matrix by reading a tab separated value file.</p></div>
+<div class="desc"><p>Create a new matrix by reading a tab separated value file.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_tsv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7)
+&gt;&gt;&gt; print(M)
+      0  1  2  3  4  5  6
+  0|     0     1         |  0
+  1|              2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                 7   |  4
+  5|        8            |  5
+  6|        9 10 11      |  6
+      0  1  2  3  4  5  6
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def from_tsv(cls, tsv_file, typ, nrows, ncols):
-    &#34;&#34;&#34;Create a new matrix by reading a tab separated value file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create a new matrix by reading a tab separated value file.
+
+    &gt;&gt;&gt; M = Matrix.from_tsv(Path(&#39;/docs/test_tsvfile.tsv&#39;), types.INT32, 7, 7)
+    &gt;&gt;&gt; print(M)
+          0  1  2  3  4  5  6
+      0|     0     1         |  0
+      1|              2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                 7   |  4
+      5|        8            |  5
+      6|        9 10 11      |  6
+          0  1  2  3  4  5  6
+
+    &#34;&#34;&#34;
     m = ffi.new(&#34;GrB_Matrix*&#34;)
     i = cls(m, typ)
-    _check(lib.LAGraph_tsvread(m, tsv_file, typ.gb_type, nrows, ncols))
+    with open(tsv_file, &#34;r&#34;) as f:
+        _check(lib.LAGraph_tsvread(m, f, typ.gb_type, nrows, ncols))
     return i</code></pre>
 </details>
 </dd>
@@ -22818,12 +22900,18 @@ def sparse(cls, typ, nrows=None, ncols=None):
 <span>def <span class="ident">ssget</span></span>(<span>name_or_id=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Load a matrix from the SuiteSparse Matrix Market.</p>
+<div class="desc"><p>Load a matrix from the <a href="https://sparse.tamu.edu/">SuiteSparse Matrix Market</a>.</p>
 <p>See <a href="https://github.com/drdarshan/ssgetpy">the ssgetpy
-library</a> for options:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; r = Matrix.ssget(1)
-&gt;&gt;&gt; r.nvals
-4054
+library</a> for search
+argument:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from pprint import pprint
+&gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
+[('lp_adlittle_z0.mtx', &lt;Matrix (1x1 : 1:FP64)&gt;),
+ ('lp_adlittle.mtx', &lt;Matrix (56x138 : 424:FP64)&gt;),
+ ('lp_adlittle_hi.mtx', &lt;Matrix (138x1 : 138:FP64)&gt;),
+ ('lp_adlittle_c.mtx', &lt;Matrix (138x1 : 138:FP64)&gt;),
+ ('lp_adlittle_b.mtx', &lt;Matrix (56x1 : 56:FP64)&gt;),
+ ('lp_adlittle_lo.mtx', &lt;Matrix (138x1 : 138:FP64)&gt;)]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -22831,28 +22919,35 @@ library</a> for options:</p>
 </summary>
 <pre><code class="python">@classmethod
 def ssget(cls, name_or_id=None):
-    &#34;&#34;&#34;Load a matrix from the SuiteSparse Matrix Market.
+    &#34;&#34;&#34;Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
     See [the ssgetpy
-    library](https://github.com/drdarshan/ssgetpy) for options:
+    library](https://github.com/drdarshan/ssgetpy) for search
+    argument:
 
-    &gt;&gt;&gt; r = Matrix.ssget(1)
-    &gt;&gt;&gt; r.nvals
-    4054
+    &gt;&gt;&gt; from pprint import pprint
+    &gt;&gt;&gt; pprint(list(Matrix.ssget(596)))
+    [(&#39;lp_adlittle_z0.mtx&#39;, &lt;Matrix (1x1 : 1:FP64)&gt;),
+     (&#39;lp_adlittle.mtx&#39;, &lt;Matrix (56x138 : 424:FP64)&gt;),
+     (&#39;lp_adlittle_hi.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;),
+     (&#39;lp_adlittle_c.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;),
+     (&#39;lp_adlittle_b.mtx&#39;, &lt;Matrix (56x1 : 56:FP64)&gt;),
+     (&#39;lp_adlittle_lo.mtx&#39;, &lt;Matrix (138x1 : 138:FP64)&gt;)]
 
     &#34;&#34;&#34;
-    import ssgetpy, pathlib
+    import ssgetpy
 
     results = []
     result = ssgetpy.search(name_or_id)[0]
     mm_path, _ = result.download(extract=True)
-    mm_path = pathlib.Path(mm_path)
-    with open(mm_path / (result.name + &#34;.mtx&#34;), &#34;r&#34;) as f:
-        return cls.from_mm(f, types.FP64)</code></pre>
+    mm_path = Path(mm_path)
+    for m in mm_path.glob(&#34;*.mtx&#34;):
+        with open(mm_path / m, &#34;r&#34;) as f:
+            yield m.name, cls.from_mm(f, types.FP64)</code></pre>
 </details>
 </dd>
 </dl>
-<h3 class="caret">Instance variables</h3>
+<h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.Matrix.M"><code class="name">var <span class="ident">M</span></code></dt>
 <dd>
@@ -25085,6 +25180,56 @@ True
     return out</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Matrix.kronpow"><code class="name flex">
+<span>def <span class="ident">kronpow</span></span>(<span>self, exponent)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Do "Kronecker Power" expansion.
+This is useful for graph
+generation through expanding patterns.
+And it draws pretty
+pictures.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; initiator = Matrix.from_lists([0, 0, 1], [0, 1, 1], [0.77, 0.88, 0.99])
+&gt;&gt;&gt; initiator.kronpow(0).iseq(Matrix.identity(types.FP64, 2))
+True
+&gt;&gt;&gt; initiator.kronpow(1).iseq(initiator)
+True
+&gt;&gt;&gt; M = initiator.kronpow(3)
+&gt;&gt;&gt; g = draw_matrix(M, scale=40,
+...     filename='/docs/imgs/Matrix_kronpow')
+</code></pre>
+<p><img alt="Matrix_kronpow.png" src="../imgs/Matrix_kronpow.png"></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def kronpow(self, exponent):
+    &#34;&#34;&#34;Do &#34;Kronecker Power&#34; expansion.  This is useful for graph
+    generation through expanding patterns.  And it draws pretty
+    pictures.
+
+    &gt;&gt;&gt; initiator = Matrix.from_lists([0, 0, 1], [0, 1, 1], [0.77, 0.88, 0.99])
+    &gt;&gt;&gt; initiator.kronpow(0).iseq(Matrix.identity(types.FP64, 2))
+    True
+    &gt;&gt;&gt; initiator.kronpow(1).iseq(initiator)
+    True
+    &gt;&gt;&gt; M = initiator.kronpow(3)
+    &gt;&gt;&gt; g = draw_matrix(M, scale=40,
+    ...     filename=&#39;/docs/imgs/Matrix_kronpow&#39;)
+
+    ![Matrix_kronpow.png](../imgs/Matrix_kronpow.png)
+
+    &#34;&#34;&#34;
+    if exponent == 0:
+        return self.__class__.identity(self.type, self.nrows)
+    if exponent == 1:
+        return self
+    result = self.dup()
+    for i in range(1, exponent):
+        result = result.kronecker(result)
+    return result</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Matrix.mxm"><code class="name flex">
 <span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
 </code></dt>
@@ -26976,7 +27121,7 @@ def from_value(cls, value):
 </details>
 </dd>
 </dl>
-<h3 class="caret">Instance variables</h3>
+<h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.Scalar.gb_type"><code class="name">var <span class="ident">gb_type</span></code></dt>
 <dd>
@@ -27077,7 +27222,7 @@ def nvals(self):
     typecode = &#34;I&#34;
     numba_t = numba.uint16</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.UINT16.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -29809,7 +29954,7 @@ def nvals(self):
     typecode = &#34;L&#34;
     numba_t = numba.uint32</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.UINT32.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -32541,7 +32686,7 @@ def nvals(self):
     typecode = &#34;Q&#34;
     numba_t = numba.uint64</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.UINT64.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -35273,7 +35418,7 @@ def nvals(self):
     typecode = &#34;B&#34;
     numba_t = numba.uint8</code></pre>
 </details>
-<h3 class="caret">Class variables</h3>
+<h3 class="caret">Class Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.UINT8.ABS"><code class="name">var <span class="ident">ABS</span></code></dt>
 <dd>
@@ -39308,7 +39453,7 @@ def sparse(cls, typ, size=None):
 </details>
 </dd>
 </dl>
-<h3 class="caret">Instance variables</h3>
+<h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
 <dt id="pygraphblas.Vector.gb_type"><code class="name">var <span class="ident">gb_type</span></code></dt>
 <dd>
@@ -40708,24 +40853,68 @@ doctests and Jupyter notebooks …</p></div>
 <h2 class="section-title caret" id="header-functions">Functions</h2>
 <dl class="nested active">
 <dt id="pygraphblas.binary_op"><code class="name flex">
-<span>def <span class="ident">binary_op</span></span>(<span>arg_type, result_type=None)</span>
+<span>def <span class="ident">binary_op</span></span>(<span>arg_type)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
+object.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from random import uniform
+&gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+&gt;&gt;&gt; @binary_op(types.FP64)
+... def uniform(x, y):
+...     return uniform(x, y)
+&gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=0)
+&gt;&gt;&gt; B = A.dup()
+&gt;&gt;&gt; with uniform:
+...     A += 1
+</code></pre>
+<p>Calling <code>A += 1</code> with the <code>uniform</code> binary operator is the same as
+calling <code>apply_second</code> with an <code>out</code> parameter:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; B.apply_second(uniform, 1, out=B) is B
+True
+&gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+...     filename='/docs/imgs/binary_op_A')
+&gt;&gt;&gt; gb = gviz.draw_matrix(B, scale=40,
+...     filename='/docs/imgs/binary_op_B')
+</code></pre>
+<p><img alt="binary_op_A.png" src="../imgs/binary_op_A.png"> <img alt="binary_op_B.png" src="../imgs/binary_op_B.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def binary_op(arg_type, result_type=None):
-    if result_type is None:  # pragma: no cover
-        result_type = arg_type
+<pre><code class="python">def binary_op(arg_type):
+    &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    &gt;&gt;&gt; from random import uniform
+    &gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+    &gt;&gt;&gt; @binary_op(types.FP64)
+    ... def uniform(x, y):
+    ...     return uniform(x, y)
+    &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=0)
+    &gt;&gt;&gt; B = A.dup()
+    &gt;&gt;&gt; with uniform:
+    ...     A += 1
+
+    Calling `A += 1` with the `uniform` binary operator is the same as
+    calling `apply_second` with an `out` parameter:
+
+    &gt;&gt;&gt; B.apply_second(uniform, 1, out=B) is B
+    True
+    &gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+    ...     filename=&#39;/docs/imgs/binary_op_A&#39;)
+    &gt;&gt;&gt; gb = gviz.draw_matrix(B, scale=40,
+    ...     filename=&#39;/docs/imgs/binary_op_B&#39;)
+
+
+    ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
+
+    &#34;&#34;&#34;
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
@@ -40740,7 +40929,7 @@ doctests and Jupyter notebooks …</p></div>
         lib.GrB_BinaryOp_new(
             out,
             ffi.cast(&#34;GxB_binary_function&#34;, wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
             arg_type.gb_type,
         )
@@ -40889,30 +41078,58 @@ The parameter is typically in the range
 </details>
 </dd>
 <dt id="pygraphblas.unary_op"><code class="name flex">
-<span>def <span class="ident">unary_op</span></span>(<span>arg_type, result_type=None, boolean=False)</span>
+<span>def <span class="ident">unary_op</span></span>(<span>arg_type)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
+object.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from random import random
+&gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+&gt;&gt;&gt; @unary_op(types.FP64)
+... def random(x):
+...     return x * random()
+&gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+&gt;&gt;&gt; A.apply(random, out=A) is A
+True
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+...     filename='/docs/imgs/unary_op_A')
+</code></pre>
+<p><img alt="unary_op_A.png" src="../imgs/unary_op_A.png"></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def unary_op(arg_type, result_type=None, boolean=False):  # pragma: nocover
-    if result_type is None:
-        result_type = arg_type
+<pre><code class="python">def unary_op(arg_type):
+    &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    &gt;&gt;&gt; from random import random
+    &gt;&gt;&gt; from pygraphblas import Matrix, binary_op, types, gviz
+    &gt;&gt;&gt; @unary_op(types.FP64)
+    ... def random(x):
+    ...     return x * random()
+    &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+    &gt;&gt;&gt; A.apply(random, out=A) is A
+    True
+
+    &gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+    ...     filename=&#39;/docs/imgs/unary_op_A&#39;)
+
+    ![unary_op_A.png](../imgs/unary_op_A.png)
+
+    &#34;&#34;&#34;
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if boolean
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
-        jitfunc = jit(func, nopython=True)
+        jitfunc = numba.jit(func, nopython=True)
 
-        @cfunc(sig, nopython=True)
-        def wrapper(z, x):
+        @numba.cfunc(sig, nopython=True)
+        def wrapper(z, x):  # pragma: no cover
             result = jitfunc(x[0])
             z[0] = result
 
@@ -40920,11 +41137,11 @@ The parameter is typically in the range
         lib.GrB_UnaryOp_new(
             out,
             core_ffi.cast(&#34;GxB_unary_function&#34;, wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
         )
 
-        return UnaryOp(func_name, arg_type.C, out[0])
+        return UnaryOp(func_name, arg_type.__name__, out[0])
 
     return inner</code></pre>
 </details>
@@ -42517,6 +42734,7 @@ The parameter is typically in the range
 <li><code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.Matrix.isne" href="#pygraphblas.Matrix.isne">isne</a></code></li>
 <li><code><a title="pygraphblas.Matrix.kronecker" href="#pygraphblas.Matrix.kronecker">kronecker</a></code></li>
+<li><code><a title="pygraphblas.Matrix.kronpow" href="#pygraphblas.Matrix.kronpow">kronpow</a></code></li>
 <li><code><a title="pygraphblas.Matrix.mxm" href="#pygraphblas.Matrix.mxm">mxm</a></code></li>
 <li><code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">mxv</a></code></li>
 <li><code><a title="pygraphblas.Matrix.ncols" href="#pygraphblas.Matrix.ncols">ncols</a></code></li>

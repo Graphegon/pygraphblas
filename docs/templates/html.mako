@@ -176,7 +176,7 @@
           </ul>
       % endif
       % if class_vars :
-          <h3 class="caret">Class variables</h3>
+          <h3 class="caret">Class Attributes</h3>
           <dl class="nested active">
           % for v in class_vars:
               <% return_type = get_annotation(v.type_annotation) %>
@@ -194,7 +194,7 @@
           </dl>
       % endif
       % if inst_vars :
-          <h3 class="caret">Instance variables</h3>
+          <h3 class="caret">Instance Attributes</h3>
           <dl class="nested active">
           % for v in inst_vars:
               <% return_type = get_annotation(v.type_annotation) %>
@@ -413,7 +413,7 @@
   % endif
 
   % if syntax_highlighting:
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+    <script defer src="highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
     <script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
   % endif
 

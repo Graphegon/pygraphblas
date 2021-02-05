@@ -349,8 +349,7 @@ def test_matrix_tsv_read(tmp_path):
     with mmf.open("w") as f:
         f.writelines(["3\t3\t3\n", "1\t1\t2\n", "2\t2\t3\n", "3\t3\t4\n"])
 
-    with mmf.open() as f:
-        n = Matrix.from_tsv(f, INT8, 3, 3)
+    n = Matrix.from_tsv(mmf, INT8, 3, 3)
     assert n.to_lists() == [[0, 1, 2], [0, 1, 2], [2, 3, 4]]
 
 

@@ -121,16 +121,39 @@ def build_binaryops(__pdoc__):
         __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
-def binary_op(arg_type, result_type=None):
-    if result_type is None:  # pragma: no cover
-        result_type = arg_type
+def binary_op(arg_type):
+    """Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    >>> from random import uniform
+    >>> from pygraphblas import Matrix, binary_op, types, gviz
+    >>> @binary_op(types.FP64)
+    ... def uniform(x, y):
+    ...     return uniform(x, y)
+    >>> A = Matrix.dense(types.FP64, 3, 3, fill=0)
+    >>> B = A.dup()
+    >>> with uniform:
+    ...     A += 1
+
+    Calling `A += 1` with the `uniform` binary operator is the same as
+    calling `apply_second` with an `out` parameter:
+
+    >>> B.apply_second(uniform, 1, out=B) is B
+    True
+    >>> ga = gviz.draw_matrix(A, scale=40,
+    ...     filename='/docs/imgs/binary_op_A')
+    >>> gb = gviz.draw_matrix(B, scale=40,
+    ...     filename='/docs/imgs/binary_op_B')
+
+
+    ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
+
+    """
 
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(numba.boolean)
-            if result_type is types.BOOL
-            else numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
             numba.types.CPointer(arg_type.numba_t),
         )
@@ -145,7 +168,7 @@ def binary_op(arg_type, result_type=None):
         lib.GrB_BinaryOp_new(
             out,
             ffi.cast("GxB_binary_function", wrapper.address),
-            result_type.gb_type,
+            arg_type.gb_type,
             arg_type.gb_type,
             arg_type.gb_type,
         )
