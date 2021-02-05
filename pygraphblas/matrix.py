@@ -369,13 +369,14 @@ class Matrix:
         argument:
 
         >>> from pprint import pprint
-        >>> pprint(list(Matrix.ssget(596)))
-        [('lp_adlittle_z0.mtx', <Matrix (1x1 : 1:FP64)>),
-         ('lp_adlittle.mtx', <Matrix (56x138 : 424:FP64)>),
-         ('lp_adlittle_hi.mtx', <Matrix (138x1 : 138:FP64)>),
-         ('lp_adlittle_c.mtx', <Matrix (138x1 : 138:FP64)>),
+        >>> from operator import itemgetter
+        >>> pprint(sorted(list(Matrix.ssget(596)), key=itemgetter(0)))
+        [('lp_adlittle.mtx', <Matrix (56x138 : 424:FP64)>),
          ('lp_adlittle_b.mtx', <Matrix (56x1 : 56:FP64)>),
-         ('lp_adlittle_lo.mtx', <Matrix (138x1 : 138:FP64)>)]
+         ('lp_adlittle_c.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_hi.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_lo.mtx', <Matrix (138x1 : 138:FP64)>),
+         ('lp_adlittle_z0.mtx', <Matrix (1x1 : 1:FP64)>)]
 
         """
         import ssgetpy
