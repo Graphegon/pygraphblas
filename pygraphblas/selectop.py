@@ -1,6 +1,19 @@
 """Contains all automatically generated SelectOps from CFFI.
 
-This module contains the built-in select ops from SuiteSparse.  Unlike other operators they do not hang
+This module contains the built-in select ops from SuiteSparse.  Unlike
+other operators they can be type generic so they are kept here:
+
+>>> from pygraphblas import Matrix, selectop
+>>> A = Matrix.from_lists([0, 0, 1], [0, 1, 1], [-1, 0, 1])
+>>> print(A.select(selectop.LT_THUNK, 0))
+      0  1
+  0| -1   |  0
+  1|      |  1
+      0  1
+
+Note that all of these operators are already wrapped as string names
+by `Matrix.select()` and variants like `Matrix.tril()`.  You should
+use those.
 
 """
 
@@ -51,10 +64,11 @@ def build_selectops(__pdoc__):
     this = sys.modules[__name__]
     for n in _lib_ops:
         lop = getattr(lib, n)
-        n = n.split('_')[1]
+        n = '_'.join(n.split('_')[1:])
         sop = SelectOp(n, lop)
         setattr(this, n, sop)
         __all__.append(n)
+        __pdoc__[f'selectop.{n}'] = f"SelectOp {n}"
 
 def _uop_name(name):  # pragma: nocover
     return "_{0}_selectop_function".format(name)

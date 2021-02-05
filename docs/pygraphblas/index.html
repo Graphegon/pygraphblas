@@ -207,6 +207,7 @@ lib.LAGraph_init()
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops, unary_op
+from .selectop import build_selectops, select_op
 from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
@@ -225,12 +226,15 @@ __pdoc__ = {
     &#34;scalar&#34;: False,
     &#34;types&#34;: False,
     &#34;run_doctests&#34;: False,
+    &#34;descriptor&#34;: True,
+    &#34;selectop&#34;: True,
 }
 
 build_semirings(__pdoc__)
 build_binaryops(__pdoc__)
 build_unaryops(__pdoc__)
 build_monoids(__pdoc__)
+build_selectops(__pdoc__)
 
 from .types import (
     FP64,
@@ -271,9 +275,11 @@ __all__ = [
     &#34;UINT8&#34;,
     &#34;BOOL&#34;,
     &#34;descriptor&#34;,
+    &#34;selectop&#34;,
     &#34;Accum&#34;,
     &#34;binary_op&#34;,
     &#34;unary_op&#34;,
+    &#34;select_op&#34;,
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -297,7 +303,7 @@ def run_doctests(raise_on_error=False):
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
+    for mod in (this, selectop, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )</code></pre>
@@ -311,12 +317,25 @@ def run_doctests(raise_on_error=False):
 <span>(</span><span>binaryop)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Helper context manager to specify accumulator binary operator in
+overloaded operator contexts like <code>@</code>.
+This disambiguates for
+methods like <code><a title="pygraphblas.Matrix.eadd" href="#pygraphblas.Matrix.eadd">Matrix.eadd()</a></code> and <code><a title="pygraphblas.Matrix.emult" href="#pygraphblas.Matrix.emult">Matrix.emult()</a></code> that can specify
+both a binary operators <em>and</em> a binary accumulator.</p>
+<p>See those methods and <code><a title="pygraphblas.Matrix.mxm" href="#pygraphblas.Matrix.mxm">Matrix.mxm()</a></code> for examples.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Accum:
+    &#34;&#34;&#34;Helper context manager to specify accumulator binary operator in
+    overloaded operator contexts like `@`.  This disambiguates for
+    methods like `Matrix.eadd` and `Matrix.emult` that can specify
+    both a binary operators *and* a binary accumulator.
+
+    See those methods and `Matrix.mxm` for examples.
+
+    &#34;&#34;&#34;
 
     __slots__ = (&#34;binaryop&#34;, &#34;token&#34;)
 
@@ -21125,6 +21144,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
             op = _get_select_op(op)
+        elif isinstance(op, SelectOp):
+            op = op.get_selectop()
 
         if thunk is None:
             thunk = NULL
@@ -26386,6 +26407,8 @@ True
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, str):
         op = _get_select_op(op)
+    elif isinstance(op, SelectOp):
+        op = op.get_selectop()
 
     if thunk is None:
         thunk = NULL
@@ -40830,6 +40853,10 @@ argument or a context manager:</p>
 <div class="desc"><p>Helper functions for drawing graphs and matrices with graphviz in
 doctests and Jupyter notebooks …</p></div>
 </dd>
+<dt><code class="name"><a title="pygraphblas.selectop" href="selectop.html">pygraphblas.selectop</a></code></dt>
+<dd>
+<div class="desc"><p>Contains all automatically generated SelectOps from CFFI …</p></div>
+</dd>
 </dl>
 </section>
 <section>
@@ -41077,6 +41104,101 @@ The parameter is typically in the range
         _check(lib.GxB_Global_Option_set(lib.GxB_FORMAT, format))</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.select_op"><code class="name flex">
+<span>def <span class="ident">select_op</span></span>(<span>arg_type, thunk_type=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decorator to jit-compile Python function into a GrB_BinaryOp
+object.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from random import random
+&gt;&gt;&gt; from pygraphblas import Matrix, select_op, types, gviz
+&gt;&gt;&gt; @select_op(types.FP64, types.FP64)
+... def random_gt(i, j, x, v):
+...     if random() &gt; v:
+...         return True
+...     return False
+&gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+&gt;&gt;&gt; A.select(random_gt, 0.5)
+&lt;Matrix (3x3 : ...:FP64)&gt;
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+...     filename='/docs/imgs/select_op_A')
+</code></pre>
+<p><img alt="select_op_A.png" src="../imgs/select_op_A.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; @select_op(types.FP64)
+... def coin_flip(i, j, x, v):
+...     if random() &gt; 0.5:
+...         return True
+...     return False
+&gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+&gt;&gt;&gt; A.select(coin_flip)
+&lt;Matrix (3x3 : ...:FP64)&gt;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_op(arg_type, thunk_type=None):
+    &#34;&#34;&#34;Decorator to jit-compile Python function into a GrB_BinaryOp
+    object.
+
+    &gt;&gt;&gt; from random import random
+    &gt;&gt;&gt; from pygraphblas import Matrix, select_op, types, gviz
+    &gt;&gt;&gt; @select_op(types.FP64, types.FP64)
+    ... def random_gt(i, j, x, v):
+    ...     if random() &gt; v:
+    ...         return True
+    ...     return False
+    &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+    &gt;&gt;&gt; A.select(random_gt, 0.5)
+    &lt;Matrix (3x3 : ...:FP64)&gt;
+
+    &gt;&gt;&gt; ga = gviz.draw_matrix(A, scale=40,
+    ...     filename=&#39;/docs/imgs/select_op_A&#39;)
+
+    ![select_op_A.png](../imgs/select_op_A.png)
+
+    &gt;&gt;&gt; @select_op(types.FP64)
+    ... def coin_flip(i, j, x, v):
+    ...     if random() &gt; 0.5:
+    ...         return True
+    ...     return False
+    &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
+    &gt;&gt;&gt; A.select(coin_flip)
+    &lt;Matrix (3x3 : ...:FP64)&gt;
+    &#34;&#34;&#34;
+    if thunk_type is not None:
+        thunk_type = thunk_type.gb_type
+    else:
+        thunk_type = core_ffi.NULL
+
+    def inner(func):
+        func_name = func.__name__
+        sig = numba.boolean(
+            numba.types.uint64,
+            numba.types.uint64,
+            numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type.numba_t),
+        )
+        jitfunc = numba.jit(func, nopython=True)
+
+        @numba.cfunc(sig, nopython=True)
+        def wrapper(i, j, x, t):  # pragma: no cover
+            return jitfunc(i, j, x[0], t[0])
+
+        out = core_ffi.new(&#34;GxB_SelectOp*&#34;)
+        lib.GxB_SelectOp_new(
+            out,
+            core_ffi.cast(&#34;GxB_select_function&#34;, wrapper.address),
+            arg_type.gb_type,
+            thunk_type
+        )
+
+        return SelectOp(func_name, out[0])
+
+    return inner</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.unary_op"><code class="name flex">
 <span>def <span class="ident">unary_op</span></span>(<span>arg_type)</span>
 </code></dt>
@@ -41168,6 +41290,7 @@ True
 <li><code><a title="pygraphblas.binary_op" href="#pygraphblas.binary_op">binary_op</a></code></li>
 <li><code><a title="pygraphblas.options_get" href="#pygraphblas.options_get">options_get</a></code></li>
 <li><code><a title="pygraphblas.options_set" href="#pygraphblas.options_set">options_set</a></code></li>
+<li><code><a title="pygraphblas.select_op" href="#pygraphblas.select_op">select_op</a></code></li>
 <li><code><a title="pygraphblas.unary_op" href="#pygraphblas.unary_op">unary_op</a></code></li>
 </ul>
 </li>
@@ -43648,6 +43771,7 @@ True
 <ul class="nested active">
 <li><code><a title="pygraphblas.descriptor" href="descriptor.html">pygraphblas.descriptor</a></code></li>
 <li><code><a title="pygraphblas.gviz" href="gviz.html">pygraphblas.gviz</a></code></li>
+<li><code><a title="pygraphblas.selectop" href="selectop.html">pygraphblas.selectop</a></code></li>
 </ul>
 </li>
 </ul>

@@ -117,6 +117,8 @@ __pdoc__ = {
     "scalar": False,
     "types": False,
     "run_doctests": False,
+    "descriptor": True,
+    "selectop": True,
 }
 
 build_semirings(__pdoc__)
