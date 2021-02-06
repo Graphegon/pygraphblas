@@ -81,7 +81,7 @@ class Vector:
             new_type = ffi.new("GrB_Type*")
             self._check(lib.GxB_Vector_type(new_type, vec[0]))
 
-            typ = types.gb_type_to_type(new_type[0])
+            typ = types._gb_type_to_type(new_type[0])
 
         self._vector = vec
         self.type = typ
@@ -97,7 +97,7 @@ class Vector:
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
-        X = ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
@@ -147,7 +147,7 @@ class Vector:
         if size is None:
             size = GxB_INDEX_MAX
         new_vec = ffi.new("GrB_Vector*")
-        _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
+        _check(lib.GrB_Vector_new(new_vec, typ._gb_type, size))
         return cls(new_vec, typ)
 
     @classmethod
@@ -210,22 +210,22 @@ class Vector:
     def to_lists(self):
         """Extract the indices and values of the Vector as 2 lists."""
         I = ffi.new("GrB_Index[]", self.nvals)
-        V = self.type.ffi.new(self.type.C + "[]", self.nvals)
+        V = self.type._ffi.new(self.type._c_type + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
         self._check(self.type._Vector_extractTuples(I, V, n, self._vector[0]))
-        return [list(I), list(map(self.type.to_value, V))]
+        return [list(I), list(map(self.type._to_value, V))]
 
     def to_arrays(self):
         """Return as python `array` objects."""
-        if self.type.typecode is None:
+        if self.type._typecode is None:
             raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
-        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return array("L", I), array(self.type.typecode, X)
+        return array("L", I), array(self.type._typecode, X)
 
     @property
     def size(self):
@@ -244,9 +244,7 @@ class Vector:
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Vector."""
-        typ = ffi.new("GrB_Type*")
-        self._check(lib.GxB_Vector_type(typ, self._vector[0]))
-        return typ[0]
+        return self.type._gb_type
 
     def _full(self):
         B = self.__class__.sparse(self.type, self.size)
@@ -382,7 +380,7 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ._gb_type, self.size))
             out = self.__class__(_out, typ)
 
         if add_op is NULL:
@@ -480,7 +478,7 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ._gb_type, self.size))
             out = self.__class__(_out, typ)
 
         if mult_op is NULL:
@@ -941,7 +939,7 @@ class Vector:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            val = self.type.from_value(value)
+            val = self.type._from_value(value)
             self._check(self.type._Vector_setElement(self._vector[0], val, index))
             return
 
@@ -990,13 +988,13 @@ class Vector:
 
     def extract_element(self, index):
         """Extract element from vector."""
-        result = self.type.ffi.new(self.type._ptr)
+        result = self.type._ffi.new(self.type._ptr)
         self._check(
             self.type._Vector_extractElement(
                 result, self._vector[0], ffi.cast("GrB_Index", index)
             )
         )
-        return self.type.to_value(result[0])
+        return self.type._to_value(result[0])
 
     def extract(self, index, mask=None, accum=None, desc=Default):
         """Extract subvector from vector."""

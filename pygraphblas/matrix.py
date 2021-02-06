@@ -93,7 +93,7 @@ class Matrix:
             new_type = ffi.new("GrB_Type*")
             self._check(lib.GxB_Matrix_type(new_type, matrix[0]))
 
-            typ = types.gb_type_to_type(new_type[0])
+            typ = types._gb_type_to_type(new_type[0])
 
         self._matrix = matrix
         self.type = typ
@@ -139,7 +139,7 @@ class Matrix:
         if ncols is None:
             ncols = GxB_INDEX_MAX
         new_mat = ffi.new("GrB_Matrix*")
-        _check(lib.GrB_Matrix_new(new_mat, typ.gb_type, nrows, ncols))
+        _check(lib.GrB_Matrix_new(new_mat, typ._gb_type, nrows, ncols))
         m = cls(new_mat, typ)
         return m
 
@@ -265,7 +265,7 @@ class Matrix:
         m = ffi.new("GrB_Matrix*")
         i = cls(m, typ)
         with open(tsv_file, "r") as f:
-            _check(lib.LAGraph_tsvread(m, f, typ.gb_type, nrows, ncols))
+            _check(lib.LAGraph_tsvread(m, f, typ._gb_type, nrows, ncols))
         return i
 
     @classmethod
@@ -324,7 +324,7 @@ class Matrix:
         _check(
             lib.LAGraph_random(
                 result,
-                typ.gb_type,
+                typ._gb_type,
                 nrows,
                 ncols,
                 nvals,
@@ -339,13 +339,13 @@ class Matrix:
         return i
 
     @classmethod
-    def identity(cls, typ, nrows, one=None):
+    def identity(cls, typ, nrows, value=None):
         """Return a new square identity Matrix of nrows with diagonal set to
         one.
 
-        If one is None, use the default typ one value.
+        If one is None, use the default `Type.one` value.
 
-        >>> M = Matrix.identity(types.UINT8, 3, one=42)
+        >>> M = Matrix.identity(types.UINT8, 3, value=42)
         >>> print(M)
               0  1  2
           0| 42      |  0
@@ -355,10 +355,10 @@ class Matrix:
 
         """
         result = cls.sparse(typ, nrows, nrows)
-        if one is None:
-            one = result.type.one
+        if value is None:
+            value = result.type.one
         for i in range(nrows):
-            result[i, i] = one
+            result[i, i] = value
         return result
 
     @classmethod
@@ -691,11 +691,11 @@ class Matrix:
         """
         I = ffi.new("GrB_Index[%s]" % self.nvals)
         J = ffi.new("GrB_Index[%s]" % self.nvals)
-        V = self.type.ffi.new(self.type.C + "[%s]" % self.nvals)
+        V = self.type._ffi.new(self.type._c_type + "[%s]" % self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
         self._check(self.type._Matrix_extractTuples(I, J, V, n, self._matrix[0]))
-        return [list(I), list(J), list(map(self.type.to_value, V))]
+        return [list(I), list(J), list(map(self.type._to_value, V))]
 
     def clear(self):
         """Clear the matrix.  This does not change the size but removes all
@@ -790,7 +790,7 @@ class Matrix:
                 typ = cast
             else:
                 typ = self.type
-            self._check(lib.GrB_Matrix_new(_out, typ.gb_type, *new_dimensions))
+            self._check(lib.GrB_Matrix_new(_out, typ._gb_type, *new_dimensions))
             out = self.__class__(_out, typ)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
@@ -938,7 +938,7 @@ class Matrix:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Matrix*")
-            self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
+            self._check(lib.GrB_Matrix_new(_out, typ._gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
         if add_op is NULL:
@@ -1070,7 +1070,7 @@ class Matrix:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Matrix*")
-            self._check(lib.GrB_Matrix_new(_out, typ.gb_type, self.nrows, self.ncols))
+            self._check(lib.GrB_Matrix_new(_out, typ._gb_type, self.nrows, self.ncols))
             out = Matrix(_out, typ)
 
         if mult_op is NULL:
@@ -1129,9 +1129,9 @@ class Matrix:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         J = ffi.new("GrB_Index[%s]" % nvals)
-        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return zip(I, J, map(self.type.to_value, X))
+        return zip(I, J, map(self.type._to_value, X))
 
     def to_arrays(self):
         """Convert Matrix to tuple of three dense
@@ -1142,15 +1142,15 @@ class Matrix:
         (array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 1492]))
 
         """
-        if self.type.typecode is None:
+        if self.type._typecode is None:
             raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
         J = ffi.new("GrB_Index[%s]" % nvals)
-        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return array("L", I), array("L", J), array(self.type.typecode, X)
+        return array("L", I), array("L", J), array(self.type._typecode, X)
 
     @property
     def rows(self):
@@ -1199,7 +1199,7 @@ class Matrix:
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
         J = NULL
-        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
 
@@ -2382,13 +2382,13 @@ class Matrix:
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
             # a[3,3] extract single element
-            result = self.type.ffi.new(self.type._ptr)
+            result = self.type._ffi.new(self.type._ptr)
             self._check(
                 self.type._Matrix_extractElement(
                     result, self._matrix[0], index[0], index[1]
                 )
             )
-            return self.type.to_value(result[0])
+            return self.type._to_value(result[0])
 
         if isinstance(i0, int) and isinstance(i1, slice):
             # a[3,:] extract slice of row vector
@@ -2667,7 +2667,7 @@ class Matrix:
         i0 = index[0]
         i1 = index[1]
         if isinstance(i0, int) and isinstance(i1, int):
-            val = self.type.from_value(value)
+            val = self.type._from_value(value)
             self._check(self.type._Matrix_setElement(self._matrix[0], val, i0, i1))
             return
 

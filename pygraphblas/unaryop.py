@@ -117,8 +117,8 @@ def unary_op(arg_type):
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(arg_type.numba_t),
-            numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type._numba_t),
+            numba.types.CPointer(arg_type._numba_t),
         )
         jitfunc = numba.jit(func, nopython=True)
 
@@ -131,8 +131,8 @@ def unary_op(arg_type):
         lib.GrB_UnaryOp_new(
             out,
             core_ffi.cast("GxB_unary_function", wrapper.address),
-            arg_type.gb_type,
-            arg_type.gb_type,
+            arg_type._gb_type,
+            arg_type._gb_type,
         )
 
         return UnaryOp(func_name, arg_type.__name__, out[0])

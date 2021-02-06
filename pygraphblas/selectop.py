@@ -90,14 +90,14 @@ def select_op(arg_type, thunk_type=None):
     object.
 
     >>> from random import random
-    >>> from pygraphblas import Matrix, select_op, types, gviz
+    >>> from pygraphblas import Matrix, select_op, types, gviz, descriptor
     >>> @select_op(types.FP64, types.FP64)
     ... def random_gt(i, j, x, v):
     ...     if random() > v:
     ...         return True
     ...     return False
     >>> A = Matrix.dense(types.FP64, 3, 3, fill=1)
-    >>> A.select(random_gt, 0.5, out=A) is A
+    >>> A.select(random_gt, 0.5, out=A, desc=descriptor.R) is A
     True
     >>> ga = gviz.draw_matrix(A, scale=40,
     ...     filename='/docs/imgs/select_op_A')
@@ -114,7 +114,7 @@ def select_op(arg_type, thunk_type=None):
     <Matrix (3x3 : ...:FP64)>
     """
     if thunk_type is not None:
-        thunk_type = thunk_type.gb_type
+        thunk_type = thunk_type._gb_type
     else:
         thunk_type = core_ffi.NULL
 
@@ -123,8 +123,8 @@ def select_op(arg_type, thunk_type=None):
         sig = numba.boolean(
             numba.types.uint64,
             numba.types.uint64,
-            numba.types.CPointer(arg_type.numba_t),
-            numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type._numba_t),
+            numba.types.CPointer(arg_type._numba_t),
         )
         jitfunc = numba.jit(func, nopython=True)
 
@@ -136,7 +136,7 @@ def select_op(arg_type, thunk_type=None):
         lib.GxB_SelectOp_new(
             out,
             core_ffi.cast("GxB_select_function", wrapper.address),
-            arg_type.gb_type,
+            arg_type._gb_type,
             thunk_type
         )
 

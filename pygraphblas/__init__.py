@@ -128,6 +128,7 @@ build_monoids(__pdoc__)
 build_selectops(__pdoc__)
 
 from .types import (
+    BOOL,
     FP64,
     FP32,
     FC64,
@@ -140,18 +141,17 @@ from .types import (
     UINT32,
     UINT16,
     UINT8,
-    BOOL,
 )
 
 __all__ = [
     "GxB_INDEX_MAX",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
-    "options_set",
-    "options_get",
     "Matrix",
     "Vector",
     "Scalar",
+    "Accum",
+    "BOOL",
     "FP64",
     "FP32",
     "FC64",
@@ -164,13 +164,13 @@ __all__ = [
     "UINT32",
     "UINT16",
     "UINT8",
-    "BOOL",
     "descriptor",
     "selectop",
-    "Accum",
     "binary_op",
     "unary_op",
     "select_op",
+    "options_set",
+    "options_get",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX

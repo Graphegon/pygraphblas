@@ -125,9 +125,7 @@
       % endfor
     </nav>
   % endif
-  <h1 class="title">${'Namespace' if module.is_namespace else  \
-                      'Package' if module.is_package and not module.supermodule else \
-                      'Module'} <code>${module.name}</code></h1>
+  <h1 class="title"><code>${module.name}</code></h1>
   </header>
 
   <section id="section-intro">

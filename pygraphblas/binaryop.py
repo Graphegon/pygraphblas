@@ -30,7 +30,7 @@ class BinaryOp:
     def __init__(self, op, typ, binaryop, udt=None, boolean=False):
         if udt is not None:  # pragma: no cover
             o = ffi.new("GrB_BinaryOp*")
-            udt = udt.gb_type
+            udt = udt._gb_type
             lib.GrB_BinaryOp_new(
                 o,
                 ffi.cast("GxB_binary_function", binaryop.address),
@@ -161,9 +161,9 @@ def binary_op(arg_type):
     def inner(func):
         func_name = func.__name__
         sig = numba.void(
-            numba.types.CPointer(arg_type.numba_t),
-            numba.types.CPointer(arg_type.numba_t),
-            numba.types.CPointer(arg_type.numba_t),
+            numba.types.CPointer(arg_type._numba_t),
+            numba.types.CPointer(arg_type._numba_t),
+            numba.types.CPointer(arg_type._numba_t),
         )
         jitfunc = numba.jit(func, nopython=True)
 
@@ -176,9 +176,9 @@ def binary_op(arg_type):
         lib.GrB_BinaryOp_new(
             out,
             ffi.cast("GxB_binary_function", wrapper.address),
-            arg_type.gb_type,
-            arg_type.gb_type,
-            arg_type.gb_type,
+            arg_type._gb_type,
+            arg_type._gb_type,
+            arg_type._gb_type,
         )
 
         return BinaryOp(func_name, arg_type.__name__, out[0])

@@ -41,7 +41,7 @@ __all__ = [
 ]
 
 
-def gb_type_to_type(gb_type):
+def _gb_type_to_type(gb_type):
     return MetaType._gb_type_map[gb_type]
 
 
@@ -62,22 +62,22 @@ class MetaType(type):
             t = core_ffi.new("GrB_Type*")
             _check(lib.GrB_Type_new(t, cls_ffi.sizeof(type_name)))
             cffi_support.map_type(cls_ffi.typeof(type_name), use_record_dtype=True)
-            attrs["ffi"] = cls_ffi
-            attrs["gb_type"] = t[0]
-            attrs["C"] = type_name
+            attrs["_ffi"] = cls_ffi
+            attrs["_gb_type"] = t[0]
+            attrs["_c_type"] = type_name
             attrs["member_def"] = list(map(methodcaller("split"), m))
             attrs["base_name"] = "UDT"
         else:
-            attrs["ffi"] = core_ffi
-            gb_type_name = type_name
+            attrs["_ffi"] = core_ffi
+            _gb_type_name = type_name
 
         cls = super().__new__(meta, type_name, bases, attrs)
-        meta._gb_type_map[cls.gb_type] = cls
-        meta._type_gb_map[cls] = cls.gb_type
+        meta._gb_type_map[cls._gb_type] = cls
+        meta._type_gb_map[cls] = cls._gb_type
         meta._gb_name_type_map[type_name] = cls
-        meta._gb_name_type_map[cls.C] = cls
+        meta._gb_name_type_map[cls._c_type] = cls
 
-        cls._ptr = cls.C + "*"
+        cls._ptr = cls._c_type + "*"
         cls.zero = getattr(cls, "zero", core_ffi.NULL)
         cls.one = getattr(cls, "one", core_ffi.NULL)
         get = partial(getattr, lib)
@@ -127,7 +127,7 @@ class MetaType(type):
 
         monoid = core_ffi.new("GrB_Monoid[1]")
         if cls._base_name == "UDT":  # pragma: nocover
-            i = cls.ffi.new(cls._ptr)
+            i = cls._ffi.new(cls._ptr)
             i[0] = identity
             identity = i
         _check(cls._Monoid_new(monoid, op.binaryop, identity))
@@ -145,16 +145,21 @@ class MetaType(type):
         return Semiring("PLUS", "TIMES", cls.__name__, semiring[0], udt=cls)
 
     def gb_from_name(cls, name):
-        return cls._gb_name_type_map[name].gb_type
+        return cls._gb_name_type_map[name]._gb_type
 
 class Type(metaclass=MetaType):
     one = 1
+    """The default value used to represent 1 for filling in types."""
     zero = 0
+    """The default value used to represent 0 for filling in types."""
     base = True
-    typecode = None
+    _typecode = None
 
     @classmethod
     def format_value(cls, val, width=2, prec=None):
+        """Return the value as a formatted string for display.
+
+        """
         return f"{val:{width}}"
 
     @classmethod
@@ -170,17 +175,20 @@ class Type(metaclass=MetaType):
         return cls.PLUS_TIMES
 
     @classmethod
-    def from_value(cls, value):
+    def _from_value(cls, value):
+        """
+
+        """
         if cls._base_name != "UDT":
             return value
         else:  # pragma: nocover
-            data = cls.ffi.new("%s[1]" % cls.__name__)
+            data = cls._ffi.new("%s[1]" % cls.__name__)
             for (_, name), val in zip(cls.member_def, value):
                 setattr(data[0], name, val)
             return data
 
     @classmethod
-    def to_value(cls, cdata):
+    def _to_value(cls, cdata):
         if cls._base_name != "UDT":
             return cdata
         else:  # pragma: nocover
@@ -190,12 +198,12 @@ class Type(metaclass=MetaType):
 class BOOL(Type):
     """GraphBLAS Boolean Type."""
 
-    gb_type = lib.GrB_BOOL
-    C = "_Bool"
+    _gb_type = lib.GrB_BOOL
+    _c_type = "_Bool"
     one = True
     zero = False
-    typecode = "B"
-    numba_t = numba.boolean
+    _typecode = "B"
+    _numba_t = numba.boolean
 
     @classmethod
     def _default_addop(self):  # pragma: nocover
@@ -217,80 +225,80 @@ class BOOL(Type):
         return f.format("t") if val is True else f.format("f")
 
     @classmethod
-    def to_value(cls, cdata):
+    def _to_value(cls, cdata):
         return bool(cdata)
 
 
 class INT8(Type):
     """GraphBLAS 8 bit signed integer."""
 
-    gb_type = lib.GrB_INT8
-    C = "int8_t"
-    typecode = "b"
-    numba_t = numba.int8
+    _gb_type = lib.GrB_INT8
+    _c_type = "int8_t"
+    _typecode = "b"
+    _numba_t = numba.int8
 
 
 class UINT8(Type):
     """GraphBLAS 8 bit unsigned integer."""
 
-    gb_type = lib.GrB_UINT8
-    C = "uint8_t"
-    typecode = "B"
-    numba_t = numba.uint8
+    _gb_type = lib.GrB_UINT8
+    _c_type = "uint8_t"
+    _typecode = "B"
+    _numba_t = numba.uint8
 
 
 class INT16(Type):
     """GraphBLAS 16 bit signed integer."""
 
-    gb_type = lib.GrB_INT16
-    C = "int16_t"
-    typecode = "i"
-    numba_t = numba.int16
+    _gb_type = lib.GrB_INT16
+    _c_type = "int16_t"
+    _typecode = "i"
+    _numba_t = numba.int16
 
 
 class UINT16(Type):
     """GraphBLAS 16 bit unsigned integer."""
 
-    gb_type = lib.GrB_UINT16
-    C = "uint16_t"
-    typecode = "I"
-    numba_t = numba.uint16
+    _gb_type = lib.GrB_UINT16
+    _c_type = "uint16_t"
+    _typecode = "I"
+    _numba_t = numba.uint16
 
 
 class INT32(Type):
     """GraphBLAS 32 bit signed integer."""
 
-    gb_type = lib.GrB_INT32
-    C = "int32_t"
-    typecode = "l"
-    numba_t = numba.int32
+    _gb_type = lib.GrB_INT32
+    _c_type = "int32_t"
+    _typecode = "l"
+    _numba_t = numba.int32
 
 
 class UINT32(Type):
     """GraphBLAS 32 bit unsigned integer."""
 
-    gb_type = lib.GrB_UINT32
-    C = "uint32_t"
-    typecode = "L"
-    numba_t = numba.uint32
+    _gb_type = lib.GrB_UINT32
+    _c_type = "uint32_t"
+    _typecode = "L"
+    _numba_t = numba.uint32
 
 
 class INT64(Type):
     """GraphBLAS 64 bit signed integer."""
 
-    gb_type = lib.GrB_INT64
-    C = "int64_t"
-    typecode = "q"
-    numba_t = numba.int64
+    _gb_type = lib.GrB_INT64
+    _c_type = "int64_t"
+    _typecode = "q"
+    _numba_t = numba.int64
 
 
 class UINT64(Type):
     """GraphBLAS 64 bit unsigned integer."""
 
-    gb_type = lib.GrB_UINT64
-    C = "uint64_t"
-    typecode = "Q"
-    numba_t = numba.uint64
+    _gb_type = lib.GrB_UINT64
+    _c_type = "uint64_t"
+    _typecode = "Q"
+    _numba_t = numba.uint64
 
 
 class FP32(Type):
@@ -298,10 +306,10 @@ class FP32(Type):
 
     one = 1.0
     zero = 0.0
-    gb_type = lib.GrB_FP32
-    C = "float"
-    typecode = "f"
-    numba_t = numba.float32
+    _gb_type = lib.GrB_FP32
+    _c_type = "float"
+    _typecode = "f"
+    _numba_t = numba.float32
 
     @classmethod
     def format_value(cls, val, width=2, prec=2):
@@ -313,10 +321,10 @@ class FP64(Type):
 
     one = 1.0
     zero = 0.0
-    gb_type = lib.GrB_FP64
-    C = "double"
-    typecode = "d"
-    numba_t = numba.float64
+    _gb_type = lib.GrB_FP64
+    _c_type = "double"
+    _typecode = "d"
+    _numba_t = numba.float64
 
     @classmethod
     def format_value(cls, val, width=2, prec=2):
@@ -329,9 +337,9 @@ class FC32(Type):
     _prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)
-    gb_type = lib.GxB_FC32
-    C = "float _Complex"
-    numba_t = numba.complex64
+    _gb_type = lib.GxB_FC32
+    _c_type = "float _Complex"
+    _numba_t = numba.complex64
 
 
 class FC64(Type):
@@ -340,15 +348,15 @@ class FC64(Type):
     _prefix = "GxB"
     one = complex(1.0)
     zero = complex(0.0)
-    gb_type = lib.GxB_FC64
-    C = "double _Complex"
-    numba_t = numba.complex128
+    _gb_type = lib.GxB_FC64
+    _c_type = "double _Complex"
+    _numba_t = numba.complex128
 
 
 # class Complex(Type):
-#     gb_type = lib.LAGraph_Complex
+#     _gb_type = lib.LAGraph_Complex
 #     C = 'double _Complex'
-#     typecode = None
+#     _typecode = None
 #     udt = True
 #     add_op = lib.Complex_plus
 #     mult_op = lib.Complex_times
@@ -357,11 +365,11 @@ class FC64(Type):
 #     semiring = lib.Complex_plus_times
 
 #     @classmethod
-#     def from_value(cls, value):
+#     def _from_value(cls, value):
 #         return ffi.new(cls._ptr, value)
 
 #     @classmethod
-#     def to_value(cls, data):
+#     def _to_value(cls, data):
 #         return data
 
 
@@ -436,13 +444,13 @@ def binop(boolean=False):  # pragma: nocover
             func_name = self.func.__name__
             cls_name = cls.__name__
             if cls._base_name == "UDT":
-                cls.ffi.cdef(build_binop_def(cls_name, func_name, boolean))
+                cls._ffi.cdef(build_binop_def(cls_name, func_name, boolean))
                 sig = cffi_support.map_type(
-                    cls.ffi.typeof(binop_name(cls_name, func_name)),
+                    cls._ffi.typeof(binop_name(cls_name, func_name)),
                     use_record_dtype=True,
                 )
             else:
-                sig = numba.void(cls.numba_t, cls.numba_t, cls.numba_t)
+                sig = numba.void(cls._numba_t, cls._numba_t, cls._numba_t)
 
             jitfunc = jit(self.func, nopython=True)
 
@@ -474,7 +482,7 @@ def get_binaryop(moid):
 def get_ztype(bop):
     typ = core_ffi.new("GrB_Type*")
     _check(lib.GxB_BinaryOp_ztype(typ, bop))
-    return gb_type_to_type(typ[0])
+    return _gb_type_to_type(typ[0])
 
 
 def get_semiring_ztype(sring):
