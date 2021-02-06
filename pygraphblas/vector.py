@@ -182,7 +182,14 @@ class Vector:
 
     @classmethod
     def from_1_to_n(cls, n):
-        """Wrapper around LAGraph_1_to_n()"""
+        """Wrapper around LAGraph_1_to_n()
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> print(v)
+        0| 1
+        1| 2
+        2| 3
+        """
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.LAGraph_1_to_n(new_vec, n))
         if n < lib.INT32_MAX:
@@ -190,7 +197,19 @@ class Vector:
         return cls(new_vec, types.INT64)  # pragma: no cover
 
     def dup(self):
-        """Create an duplicate Vector from the given argument."""
+        """Create an duplicate Vector from the given argument.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> w = v.dup()
+        >>> w is not v
+        True
+        >>> w.iseq(v)
+        True
+        >>> print(w)
+        0| 1
+        1| 2
+        2| 3
+        """
         new_vec = ffi.new("GrB_Vector*")
         self._check(lib.GrB_Vector_dup(new_vec, self._vector[0]))
         return self.__class__(new_vec, self.type)
@@ -200,6 +219,15 @@ class Vector:
         """Return a dense vector of `typ` and `size`.  If `fill` is provided,
         use that value otherwise use `type.zero`
 
+        >>> print(Vector.dense(types.FP32, 3))
+        0|0.0
+        1|0.0
+        2|0.0
+        >>> print(Vector.dense(types.FP32, 3, fill=42.0))
+        0|42.0
+        1|42.0
+        2|42.0
+
         """
         v = cls.sparse(typ, size)
         if fill is None:
@@ -208,7 +236,12 @@ class Vector:
         return v
 
     def to_lists(self):
-        """Extract the indices and values of the Vector as 2 lists."""
+        """Extract the indices and values of the Vector as 2 lists.
+
+        >>> Vector.from_1_to_n(3).to_lists()
+        [[0, 1, 2], [1, 2, 3]]
+
+        """
         I = ffi.new("GrB_Index[]", self.nvals)
         V = self.type._ffi.new(self.type._c_type + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
@@ -217,7 +250,12 @@ class Vector:
         return [list(I), list(map(self.type._to_value, V))]
 
     def to_arrays(self):
-        """Return as python `array` objects."""
+        """Return as python `array` objects.
+
+        >>> Vector.from_1_to_n(3).to_arrays()
+        (array('L', [0, 1, 2]), array('l', [1, 2, 3]))
+
+        """
         if self.type._typecode is None:
             raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
@@ -229,21 +267,37 @@ class Vector:
 
     @property
     def size(self):
-        """Return the size of the vector."""
+        """Return the size of the vector.
+
+        >>> Vector.from_1_to_n(3).size
+        3
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Vector_size(n, self._vector[0]))
         return n[0]
 
     @property
     def nvals(self):
-        """Return the number of values in the vector."""
+        """Return the number of values in the vector.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.nvals
+        3
+        >>> v.clear()
+        >>> v.nvals
+        0
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Vector_nvals(n, self._vector[0]))
         return n[0]
 
     @property
     def gb_type(self):
-        """Return the GraphBLAS low-level type object of the Vector."""
+        """Return the GraphBLAS low-level type object of the Vector.
+
+        """
         return self.type._gb_type
 
     def _full(self):
@@ -724,6 +778,13 @@ class Vector:
     def resize(self, size):
         """Resize the vector.  If the dimensions decrease, entries that fall
         outside the resized vector are deleted.
+
+        >>> v = Vector.dense(types.UINT8, 2)
+        >>> v.resize(3)
+        >>> print(v)
+        0| 0
+        1| 0
+        2|
 
         """
         self._check(lib.GrB_Vector_resize(self._vector[0], size))
