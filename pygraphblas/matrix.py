@@ -1586,21 +1586,18 @@ class Matrix:
           1|         |  1
           2|149      |  2
               0  1  2
-
         >>> print(M.select('>=', 0))
               0  1  2
           0|         |  0
           1|        0|  1
           2|149      |  2
               0  1  2
-
         >>> print(M.select('<', 0))
               0  1  2
           0|   -42   |  0
           1|         |  1
           2|         |  2
               0  1  2
-
         >>> N = M.dup(clear=True)
         >>> M.select('<', 0, out=N) is N
         True
@@ -1610,7 +1607,6 @@ class Matrix:
           1|         |  1
           2|         |  2
               0  1  2
-
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -1871,13 +1867,14 @@ class Matrix:
           1|        2|  1
           2|  3      |  2
               0  1  2
-
         >>> print(n)
               0  1  2
           0|     2   |  0
           1|        3|  1
           2|  4      |  2
               0  1  2
+
+        Matrix multiply `m` by `n`:
 
         >>> o = m.mxm(n)
         >>> print(o)
@@ -1887,23 +1884,9 @@ class Matrix:
           2|     6   |  2
               0  1  2
 
+        Matrix matrix with the `@` operator:
+
         >>> o = m @ n
-        >>> print(o)
-              0  1  2
-          0|        3|  0
-          1|  8      |  1
-          2|     6   |  2
-              0  1  2
-
-        >>> p = m.pattern() @ n
-        >>> print(o)
-              0  1  2
-          0|        3|  0
-          1|  8      |  1
-          2|     6   |  2
-              0  1  2
-
-        >>> p = m @ n.pattern()
         >>> print(o)
               0  1  2
           0|        3|  0
@@ -1927,7 +1910,6 @@ class Matrix:
           1|  8     2|  1
           2|  3  6   |  2
               0  1  2
-
         >>> o = m.dup()
         >>> with Accum(types.INT64.MIN):
         ...     o @= n
@@ -1952,7 +1934,6 @@ class Matrix:
           1|  6      |  1
           2|     5   |  2
               0  1  2
-
         >>> with types.INT64.MIN_PLUS:
         ...     o = m @ n
         >>> print(o)
@@ -1967,7 +1948,6 @@ class Matrix:
 
         >>> descriptor.T0
         <Descriptor T0>
-
         >>> o = m.mxm(n, desc=descriptor.T0)
         >>> print(o)
               0  1  2
@@ -1975,7 +1955,6 @@ class Matrix:
           1|     2   |  1
           2|        6|  2
               0  1  2
-
         >>> with descriptor.T0:
         ...     o = m @ n
         >>> print(o)

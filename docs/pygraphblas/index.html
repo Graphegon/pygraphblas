@@ -2044,21 +2044,18 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|         |  1
           2|149      |  2
               0  1  2
-
         &gt;&gt;&gt; print(M.select(&#39;&gt;=&#39;, 0))
               0  1  2
           0|         |  0
           1|        0|  1
           2|149      |  2
               0  1  2
-
         &gt;&gt;&gt; print(M.select(&#39;&lt;&#39;, 0))
               0  1  2
           0|   -42   |  0
           1|         |  1
           2|         |  2
               0  1  2
-
         &gt;&gt;&gt; N = M.dup(clear=True)
         &gt;&gt;&gt; M.select(&#39;&lt;&#39;, 0, out=N) is N
         True
@@ -2068,7 +2065,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|         |  1
           2|         |  2
               0  1  2
-
         &#34;&#34;&#34;
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -2329,13 +2325,14 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|        2|  1
           2|  3      |  2
               0  1  2
-
         &gt;&gt;&gt; print(n)
               0  1  2
           0|     2   |  0
           1|        3|  1
           2|  4      |  2
               0  1  2
+
+        Matrix multiply `m` by `n`:
 
         &gt;&gt;&gt; o = m.mxm(n)
         &gt;&gt;&gt; print(o)
@@ -2345,23 +2342,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           2|     6   |  2
               0  1  2
 
+        Matrix matrix with the `@` operator:
+
         &gt;&gt;&gt; o = m @ n
-        &gt;&gt;&gt; print(o)
-              0  1  2
-          0|        3|  0
-          1|  8      |  1
-          2|     6   |  2
-              0  1  2
-
-        &gt;&gt;&gt; p = m.pattern() @ n
-        &gt;&gt;&gt; print(o)
-              0  1  2
-          0|        3|  0
-          1|  8      |  1
-          2|     6   |  2
-              0  1  2
-
-        &gt;&gt;&gt; p = m @ n.pattern()
         &gt;&gt;&gt; print(o)
               0  1  2
           0|        3|  0
@@ -2385,7 +2368,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|  8     2|  1
           2|  3  6   |  2
               0  1  2
-
         &gt;&gt;&gt; o = m.dup()
         &gt;&gt;&gt; with Accum(types.INT64.MIN):
         ...     o @= n
@@ -2410,7 +2392,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|  6      |  1
           2|     5   |  2
               0  1  2
-
         &gt;&gt;&gt; with types.INT64.MIN_PLUS:
         ...     o = m @ n
         &gt;&gt;&gt; print(o)
@@ -2425,7 +2406,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         &gt;&gt;&gt; descriptor.T0
         &lt;Descriptor T0&gt;
-
         &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
         &gt;&gt;&gt; print(o)
               0  1  2
@@ -2433,7 +2413,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
           1|     2   |  1
           2|        6|  2
               0  1  2
-
         &gt;&gt;&gt; with descriptor.T0:
         ...     o = m @ n
         &gt;&gt;&gt; print(o)
@@ -5925,22 +5904,19 @@ Can be a string mapping to following operators:</p>
   1|         |  1
   2|149      |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.select('&gt;=', 0))
+&gt;&gt;&gt; print(M.select('&gt;=', 0))
       0  1  2
   0|         |  0
   1|        0|  1
   2|149      |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; print(M.select('&lt;', 0))
+&gt;&gt;&gt; print(M.select('&lt;', 0))
       0  1  2
   0|   -42   |  0
   1|         |  1
   2|         |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; N = M.dup(clear=True)
+&gt;&gt;&gt; N = M.dup(clear=True)
 &gt;&gt;&gt; M.select('&lt;', 0, out=N) is N
 True
 &gt;&gt;&gt; print(N)
@@ -5980,21 +5956,18 @@ True
       1|         |  1
       2|149      |  2
           0  1  2
-
     &gt;&gt;&gt; print(M.select(&#39;&gt;=&#39;, 0))
           0  1  2
       0|         |  0
       1|        0|  1
       2|149      |  2
           0  1  2
-
     &gt;&gt;&gt; print(M.select(&#39;&lt;&#39;, 0))
           0  1  2
       0|   -42   |  0
       1|         |  1
       2|         |  2
           0  1  2
-
     &gt;&gt;&gt; N = M.dup(clear=True)
     &gt;&gt;&gt; M.select(&#39;&lt;&#39;, 0, out=N) is N
     True
@@ -6004,7 +5977,6 @@ True
       1|         |  1
       2|         |  2
           0  1  2
-
     &#34;&#34;&#34;
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
@@ -6333,14 +6305,14 @@ for details.</p>
   1|        2|  1
   2|  3      |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; print(n)
+&gt;&gt;&gt; print(n)
       0  1  2
   0|     2   |  0
   1|        3|  1
   2|  4      |  2
       0  1  2
 </code></pre>
+<p>Matrix multiply <code>m</code> by <code>n</code>:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n)
 &gt;&gt;&gt; print(o)
       0  1  2
@@ -6349,23 +6321,8 @@ for details.</p>
   2|     6   |  2
       0  1  2
 </code></pre>
+<p>Matrix matrix with the <code>@</code> operator:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; o = m @ n
-&gt;&gt;&gt; print(o)
-      0  1  2
-  0|        3|  0
-  1|  8      |  1
-  2|     6   |  2
-      0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; p = m.pattern() @ n
-&gt;&gt;&gt; print(o)
-      0  1  2
-  0|        3|  0
-  1|  8      |  1
-  2|     6   |  2
-      0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; p = m @ n.pattern()
 &gt;&gt;&gt; print(o)
       0  1  2
   0|        3|  0
@@ -6391,8 +6348,7 @@ True
   1|  8     2|  1
   2|  3  6   |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.dup()
+&gt;&gt;&gt; o = m.dup()
 &gt;&gt;&gt; with Accum(types.INT64.MIN):
 ...     o @= n
 &gt;&gt;&gt; print(o)
@@ -6416,8 +6372,7 @@ with a context manager:</p>
   1|  6      |  1
   2|     5   |  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN_PLUS:
+&gt;&gt;&gt; with types.INT64.MIN_PLUS:
 ...     o = m @ n
 &gt;&gt;&gt; print(o)
       0  1  2
@@ -6430,16 +6385,14 @@ with a context manager:</p>
 argument or a context manager:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; descriptor.T0
 &lt;Descriptor T0&gt;
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
+&gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
 &gt;&gt;&gt; print(o)
       0  1  2
   0| 12      |  0
   1|     2   |  1
   2|        6|  2
       0  1  2
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; with descriptor.T0:
+&gt;&gt;&gt; with descriptor.T0:
 ...     o = m @ n
 &gt;&gt;&gt; print(o)
       0  1  2
@@ -6483,13 +6436,14 @@ and <code>emult</code>.</p></div>
       1|        2|  1
       2|  3      |  2
           0  1  2
-
     &gt;&gt;&gt; print(n)
           0  1  2
       0|     2   |  0
       1|        3|  1
       2|  4      |  2
           0  1  2
+
+    Matrix multiply `m` by `n`:
 
     &gt;&gt;&gt; o = m.mxm(n)
     &gt;&gt;&gt; print(o)
@@ -6499,23 +6453,9 @@ and <code>emult</code>.</p></div>
       2|     6   |  2
           0  1  2
 
+    Matrix matrix with the `@` operator:
+
     &gt;&gt;&gt; o = m @ n
-    &gt;&gt;&gt; print(o)
-          0  1  2
-      0|        3|  0
-      1|  8      |  1
-      2|     6   |  2
-          0  1  2
-
-    &gt;&gt;&gt; p = m.pattern() @ n
-    &gt;&gt;&gt; print(o)
-          0  1  2
-      0|        3|  0
-      1|  8      |  1
-      2|     6   |  2
-          0  1  2
-
-    &gt;&gt;&gt; p = m @ n.pattern()
     &gt;&gt;&gt; print(o)
           0  1  2
       0|        3|  0
@@ -6539,7 +6479,6 @@ and <code>emult</code>.</p></div>
       1|  8     2|  1
       2|  3  6   |  2
           0  1  2
-
     &gt;&gt;&gt; o = m.dup()
     &gt;&gt;&gt; with Accum(types.INT64.MIN):
     ...     o @= n
@@ -6564,7 +6503,6 @@ and <code>emult</code>.</p></div>
       1|  6      |  1
       2|     5   |  2
           0  1  2
-
     &gt;&gt;&gt; with types.INT64.MIN_PLUS:
     ...     o = m @ n
     &gt;&gt;&gt; print(o)
@@ -6579,7 +6517,6 @@ and <code>emult</code>.</p></div>
 
     &gt;&gt;&gt; descriptor.T0
     &lt;Descriptor T0&gt;
-
     &gt;&gt;&gt; o = m.mxm(n, desc=descriptor.T0)
     &gt;&gt;&gt; print(o)
           0  1  2
@@ -6587,7 +6524,6 @@ and <code>emult</code>.</p></div>
       1|     2   |  1
       2|        6|  2
           0  1  2
-
     &gt;&gt;&gt; with descriptor.T0:
     ...     o = m @ n
     &gt;&gt;&gt; print(o)
