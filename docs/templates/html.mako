@@ -125,9 +125,7 @@
       % endfor
     </nav>
   % endif
-  <h1 class="title">${'Namespace' if module.is_namespace else  \
-                      'Package' if module.is_package and not module.supermodule else \
-                      'Module'} <code>${module.name}</code></h1>
+  <h1 class="title"><code>${module.name}</code></h1>
   </header>
 
   <section id="section-intro">
@@ -178,7 +176,7 @@
       % if class_vars :
           <h3 class="caret">Class Attributes</h3>
           <dl class="nested active">
-          % for v in class_vars:
+          % for v in sorted(class_vars):
               <% return_type = get_annotation(v.type_annotation) %>
               <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${return_type}</code></dt>
               <dd>${show_desc(v)}</dd>
@@ -336,7 +334,7 @@
                             c.class_variables(sort=sort_identifiers))
             if not show_inherited_members:
                 members = [i for i in members if not i.inherits]
-            if sort_identifiers:
+            if True:
               members = sorted(members)
         %>
         % if members:

@@ -81,7 +81,7 @@ class Vector:
             new_type = ffi.new("GrB_Type*")
             self._check(lib.GxB_Vector_type(new_type, vec[0]))
 
-            typ = types.gb_type_to_type(new_type[0])
+            typ = types._gb_type_to_type(new_type[0])
 
         self._vector = vec
         self.type = typ
@@ -97,7 +97,7 @@ class Vector:
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
-        X = ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
@@ -147,7 +147,7 @@ class Vector:
         if size is None:
             size = GxB_INDEX_MAX
         new_vec = ffi.new("GrB_Vector*")
-        _check(lib.GrB_Vector_new(new_vec, typ.gb_type, size))
+        _check(lib.GrB_Vector_new(new_vec, typ._gb_type, size))
         return cls(new_vec, typ)
 
     @classmethod
@@ -182,7 +182,14 @@ class Vector:
 
     @classmethod
     def from_1_to_n(cls, n):
-        """Wrapper around LAGraph_1_to_n()"""
+        """Wrapper around LAGraph_1_to_n()
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> print(v)
+        0| 1
+        1| 2
+        2| 3
+        """
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.LAGraph_1_to_n(new_vec, n))
         if n < lib.INT32_MAX:
@@ -190,7 +197,19 @@ class Vector:
         return cls(new_vec, types.INT64)  # pragma: no cover
 
     def dup(self):
-        """Create an duplicate Vector from the given argument."""
+        """Create an duplicate Vector from the given argument.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> w = v.dup()
+        >>> w is not v
+        True
+        >>> w.iseq(v)
+        True
+        >>> print(w)
+        0| 1
+        1| 2
+        2| 3
+        """
         new_vec = ffi.new("GrB_Vector*")
         self._check(lib.GrB_Vector_dup(new_vec, self._vector[0]))
         return self.__class__(new_vec, self.type)
@@ -200,6 +219,15 @@ class Vector:
         """Return a dense vector of `typ` and `size`.  If `fill` is provided,
         use that value otherwise use `type.zero`
 
+        >>> print(Vector.dense(types.FP32, 3))
+        0|0.0
+        1|0.0
+        2|0.0
+        >>> print(Vector.dense(types.FP32, 3, fill=42.0))
+        0|42.0
+        1|42.0
+        2|42.0
+
         """
         v = cls.sparse(typ, size)
         if fill is None:
@@ -208,35 +236,59 @@ class Vector:
         return v
 
     def to_lists(self):
-        """Extract the indices and values of the Vector as 2 lists."""
+        """Extract the indices and values of the Vector as 2 lists.
+
+        >>> Vector.from_1_to_n(3).to_lists()
+        [[0, 1, 2], [1, 2, 3]]
+
+        """
         I = ffi.new("GrB_Index[]", self.nvals)
-        V = self.type.ffi.new(self.type.C + "[]", self.nvals)
+        V = self.type._ffi.new(self.type._c_type + "[]", self.nvals)
         n = ffi.new("GrB_Index*")
         n[0] = self.nvals
         self._check(self.type._Vector_extractTuples(I, V, n, self._vector[0]))
-        return [list(I), list(map(self.type.to_value, V))]
+        return [list(I), list(map(self.type._to_value, V))]
 
     def to_arrays(self):
-        """Return as python `array` objects."""
-        if self.type.typecode is None:
+        """Return as python `array` objects.
+
+        >>> Vector.from_1_to_n(3).to_arrays()
+        (array('L', [0, 1, 2]), array('l', [1, 2, 3]))
+
+        """
+        if self.type._typecode is None:
             raise TypeError("This matrix has no array typecode.")
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = ffi.new("GrB_Index[%s]" % nvals)
-        X = self.type.ffi.new("%s[%s]" % (self.type.C, nvals))
+        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return array("L", I), array(self.type.typecode, X)
+        return array("L", I), array(self.type._typecode, X)
 
     @property
     def size(self):
-        """Return the size of the vector."""
+        """Return the size of the vector.
+
+        >>> Vector.from_1_to_n(3).size
+        3
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Vector_size(n, self._vector[0]))
         return n[0]
 
     @property
     def nvals(self):
-        """Return the number of values in the vector."""
+        """Return the number of values in the vector.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.nvals
+        3
+        >>> v.clear()
+        >>> v.nvals
+        0
+
+        """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Vector_nvals(n, self._vector[0]))
         return n[0]
@@ -244,9 +296,7 @@ class Vector:
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Vector."""
-        typ = ffi.new("GrB_Type*")
-        self._check(lib.GxB_Vector_type(typ, self._vector[0]))
-        return typ[0]
+        return self.type._gb_type
 
     def _full(self):
         B = self.__class__.sparse(self.type, self.size)
@@ -382,7 +432,7 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ._gb_type, self.size))
             out = self.__class__(_out, typ)
 
         if add_op is NULL:
@@ -480,7 +530,7 @@ class Vector:
         if out is None:
             typ = cast or types.promote(self.type, other.type)
             _out = ffi.new("GrB_Vector*")
-            self._check(lib.GrB_Vector_new(_out, typ.gb_type, self.size))
+            self._check(lib.GrB_Vector_new(_out, typ._gb_type, self.size))
             out = self.__class__(_out, typ)
 
         if mult_op is NULL:
@@ -547,7 +597,6 @@ class Vector:
         0|14
         1| 5
         2|10
-
         >>> o = v.dup()
         >>> with Accum(types.INT64.MIN):
         ...     o @= M
@@ -568,7 +617,6 @@ class Vector:
         0| 7
         1| 3
         2| 5
-
         >>> with types.INT64.MIN_PLUS:
         ...     o = v @ M
         >>> print(o)
@@ -584,14 +632,12 @@ class Vector:
         0|12
         1| 2
         2| 6
-
         >>> with descriptor.T0:
         ...     o = v @ M
         >>> print(o)
         0|12
         1| 2
         2| 6
-
         >>> del o[1]
         >>> o = v.vxm(M, mask=o)
         >>> print(o)
@@ -727,6 +773,13 @@ class Vector:
         """Resize the vector.  If the dimensions decrease, entries that fall
         outside the resized vector are deleted.
 
+        >>> v = Vector.dense(types.UINT8, 2)
+        >>> v.resize(3)
+        >>> print(v)
+        0| 0
+        1| 0
+        2|
+
         """
         self._check(lib.GrB_Vector_resize(self._vector[0], size))
 
@@ -822,7 +875,13 @@ class Vector:
         return result[0]
 
     def apply(self, op, out=None, mask=None, accum=None, desc=Default):
-        """Apply Unary op to vector elements."""
+        """Apply Unary op to vector elements.
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> print(v.apply(types.UINT64.AINV))
+        0|-1
+        1|-1
+
+        """
         if out is None:
             out = Vector.sparse(self.type, self.size)
 
@@ -844,10 +903,10 @@ class Vector:
         >>> print(v.apply_first(3, types.UINT64.PLUS))
         0| 4
         1| 4
-
         >>> w = Vector.sparse(v.type, v.size)
         >>> v.apply_first(3, types.UINT64.PLUS, out=w) is w
         True
+
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -868,6 +927,13 @@ class Vector:
         """Apply a binary operator to the entries in a vector, binding the second input
         to a scalar second.
 
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> print(v.apply_second(types.UINT64.PLUS, 3))
+        0| 4
+        1| 4
+        >>> w = Vector.sparse(v.type, v.size)
+        >>> v.apply_second(types.UINT64.PLUS, 3, out=w) is w
+        True
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -941,7 +1007,7 @@ class Vector:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            val = self.type.from_value(value)
+            val = self.type._from_value(value)
             self._check(self.type._Vector_setElement(self._vector[0], val, index))
             return
 
@@ -990,13 +1056,13 @@ class Vector:
 
     def extract_element(self, index):
         """Extract element from vector."""
-        result = self.type.ffi.new(self.type._ptr)
+        result = self.type._ffi.new(self.type._ptr)
         self._check(
             self.type._Vector_extractElement(
                 result, self._vector[0], ffi.cast("GrB_Index", index)
             )
         )
-        return self.type.to_value(result[0])
+        return self.type._to_value(result[0])
 
     def extract(self, index, mask=None, accum=None, desc=Default):
         """Extract subvector from vector."""

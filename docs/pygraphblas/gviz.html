@@ -20,7 +20,7 @@ doctests and Jupyter notebooks …" />
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pygraphblas.gviz</code></h1>
+<h1 class="title"><code>pygraphblas.gviz</code></h1>
 </header>
 <section id="section-intro">
 <p>Helper functions for drawing graphs and matrices with graphviz in
@@ -520,21 +520,6 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         return draw_vector_dot(obj, name, **kws)</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.gviz.draw_cy"><code class="name flex">
-<span>def <span class="ident">draw_cy</span></span>(<span>M, visual_style=[{'selector': 'node', 'style': {'background-color': 'blue', 'label': 'data(name)', 'width': 2, 'height': 2, 'shape': 'circle', 'color': '#EEEEEE', 'font-weight': 400, 'text-halign': 'right', 'text-valign': 'bottom', 'font-size': 12}}, {'selector': 'edge', 'style': {'width': 0.2, 'opacity': 1, 'line-color': 'green'}}])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def draw_cy(M, visual_style=my_style):  # pragma: nocover
-    from cyjupyter import Cytoscape
-
-    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
-</details>
-</dd>
 <dt id="pygraphblas.gviz.draw_graph"><code class="name flex">
 <span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', show_weight=True, concentrate=True, labels=True, label_vector=None, label_width=None, size_vector=None, size_scale=1.0, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None)</span>
 </code></dt>
@@ -623,87 +608,6 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format=&#34;png&#34;)
-    return g</code></pre>
-</details>
-</dd>
-<dt id="pygraphblas.gviz.draw_graph_op"><code class="name flex">
-<span>def <span class="ident">draw_graph_op</span></span>(<span>left, op, right, result)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def draw_graph_op(left, op, right, result):  # pragma: nocover
-    from pygraphblas import Matrix, Vector
-
-    ioff = 0
-    joff = 0
-
-    def draw(obj, name=&#34;&#34;, **kws):
-        nonlocal ioff, joff
-        if isinstance(obj, Matrix):
-            ioff += obj.nrows
-            joff += obj.ncols
-            return draw_graph(obj, name=name, ioff=ioff, joff=joff)
-        if isinstance(obj, Vector):
-            ioff += obj.size
-            joff += obj.size
-            return draw_vector_dot(obj, name=name, ioff=ioff, joff=joff)
-
-    g = Digraph()
-    g.subgraph(draw(left, name=&#34;cluster_left&#34;))
-    g.node(op, width=&#34;0.5&#34;)
-    g.subgraph(draw(right, name=&#34;cluster_right&#34;))
-    g.node(&#34;=&#34;, width=&#34;0.5&#34;)
-    g.subgraph(draw(result, name=&#34;cluster_result&#34;))
-    return g</code></pre>
-</details>
-</dd>
-<dt id="pygraphblas.gviz.draw_layers"><code class="name flex">
-<span>def <span class="ident">draw_layers</span></span>(<span>M, name='', rankdir='LR', label_width=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):  # pragma: nocover
-    g = Digraph(name)
-    g.attr(rankdir=rankdir, ranksep=&#34;1&#34;)
-    for l, m in enumerate(M):
-        with g.subgraph() as s:
-            s.attr(rank=&#34;same&#34;, rankdir=&#34;TB&#34;)
-            for i in range(m.nrows):
-                si = (l * m.nrows) + i
-                s.node(str(si), label=_str(si, label_width), width=&#34;0.5&#34;)
-                if i &lt; m.nrows - 1:
-                    ni = si + 1
-                    s.edge(str(si), str(ni), style=&#34;invis&#34;, minlen=&#34;0&#34;, weight=&#34;1000&#34;)
-            g.edge(
-                str(si - m.nrows + 1),
-                str(si + 1),
-                weight=&#34;10000000&#34;,
-                style=&#34;invis&#34;,
-                minlen=&#34;0&#34;,
-            )
-
-    with g.subgraph() as s:
-        s.attr(rank=&#34;same&#34;, rankdir=&#34;LR&#34;)
-        for j in range(M[-1].nrows):
-            sj = (len(M) * m.nrows) + j
-            s.node(str(sj), label=_str(j, label_width), width=&#34;0.5&#34;)
-            if j &lt; M[-1].nrows - 1:
-                nj = sj + 1
-                s.edge(str(sj), str(nj), style=&#34;invis&#34;)
-
-    for l, m in enumerate(M):
-        for i, j, _ in m:
-            si = (l * m.nrows) + i
-            sj = ((l + 1) * m.nrows) + j
-            g.edge(str(si), str(sj))
     return g</code></pre>
 </details>
 </dd>
@@ -806,8 +710,8 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     return im</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.gviz.draw_matrix_layers"><code class="name flex">
-<span>def <span class="ident">draw_matrix_layers</span></span>(<span>layers, **kwargs)</span>
+<dt id="pygraphblas.gviz.draw_vector"><code class="name flex">
+<span>def <span class="ident">draw_vector</span></span>(<span>V, column=True, *args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -815,18 +719,98 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_matrix_layers(layers, **kwargs):  # pragma: nocover
-    filename = kwargs.pop(&#34;filename&#34;, None)
-    imgs = [draw_matrix(i, **kwargs) for i in layers]
-    widths = [0] + list(accumulate((i.size[0] for i in imgs), operator.add))
-    width = sum(widths)
-    height = max(i.size[1] for i in imgs)
-    im = Image.new(imgs[0].mode, (width, height), color=&#34;white&#34;)
-    for c, i in enumerate(imgs):
-        im.paste(i, (widths[c], 0))
-    if filename is not None:
-        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
-    return im</code></pre>
+<pre><code class="python">def draw_vector(V, column=True, *args, **kwargs):  # pragma: nocover
+    from pygraphblas import Matrix
+
+    if column:
+        A = Matrix.sparse(V.type, V.size, 1)
+        A[:, 0] = V
+    else:
+        A = Matrix.sparse(V.type, 1, V.size)
+        A[0, :] = V
+
+    return draw_matrix(A, *args, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.gviz.draw_layers"><code class="name flex">
+<span>def <span class="ident">draw_layers</span></span>(<span>M, name='', rankdir='LR', label_width=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_layers(M, name=&#34;&#34;, rankdir=&#34;LR&#34;, label_width=None):  # pragma: nocover
+    g = Digraph(name)
+    g.attr(rankdir=rankdir, ranksep=&#34;1&#34;)
+    for l, m in enumerate(M):
+        with g.subgraph() as s:
+            s.attr(rank=&#34;same&#34;, rankdir=&#34;TB&#34;)
+            for i in range(m.nrows):
+                si = (l * m.nrows) + i
+                s.node(str(si), label=_str(si, label_width), width=&#34;0.5&#34;)
+                if i &lt; m.nrows - 1:
+                    ni = si + 1
+                    s.edge(str(si), str(ni), style=&#34;invis&#34;, minlen=&#34;0&#34;, weight=&#34;1000&#34;)
+            g.edge(
+                str(si - m.nrows + 1),
+                str(si + 1),
+                weight=&#34;10000000&#34;,
+                style=&#34;invis&#34;,
+                minlen=&#34;0&#34;,
+            )
+
+    with g.subgraph() as s:
+        s.attr(rank=&#34;same&#34;, rankdir=&#34;LR&#34;)
+        for j in range(M[-1].nrows):
+            sj = (len(M) * m.nrows) + j
+            s.node(str(sj), label=_str(j, label_width), width=&#34;0.5&#34;)
+            if j &lt; M[-1].nrows - 1:
+                nj = sj + 1
+                s.edge(str(sj), str(nj), style=&#34;invis&#34;)
+
+    for l, m in enumerate(M):
+        for i, j, _ in m:
+            si = (l * m.nrows) + i
+            sj = ((l + 1) * m.nrows) + j
+            g.edge(str(si), str(sj))
+    return g</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.gviz.draw_graph_op"><code class="name flex">
+<span>def <span class="ident">draw_graph_op</span></span>(<span>left, op, right, result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_graph_op(left, op, right, result):  # pragma: nocover
+    from pygraphblas import Matrix, Vector
+
+    ioff = 0
+    joff = 0
+
+    def draw(obj, name=&#34;&#34;, **kws):
+        nonlocal ioff, joff
+        if isinstance(obj, Matrix):
+            ioff += obj.nrows
+            joff += obj.ncols
+            return draw_graph(obj, name=name, ioff=ioff, joff=joff)
+        if isinstance(obj, Vector):
+            ioff += obj.size
+            joff += obj.size
+            return draw_vector_dot(obj, name=name, ioff=ioff, joff=joff)
+
+    g = Digraph()
+    g.subgraph(draw(left, name=&#34;cluster_left&#34;))
+    g.node(op, width=&#34;0.5&#34;)
+    g.subgraph(draw(right, name=&#34;cluster_right&#34;))
+    g.node(&#34;=&#34;, width=&#34;0.5&#34;)
+    g.subgraph(draw(result, name=&#34;cluster_result&#34;))
+    return g</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix_op"><code class="name flex">
@@ -878,8 +862,8 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     return im</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.gviz.draw_vector"><code class="name flex">
-<span>def <span class="ident">draw_vector</span></span>(<span>V, column=True, *args, **kwargs)</span>
+<dt id="pygraphblas.gviz.draw_matrix_layers"><code class="name flex">
+<span>def <span class="ident">draw_matrix_layers</span></span>(<span>layers, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -887,17 +871,33 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_vector(V, column=True, *args, **kwargs):  # pragma: nocover
-    from pygraphblas import Matrix
+<pre><code class="python">def draw_matrix_layers(layers, **kwargs):  # pragma: nocover
+    filename = kwargs.pop(&#34;filename&#34;, None)
+    imgs = [draw_matrix(i, **kwargs) for i in layers]
+    widths = [0] + list(accumulate((i.size[0] for i in imgs), operator.add))
+    width = sum(widths)
+    height = max(i.size[1] for i in imgs)
+    im = Image.new(imgs[0].mode, (width, height), color=&#34;white&#34;)
+    for c, i in enumerate(imgs):
+        im.paste(i, (widths[c], 0))
+    if filename is not None:
+        im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
+    return im</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.gviz.draw_cy"><code class="name flex">
+<span>def <span class="ident">draw_cy</span></span>(<span>M, visual_style=[{'selector': 'node', 'style': {'background-color': 'blue', 'label': 'data(name)', 'width': 2, 'height': 2, 'shape': 'circle', 'color': '#EEEEEE', 'font-weight': 400, 'text-halign': 'right', 'text-valign': 'bottom', 'font-size': 12}}, {'selector': 'edge', 'style': {'width': 0.2, 'opacity': 1, 'line-color': 'green'}}])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_cy(M, visual_style=my_style):  # pragma: nocover
+    from cyjupyter import Cytoscape
 
-    if column:
-        A = Matrix.sparse(V.type, V.size, 1)
-        A[:, 0] = V
-    else:
-        A = Matrix.sparse(V.type, 1, V.size)
-        A[0, :] = V
-
-    return draw_matrix(A, *args, **kwargs)</code></pre>
+    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_vis"><code class="name flex">
@@ -938,14 +938,14 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 <li><h3 class="caret"><a href="#header-functions">Functions</a></h3>
 <ul class="two-column nested active">
 <li><code><a title="pygraphblas.gviz.draw" href="#pygraphblas.gviz.draw">draw</a></code></li>
-<li><code><a title="pygraphblas.gviz.draw_cy" href="#pygraphblas.gviz.draw_cy">draw_cy</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_graph" href="#pygraphblas.gviz.draw_graph">draw_graph</a></code></li>
-<li><code><a title="pygraphblas.gviz.draw_graph_op" href="#pygraphblas.gviz.draw_graph_op">draw_graph_op</a></code></li>
-<li><code><a title="pygraphblas.gviz.draw_layers" href="#pygraphblas.gviz.draw_layers">draw_layers</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_matrix" href="#pygraphblas.gviz.draw_matrix">draw_matrix</a></code></li>
-<li><code><a title="pygraphblas.gviz.draw_matrix_layers" href="#pygraphblas.gviz.draw_matrix_layers">draw_matrix_layers</a></code></li>
-<li><code><a title="pygraphblas.gviz.draw_matrix_op" href="#pygraphblas.gviz.draw_matrix_op">draw_matrix_op</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_vector" href="#pygraphblas.gviz.draw_vector">draw_vector</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_layers" href="#pygraphblas.gviz.draw_layers">draw_layers</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_graph_op" href="#pygraphblas.gviz.draw_graph_op">draw_graph_op</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_matrix_op" href="#pygraphblas.gviz.draw_matrix_op">draw_matrix_op</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_matrix_layers" href="#pygraphblas.gviz.draw_matrix_layers">draw_matrix_layers</a></code></li>
+<li><code><a title="pygraphblas.gviz.draw_cy" href="#pygraphblas.gviz.draw_cy">draw_cy</a></code></li>
 <li><code><a title="pygraphblas.gviz.draw_vis" href="#pygraphblas.gviz.draw_vis">draw_vis</a></code></li>
 </ul>
 </li>

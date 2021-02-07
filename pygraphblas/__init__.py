@@ -98,6 +98,7 @@ lib.LAGraph_init()
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
 from .unaryop import build_unaryops, unary_op
+from .selectop import build_selectops, select_op
 from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
@@ -116,14 +117,18 @@ __pdoc__ = {
     "scalar": False,
     "types": False,
     "run_doctests": False,
+    "descriptor": True,
+    "selectop": True,
 }
 
 build_semirings(__pdoc__)
 build_binaryops(__pdoc__)
 build_unaryops(__pdoc__)
 build_monoids(__pdoc__)
+build_selectops(__pdoc__)
 
 from .types import (
+    BOOL,
     FP64,
     FP32,
     FC64,
@@ -136,18 +141,17 @@ from .types import (
     UINT32,
     UINT16,
     UINT8,
-    BOOL,
 )
 
 __all__ = [
     "GxB_INDEX_MAX",
     "GxB_IMPLEMENTATION",
     "GxB_SPEC",
-    "options_set",
-    "options_get",
     "Matrix",
     "Vector",
     "Scalar",
+    "Accum",
+    "BOOL",
     "FP64",
     "FP32",
     "FC64",
@@ -160,11 +164,13 @@ __all__ = [
     "UINT32",
     "UINT16",
     "UINT8",
-    "BOOL",
     "descriptor",
-    "Accum",
+    "selectop",
     "binary_op",
     "unary_op",
+    "select_op",
+    "options_set",
+    "options_get",
 ]
 
 GxB_INDEX_MAX = GxB_INDEX_MAX
@@ -188,7 +194,17 @@ def run_doctests(raise_on_error=False):
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
+    for mod in (
+        this,
+        selectop,
+        unaryop,
+        binaryop,
+        matrix,
+        vector,
+        descriptor,
+        gviz,
+        base,
+    ):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

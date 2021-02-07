@@ -98,11 +98,11 @@ def test_log_semiring():
             return x + y
 
         @classmethod
-        def from_value(cls, value):
+        def _from_value(cls, value):
             return log(value)
 
         @classmethod
-        def to_value(cls, data):
+        def _to_value(cls, data):
             return exp(data)
 
     A = Matrix.sparse(Log32, 6, 6)

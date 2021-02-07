@@ -42,7 +42,7 @@ class Scalar:
     def from_type(cls, typ):
         """Create an empty Scalar from the given type and size."""
         new_sca = ffi.new("GxB_Scalar*")
-        _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
+        _check(lib.GxB_Scalar_new(new_sca, typ._gb_type))
         return cls(new_sca, typ)
 
     @classmethod
@@ -50,7 +50,7 @@ class Scalar:
         """Create an empty Scalar from the given type and size."""
         new_sca = ffi.new("GxB_Scalar*")
         typ = _gb_from_type(type(value))
-        _check(lib.GxB_Scalar_new(new_sca, typ.gb_type))
+        _check(lib.GxB_Scalar_new(new_sca, typ._gb_type))
         s = cls(new_sca, typ)
         s[0] = value
         return s
@@ -58,16 +58,14 @@ class Scalar:
     @property
     def gb_type(self):
         """Return the GraphBLAS low-level type object of the Scalar."""
-        typ = ffi.new("GrB_Type*")
-        _check(lib.GxB_Scalar_type(typ, self._scalar[0]))
-        return typ[0]
+        return self.type._gb_type
 
     def clear(self):
         """Clear the scalar."""
         _check(lib.GxB_Scalar_clear(self._scalar[0]))
 
     def __getitem__(self, index):
-        result = ffi.new(self.type.C + "*")
+        result = ffi.new(self.type._c_type + "*")
         _check(
             self.type._Scalar_extractElement(result, self._scalar[0]), raise_no_val=True
         )
@@ -75,7 +73,9 @@ class Scalar:
 
     def __setitem__(self, index, value):
         _check(
-            self.type._Scalar_setElement(self._scalar[0], ffi.cast(self.type.C, value))
+            self.type._Scalar_setElement(
+                self._scalar[0], ffi.cast(self.type._c_type, value)
+            )
         )
 
     def wait(self):

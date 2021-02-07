@@ -3,7 +3,7 @@ from pygraphblas import types
 
 
 def test_type_lookup_name():
-    assert types.Type.gb_from_name("INT8") == types.INT8.gb_type
+    assert types.Type.gb_from_name("INT8") == types.INT8._gb_type
 
 
 def test_gb_from_type():
