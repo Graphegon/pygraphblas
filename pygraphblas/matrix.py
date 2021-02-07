@@ -1494,9 +1494,18 @@ class Matrix:
           1|        1|  1
           2|150      |  2
               0  1  2
-
         >>> N = Matrix.sparse(M.type, M.nrows, M.ncols)
         >>> print(M.apply_first(1, types.INT64.PLUS, out=N))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
+        `apply_first` is also used when a `Matrix` is used "on the
+        right" for math operations like `+-*.` with a scalar:
+
+        >>> print(1 + M)
               0  1  2
           0|   -41   |  0
           1|        1|  1
@@ -1522,6 +1531,16 @@ class Matrix:
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         >>> print(M.apply_second(types.INT64.PLUS, 1))
+              0  1  2
+          0|   -41   |  0
+          1|        1|  1
+          2|150      |  2
+              0  1  2
+
+        `apply_second` is also used when a `Matrix` is used "on the
+        left" for math operations like `+-*.` with a scalar:
+
+        >>> print(M + 1)
               0  1  2
           0|   -41   |  0
           1|        1|  1

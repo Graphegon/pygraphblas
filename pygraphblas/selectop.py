@@ -54,21 +54,36 @@ class SelectOp:
         _check(lib.GxB_SelectOp_fprint(self.selectop, bytes(name, "utf8"), level, f))
 
 
-_lib_ops = ['GxB_TRIL', 'GxB_TRIU', 'GxB_DIAG', 'GxB_OFFDIAG',
-            'GxB_NONZERO', 'GxB_EQ_ZERO', 'GxB_GT_ZERO',
-            'GxB_GE_ZERO', 'GxB_LT_ZERO', 'GxB_LE_ZERO',
-            'GxB_NE_THUNK', 'GxB_EQ_THUNK', 'GxB_GT_THUNK',
-            'GxB_GE_THUNK', 'GxB_LT_THUNK', 'GxB_LE_THUNK']
+_lib_ops = [
+    "GxB_TRIL",
+    "GxB_TRIU",
+    "GxB_DIAG",
+    "GxB_OFFDIAG",
+    "GxB_NONZERO",
+    "GxB_EQ_ZERO",
+    "GxB_GT_ZERO",
+    "GxB_GE_ZERO",
+    "GxB_LT_ZERO",
+    "GxB_LE_ZERO",
+    "GxB_NE_THUNK",
+    "GxB_EQ_THUNK",
+    "GxB_GT_THUNK",
+    "GxB_GE_THUNK",
+    "GxB_LT_THUNK",
+    "GxB_LE_THUNK",
+]
+
 
 def build_selectops(__pdoc__):
     this = sys.modules[__name__]
     for n in _lib_ops:
         lop = getattr(lib, n)
-        n = '_'.join(n.split('_')[1:])
+        n = "_".join(n.split("_")[1:])
         sop = SelectOp(n, lop)
         setattr(this, n, sop)
         __all__.append(n)
-        __pdoc__[f'selectop.{n}'] = f"SelectOp {n}"
+        __pdoc__[f"selectop.{n}"] = f"SelectOp {n}"
+
 
 def _uop_name(name):  # pragma: nocover
     return "_{0}_selectop_function".format(name)
@@ -137,7 +152,7 @@ def select_op(arg_type, thunk_type=None):
             out,
             core_ffi.cast("GxB_select_function", wrapper.address),
             arg_type._gb_type,
-            thunk_type
+            thunk_type,
         )
 
         return SelectOp(func_name, out[0])

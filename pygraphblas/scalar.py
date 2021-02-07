@@ -73,7 +73,9 @@ class Scalar:
 
     def __setitem__(self, index, value):
         _check(
-            self.type._Scalar_setElement(self._scalar[0], ffi.cast(self.type._c_type, value))
+            self.type._Scalar_setElement(
+                self._scalar[0], ffi.cast(self.type._c_type, value)
+            )
         )
 
     def wait(self):

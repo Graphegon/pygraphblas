@@ -147,6 +147,7 @@ class MetaType(type):
     def gb_from_name(cls, name):
         return cls._gb_name_type_map[name]._gb_type
 
+
 class Type(metaclass=MetaType):
     one = 1
     """The default value used to represent 1 for filling in types."""
@@ -157,9 +158,7 @@ class Type(metaclass=MetaType):
 
     @classmethod
     def format_value(cls, val, width=2, prec=None):
-        """Return the value as a formatted string for display.
-
-        """
+        """Return the value as a formatted string for display."""
         return f"{val:{width}}"
 
     @classmethod
@@ -176,9 +175,7 @@ class Type(metaclass=MetaType):
 
     @classmethod
     def _from_value(cls, value):
-        """
-
-        """
+        """"""
         if cls._base_name != "UDT":
             return value
         else:  # pragma: nocover

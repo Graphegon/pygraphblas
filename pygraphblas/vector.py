@@ -295,9 +295,7 @@ class Vector:
 
     @property
     def gb_type(self):
-        """Return the GraphBLAS low-level type object of the Vector.
-
-        """
+        """Return the GraphBLAS low-level type object of the Vector."""
         return self.type._gb_type
 
     def _full(self):
@@ -599,7 +597,6 @@ class Vector:
         0|14
         1| 5
         2|10
-
         >>> o = v.dup()
         >>> with Accum(types.INT64.MIN):
         ...     o @= M
@@ -620,7 +617,6 @@ class Vector:
         0| 7
         1| 3
         2| 5
-
         >>> with types.INT64.MIN_PLUS:
         ...     o = v @ M
         >>> print(o)
@@ -636,14 +632,12 @@ class Vector:
         0|12
         1| 2
         2| 6
-
         >>> with descriptor.T0:
         ...     o = v @ M
         >>> print(o)
         0|12
         1| 2
         2| 6
-
         >>> del o[1]
         >>> o = v.vxm(M, mask=o)
         >>> print(o)
@@ -881,7 +875,13 @@ class Vector:
         return result[0]
 
     def apply(self, op, out=None, mask=None, accum=None, desc=Default):
-        """Apply Unary op to vector elements."""
+        """Apply Unary op to vector elements.
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> print(v.apply(types.UINT64.AINV))
+        0|-1
+        1|-1
+
+        """
         if out is None:
             out = Vector.sparse(self.type, self.size)
 
@@ -903,10 +903,10 @@ class Vector:
         >>> print(v.apply_first(3, types.UINT64.PLUS))
         0| 4
         1| 4
-
         >>> w = Vector.sparse(v.type, v.size)
         >>> v.apply_first(3, types.UINT64.PLUS, out=w) is w
         True
+
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -927,6 +927,13 @@ class Vector:
         """Apply a binary operator to the entries in a vector, binding the second input
         to a scalar second.
 
+        >>> v = Vector.from_lists([0,1], [1, 1])
+        >>> print(v.apply_second(types.UINT64.PLUS, 3))
+        0| 4
+        1| 4
+        >>> w = Vector.sparse(v.type, v.size)
+        >>> v.apply_second(types.UINT64.PLUS, 3, out=w) is w
+        True
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)

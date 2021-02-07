@@ -194,7 +194,17 @@ def run_doctests(raise_on_error=False):
     import sys, doctest
 
     this = sys.modules[__name__]
-    for mod in (this, selectop, unaryop, binaryop, matrix, vector, descriptor, gviz, base):
+    for mod in (
+        this,
+        selectop,
+        unaryop,
+        binaryop,
+        matrix,
+        vector,
+        descriptor,
+        gviz,
+        base,
+    ):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )

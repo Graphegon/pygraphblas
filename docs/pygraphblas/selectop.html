@@ -98,21 +98,36 @@ class SelectOp:
         _check(lib.GxB_SelectOp_fprint(self.selectop, bytes(name, &#34;utf8&#34;), level, f))
 
 
-_lib_ops = [&#39;GxB_TRIL&#39;, &#39;GxB_TRIU&#39;, &#39;GxB_DIAG&#39;, &#39;GxB_OFFDIAG&#39;,
-            &#39;GxB_NONZERO&#39;, &#39;GxB_EQ_ZERO&#39;, &#39;GxB_GT_ZERO&#39;,
-            &#39;GxB_GE_ZERO&#39;, &#39;GxB_LT_ZERO&#39;, &#39;GxB_LE_ZERO&#39;,
-            &#39;GxB_NE_THUNK&#39;, &#39;GxB_EQ_THUNK&#39;, &#39;GxB_GT_THUNK&#39;,
-            &#39;GxB_GE_THUNK&#39;, &#39;GxB_LT_THUNK&#39;, &#39;GxB_LE_THUNK&#39;]
+_lib_ops = [
+    &#34;GxB_TRIL&#34;,
+    &#34;GxB_TRIU&#34;,
+    &#34;GxB_DIAG&#34;,
+    &#34;GxB_OFFDIAG&#34;,
+    &#34;GxB_NONZERO&#34;,
+    &#34;GxB_EQ_ZERO&#34;,
+    &#34;GxB_GT_ZERO&#34;,
+    &#34;GxB_GE_ZERO&#34;,
+    &#34;GxB_LT_ZERO&#34;,
+    &#34;GxB_LE_ZERO&#34;,
+    &#34;GxB_NE_THUNK&#34;,
+    &#34;GxB_EQ_THUNK&#34;,
+    &#34;GxB_GT_THUNK&#34;,
+    &#34;GxB_GE_THUNK&#34;,
+    &#34;GxB_LT_THUNK&#34;,
+    &#34;GxB_LE_THUNK&#34;,
+]
+
 
 def build_selectops(__pdoc__):
     this = sys.modules[__name__]
     for n in _lib_ops:
         lop = getattr(lib, n)
-        n = &#39;_&#39;.join(n.split(&#39;_&#39;)[1:])
+        n = &#34;_&#34;.join(n.split(&#34;_&#34;)[1:])
         sop = SelectOp(n, lop)
         setattr(this, n, sop)
         __all__.append(n)
-        __pdoc__[f&#39;selectop.{n}&#39;] = f&#34;SelectOp {n}&#34;
+        __pdoc__[f&#34;selectop.{n}&#34;] = f&#34;SelectOp {n}&#34;
+
 
 def _uop_name(name):  # pragma: nocover
     return &#34;_{0}_selectop_function&#34;.format(name)
@@ -181,7 +196,7 @@ def select_op(arg_type, thunk_type=None):
             out,
             core_ffi.cast(&#34;GxB_select_function&#34;, wrapper.address),
             arg_type._gb_type,
-            thunk_type
+            thunk_type,
         )
 
         return SelectOp(func_name, out[0])
@@ -378,7 +393,7 @@ True
             out,
             core_ffi.cast(&#34;GxB_select_function&#34;, wrapper.address),
             arg_type._gb_type,
-            thunk_type
+            thunk_type,
         )
 
         return SelectOp(func_name, out[0])
@@ -412,8 +427,8 @@ True
 <code class="caret"><a title="pygraphblas.selectop.SelectOp" href="#pygraphblas.selectop.SelectOp">SelectOp</a></code>
 <ul class=" nested ">
 <li><code><a title="pygraphblas.selectop.SelectOp.get_selectop" href="#pygraphblas.selectop.SelectOp.get_selectop">get_selectop</a></code></li>
-<li><code><a title="pygraphblas.selectop.SelectOp.print" href="#pygraphblas.selectop.SelectOp.print">print</a></code></li>
 <li><code><a title="pygraphblas.selectop.SelectOp.name" href="#pygraphblas.selectop.SelectOp.name">name</a></code></li>
+<li><code><a title="pygraphblas.selectop.SelectOp.print" href="#pygraphblas.selectop.SelectOp.print">print</a></code></li>
 <li><code><a title="pygraphblas.selectop.SelectOp.selectop" href="#pygraphblas.selectop.SelectOp.selectop">selectop</a></code></li>
 </ul>
 </li>
