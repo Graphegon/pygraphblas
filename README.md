@@ -8,9 +8,6 @@ pygraphblas is a Python wrapper around the
 
 ## [Click here for API Documentation](https://graphegon.github.io/pygraphblas/pygraphblas/index.html)
 
-Check out the [API
-Documentation](https://graphegon.github.io/pygraphblas/pygraphblas/index.html)
-
 ## Installation
 
 pygraphblas requires the
