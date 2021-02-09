@@ -754,7 +754,6 @@ class Matrix:
           1|      314|  1
           2|149      |  2
               0  1  2
-
         >>> MT = M.transpose()
         >>> print(MT)
               0  1  2
@@ -762,7 +761,6 @@ class Matrix:
           1| 42      |  1
           2|   314   |  2
               0  1  2
-
         >>> MT = M.transpose(cast=types.BOOL, desc=descriptor.T0)
         >>> print(MT)
               0  1  2
@@ -770,7 +768,6 @@ class Matrix:
           1|        t|  1
           2|  t      |  2
               0  1  2
-
         >>> N = M.dup(True)
         >>> MT = M.transpose(desc=descriptor.T0, out=N)
         >>> print(MT)
@@ -816,7 +813,6 @@ class Matrix:
             1|          314.0|  1
             2|149.0          |  2
                   0    1    2
-
         >>> N = M.cast(types.FP64)
         >>> print(N.to_string(width=5, prec=4))
                   0    1    2
@@ -1355,7 +1351,6 @@ class Matrix:
         >>> M[0,1] = True
         >>> M.reduce_bool()
         True
-
         >>> M.reduce_bool(types.BOOL.LOR_MONOID)
         True
         """
@@ -1430,12 +1425,10 @@ class Matrix:
         0|84.0
         1|
         2|-42.0
-
         >>> print(M.reduce_vector(types.FP32.MIN_MONOID))
         0|42.0
         1|
         2|-42.0
-
         >>> v = Vector.sparse(types.FP32, M.nrows)
         >>> print(M.reduce_vector(out=v))
         0|84.0
@@ -1465,7 +1458,6 @@ class Matrix:
           1|        0|  1
           2|149      |  2
               0  1  2
-
         >>> print(M.apply(types.INT64.ABS))
               0  1  2
           0|    42   |  0
@@ -2060,7 +2052,6 @@ class Matrix:
         0| 4
         1| 6
         2| 5
-
         >>> with types.INT64.MIN_PLUS:
         ...     o = m @ v
         >>> print(o)
@@ -2076,7 +2067,6 @@ class Matrix:
         0|12
         1| 2
         2| 6
-
         >>> with descriptor.T0:
         ...     o = m @ v
         >>> print(o)
@@ -2155,7 +2145,6 @@ class Matrix:
           7|  4  4  4                  |  7
           8|  4  4  4                  |  8
               0  1  2  3  4  5  6  7  8
-
         >>> o = Matrix.sparse(types.UINT64, 9, 9)
         >>> m.kronecker(n, out=o) is o
         True
@@ -2171,8 +2160,6 @@ class Matrix:
           7|        3        3        3|  7
           8|  4        4        4      |  8
               0  1  2  3  4  5  6  7  8
-
-        >>>
         >>> print(m.kronecker(n, op=types.UINT64.MIN))
               0  1  2  3  4  5  6  7  8
           0|     1        1        1   |  0
@@ -2236,12 +2223,10 @@ class Matrix:
           1|        0|  1
           2|149      |  2
               0  1  2
-
         >>> print(M.extract_matrix(0, 1))
               0
           0| 42|  0
               0
-
         >>> O = Matrix.sparse(types.UINT64, 1, 1)
         >>> M.extract_matrix(0, 1, out=O) is O
         True
@@ -2249,18 +2234,15 @@ class Matrix:
               0
           0| 42|  0
               0
-
         >>> print(M.extract_matrix(slice(1,2), 2))
               0
           0|  0|  0
           1|   |  1
               0
-
         >>> print(M.extract_matrix(0, slice(0,1)))
               0  1
           0|    42|  0
               0  1
-
         >>> N = Matrix.from_lists([1, 2], [2, 0], [True, True])
         >>> print(M[N])
               0  1  2
