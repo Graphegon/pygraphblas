@@ -264,6 +264,12 @@ class Matrix:
         """
         m = ffi.new("GrB_Matrix*")
         i = cls(m, typ)
+        if format:
+            i.format = format
+        if sparsity:
+            i.sparsity = sparsity
+        if hyper_switch:
+            i.hyper_switch = hyper_switch
         with open(tsv_file, "r") as f:
             _check(lib.LAGraph_tsvread(m, f, typ._gb_type, nrows, ncols))
         return i
