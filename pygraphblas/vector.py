@@ -101,6 +101,38 @@ class Vector:
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
+    @property
+    def indexes(self):
+        """ Iterator of vector indexes.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.indexes)
+        [0, 1, 2]
+
+        """
+        nvals = self.nvals
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = ffi.new("GrB_Index[%s]" % nvals)
+        X = NULL
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        return iter(I)
+
+    @property
+    def values(self):
+        """ Iterator of vector values.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.values)
+        [1, 2, 3]
+
+        """
+        nvals = self.nvals
+        _nvals = ffi.new("GrB_Index[1]", [nvals])
+        I = NULL
+        X = ffi.new("%s[%s]" % (self.type._c_type, nvals))
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        return iter(X)
+
     def iseq(self, other, eq_op=None):
         """Compare two vectors for equality.
 
@@ -213,6 +245,83 @@ class Vector:
         new_vec = ffi.new("GrB_Vector*")
         self._check(lib.GrB_Vector_dup(new_vec, self._vector[0]))
         return self.__class__(new_vec, self.type)
+
+    @property
+    def hyper_switch(self): #pragma: nocover not sure what's up with this test being busted might be SS issue.
+        """Get the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        >>> A = Vector.sparse(types.UINT8)
+        
+        """
+        switch = ffi.new("double*")
+        self._check(
+            lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
+        )
+        return switch[0]
+
+    @hyper_switch.setter
+    def hyper_switch(self, switch):
+        """Set the hyper_switch threshold. (See SuiteSparse User Guide)
+
+        >>> A = Vector.sparse(types.UINT8)
+        >>> A.hyper_switch = 0.5
+        >>> hs = A.hyper_switch
+        >>> hs == 0.5
+        True
+
+        """
+        switch = ffi.cast("double", switch)
+        self._check(
+            lib.GxB_Vector_Option_set(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
+        )
+
+    @property
+    def sparsity(self):
+        """Get Vector sparsity control. (See SuiteSparse User Guide)
+
+        >>> A = Vector.sparse(types.UINT8)
+        >>> A.sparsity == lib.GxB_AUTO_SPARSITY
+        True
+
+        """
+        sparsity = ffi.new("int*")
+        self._check(
+            lib.GxB_Vector_Option_get(
+                self._vector[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+        return sparsity[0]
+
+    @sparsity.setter
+    def sparsity(self, sparsity):
+        """Set Vector sparsity control. (See SuiteSparse User Guide)
+
+        >>> A = Vector.sparse(types.UINT8)
+        >>> A.sparsity = lib.GxB_FULL + lib.GxB_BITMAP
+        >>> A.sparsity == lib.GxB_FULL + lib.GxB_BITMAP
+
+        """
+        sparsity = ffi.cast("int", sparsity)
+        self._check(
+            lib.GxB_Vector_Option_set(
+                self._vector[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+
+    @property
+    def sparsity_status(self):
+        """Get Vector sparsity status. (See SuiteSparse User Guide)
+
+        >>> A = Vector.sparse(types.UINT8)
+        >>> A.sparsity_status in [1,2,4,8]
+        True
+
+        """
+        status = ffi.new("int*")
+        self._check(
+            lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_SPARSITY_STATUS, status)
+        )
+        return status[0]
 
     @classmethod
     def dense(cls, typ, size, fill=None):
@@ -1018,7 +1127,12 @@ class Vector:
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index)
                 return
-        raise TypeError("Unknown index or value for vector assignment.")
+        if isinstance(index, Vector):
+            mask = index._vector[0]
+            index = slice(None, None, None)
+            I, ni, size = _build_range(index, self.size - 1)
+            self.assign_scalar(value, index, mask=mask)
+            return
 
     def assign(self, value, index=None, mask=None, accum=None, desc=Default):
         """Assign vector to vector."""
