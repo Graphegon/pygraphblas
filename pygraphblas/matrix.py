@@ -740,7 +740,7 @@ class Matrix:
         """
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
-    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
+    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=None):
         """Return Transpose of this matrix.
 
         This function can serve multiple interesting purposes
@@ -783,7 +783,7 @@ class Matrix:
         """
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+                (self.nrows, self.ncols) if T0 in (desc or ()) else (self.ncols, self.nrows)
             )
             _out = ffi.new("GrB_Matrix*")
             if cast is not None:
@@ -836,7 +836,7 @@ class Matrix:
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Element-wise addition with other matrix
 
@@ -965,7 +965,7 @@ class Matrix:
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Element-wise multiplication with other matrix.
 
@@ -1346,7 +1346,7 @@ class Matrix:
             result = result.kronecker(result)
         return result
 
-    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce matrix to a boolean.
 
         >>> M = Matrix.sparse(types.INT8)
@@ -1369,7 +1369,7 @@ class Matrix:
         )
         return result[0]
 
-    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce matrix to an integer.
 
         >>> M = Matrix.sparse(types.INT8)
@@ -1393,7 +1393,7 @@ class Matrix:
         )
         return result[0]
 
-    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce matrix to an float.
 
         >>> M = Matrix.sparse(types.FP32)
@@ -1415,7 +1415,7 @@ class Matrix:
         )
         return result[0]
 
-    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
+    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=None):
         """Reduce matrix to a vector.
 
         >>> M = Matrix.sparse(types.FP32, 3, 3)
@@ -1455,7 +1455,24 @@ class Matrix:
         )
         return out
 
-    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+    def max(self):
+        """ Return the max of the matrix. 
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> M.min()
+        149
+        """
+        
+
+    def min(self):
+        """ Return the min of the matrix. 
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        >>> M.min()
+        -42
+        """
+
+    def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to matrix elements.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
@@ -1483,7 +1500,7 @@ class Matrix:
         )
         return out
 
-    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
         """Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
 
@@ -1525,7 +1542,7 @@ class Matrix:
         self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
         return out
 
-    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
         """Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
@@ -1560,7 +1577,7 @@ class Matrix:
         self._check(f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc))
         return out
 
-    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
         """Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
@@ -1578,6 +1595,8 @@ class Matrix:
         `<=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
         `!=0` | lib.GxB_NONZERO  | Select nonzero value.
         `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+        `max` | no equivalent    | Select max values.
+        `min` | no equivalent    | Select min values.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         >>> print(M.select('>', 0))
@@ -1611,8 +1630,11 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
+            # if op == 'min':
+            #     op = lib.GxB_EQ_THUNK
+            #     thunk = self.
             op = _get_select_op(op)
-        elif isinstance(op, SelectOp):
+        if isinstance(op, SelectOp):
             op = op.get_selectop()
 
         if thunk is None:
@@ -1822,7 +1844,7 @@ class Matrix:
     def __ne__(self, other):
         return self._compare(other, operator.ne, "!=")
 
-    def _get_args(self, mask=None, accum=None, desc=Default):
+    def _get_args(self, mask=None, accum=None, desc=None):
         if isinstance(mask, Matrix):
             mask = mask._matrix[0]
         elif isinstance(mask, Vector):
@@ -1833,10 +1855,11 @@ class Matrix:
             accum = current_accum.get(NULL)
         if accum is not NULL:
             accum = accum.get_binaryop(self.type)
-        if desc is None or desc == Default:
-            desc = current_desc.get(Default)
+        if desc is None:
+            desc = current_desc.get(NULL)
+        if desc is not NULL:
+            desc = desc.get_desc()
 
-        desc = desc.desc[0]
         return mask, accum, desc
 
     def mxm(
@@ -1847,7 +1870,7 @@ class Matrix:
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Matrix-matrix multiply.
 
@@ -2007,7 +2030,7 @@ class Matrix:
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Matrix-vector multiply.
 
@@ -2097,7 +2120,7 @@ class Matrix:
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            new_dimension = self.ncols if T0 in desc else self.nrows
+            new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
             if semiring is not NULL:
                 typ = semiring.ztype
             else:
@@ -2137,7 +2160,7 @@ class Matrix:
         return self.mxm(other, out=self)
 
     def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=None
     ):
         """[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
 
@@ -2211,7 +2234,7 @@ class Matrix:
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Extract a submatrix.
 
@@ -2270,7 +2293,7 @@ class Matrix:
               0  1  2
 
         """
-        ta = T0 in desc
+        ta = T0 in (desc or ())
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -2299,7 +2322,7 @@ class Matrix:
         return out
 
     def extract_col(
-        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=None
     ):
         """Extract a column Vector.
 
@@ -2324,7 +2347,7 @@ class Matrix:
         2|149
 
         """
-        stop_val = self.ncols if T0 in desc else self.nrows
+        stop_val = self.ncols if T0 in (desc or ()) else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
@@ -2339,7 +2362,7 @@ class Matrix:
         return out
 
     def extract_row(
-        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=None
     ):
         """Extract a row Vector.
 
@@ -2357,7 +2380,7 @@ class Matrix:
         2|
 
         """
-        desc = desc & T0
+        desc = desc & T0 if desc else T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -2400,7 +2423,7 @@ class Matrix:
         return self.extract_matrix(i0, i1)
 
     def assign_col(
-        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=None
     ):
         """Assign a vector to a column.
 
@@ -2414,7 +2437,7 @@ class Matrix:
               0  1  2
 
         """
-        stop_val = self.ncols if T0 in desc else self.nrows
+        stop_val = self.ncols if T0 in (desc or ()) else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -2425,7 +2448,7 @@ class Matrix:
         )
 
     def assign_row(
-        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=None
     ):
         """Assign a vector to a row.
 
@@ -2439,7 +2462,7 @@ class Matrix:
               0  1  2
 
         """
-        stop_val = self.nrows if T0 in desc else self.ncols
+        stop_val = self.nrows if T0 in (desc or ()) else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -2450,7 +2473,7 @@ class Matrix:
         )
 
     def assign_matrix(
-        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=None
     ):
         """Assign a submatrix.
 
@@ -2493,7 +2516,7 @@ class Matrix:
         )
 
     def assign_scalar(
-        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=None
     ):
         """Assign a scalar `value` to the Matrix.
 

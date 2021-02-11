@@ -51,16 +51,19 @@ class Descriptor:
 
     """
 
-    __slots__ = ("field", "value", "desc", "token", "name")
+    __slots__ = ("field", "value", "_desc", "token", "name")
 
     def __init__(self, field, value, name=None):
         self.field = field
         self.value = value
-        self.desc = ffi.new("GrB_Descriptor*")
-        _check(lib.GrB_Descriptor_new(self.desc))
+        self._desc = ffi.new("GrB_Descriptor*")
+        _check(lib.GrB_Descriptor_new(self._desc))
         self[field] = value
         self.token = None
         self.name = name
+
+    def get_desc(self):
+        return self._desc[0]
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -71,7 +74,7 @@ class Descriptor:
 
     def __del__(self):
         if lib is not None:  # pragma: no cover
-            _check(lib.GrB_Descriptor_free(self.desc))
+            _check(lib.GrB_Descriptor_free(self._desc))
 
     def __and__(self, other):
         d = Descriptor(self.field, self.value, self.name + other.name)
@@ -82,11 +85,11 @@ class Descriptor:
         return self[other.field] != lib.GxB_DEFAULT
 
     def __setitem__(self, field, value):
-        _check(lib.GrB_Descriptor_set(self.desc[0], field, value))
+        _check(lib.GrB_Descriptor_set(self._desc[0], field, value))
 
     def __getitem__(self, field):
         val = ffi.new("GrB_Desc_Value*")
-        _check(lib.GxB_Desc_get(self.desc[0], field, val))
+        _check(lib.GxB_Desc_get(self._desc[0], field, val))
         return val[0]
 
     def __eq__(self, other):

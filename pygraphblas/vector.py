@@ -24,7 +24,7 @@ from .semiring import current_semiring
 from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, T1
+from .descriptor import Descriptor, Default, T1, current_desc
 
 __all__ = ["Vector"]
 __pdoc__ = {"Vector.__init__": False}
@@ -462,7 +462,7 @@ class Vector:
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Element-wise addition with other vector.
 
@@ -555,7 +555,7 @@ class Vector:
                 add_op,
                 self._vector[0],
                 other._vector[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -568,7 +568,7 @@ class Vector:
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Element-wise multiplication with other vector.
 
@@ -654,7 +654,7 @@ class Vector:
                 mult_op,
                 self._vector[0],
                 other._vector[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -667,7 +667,7 @@ class Vector:
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         """Vector-Matrix multiply.
 
@@ -760,7 +760,7 @@ class Vector:
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            new_dimension = other.nrows if T1 in desc else other.ncols
+            new_dimension = other.nrows if T1 in (desc or ()) else other.ncols
             if semiring is not NULL:
                 typ = semiring.ztype
             else:
@@ -782,7 +782,7 @@ class Vector:
                 semiring,
                 self._vector[0],
                 other._matrix[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -892,20 +892,27 @@ class Vector:
         """
         self._check(lib.GrB_Vector_resize(self._vector[0], size))
 
-    def _get_args(self, mask=None, accum=None, desc=Default):
+    def _get_args(self, mask=None, accum=None, desc=None):
         if accum is None:
             accum = current_accum.get(NULL)
 
         if accum is not NULL:
             accum = accum.get_binaryop(self.type)
 
+        if desc is None:
+            desc = current_desc.get(NULL)
+
+        if desc is not NULL:
+            desc = desc.get_desc()
+            
         if mask is None:
             mask = NULL
+            
         if isinstance(mask, Vector):
             mask = mask._vector[0]
         return mask, accum, desc
 
-    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce vector to a boolean.
 
         >>> v = Vector.from_lists([0, 1], [True, False])
@@ -926,12 +933,12 @@ class Vector:
         result = ffi.new("_Bool*")
         self._check(
             lib.GrB_Vector_reduce_BOOL(
-                result, accum, mon, self._vector[0], desc.desc[0]
+                result, accum, mon, self._vector[0], desc
             )
         )
         return result[0]
 
-    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce vector to a integer.
 
         >>> v = Vector.from_lists([0, 1], [1, 1])
@@ -952,12 +959,12 @@ class Vector:
         result = ffi.new("int64_t*")
         self._check(
             lib.GrB_Vector_reduce_INT64(
-                result, accum, mon, self._vector[0], desc.desc[0]
+                result, accum, mon, self._vector[0], desc
             )
         )
         return result[0]
 
-    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce vector to a float.
 
         >>> v = Vector.from_lists([0, 1], [1.2, 1.1])
@@ -978,12 +985,12 @@ class Vector:
         result = ffi.new("double*")
         self._check(
             lib.GrB_Vector_reduce_FP64(
-                result, accum, mon, self._vector[0], desc.desc[0]
+                result, accum, mon, self._vector[0], desc
             )
         )
         return result[0]
 
-    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+    def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to vector elements.
         >>> v = Vector.from_lists([0,1], [1, 1])
         >>> print(v.apply(types.UINT64.AINV))
@@ -998,12 +1005,12 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Vector_apply(
-                out._vector[0], mask, accum, op, self._vector[0], desc.desc[0]
+                out._vector[0], mask, accum, op, self._vector[0], desc
             )
         )
         return out
 
-    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
         """Apply a binary operator to the entries in a vector, binding the first input
         to a scalar first.
 
@@ -1028,11 +1035,11 @@ class Vector:
         else:
             f = self.type._Vector_apply_BinaryOp1st
         self._check(
-            f(out._vector[0], mask, accum, op, first, self._vector[0], desc.desc[0])
+            f(out._vector[0], mask, accum, op, first, self._vector[0], desc)
         )
         return out
 
-    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
         """Apply a binary operator to the entries in a vector, binding the second input
         to a scalar second.
 
@@ -1055,11 +1062,11 @@ class Vector:
         else:
             f = self.type._Vector_apply_BinaryOp2nd
         self._check(
-            f(out._vector[0], mask, accum, op, self._vector[0], second, desc.desc[0])
+            f(out._vector[0], mask, accum, op, self._vector[0], second, desc)
         )
         return out
 
-    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
         """Select elements that match the given select operation condition.
         See `Matrix.select` for possible operators.
 
@@ -1089,7 +1096,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GxB_Vector_select(
-                out._vector[0], mask, accum, op, self._vector[0], thunk, desc.desc[0]
+                out._vector[0], mask, accum, op, self._vector[0], thunk, desc
             )
         )
         return out
@@ -1134,24 +1141,24 @@ class Vector:
             self.assign_scalar(value, index, mask=mask)
             return
 
-    def assign(self, value, index=None, mask=None, accum=None, desc=Default):
+    def assign(self, value, index=None, mask=None, accum=None, desc=None):
         """Assign vector to vector."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
             lib.GrB_Vector_assign(
-                self._vector[0], mask, accum, value._vector[0], I, ni, desc.desc[0]
+                self._vector[0], mask, accum, value._vector[0], I, ni, desc
             )
         )
 
-    def assign_scalar(self, value, index=None, mask=None, accum=None, desc=Default):
+    def assign_scalar(self, value, index=None, mask=None, accum=None, desc=None):
         """Assign scalar to vector."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
             scalar_type._Vector_assignScalar(
-                self._vector[0], mask, accum, value, I, ni, desc.desc[0]
+                self._vector[0], mask, accum, value, I, ni, desc
             )
         )
 
@@ -1178,7 +1185,7 @@ class Vector:
         )
         return self.type._to_value(result[0])
 
-    def extract(self, index, mask=None, accum=None, desc=Default):
+    def extract(self, index, mask=None, accum=None, desc=None):
         """Extract subvector from vector."""
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(index, Vector):
@@ -1190,7 +1197,7 @@ class Vector:
         result = Vector.sparse(self.type, size)
         self._check(
             lib.GrB_Vector_extract(
-                result._vector[0], mask, accum, self._vector[0], I, ni, desc.desc[0]
+                result._vector[0], mask, accum, self._vector[0], I, ni, desc
             )
         )
         return result
