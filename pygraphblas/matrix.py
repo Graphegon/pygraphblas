@@ -1459,10 +1459,16 @@ class Matrix:
         """ Return the max of the matrix. 
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
-        >>> M.min()
+        >>> M.max()
         149
         """
-        
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LOR_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MAX_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MAX_MONOID)
+        raise TypeError('Un-maxable type')
 
     def min(self):
         """ Return the min of the matrix. 
@@ -1471,6 +1477,14 @@ class Matrix:
         >>> M.min()
         -42
         """
+        if self.type == types.BOOL:
+            return self.reduce_bool(BOOL.LAND_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MIN_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MIN_MONOID)
+        raise TypeError('Un-minable type')
+
 
     def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to matrix elements.

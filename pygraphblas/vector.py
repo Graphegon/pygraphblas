@@ -990,6 +990,38 @@ class Vector:
         )
         return result[0]
 
+    def max(self):
+        """ Return the max of the vector. 
+
+        >>> M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+        >>> M.max()
+        149
+        """
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LOR_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MAX_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MAX_MONOID)
+        raise TypeError('Un-maxable type')
+
+    def min(self):
+        """ Return the min of the vector. 
+
+        >>> M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+        >>> M.min()
+        -42
+        """
+        if self.type == types.BOOL:
+            return self.reduce_bool(BOOL.LAND_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MIN_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MIN_MONOID)
+        raise TypeError('Un-minable type')
+
+
+
     def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to vector elements.
         >>> v = Vector.from_lists([0,1], [1, 1])
@@ -1083,7 +1115,14 @@ class Vector:
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, str):
-            op = _get_select_op(op)
+            if op == 'min':
+                op = lib.GxB_EQ_THUNK
+                thunk = self.min()
+            elif op == 'max':
+                op = lib.GxB_EQ_THUNK
+                thunk = self.max()
+            else:
+                op = _get_select_op(op)
 
         if thunk is None:
             thunk = NULL
