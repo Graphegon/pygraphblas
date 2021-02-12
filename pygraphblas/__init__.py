@@ -49,6 +49,7 @@ following Notebooks:
  - [Betweeness Centrality](https://github.com/Graphegon/pygraphblas/blob/main/demo/BetweenessCentrality.ipynb)
  - [K-Truss Subgraphs](https://github.com/Graphegon/pygraphblas/blob/main/demo/K-Truss.ipynb)
  - [Triangle Counting](https://github.com/Graphegon/pygraphblas/blob/main/demo/Triangle-Counting.ipynb)
+ - [Louvain Community Detection](https://github.com/Graphegon/pygraphblas/blob/main/demo/Louvain.ipynb)
  - [RadiX-Net Topologies](https://github.com/Graphegon/pygraphblas/blob/main/demo/RadiX-Net-with-pygraphblas.ipynb)
  - [User Defined Types](https://github.com/Graphegon/pygraphblas/blob/main/demo/User-Defined-Types.ipynb)
  - [Log Semiring Type](https://github.com/Graphegon/pygraphblas/blob/main/demo/Log-Semiring.ipynb)

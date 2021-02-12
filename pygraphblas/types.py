@@ -486,6 +486,10 @@ def get_semiring_ztype(sring):
     return get_ztype(get_binaryop(get_add(sring)))
 
 
+_int_types = (INT8, INT16, INT32, INT64, UINT8, UINT16, UINT32, UINT64)
+
+_float_types = (FP32, FP64)
+
 _promotion_order = (
     FC64,
     FC32,

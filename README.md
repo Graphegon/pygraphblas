@@ -60,6 +60,7 @@ following Notebooks:
  - [Betweeness Centrality](./demo/BetweenessCentrality.ipynb)
  - [K-Truss Subgraphs](./demo/K-Truss.ipynb)
  - [Triangle Counting](./demo/Triangle-Counting.ipynb)
+ - [Louvain Community Detection](./demo/Louvain.ipynb)
  - [RadiX-Net Topologies](./demo/RadiX-Net-with-pygraphblas.ipynb)
  - [User Defined Types](./demo/User-Defined-Types.ipynb)
  - [Log Semiring Type](./demo/Log-Semiring.ipynb)

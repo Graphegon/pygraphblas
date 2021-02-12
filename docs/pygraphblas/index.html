@@ -73,6 +73,7 @@ following Notebooks:</p>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/BetweenessCentrality.ipynb">Betweeness Centrality</a></li>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/K-Truss.ipynb">K-Truss Subgraphs</a></li>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/Triangle-Counting.ipynb">Triangle Counting</a></li>
+<li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/Louvain.ipynb">Louvain Community Detection</a></li>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/RadiX-Net-with-pygraphblas.ipynb">RadiX-Net Topologies</a></li>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/User-Defined-Types.ipynb">User Defined Types</a></li>
 <li><a href="https://github.com/Graphegon/pygraphblas/blob/main/demo/Log-Semiring.ipynb">Log Semiring Type</a></li>
@@ -299,6 +300,7 @@ following Notebooks:
  - [Betweeness Centrality](https://github.com/Graphegon/pygraphblas/blob/main/demo/BetweenessCentrality.ipynb)
  - [K-Truss Subgraphs](https://github.com/Graphegon/pygraphblas/blob/main/demo/K-Truss.ipynb)
  - [Triangle Counting](https://github.com/Graphegon/pygraphblas/blob/main/demo/Triangle-Counting.ipynb)
+ - [Louvain Community Detection](https://github.com/Graphegon/pygraphblas/blob/main/demo/Louvain.ipynb)
  - [RadiX-Net Topologies](https://github.com/Graphegon/pygraphblas/blob/main/demo/RadiX-Net-with-pygraphblas.ipynb)
  - [User Defined Types](https://github.com/Graphegon/pygraphblas/blob/main/demo/User-Defined-Types.ipynb)
  - [Log Semiring Type](https://github.com/Graphegon/pygraphblas/blob/main/demo/Log-Semiring.ipynb)
@@ -1489,7 +1491,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         self._check(lib.GrB_Matrix_resize(self._matrix[0], nrows, ncols))
 
-    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
+    def transpose(self, cast=None, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Return Transpose of this matrix.
 
         This function can serve multiple interesting purposes
@@ -1532,7 +1534,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+                (self.nrows, self.ncols)
+                if T0 in (desc or ())
+                else (self.ncols, self.nrows)
             )
             _out = ffi.new(&#34;GrB_Matrix*&#34;)
             if cast is not None:
@@ -1585,7 +1589,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Element-wise addition with other matrix
 
@@ -1714,7 +1718,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Element-wise multiplication with other matrix.
 
@@ -2095,7 +2099,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             result = result.kronecker(result)
         return result
 
-    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce matrix to a boolean.
 
         &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
@@ -2118,7 +2122,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return result[0]
 
-    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce matrix to an integer.
 
         &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
@@ -2142,7 +2146,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return result[0]
 
-    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce matrix to an float.
 
         &gt;&gt;&gt; M = Matrix.sparse(types.FP32)
@@ -2164,7 +2168,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return result[0]
 
-    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
+    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce matrix to a vector.
 
         &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
@@ -2204,7 +2208,65 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+    def max(self):
+        &#34;&#34;&#34;Return the max of the matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, False])
+        &gt;&gt;&gt; M.max()
+        False
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, True])
+        &gt;&gt;&gt; M.max()
+        True
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; M.max()
+        149
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+        &gt;&gt;&gt; M.max()
+        149.0
+        &gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+        &gt;&gt;&gt; M.max()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-maxable type
+        &#34;&#34;&#34;
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LOR_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MAX_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MAX_MONOID)
+        raise TypeError(&#34;Un-maxable type&#34;)
+
+    def min(self):
+        &#34;&#34;&#34;Return the min of the matrix.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [True, True, True])
+        &gt;&gt;&gt; M.min()
+        True
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, True, True])
+        &gt;&gt;&gt; M.min()
+        False
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+        &gt;&gt;&gt; M.min()
+        -42
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+        &gt;&gt;&gt; M.min()
+        -42.0
+        &gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+        &gt;&gt;&gt; M.min()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-minable type
+        &#34;&#34;&#34;
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LAND_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MIN_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MIN_MONOID)
+        raise TypeError(&#34;Un-minable type&#34;)
+
+    def apply(self, op, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply Unary op to matrix elements.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
@@ -2232,7 +2294,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
-    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         first input to a scalar first.
 
@@ -2274,7 +2336,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         self._check(f(out._matrix[0], mask, accum, op, first, self._matrix[0], desc))
         return out
 
-    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
         second input to a scalar second.
 
@@ -2309,7 +2371,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         self._check(f(out._matrix[0], mask, accum, op, self._matrix[0], second, desc))
         return out
 
-    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Select elements that match the given select operation condition.
         Can be a string mapping to following operators:
 
@@ -2327,6 +2389,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         `&lt;=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
         `!=0` | lib.GxB_NONZERO  | Select nonzero value.
         `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+        `max` | no equivalent    | Select max values.
+        `min` | no equivalent    | Select min values.
 
         &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         &gt;&gt;&gt; print(M.select(&#39;&gt;&#39;, 0))
@@ -2360,8 +2424,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
+            # if op == &#39;min&#39;:
+            #     op = lib.GxB_EQ_THUNK
+            #     thunk = self.
             op = _get_select_op(op)
-        elif isinstance(op, SelectOp):
+        if isinstance(op, SelectOp):
             op = op.get_selectop()
 
         if thunk is None:
@@ -2571,7 +2638,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __ne__(self, other):
         return self._compare(other, operator.ne, &#34;!=&#34;)
 
-    def _get_args(self, mask=None, accum=None, desc=Default):
+    def _get_args(self, mask=None, accum=None, desc=None):
         if isinstance(mask, Matrix):
             mask = mask._matrix[0]
         elif isinstance(mask, Vector):
@@ -2582,10 +2649,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             accum = current_accum.get(NULL)
         if accum is not NULL:
             accum = accum.get_binaryop(self.type)
-        if desc is None or desc == Default:
-            desc = current_desc.get(Default)
+        if desc is None:
+            desc = current_desc.get(NULL)
+        if desc is not NULL:
+            desc = desc.get_desc()
 
-        desc = desc.desc[0]
         return mask, accum, desc
 
     def mxm(
@@ -2596,7 +2664,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Matrix-matrix multiply.
 
@@ -2756,7 +2824,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Matrix-vector multiply.
 
@@ -2846,7 +2914,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            new_dimension = self.ncols if T0 in desc else self.nrows
+            new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
             if semiring is not NULL:
                 typ = semiring.ztype
             else:
@@ -2886,7 +2954,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return self.mxm(other, out=self)
 
     def kronecker(
-        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+        self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
 
@@ -2960,7 +3028,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Extract a submatrix.
 
@@ -3019,7 +3087,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2
 
         &#34;&#34;&#34;
-        ta = T0 in desc
+        ta = T0 in (desc or ())
         mask, accum, desc = self._get_args(mask, accum, desc)
         result_nrows = self.ncols if ta else self.nrows
         result_ncols = self.nrows if ta else self.ncols
@@ -3048,7 +3116,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def extract_col(
-        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+        self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Extract a column Vector.
 
@@ -3073,7 +3141,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         2|149
 
         &#34;&#34;&#34;
-        stop_val = self.ncols if T0 in desc else self.nrows
+        stop_val = self.ncols if T0 in (desc or ()) else self.nrows
         if out is None:
             out = Vector.sparse(self.type, stop_val)
 
@@ -3088,7 +3156,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return out
 
     def extract_row(
-        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+        self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Extract a row Vector.
 
@@ -3106,7 +3174,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         2|
 
         &#34;&#34;&#34;
-        desc = desc &amp; T0
+        desc = desc &amp; T0 if desc else T0
         return self.extract_col(
             row_index, col_slice, out, desc=desc, mask=None, accum=None
         )
@@ -3149,7 +3217,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return self.extract_matrix(i0, i1)
 
     def assign_col(
-        self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+        self, col_index, value, row_slice=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Assign a vector to a column.
 
@@ -3163,7 +3231,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.ncols if T0 in desc else self.nrows
+        stop_val = self.ncols if T0 in (desc or ()) else self.nrows
         I, ni, size = _build_range(row_slice, stop_val)
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -3174,7 +3242,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
 
     def assign_row(
-        self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+        self, row_index, value, col_slice=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Assign a vector to a row.
 
@@ -3188,7 +3256,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
               0  1  2
 
         &#34;&#34;&#34;
-        stop_val = self.nrows if T0 in desc else self.ncols
+        stop_val = self.nrows if T0 in (desc or ()) else self.ncols
         I, ni, size = _build_range(col_slice, stop_val)
 
         mask, accum, desc = self._get_args(mask, accum, desc)
@@ -3199,7 +3267,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
 
     def assign_matrix(
-        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+        self, value, rindex=None, cindex=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Assign a submatrix.
 
@@ -3242,7 +3310,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
 
     def assign_scalar(
-        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+        self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=None
     ):
         &#34;&#34;&#34;Assign a scalar `value` to the Matrix.
 
@@ -4886,7 +4954,7 @@ outside the resized matrix are deleted.</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.transpose"><code class="name flex">
-<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">transpose</span></span>(<span>self, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return Transpose of this matrix.</p>
@@ -4931,7 +4999,7 @@ Guide</a></p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transpose(self, cast=None, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def transpose(self, cast=None, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Return Transpose of this matrix.
 
     This function can serve multiple interesting purposes
@@ -4974,7 +5042,9 @@ Guide</a></p>
     &#34;&#34;&#34;
     if out is None:
         new_dimensions = (
-            (self.nrows, self.ncols) if T0 in desc else (self.ncols, self.nrows)
+            (self.nrows, self.ncols)
+            if T0 in (desc or ())
+            else (self.ncols, self.nrows)
         )
         _out = ffi.new(&#34;GrB_Matrix*&#34;)
         if cast is not None:
@@ -5056,7 +5126,7 @@ new matrix is of the cast type is created.</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.eadd"><code class="name flex">
-<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise addition with other matrix</p>
@@ -5189,7 +5259,7 @@ B</td>
     out=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Element-wise addition with other matrix
 
@@ -5312,7 +5382,7 @@ B</td>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.emult"><code class="name flex">
-<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise multiplication with other matrix.</p>
@@ -5448,7 +5518,7 @@ B</td>
     out=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Element-wise multiplication with other matrix.
 
@@ -5718,7 +5788,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.reduce_bool"><code class="name flex">
-<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a boolean.</p>
@@ -5736,7 +5806,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce matrix to a boolean.
 
     &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
@@ -5761,7 +5831,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.reduce_int"><code class="name flex">
-<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an integer.</p>
@@ -5779,7 +5849,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce matrix to an integer.
 
     &gt;&gt;&gt; M = Matrix.sparse(types.INT8)
@@ -5805,7 +5875,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.reduce_float"><code class="name flex">
-<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to an float.</p>
@@ -5821,7 +5891,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce matrix to an float.
 
     &gt;&gt;&gt; M = Matrix.sparse(types.FP32)
@@ -5845,7 +5915,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.reduce_vector"><code class="name flex">
-<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_vector</span></span>(<span>self, mon=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce matrix to a vector.</p>
@@ -5877,7 +5947,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce matrix to a vector.
 
     &gt;&gt;&gt; M = Matrix.sparse(types.FP32, 3, 3)
@@ -5918,8 +5988,122 @@ True
     return out</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Matrix.max"><code class="name flex">
+<span>def <span class="ident">max</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the max of the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, False])
+&gt;&gt;&gt; M.max()
+False
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, True])
+&gt;&gt;&gt; M.max()
+True
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; M.max()
+149
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+&gt;&gt;&gt; M.max()
+149.0
+&gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+&gt;&gt;&gt; M.max()
+Traceback (most recent call last):
+...
+TypeError: Un-maxable type
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def max(self):
+    &#34;&#34;&#34;Return the max of the matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, False])
+    &gt;&gt;&gt; M.max()
+    False
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, True])
+    &gt;&gt;&gt; M.max()
+    True
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; M.max()
+    149
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+    &gt;&gt;&gt; M.max()
+    149.0
+    &gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+    &gt;&gt;&gt; M.max()
+    Traceback (most recent call last):
+    ...
+    TypeError: Un-maxable type
+    &#34;&#34;&#34;
+    if self.type == types.BOOL:
+        return self.reduce_bool(self.type.LOR_MONOID)
+    if self.type in types._int_types:
+        return self.reduce_int(self.type.MAX_MONOID)
+    if self.type in types._float_types:
+        return self.reduce_float(self.type.MAX_MONOID)
+    raise TypeError(&#34;Un-maxable type&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.min"><code class="name flex">
+<span>def <span class="ident">min</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the min of the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [True, True, True])
+&gt;&gt;&gt; M.min()
+True
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, True, True])
+&gt;&gt;&gt; M.min()
+False
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+&gt;&gt;&gt; M.min()
+-42
+&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+&gt;&gt;&gt; M.min()
+-42.0
+&gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+&gt;&gt;&gt; M.min()
+Traceback (most recent call last):
+...
+TypeError: Un-minable type
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def min(self):
+    &#34;&#34;&#34;Return the min of the matrix.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [True, True, True])
+    &gt;&gt;&gt; M.min()
+    True
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, True, True])
+    &gt;&gt;&gt; M.min()
+    False
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
+    &gt;&gt;&gt; M.min()
+    -42
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+    &gt;&gt;&gt; M.min()
+    -42.0
+    &gt;&gt;&gt; M = Matrix.from_lists([0], [1], [1j])
+    &gt;&gt;&gt; M.min()
+    Traceback (most recent call last):
+    ...
+    TypeError: Un-minable type
+    &#34;&#34;&#34;
+    if self.type == types.BOOL:
+        return self.reduce_bool(self.type.LAND_MONOID)
+    if self.type in types._int_types:
+        return self.reduce_int(self.type.MIN_MONOID)
+    if self.type in types._float_types:
+        return self.reduce_float(self.type.MIN_MONOID)
+    raise TypeError(&#34;Un-minable type&#34;)</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Matrix.apply"><code class="name flex">
-<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply Unary op to matrix elements.</p>
@@ -5942,7 +6126,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply Unary op to matrix elements.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
@@ -5972,7 +6156,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.apply_first"><code class="name flex">
-<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -6005,7 +6189,7 @@ right" for math operations like <code>+-*.</code> with a scalar:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     first input to a scalar first.
 
@@ -6049,7 +6233,7 @@ right" for math operations like <code>+-*.</code> with a scalar:</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.apply_second"><code class="name flex">
-<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a matrix, binding the
@@ -6075,7 +6259,7 @@ left" for math operations like <code>+-*.</code> with a scalar:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply a binary operator to the entries in a matrix, binding the
     second input to a scalar second.
 
@@ -6112,7 +6296,7 @@ left" for math operations like <code>+-*.</code> with a scalar:</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select elements that match the given select operation condition.
@@ -6186,6 +6370,16 @@ Can be a string mapping to following operators:</p>
 <td>lib.GxB_EQ_ZERO</td>
 <td>Select equal to zero.</td>
 </tr>
+<tr>
+<td><code>max</code></td>
+<td>no equivalent</td>
+<td>Select max values.</td>
+</tr>
+<tr>
+<td><code>min</code></td>
+<td>no equivalent</td>
+<td>Select min values.</td>
+</tr>
 </tbody>
 </table>
 <pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
@@ -6221,7 +6415,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Select elements that match the given select operation condition.
     Can be a string mapping to following operators:
 
@@ -6239,6 +6433,8 @@ True
     `&lt;=0` | lib.GxB_LE_ZERO  | Select less than or equal to zero.
     `!=0` | lib.GxB_NONZERO  | Select nonzero value.
     `==0` | lib.GxB_EQ_ZERO  | Select equal to zero.
+    `max` | no equivalent    | Select max values.
+    `min` | no equivalent    | Select min values.
 
     &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
     &gt;&gt;&gt; print(M.select(&#39;&gt;&#39;, 0))
@@ -6272,8 +6468,11 @@ True
     if out is None:
         out = self.__class__.sparse(self.type, self.nrows, self.ncols)
     if isinstance(op, str):
+        # if op == &#39;min&#39;:
+        #     op = lib.GxB_EQ_THUNK
+        #     thunk = self.
         op = _get_select_op(op)
-    elif isinstance(op, SelectOp):
+    if isinstance(op, SelectOp):
         op = op.get_selectop()
 
     if thunk is None:
@@ -6579,7 +6778,7 @@ toward the lower left.</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.mxm"><code class="name flex">
-<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">mxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-matrix multiply.</p>
@@ -6707,7 +6906,7 @@ and <code>emult</code>.</p></div>
     semiring=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Matrix-matrix multiply.
 
@@ -6861,7 +7060,7 @@ and <code>emult</code>.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.mxv"><code class="name flex">
-<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">mxv</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Matrix-vector multiply.</p>
@@ -6954,7 +7153,7 @@ argument or a context manager:</p>
     semiring=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Matrix-vector multiply.
 
@@ -7044,7 +7243,7 @@ argument or a context manager:</p>
         semiring = current_semiring.get(NULL)
 
     if out is None:
-        new_dimension = self.ncols if T0 in desc else self.nrows
+        new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
         if semiring is not NULL:
             typ = semiring.ztype
         else:
@@ -7074,7 +7273,7 @@ argument or a context manager:</p>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.kronecker"><code class="name flex">
-<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">kronecker</span></span>(<span>self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><a href="https://en.wikipedia.org/wiki/Kronecker_product">Kronecker product</a>.</p>
@@ -7132,7 +7331,7 @@ True
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def kronecker(
-    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=Default
+    self, other, op=None, cast=None, out=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;[Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product).
 
@@ -7201,7 +7400,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.extract_matrix"><code class="name flex">
-<span>def <span class="ident">extract_matrix</span></span>(<span>self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">extract_matrix</span></span>(<span>self, row_index=None, col_index=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a submatrix.</p>
@@ -7269,7 +7468,7 @@ True
     out=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Extract a submatrix.
 
@@ -7328,7 +7527,7 @@ True
           0  1  2
 
     &#34;&#34;&#34;
-    ta = T0 in desc
+    ta = T0 in (desc or ())
     mask, accum, desc = self._get_args(mask, accum, desc)
     result_nrows = self.ncols if ta else self.nrows
     result_ncols = self.nrows if ta else self.ncols
@@ -7358,7 +7557,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.extract_col"><code class="name flex">
-<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">extract_col</span></span>(<span>self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a column Vector.</p>
@@ -7387,7 +7586,7 @@ True
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_col(
-    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=Default
+    self, col_index, row_slice=None, out=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Extract a column Vector.
 
@@ -7412,7 +7611,7 @@ True
     2|149
 
     &#34;&#34;&#34;
-    stop_val = self.ncols if T0 in desc else self.nrows
+    stop_val = self.ncols if T0 in (desc or ()) else self.nrows
     if out is None:
         out = Vector.sparse(self.type, stop_val)
 
@@ -7428,7 +7627,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.extract_row"><code class="name flex">
-<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">extract_row</span></span>(<span>self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a row Vector.</p>
@@ -7449,7 +7648,7 @@ True
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract_row(
-    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=Default
+    self, row_index, col_slice=None, out=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Extract a row Vector.
 
@@ -7467,14 +7666,14 @@ True
     2|
 
     &#34;&#34;&#34;
-    desc = desc &amp; T0
+    desc = desc &amp; T0 if desc else T0
     return self.extract_col(
         row_index, col_slice, out, desc=desc, mask=None, accum=None
     )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.assign_col"><code class="name flex">
-<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign_col</span></span>(<span>self, col_index, value, row_slice=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a column.</p>
@@ -7492,7 +7691,7 @@ True
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def assign_col(
-    self, col_index, value, row_slice=None, mask=None, accum=None, desc=Default
+    self, col_index, value, row_slice=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Assign a vector to a column.
 
@@ -7506,7 +7705,7 @@ True
           0  1  2
 
     &#34;&#34;&#34;
-    stop_val = self.ncols if T0 in desc else self.nrows
+    stop_val = self.ncols if T0 in (desc or ()) else self.nrows
     I, ni, size = _build_range(row_slice, stop_val)
     mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -7518,7 +7717,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.assign_row"><code class="name flex">
-<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign_row</span></span>(<span>self, row_index, value, col_slice=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a vector to a row.</p>
@@ -7536,7 +7735,7 @@ True
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def assign_row(
-    self, row_index, value, col_slice=None, mask=None, accum=None, desc=Default
+    self, row_index, value, col_slice=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Assign a vector to a row.
 
@@ -7550,7 +7749,7 @@ True
           0  1  2
 
     &#34;&#34;&#34;
-    stop_val = self.nrows if T0 in desc else self.ncols
+    stop_val = self.nrows if T0 in (desc or ()) else self.ncols
     I, ni, size = _build_range(col_slice, stop_val)
 
     mask, accum, desc = self._get_args(mask, accum, desc)
@@ -7562,7 +7761,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.assign_matrix"><code class="name flex">
-<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign_matrix</span></span>(<span>self, value, rindex=None, cindex=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a submatrix.</p>
@@ -7594,7 +7793,7 @@ with if the index and value arguments are type <code><a title="pygraphblas.Matri
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def assign_matrix(
-    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=Default
+    self, value, rindex=None, cindex=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Assign a submatrix.
 
@@ -7638,7 +7837,7 @@ with if the index and value arguments are type <code><a title="pygraphblas.Matri
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.assign_scalar"><code class="name flex">
-<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assign a scalar <code>value</code> to the Matrix.</p>
@@ -7744,7 +7943,7 @@ index to one row or column:</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def assign_scalar(
-    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=Default
+    self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=None
 ):
     &#34;&#34;&#34;Assign a scalar `value` to the Matrix.
 
@@ -8427,6 +8626,38 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
+    @property
+    def indexes(self):
+        &#34;&#34;&#34;Iterator of vector indexes.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; list(v.indexes)
+        [0, 1, 2]
+
+        &#34;&#34;&#34;
+        nvals = self.nvals
+        _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
+        I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
+        X = NULL
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        return iter(I)
+
+    @property
+    def values(self):
+        &#34;&#34;&#34;Iterator of vector values.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; list(v.values)
+        [1, 2, 3]
+
+        &#34;&#34;&#34;
+        nvals = self.nvals
+        _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
+        I = NULL
+        X = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+        return iter(X)
+
     def iseq(self, other, eq_op=None):
         &#34;&#34;&#34;Compare two vectors for equality.
 
@@ -8539,6 +8770,53 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         new_vec = ffi.new(&#34;GrB_Vector*&#34;)
         self._check(lib.GrB_Vector_dup(new_vec, self._vector[0]))
         return self.__class__(new_vec, self.type)
+
+    @property
+    def hyper_switch(self):  # pragma: nocover
+        &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        switch = ffi.new(&#34;double*&#34;)
+        self._check(
+            lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
+        )
+        return switch[0]
+
+    @hyper_switch.setter
+    def hyper_switch(self, switch):  # pragma: nocover
+        &#34;&#34;&#34;Set the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        switch = ffi.cast(&#34;double&#34;, switch)
+        self._check(
+            lib.GxB_Vector_Option_set(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
+        )
+
+    @property
+    def sparsity(self):  # pragma: nocover
+        &#34;&#34;&#34;Get Vector sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        sparsity = ffi.new(&#34;int*&#34;)
+        self._check(
+            lib.GxB_Vector_Option_get(
+                self._vector[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+        return sparsity[0]
+
+    @sparsity.setter
+    def sparsity(self, sparsity):  # pragma: nocover
+        &#34;&#34;&#34;Set Vector sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        sparsity = ffi.cast(&#34;int&#34;, sparsity)
+        self._check(
+            lib.GxB_Vector_Option_set(
+                self._vector[0], lib.GxB_SPARSITY_CONTROL, sparsity
+            )
+        )
+
+    @property
+    def sparsity_status(self):  # pragma: nocover
+        &#34;&#34;&#34;Get Vector sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
+        status = ffi.new(&#34;int*&#34;)
+        self._check(
+            lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_SPARSITY_STATUS, status)
+        )
+        return status[0]
 
     @classmethod
     def dense(cls, typ, size, fill=None):
@@ -8679,7 +8957,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Element-wise addition with other vector.
 
@@ -8772,7 +9050,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
                 add_op,
                 self._vector[0],
                 other._vector[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -8785,7 +9063,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         out=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Element-wise multiplication with other vector.
 
@@ -8871,7 +9149,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
                 mult_op,
                 self._vector[0],
                 other._vector[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -8884,7 +9162,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         semiring=None,
         mask=None,
         accum=None,
-        desc=Default,
+        desc=None,
     ):
         &#34;&#34;&#34;Vector-Matrix multiply.
 
@@ -8977,7 +9255,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            new_dimension = other.nrows if T1 in desc else other.ncols
+            new_dimension = other.nrows if T1 in (desc or ()) else other.ncols
             if semiring is not NULL:
                 typ = semiring.ztype
             else:
@@ -8999,7 +9277,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
                 semiring,
                 self._vector[0],
                 other._matrix[0],
-                desc.desc[0],
+                desc,
             )
         )
         return out
@@ -9109,20 +9387,27 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         &#34;&#34;&#34;
         self._check(lib.GrB_Vector_resize(self._vector[0], size))
 
-    def _get_args(self, mask=None, accum=None, desc=Default):
+    def _get_args(self, mask=None, accum=None, desc=None):
         if accum is None:
             accum = current_accum.get(NULL)
 
         if accum is not NULL:
             accum = accum.get_binaryop(self.type)
 
+        if desc is None:
+            desc = current_desc.get(NULL)
+
+        if desc is not NULL:
+            desc = desc.get_desc()
+
         if mask is None:
             mask = NULL
+
         if isinstance(mask, Vector):
             mask = mask._vector[0]
         return mask, accum, desc
 
-    def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce vector to a boolean.
 
         &gt;&gt;&gt; v = Vector.from_lists([0, 1], [True, False])
@@ -9142,13 +9427,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;_Bool*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_BOOL(
-                result, accum, mon, self._vector[0], desc.desc[0]
-            )
+            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
-    def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce vector to a integer.
 
         &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1, 1])
@@ -9168,13 +9451,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;int64_t*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_INT64(
-                result, accum, mon, self._vector[0], desc.desc[0]
-            )
+            lib.GrB_Vector_reduce_INT64(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
-    def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+    def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Reduce vector to a float.
 
         &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1.2, 1.1])
@@ -9194,13 +9475,69 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new(&#34;double*&#34;)
         self._check(
-            lib.GrB_Vector_reduce_FP64(
-                result, accum, mon, self._vector[0], desc.desc[0]
-            )
+            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
-    def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+    def max(self):
+        &#34;&#34;&#34;Return the max of the vector.
+
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, False])
+        &gt;&gt;&gt; M.max()
+        False
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, True])
+        &gt;&gt;&gt; M.max()
+        True
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+        &gt;&gt;&gt; M.max()
+        149
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+        &gt;&gt;&gt; M.max()
+        149.0
+        &gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+        &gt;&gt;&gt; M.max()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-maxable type
+        &#34;&#34;&#34;
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LOR_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MAX_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MAX_MONOID)
+        raise TypeError(&#34;Un-maxable type&#34;)
+
+    def min(self):
+        &#34;&#34;&#34;Return the min of the vector.
+
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [True, True, True])
+        &gt;&gt;&gt; M.min()
+        True
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, True, True])
+        &gt;&gt;&gt; M.min()
+        False
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+        &gt;&gt;&gt; M.min()
+        -42
+        &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+        &gt;&gt;&gt; M.min()
+        -42.0
+        &gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+        &gt;&gt;&gt; M.min()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-minable type
+        &#34;&#34;&#34;
+        if self.type == types.BOOL:
+            return self.reduce_bool(self.type.LAND_MONOID)
+        if self.type in types._int_types:
+            return self.reduce_int(self.type.MIN_MONOID)
+        if self.type in types._float_types:
+            return self.reduce_float(self.type.MIN_MONOID)
+        raise TypeError(&#34;Un-minable type&#34;)
+
+    def apply(self, op, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply Unary op to vector elements.
         &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
         &gt;&gt;&gt; print(v.apply(types.UINT64.AINV))
@@ -9214,13 +9551,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         op = op.get_unaryop(self)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Vector_apply(
-                out._vector[0], mask, accum, op, self._vector[0], desc.desc[0]
-            )
+            lib.GrB_Vector_apply(out._vector[0], mask, accum, op, self._vector[0], desc)
         )
         return out
 
-    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+    def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the first input
         to a scalar first.
 
@@ -9244,12 +9579,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
             first = first._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp1st
-        self._check(
-            f(out._vector[0], mask, accum, op, first, self._vector[0], desc.desc[0])
-        )
+        self._check(f(out._vector[0], mask, accum, op, first, self._vector[0], desc))
         return out
 
-    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+    def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the second input
         to a scalar second.
 
@@ -9271,12 +9604,10 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
             second = second._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp2nd
-        self._check(
-            f(out._vector[0], mask, accum, op, self._vector[0], second, desc.desc[0])
-        )
+        self._check(f(out._vector[0], mask, accum, op, self._vector[0], second, desc))
         return out
 
-    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+    def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Select elements that match the given select operation condition.
         See `Matrix.select` for possible operators.
 
@@ -9289,11 +9620,28 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         &gt;&gt;&gt; v.select(&#39;&gt;&#39;, 0, out=w) is w
         True
 
+        `min` and `max` selectors can be shortcuts for selecting all
+        elements that equal the min or max reduction of all elements.
+
+        &gt;&gt;&gt; print(v.select(&#39;min&#39;))
+        0|
+        1| 0
+        &gt;&gt;&gt; print(v.select(&#39;max&#39;))
+        0| 1
+        1|
+
         &#34;&#34;&#34;
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, str):
-            op = _get_select_op(op)
+            if op == &#34;min&#34;:
+                op = lib.GxB_EQ_THUNK
+                thunk = self.min()
+            elif op == &#34;max&#34;:
+                op = lib.GxB_EQ_THUNK
+                thunk = self.max()
+            else:
+                op = _get_select_op(op)
 
         if thunk is None:
             thunk = NULL
@@ -9306,7 +9654,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GxB_Vector_select(
-                out._vector[0], mask, accum, op, self._vector[0], thunk, desc.desc[0]
+                out._vector[0], mask, accum, op, self._vector[0], thunk, desc
             )
         )
         return out
@@ -9344,26 +9692,78 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index)
                 return
-        raise TypeError(&#34;Unknown index or value for vector assignment.&#34;)
 
-    def assign(self, value, index=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Assign vector to vector.&#34;&#34;&#34;
+        if isinstance(index, Vector):
+            mask = index._vector[0]
+            index = slice(None, None, None)
+            if isinstance(value, Vector):
+                self.assign(value, index, mask=mask)
+                return
+            self.assign_scalar(value, index, mask=mask)
+            return
+        raise TypeError(&#34;Unknown index&#34;)
+
+    def assign(self, value, index=None, mask=None, accum=None, desc=None):
+        &#34;&#34;&#34;Assign vector to vector.
+
+        &gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+        &gt;&gt;&gt; w = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; v[:] = w
+        &gt;&gt;&gt; print(v)
+        0| 1
+        1| 2
+        2| 3
+
+        If the index is another vector it is used as an assignment
+        mask:
+
+        &gt;&gt;&gt; v.clear()
+        &gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+        &gt;&gt;&gt; m[1] = True
+        &gt;&gt;&gt; v[m] = w
+        &gt;&gt;&gt; print(v)
+        0|
+        1| 2
+        2|
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
             lib.GrB_Vector_assign(
-                self._vector[0], mask, accum, value._vector[0], I, ni, desc.desc[0]
+                self._vector[0], mask, accum, value._vector[0], I, ni, desc
             )
         )
 
-    def assign_scalar(self, value, index=None, mask=None, accum=None, desc=Default):
-        &#34;&#34;&#34;Assign scalar to vector.&#34;&#34;&#34;
+    def assign_scalar(self, value, index=None, mask=None, accum=None, desc=None):
+        &#34;&#34;&#34;Assign scalar to vector.
+
+        &gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+        &gt;&gt;&gt; v[:] = 2
+        &gt;&gt;&gt; print(v)
+        0| 2
+        1| 2
+        2| 2
+
+        If the index is another vector it is used as an assignment
+        mask:
+
+        &gt;&gt;&gt; v.clear()
+        &gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+        &gt;&gt;&gt; m[1] = True
+        &gt;&gt;&gt; v[m] = 3
+        &gt;&gt;&gt; print(v)
+        0|
+        1| 3
+        2|
+
+        &#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
             scalar_type._Vector_assignScalar(
-                self._vector[0], mask, accum, value, I, ni, desc.desc[0]
+                self._vector[0], mask, accum, value, I, ni, desc
             )
         )
 
@@ -9390,7 +9790,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         )
         return self.type._to_value(result[0])
 
-    def extract(self, index, mask=None, accum=None, desc=Default):
+    def extract(self, index, mask=None, accum=None, desc=None):
         &#34;&#34;&#34;Extract subvector from vector.&#34;&#34;&#34;
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(index, Vector):
@@ -9402,7 +9802,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         result = Vector.sparse(self.type, size)
         self._check(
             lib.GrB_Vector_extract(
-                result._vector[0], mask, accum, self._vector[0], I, ni, desc.desc[0]
+                result._vector[0], mask, accum, self._vector[0], I, ni, desc
             )
         )
         return result
@@ -9627,6 +10027,115 @@ def dense(cls, typ, size, fill=None):
 </dl>
 <h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
+<dt id="pygraphblas.Vector.indexes"><code class="name">var <span class="ident">indexes</span></code></dt>
+<dd>
+<div class="desc"><p>Iterator of vector indexes.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; list(v.indexes)
+[0, 1, 2]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def indexes(self):
+    &#34;&#34;&#34;Iterator of vector indexes.
+
+    &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; list(v.indexes)
+    [0, 1, 2]
+
+    &#34;&#34;&#34;
+    nvals = self.nvals
+    _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
+    I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
+    X = NULL
+    self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+    return iter(I)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.values"><code class="name">var <span class="ident">values</span></code></dt>
+<dd>
+<div class="desc"><p>Iterator of vector values.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; list(v.values)
+[1, 2, 3]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def values(self):
+    &#34;&#34;&#34;Iterator of vector values.
+
+    &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; list(v.values)
+    [1, 2, 3]
+
+    &#34;&#34;&#34;
+    nvals = self.nvals
+    _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
+    I = NULL
+    X = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+    self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
+    return iter(X)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.hyper_switch"><code class="name">var <span class="ident">hyper_switch</span></code></dt>
+<dd>
+<div class="desc"><p>Get the hyper_switch threshold. (See SuiteSparse User Guide)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def hyper_switch(self):  # pragma: nocover
+    &#34;&#34;&#34;Get the hyper_switch threshold. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    switch = ffi.new(&#34;double*&#34;)
+    self._check(
+        lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
+    )
+    return switch[0]</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.sparsity"><code class="name">var <span class="ident">sparsity</span></code></dt>
+<dd>
+<div class="desc"><p>Get Vector sparsity control. (See SuiteSparse User Guide)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def sparsity(self):  # pragma: nocover
+    &#34;&#34;&#34;Get Vector sparsity control. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    sparsity = ffi.new(&#34;int*&#34;)
+    self._check(
+        lib.GxB_Vector_Option_get(
+            self._vector[0], lib.GxB_SPARSITY_CONTROL, sparsity
+        )
+    )
+    return sparsity[0]</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.sparsity_status"><code class="name">var <span class="ident">sparsity_status</span></code></dt>
+<dd>
+<div class="desc"><p>Get Vector sparsity status. (See SuiteSparse User Guide)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def sparsity_status(self):  # pragma: nocover
+    &#34;&#34;&#34;Get Vector sparsity status. (See SuiteSparse User Guide)&#34;&#34;&#34;
+    status = ffi.new(&#34;int*&#34;)
+    self._check(
+        lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_SPARSITY_STATUS, status)
+    )
+    return status[0]</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Vector.size"><code class="name">var <span class="ident">size</span></code></dt>
 <dd>
 <div class="desc"><p>Return the size of the vector.</p>
@@ -9871,7 +10380,7 @@ True
 </details>
 </dd>
 <dt id="pygraphblas.Vector.eadd"><code class="name flex">
-<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise addition with other vector.</p>
@@ -9985,7 +10494,7 @@ w</td>
     out=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Element-wise addition with other vector.
 
@@ -10078,14 +10587,14 @@ w</td>
             add_op,
             self._vector[0],
             other._vector[0],
-            desc.desc[0],
+            desc,
         )
     )
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.emult"><code class="name flex">
-<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">emult</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise multiplication with other vector.</p>
@@ -10153,7 +10662,7 @@ context manager or passed to <code>mxv</code> as the <code>add_op</code> argumen
     out=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Element-wise multiplication with other vector.
 
@@ -10239,14 +10748,14 @@ context manager or passed to <code>mxv</code> as the <code>add_op</code> argumen
             mult_op,
             self._vector[0],
             other._vector[0],
-            desc.desc[0],
+            desc,
         )
     )
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.vxm"><code class="name flex">
-<span>def <span class="ident">vxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">vxm</span></span>(<span>self, other, cast=None, out=None, semiring=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Vector-Matrix multiply.</p>
@@ -10344,7 +10853,7 @@ argument or a context manager:</p>
     semiring=None,
     mask=None,
     accum=None,
-    desc=Default,
+    desc=None,
 ):
     &#34;&#34;&#34;Vector-Matrix multiply.
 
@@ -10437,7 +10946,7 @@ argument or a context manager:</p>
         semiring = current_semiring.get(NULL)
 
     if out is None:
-        new_dimension = other.nrows if T1 in desc else other.ncols
+        new_dimension = other.nrows if T1 in (desc or ()) else other.ncols
         if semiring is not NULL:
             typ = semiring.ztype
         else:
@@ -10459,7 +10968,7 @@ argument or a context manager:</p>
             semiring,
             self._vector[0],
             other._matrix[0],
-            desc.desc[0],
+            desc,
         )
     )
     return out</code></pre>
@@ -10513,7 +11022,7 @@ outside the resized vector are deleted.</p>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.reduce_bool"><code class="name flex">
-<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_bool</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce vector to a boolean.</p>
@@ -10531,7 +11040,7 @@ False
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce vector to a boolean.
 
     &gt;&gt;&gt; v = Vector.from_lists([0, 1], [True, False])
@@ -10551,15 +11060,13 @@ False
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;_Bool*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_BOOL(
-            result, accum, mon, self._vector[0], desc.desc[0]
-        )
+        lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc)
     )
     return result[0]</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.reduce_int"><code class="name flex">
-<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_int</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce vector to a integer.</p>
@@ -10577,7 +11084,7 @@ False
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_int(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce vector to a integer.
 
     &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1, 1])
@@ -10597,15 +11104,13 @@ False
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;int64_t*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_INT64(
-            result, accum, mon, self._vector[0], desc.desc[0]
-        )
+        lib.GrB_Vector_reduce_INT64(result, accum, mon, self._vector[0], desc)
     )
     return result[0]</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.reduce_float"><code class="name flex">
-<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">reduce_float</span></span>(<span>self, mon=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reduce vector to a float.</p>
@@ -10623,7 +11128,7 @@ False
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def reduce_float(self, mon=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Reduce vector to a float.
 
     &gt;&gt;&gt; v = Vector.from_lists([0, 1], [1.2, 1.1])
@@ -10643,15 +11148,127 @@ False
     mask, accum, desc = self._get_args(mask, accum, desc)
     result = ffi.new(&#34;double*&#34;)
     self._check(
-        lib.GrB_Vector_reduce_FP64(
-            result, accum, mon, self._vector[0], desc.desc[0]
-        )
+        lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc)
     )
     return result[0]</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Vector.max"><code class="name flex">
+<span>def <span class="ident">max</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the max of the vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, False])
+&gt;&gt;&gt; M.max()
+False
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, True])
+&gt;&gt;&gt; M.max()
+True
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+&gt;&gt;&gt; M.max()
+149
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+&gt;&gt;&gt; M.max()
+149.0
+&gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+&gt;&gt;&gt; M.max()
+Traceback (most recent call last):
+...
+TypeError: Un-maxable type
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def max(self):
+    &#34;&#34;&#34;Return the max of the vector.
+
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, False])
+    &gt;&gt;&gt; M.max()
+    False
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, False, True])
+    &gt;&gt;&gt; M.max()
+    True
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+    &gt;&gt;&gt; M.max()
+    149
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+    &gt;&gt;&gt; M.max()
+    149.0
+    &gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+    &gt;&gt;&gt; M.max()
+    Traceback (most recent call last):
+    ...
+    TypeError: Un-maxable type
+    &#34;&#34;&#34;
+    if self.type == types.BOOL:
+        return self.reduce_bool(self.type.LOR_MONOID)
+    if self.type in types._int_types:
+        return self.reduce_int(self.type.MAX_MONOID)
+    if self.type in types._float_types:
+        return self.reduce_float(self.type.MAX_MONOID)
+    raise TypeError(&#34;Un-maxable type&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.min"><code class="name flex">
+<span>def <span class="ident">min</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the min of the vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [True, True, True])
+&gt;&gt;&gt; M.min()
+True
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, True, True])
+&gt;&gt;&gt; M.min()
+False
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+&gt;&gt;&gt; M.min()
+-42
+&gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+&gt;&gt;&gt; M.min()
+-42.0
+&gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+&gt;&gt;&gt; M.min()
+Traceback (most recent call last):
+...
+TypeError: Un-minable type
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def min(self):
+    &#34;&#34;&#34;Return the min of the vector.
+
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [True, True, True])
+    &gt;&gt;&gt; M.min()
+    True
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [False, True, True])
+    &gt;&gt;&gt; M.min()
+    False
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
+    &gt;&gt;&gt; M.min()
+    -42
+    &gt;&gt;&gt; M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+    &gt;&gt;&gt; M.min()
+    -42.0
+    &gt;&gt;&gt; M = Vector.from_lists([0], [1j])
+    &gt;&gt;&gt; M.min()
+    Traceback (most recent call last):
+    ...
+    TypeError: Un-minable type
+    &#34;&#34;&#34;
+    if self.type == types.BOOL:
+        return self.reduce_bool(self.type.LAND_MONOID)
+    if self.type in types._int_types:
+        return self.reduce_int(self.type.MIN_MONOID)
+    if self.type in types._float_types:
+        return self.reduce_float(self.type.MIN_MONOID)
+    raise TypeError(&#34;Un-minable type&#34;)</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Vector.apply"><code class="name flex">
-<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply</span></span>(<span>self, op, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply Unary op to vector elements.</p>
@@ -10664,7 +11281,7 @@ False
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply(self, op, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply Unary op to vector elements.
     &gt;&gt;&gt; v = Vector.from_lists([0,1], [1, 1])
     &gt;&gt;&gt; print(v.apply(types.UINT64.AINV))
@@ -10678,15 +11295,13 @@ False
     op = op.get_unaryop(self)
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
-        lib.GrB_Vector_apply(
-            out._vector[0], mask, accum, op, self._vector[0], desc.desc[0]
-        )
+        lib.GrB_Vector_apply(out._vector[0], mask, accum, op, self._vector[0], desc)
     )
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.apply_first"><code class="name flex">
-<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply_first</span></span>(<span>self, first, op, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a vector, binding the first input
@@ -10703,7 +11318,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply_first(self, first, op, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the first input
     to a scalar first.
 
@@ -10727,14 +11342,12 @@ True
         first = first._scalar[0]
     else:
         f = self.type._Vector_apply_BinaryOp1st
-    self._check(
-        f(out._vector[0], mask, accum, op, first, self._vector[0], desc.desc[0])
-    )
+    self._check(f(out._vector[0], mask, accum, op, first, self._vector[0], desc))
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.apply_second"><code class="name flex">
-<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">apply_second</span></span>(<span>self, op, second, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply a binary operator to the entries in a vector, binding the second input
@@ -10751,7 +11364,7 @@ True
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Apply a binary operator to the entries in a vector, binding the second input
     to a scalar second.
 
@@ -10773,14 +11386,12 @@ True
         second = second._scalar[0]
     else:
         f = self.type._Vector_apply_BinaryOp2nd
-    self._check(
-        f(out._vector[0], mask, accum, op, self._vector[0], second, desc.desc[0])
-    )
+    self._check(f(out._vector[0], mask, accum, op, self._vector[0], second, desc))
     return out</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">select</span></span>(<span>self, op, thunk=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select elements that match the given select operation condition.
@@ -10793,12 +11404,21 @@ See <code><a title="pygraphblas.Matrix.select" href="#pygraphblas.Matrix.select"
 <pre><code class="language-python-repl">&gt;&gt;&gt; w = Vector.sparse(types.UINT8, 2)
 &gt;&gt;&gt; v.select('&gt;', 0, out=w) is w
 True
+</code></pre>
+<p><code>min</code> and <code>max</code> selectors can be shortcuts for selecting all
+elements that equal the min or max reduction of all elements.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(v.select('min'))
+0|
+1| 0
+&gt;&gt;&gt; print(v.select('max'))
+0| 1
+1|
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=Default):
+<pre><code class="python">def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Select elements that match the given select operation condition.
     See `Matrix.select` for possible operators.
 
@@ -10811,11 +11431,28 @@ True
     &gt;&gt;&gt; v.select(&#39;&gt;&#39;, 0, out=w) is w
     True
 
+    `min` and `max` selectors can be shortcuts for selecting all
+    elements that equal the min or max reduction of all elements.
+
+    &gt;&gt;&gt; print(v.select(&#39;min&#39;))
+    0|
+    1| 0
+    &gt;&gt;&gt; print(v.select(&#39;max&#39;))
+    0| 1
+    1|
+
     &#34;&#34;&#34;
     if out is None:
         out = Vector.sparse(self.type, self.size)
     if isinstance(op, str):
-        op = _get_select_op(op)
+        if op == &#34;min&#34;:
+            op = lib.GxB_EQ_THUNK
+            thunk = self.min()
+        elif op == &#34;max&#34;:
+            op = lib.GxB_EQ_THUNK
+            thunk = self.max()
+        else:
+            op = _get_select_op(op)
 
     if thunk is None:
         thunk = NULL
@@ -10828,7 +11465,7 @@ True
     mask, accum, desc = self._get_args(mask, accum, desc)
     self._check(
         lib.GxB_Vector_select(
-            out._vector[0], mask, accum, op, self._vector[0], thunk, desc.desc[0]
+            out._vector[0], mask, accum, op, self._vector[0], thunk, desc
         )
     )
     return out</code></pre>
@@ -10886,42 +11523,122 @@ every present value in this vector is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.assign"><code class="name flex">
-<span>def <span class="ident">assign</span></span>(<span>self, value, index=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign</span></span>(<span>self, value, index=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Assign vector to vector.</p></div>
+<div class="desc"><p>Assign vector to vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+&gt;&gt;&gt; w = Vector.from_1_to_n(3)
+&gt;&gt;&gt; v[:] = w
+&gt;&gt;&gt; print(v)
+0| 1
+1| 2
+2| 3
+</code></pre>
+<p>If the index is another vector it is used as an assignment
+mask:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v.clear()
+&gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+&gt;&gt;&gt; m[1] = True
+&gt;&gt;&gt; v[m] = w
+&gt;&gt;&gt; print(v)
+0|
+1| 2
+2|
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign(self, value, index=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Assign vector to vector.&#34;&#34;&#34;
+<pre><code class="python">def assign(self, value, index=None, mask=None, accum=None, desc=None):
+    &#34;&#34;&#34;Assign vector to vector.
+
+    &gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+    &gt;&gt;&gt; w = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; v[:] = w
+    &gt;&gt;&gt; print(v)
+    0| 1
+    1| 2
+    2| 3
+
+    If the index is another vector it is used as an assignment
+    mask:
+
+    &gt;&gt;&gt; v.clear()
+    &gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+    &gt;&gt;&gt; m[1] = True
+    &gt;&gt;&gt; v[m] = w
+    &gt;&gt;&gt; print(v)
+    0|
+    1| 2
+    2|
+
+    &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     I, ni, size = _build_range(index, self.size - 1)
     self._check(
         lib.GrB_Vector_assign(
-            self._vector[0], mask, accum, value._vector[0], I, ni, desc.desc[0]
+            self._vector[0], mask, accum, value._vector[0], I, ni, desc
         )
     )</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.assign_scalar"><code class="name flex">
-<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, index=None, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">assign_scalar</span></span>(<span>self, value, index=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Assign scalar to vector.</p></div>
+<div class="desc"><p>Assign scalar to vector.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+&gt;&gt;&gt; v[:] = 2
+&gt;&gt;&gt; print(v)
+0| 2
+1| 2
+2| 2
+</code></pre>
+<p>If the index is another vector it is used as an assignment
+mask:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v.clear()
+&gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+&gt;&gt;&gt; m[1] = True
+&gt;&gt;&gt; v[m] = 3
+&gt;&gt;&gt; print(v)
+0|
+1| 3
+2|
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assign_scalar(self, value, index=None, mask=None, accum=None, desc=Default):
-    &#34;&#34;&#34;Assign scalar to vector.&#34;&#34;&#34;
+<pre><code class="python">def assign_scalar(self, value, index=None, mask=None, accum=None, desc=None):
+    &#34;&#34;&#34;Assign scalar to vector.
+
+    &gt;&gt;&gt; v = Vector.sparse(types.INT8, 3)
+    &gt;&gt;&gt; v[:] = 2
+    &gt;&gt;&gt; print(v)
+    0| 2
+    1| 2
+    2| 2
+
+    If the index is another vector it is used as an assignment
+    mask:
+
+    &gt;&gt;&gt; v.clear()
+    &gt;&gt;&gt; m = Vector.sparse(types.BOOL, 3)
+    &gt;&gt;&gt; m[1] = True
+    &gt;&gt;&gt; v[m] = 3
+    &gt;&gt;&gt; print(v)
+    0|
+    1| 3
+    2|
+
+    &#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     scalar_type = types._gb_from_type(type(value))
     I, ni, size = _build_range(index, self.size - 1)
     self._check(
         scalar_type._Vector_assignScalar(
-            self._vector[0], mask, accum, value, I, ni, desc.desc[0]
+            self._vector[0], mask, accum, value, I, ni, desc
         )
     )</code></pre>
 </details>
@@ -10947,7 +11664,7 @@ every present value in this vector is set to True.</p></div>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.extract"><code class="name flex">
-<span>def <span class="ident">extract</span></span>(<span>self, index, mask=None, accum=None, desc=&lt;Descriptor Default&gt;)</span>
+<span>def <span class="ident">extract</span></span>(<span>self, index, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract subvector from vector.</p></div>
@@ -10955,7 +11672,7 @@ every present value in this vector is set to True.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract(self, index, mask=None, accum=None, desc=Default):
+<pre><code class="python">def extract(self, index, mask=None, accum=None, desc=None):
     &#34;&#34;&#34;Extract subvector from vector.&#34;&#34;&#34;
     mask, accum, desc = self._get_args(mask, accum, desc)
     if isinstance(index, Vector):
@@ -10967,7 +11684,7 @@ every present value in this vector is set to True.</p></div>
     result = Vector.sparse(self.type, size)
     self._check(
         lib.GrB_Vector_extract(
-            result._vector[0], mask, accum, self._vector[0], I, ni, desc.desc[0]
+            result._vector[0], mask, accum, self._vector[0], I, ni, desc
         )
     )
     return result</code></pre>
@@ -41552,6 +42269,8 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Matrix.isne" href="#pygraphblas.Matrix.isne">isne</a></code></li>
 <li><code><a title="pygraphblas.Matrix.kronecker" href="#pygraphblas.Matrix.kronecker">kronecker</a></code></li>
 <li><code><a title="pygraphblas.Matrix.kronpow" href="#pygraphblas.Matrix.kronpow">kronpow</a></code></li>
+<li><code><a title="pygraphblas.Matrix.max" href="#pygraphblas.Matrix.max">max</a></code></li>
+<li><code><a title="pygraphblas.Matrix.min" href="#pygraphblas.Matrix.min">min</a></code></li>
 <li><code><a title="pygraphblas.Matrix.mxm" href="#pygraphblas.Matrix.mxm">mxm</a></code></li>
 <li><code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">mxv</a></code></li>
 <li><code><a title="pygraphblas.Matrix.ncols" href="#pygraphblas.Matrix.ncols">ncols</a></code></li>
@@ -41612,8 +42331,12 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Vector.from_lists" href="#pygraphblas.Vector.from_lists">from_lists</a></code></li>
 <li><code><a title="pygraphblas.Vector.gb_type" href="#pygraphblas.Vector.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.Vector.get" href="#pygraphblas.Vector.get">get</a></code></li>
+<li><code><a title="pygraphblas.Vector.hyper_switch" href="#pygraphblas.Vector.hyper_switch">hyper_switch</a></code></li>
+<li><code><a title="pygraphblas.Vector.indexes" href="#pygraphblas.Vector.indexes">indexes</a></code></li>
 <li><code><a title="pygraphblas.Vector.iseq" href="#pygraphblas.Vector.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.Vector.isne" href="#pygraphblas.Vector.isne">isne</a></code></li>
+<li><code><a title="pygraphblas.Vector.max" href="#pygraphblas.Vector.max">max</a></code></li>
+<li><code><a title="pygraphblas.Vector.min" href="#pygraphblas.Vector.min">min</a></code></li>
 <li><code><a title="pygraphblas.Vector.nonzero" href="#pygraphblas.Vector.nonzero">nonzero</a></code></li>
 <li><code><a title="pygraphblas.Vector.nvals" href="#pygraphblas.Vector.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.Vector.pattern" href="#pygraphblas.Vector.pattern">pattern</a></code></li>
@@ -41625,11 +42348,14 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Vector.select" href="#pygraphblas.Vector.select">select</a></code></li>
 <li><code><a title="pygraphblas.Vector.size" href="#pygraphblas.Vector.size">size</a></code></li>
 <li><code><a title="pygraphblas.Vector.sparse" href="#pygraphblas.Vector.sparse">sparse</a></code></li>
+<li><code><a title="pygraphblas.Vector.sparsity" href="#pygraphblas.Vector.sparsity">sparsity</a></code></li>
+<li><code><a title="pygraphblas.Vector.sparsity_status" href="#pygraphblas.Vector.sparsity_status">sparsity_status</a></code></li>
 <li><code><a title="pygraphblas.Vector.to_arrays" href="#pygraphblas.Vector.to_arrays">to_arrays</a></code></li>
 <li><code><a title="pygraphblas.Vector.to_dense" href="#pygraphblas.Vector.to_dense">to_dense</a></code></li>
 <li><code><a title="pygraphblas.Vector.to_lists" href="#pygraphblas.Vector.to_lists">to_lists</a></code></li>
 <li><code><a title="pygraphblas.Vector.to_string" href="#pygraphblas.Vector.to_string">to_string</a></code></li>
 <li><code><a title="pygraphblas.Vector.type" href="#pygraphblas.Vector.type">type</a></code></li>
+<li><code><a title="pygraphblas.Vector.values" href="#pygraphblas.Vector.values">values</a></code></li>
 <li><code><a title="pygraphblas.Vector.vxm" href="#pygraphblas.Vector.vxm">vxm</a></code></li>
 <li><code><a title="pygraphblas.Vector.wait" href="#pygraphblas.Vector.wait">wait</a></code></li>
 </ul>
