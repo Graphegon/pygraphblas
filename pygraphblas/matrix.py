@@ -783,7 +783,9 @@ class Matrix:
         """
         if out is None:
             new_dimensions = (
-                (self.nrows, self.ncols) if T0 in (desc or ()) else (self.ncols, self.nrows)
+                (self.nrows, self.ncols)
+                if T0 in (desc or ())
+                else (self.ncols, self.nrows)
             )
             _out = ffi.new("GrB_Matrix*")
             if cast is not None:
@@ -1456,7 +1458,7 @@ class Matrix:
         return out
 
     def max(self):
-        """ Return the max of the matrix. 
+        """Return the max of the matrix.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, False])
         >>> M.max()
@@ -1482,10 +1484,10 @@ class Matrix:
             return self.reduce_int(self.type.MAX_MONOID)
         if self.type in types._float_types:
             return self.reduce_float(self.type.MAX_MONOID)
-        raise TypeError('Un-maxable type')
+        raise TypeError("Un-maxable type")
 
     def min(self):
-        """ Return the min of the matrix. 
+        """Return the min of the matrix.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [True, True, True])
         >>> M.min()
@@ -1511,8 +1513,7 @@ class Matrix:
             return self.reduce_int(self.type.MIN_MONOID)
         if self.type in types._float_types:
             return self.reduce_float(self.type.MIN_MONOID)
-        raise TypeError('Un-minable type')
-
+        raise TypeError("Un-minable type")
 
     def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to matrix elements.

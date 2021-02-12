@@ -103,7 +103,7 @@ class Vector:
 
     @property
     def indexes(self):
-        """ Iterator of vector indexes.
+        """Iterator of vector indexes.
 
         >>> v = Vector.from_1_to_n(3)
         >>> list(v.indexes)
@@ -119,7 +119,7 @@ class Vector:
 
     @property
     def values(self):
-        """ Iterator of vector values.
+        """Iterator of vector values.
 
         >>> v = Vector.from_1_to_n(3)
         >>> list(v.values)
@@ -247,10 +247,8 @@ class Vector:
         return self.__class__(new_vec, self.type)
 
     @property
-    def hyper_switch(self): #pragma: nocover
-        """Get the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        """
+    def hyper_switch(self):  # pragma: nocover
+        """Get the hyper_switch threshold. (See SuiteSparse User Guide)"""
         switch = ffi.new("double*")
         self._check(
             lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
@@ -258,20 +256,16 @@ class Vector:
         return switch[0]
 
     @hyper_switch.setter
-    def hyper_switch(self, switch):  #pragma: nocover
-        """Set the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        """
+    def hyper_switch(self, switch):  # pragma: nocover
+        """Set the hyper_switch threshold. (See SuiteSparse User Guide)"""
         switch = ffi.cast("double", switch)
         self._check(
             lib.GxB_Vector_Option_set(self._vector[0], lib.GxB_HYPER_SWITCH, switch)
         )
 
     @property
-    def sparsity(self): #pragma: nocover
-        """Get Vector sparsity control. (See SuiteSparse User Guide)
-
-        """
+    def sparsity(self):  # pragma: nocover
+        """Get Vector sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.new("int*")
         self._check(
             lib.GxB_Vector_Option_get(
@@ -281,10 +275,8 @@ class Vector:
         return sparsity[0]
 
     @sparsity.setter
-    def sparsity(self, sparsity): #pragma: nocover
-        """Set Vector sparsity control. (See SuiteSparse User Guide)
-
-        """
+    def sparsity(self, sparsity):  # pragma: nocover
+        """Set Vector sparsity control. (See SuiteSparse User Guide)"""
         sparsity = ffi.cast("int", sparsity)
         self._check(
             lib.GxB_Vector_Option_set(
@@ -293,10 +285,8 @@ class Vector:
         )
 
     @property
-    def sparsity_status(self): #pragma: nocover
-        """Get Vector sparsity status. (See SuiteSparse User Guide)
-
-        """
+    def sparsity_status(self):  # pragma: nocover
+        """Get Vector sparsity status. (See SuiteSparse User Guide)"""
         status = ffi.new("int*")
         self._check(
             lib.GxB_Vector_Option_get(self._vector[0], lib.GxB_SPARSITY_STATUS, status)
@@ -884,10 +874,10 @@ class Vector:
 
         if desc is not NULL:
             desc = desc.get_desc()
-            
+
         if mask is None:
             mask = NULL
-            
+
         if isinstance(mask, Vector):
             mask = mask._vector[0]
         return mask, accum, desc
@@ -912,9 +902,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("_Bool*")
         self._check(
-            lib.GrB_Vector_reduce_BOOL(
-                result, accum, mon, self._vector[0], desc
-            )
+            lib.GrB_Vector_reduce_BOOL(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
@@ -938,9 +926,7 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("int64_t*")
         self._check(
-            lib.GrB_Vector_reduce_INT64(
-                result, accum, mon, self._vector[0], desc
-            )
+            lib.GrB_Vector_reduce_INT64(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
@@ -964,14 +950,12 @@ class Vector:
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("double*")
         self._check(
-            lib.GrB_Vector_reduce_FP64(
-                result, accum, mon, self._vector[0], desc
-            )
+            lib.GrB_Vector_reduce_FP64(result, accum, mon, self._vector[0], desc)
         )
         return result[0]
 
     def max(self):
-        """ Return the max of the vector. 
+        """Return the max of the vector.
 
         >>> M = Vector.from_lists([0, 1, 2], [False, False, False])
         >>> M.max()
@@ -997,10 +981,10 @@ class Vector:
             return self.reduce_int(self.type.MAX_MONOID)
         if self.type in types._float_types:
             return self.reduce_float(self.type.MAX_MONOID)
-        raise TypeError('Un-maxable type')
+        raise TypeError("Un-maxable type")
 
     def min(self):
-        """ Return the min of the vector. 
+        """Return the min of the vector.
 
         >>> M = Vector.from_lists([0, 1, 2], [True, True, True])
         >>> M.min()
@@ -1026,9 +1010,7 @@ class Vector:
             return self.reduce_int(self.type.MIN_MONOID)
         if self.type in types._float_types:
             return self.reduce_float(self.type.MIN_MONOID)
-        raise TypeError('Un-minable type')
-
-
+        raise TypeError("Un-minable type")
 
     def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to vector elements.
@@ -1044,9 +1026,7 @@ class Vector:
         op = op.get_unaryop(self)
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
-            lib.GrB_Vector_apply(
-                out._vector[0], mask, accum, op, self._vector[0], desc
-            )
+            lib.GrB_Vector_apply(out._vector[0], mask, accum, op, self._vector[0], desc)
         )
         return out
 
@@ -1074,9 +1054,7 @@ class Vector:
             first = first._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp1st
-        self._check(
-            f(out._vector[0], mask, accum, op, first, self._vector[0], desc)
-        )
+        self._check(f(out._vector[0], mask, accum, op, first, self._vector[0], desc))
         return out
 
     def apply_second(self, op, second, out=None, mask=None, accum=None, desc=None):
@@ -1101,9 +1079,7 @@ class Vector:
             second = second._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp2nd
-        self._check(
-            f(out._vector[0], mask, accum, op, self._vector[0], second, desc)
-        )
+        self._check(f(out._vector[0], mask, accum, op, self._vector[0], second, desc))
         return out
 
     def select(self, op, thunk=None, out=None, mask=None, accum=None, desc=None):
@@ -1133,10 +1109,10 @@ class Vector:
         if out is None:
             out = Vector.sparse(self.type, self.size)
         if isinstance(op, str):
-            if op == 'min':
+            if op == "min":
                 op = lib.GxB_EQ_THUNK
                 thunk = self.min()
-            elif op == 'max':
+            elif op == "max":
                 op = lib.GxB_EQ_THUNK
                 thunk = self.max()
             else:
@@ -1191,7 +1167,7 @@ class Vector:
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index)
                 return
-    
+
         if isinstance(index, Vector):
             mask = index._vector[0]
             index = slice(None, None, None)
@@ -1200,7 +1176,7 @@ class Vector:
                 return
             self.assign_scalar(value, index, mask=mask)
             return
-        raise TypeError('Unknown index')
+        raise TypeError("Unknown index")
 
     def assign(self, value, index=None, mask=None, accum=None, desc=None):
         """Assign vector to vector.

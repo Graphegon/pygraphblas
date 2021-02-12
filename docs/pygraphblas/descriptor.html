@@ -80,16 +80,19 @@ class Descriptor:
 
     &#34;&#34;&#34;
 
-    __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;desc&#34;, &#34;token&#34;, &#34;name&#34;)
+    __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;_desc&#34;, &#34;token&#34;, &#34;name&#34;)
 
     def __init__(self, field, value, name=None):
         self.field = field
         self.value = value
-        self.desc = ffi.new(&#34;GrB_Descriptor*&#34;)
-        _check(lib.GrB_Descriptor_new(self.desc))
+        self._desc = ffi.new(&#34;GrB_Descriptor*&#34;)
+        _check(lib.GrB_Descriptor_new(self._desc))
         self[field] = value
         self.token = None
         self.name = name
+
+    def get_desc(self):
+        return self._desc[0]
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -100,7 +103,7 @@ class Descriptor:
 
     def __del__(self):
         if lib is not None:  # pragma: no cover
-            _check(lib.GrB_Descriptor_free(self.desc))
+            _check(lib.GrB_Descriptor_free(self._desc))
 
     def __and__(self, other):
         d = Descriptor(self.field, self.value, self.name + other.name)
@@ -111,11 +114,11 @@ class Descriptor:
         return self[other.field] != lib.GxB_DEFAULT
 
     def __setitem__(self, field, value):
-        _check(lib.GrB_Descriptor_set(self.desc[0], field, value))
+        _check(lib.GrB_Descriptor_set(self._desc[0], field, value))
 
     def __getitem__(self, field):
         val = ffi.new(&#34;GrB_Desc_Value*&#34;)
-        _check(lib.GxB_Desc_get(self.desc[0], field, val))
+        _check(lib.GxB_Desc_get(self._desc[0], field, val))
         return val[0]
 
     def __eq__(self, other):
@@ -386,16 +389,19 @@ Descriptors necessary to use the GraphBLAS are available from the
 
     &#34;&#34;&#34;
 
-    __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;desc&#34;, &#34;token&#34;, &#34;name&#34;)
+    __slots__ = (&#34;field&#34;, &#34;value&#34;, &#34;_desc&#34;, &#34;token&#34;, &#34;name&#34;)
 
     def __init__(self, field, value, name=None):
         self.field = field
         self.value = value
-        self.desc = ffi.new(&#34;GrB_Descriptor*&#34;)
-        _check(lib.GrB_Descriptor_new(self.desc))
+        self._desc = ffi.new(&#34;GrB_Descriptor*&#34;)
+        _check(lib.GrB_Descriptor_new(self._desc))
         self[field] = value
         self.token = None
         self.name = name
+
+    def get_desc(self):
+        return self._desc[0]
 
     def __enter__(self):
         self.token = current_desc.set(self)
@@ -406,7 +412,7 @@ Descriptors necessary to use the GraphBLAS are available from the
 
     def __del__(self):
         if lib is not None:  # pragma: no cover
-            _check(lib.GrB_Descriptor_free(self.desc))
+            _check(lib.GrB_Descriptor_free(self._desc))
 
     def __and__(self, other):
         d = Descriptor(self.field, self.value, self.name + other.name)
@@ -417,11 +423,11 @@ Descriptors necessary to use the GraphBLAS are available from the
         return self[other.field] != lib.GxB_DEFAULT
 
     def __setitem__(self, field, value):
-        _check(lib.GrB_Descriptor_set(self.desc[0], field, value))
+        _check(lib.GrB_Descriptor_set(self._desc[0], field, value))
 
     def __getitem__(self, field):
         val = ffi.new(&#34;GrB_Desc_Value*&#34;)
-        _check(lib.GxB_Desc_get(self.desc[0], field, val))
+        _check(lib.GxB_Desc_get(self._desc[0], field, val))
         return val[0]
 
     def __eq__(self, other):
@@ -444,10 +450,6 @@ Descriptors necessary to use the GraphBLAS are available from the
 </details>
 <h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
-<dt id="pygraphblas.descriptor.Descriptor.desc"><code class="name">var <span class="ident">desc</span></code></dt>
-<dd>
-<div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
-</dd>
 <dt id="pygraphblas.descriptor.Descriptor.field"><code class="name">var <span class="ident">field</span></code></dt>
 <dd>
 <div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
@@ -463,6 +465,22 @@ Descriptors necessary to use the GraphBLAS are available from the
 <dt id="pygraphblas.descriptor.Descriptor.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
 <div class="desc"><p>Return an attribute of instance, which is of type owner.</p></div>
+</dd>
+</dl>
+<h3 class="caret">Methods</h3>
+<dl class="nested active">
+<dt id="pygraphblas.descriptor.Descriptor.get_desc"><code class="name flex">
+<span>def <span class="ident">get_desc</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_desc(self):
+    return self._desc[0]</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -492,8 +510,8 @@ Descriptors necessary to use the GraphBLAS are available from the
 <li>
 <code class="caret"><a title="pygraphblas.descriptor.Descriptor" href="#pygraphblas.descriptor.Descriptor">Descriptor</a></code>
 <ul class=" nested ">
-<li><code><a title="pygraphblas.descriptor.Descriptor.desc" href="#pygraphblas.descriptor.Descriptor.desc">desc</a></code></li>
 <li><code><a title="pygraphblas.descriptor.Descriptor.field" href="#pygraphblas.descriptor.Descriptor.field">field</a></code></li>
+<li><code><a title="pygraphblas.descriptor.Descriptor.get_desc" href="#pygraphblas.descriptor.Descriptor.get_desc">get_desc</a></code></li>
 <li><code><a title="pygraphblas.descriptor.Descriptor.name" href="#pygraphblas.descriptor.Descriptor.name">name</a></code></li>
 <li><code><a title="pygraphblas.descriptor.Descriptor.token" href="#pygraphblas.descriptor.Descriptor.token">token</a></code></li>
 <li><code><a title="pygraphblas.descriptor.Descriptor.value" href="#pygraphblas.descriptor.Descriptor.value">value</a></code></li>
