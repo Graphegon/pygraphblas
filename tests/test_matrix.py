@@ -1059,3 +1059,4 @@ def test_to_scipy_sparse():
     assert m.shape == (10, 10)
     with pytest.raises(TypeError):
         s = v.to_scipy_sparse("boef")
+

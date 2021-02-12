@@ -9,3 +9,5 @@ def test_type_lookup_name():
 def test_gb_from_type():
     with pytest.raises(TypeError):
         types._gb_from_type("")
+
+    

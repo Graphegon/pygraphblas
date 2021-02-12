@@ -1173,12 +1173,14 @@ class Vector:
             if isinstance(value, (bool, int, float, complex)):
                 self.assign_scalar(value, index)
                 return
+    
         if isinstance(index, Vector):
             mask = index._vector[0]
             index = slice(None, None, None)
             I, ni, size = _build_range(index, self.size - 1)
             self.assign_scalar(value, index, mask=mask)
             return
+        raise TypeError('Unknown index')
 
     def assign(self, value, index=None, mask=None, accum=None, desc=None):
         """Assign vector to vector."""

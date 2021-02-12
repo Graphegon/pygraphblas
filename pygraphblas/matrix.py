@@ -1458,9 +1458,23 @@ class Matrix:
     def max(self):
         """ Return the max of the matrix. 
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, False])
+        >>> M.max()
+        False
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, False, True])
+        >>> M.max()
+        True
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         >>> M.max()
         149
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+        >>> M.max()
+        149.0
+        >>> M = Matrix.from_lists([0], [1], [1j])
+        >>> M.max()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-maxable type
         """
         if self.type == types.BOOL:
             return self.reduce_bool(self.type.LOR_MONOID)
@@ -1473,12 +1487,26 @@ class Matrix:
     def min(self):
         """ Return the min of the matrix. 
 
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [True, True, True])
+        >>> M.min()
+        True
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [False, True, True])
+        >>> M.min()
+        False
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42, 0, 149])
         >>> M.min()
         -42
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [-42.0, 0.0, 149.0])
+        >>> M.min()
+        -42.0
+        >>> M = Matrix.from_lists([0], [1], [1j])
+        >>> M.min()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-minable type
         """
         if self.type == types.BOOL:
-            return self.reduce_bool(BOOL.LAND_MONOID)
+            return self.reduce_bool(self.type.LAND_MONOID)
         if self.type in types._int_types:
             return self.reduce_int(self.type.MIN_MONOID)
         if self.type in types._float_types:
