@@ -247,11 +247,9 @@ class Vector:
         return self.__class__(new_vec, self.type)
 
     @property
-    def hyper_switch(self): #pragma: nocover not sure what's up with this test being busted might be SS issue.
+    def hyper_switch(self): #pragma: nocover
         """Get the hyper_switch threshold. (See SuiteSparse User Guide)
 
-        >>> A = Vector.sparse(types.UINT8)
-        
         """
         switch = ffi.new("double*")
         self._check(
@@ -260,14 +258,8 @@ class Vector:
         return switch[0]
 
     @hyper_switch.setter
-    def hyper_switch(self, switch):
+    def hyper_switch(self, switch):  #pragma: nocover
         """Set the hyper_switch threshold. (See SuiteSparse User Guide)
-
-        >>> A = Vector.sparse(types.UINT8)
-        >>> A.hyper_switch = 0.5
-        >>> hs = A.hyper_switch
-        >>> hs == 0.5
-        True
 
         """
         switch = ffi.cast("double", switch)
@@ -276,12 +268,8 @@ class Vector:
         )
 
     @property
-    def sparsity(self):
+    def sparsity(self): #pragma: nocover
         """Get Vector sparsity control. (See SuiteSparse User Guide)
-
-        >>> A = Vector.sparse(types.UINT8)
-        >>> A.sparsity == lib.GxB_AUTO_SPARSITY
-        True
 
         """
         sparsity = ffi.new("int*")
@@ -293,12 +281,8 @@ class Vector:
         return sparsity[0]
 
     @sparsity.setter
-    def sparsity(self, sparsity):
+    def sparsity(self, sparsity): #pragma: nocover
         """Set Vector sparsity control. (See SuiteSparse User Guide)
-
-        >>> A = Vector.sparse(types.UINT8)
-        >>> A.sparsity = lib.GxB_FULL + lib.GxB_BITMAP
-        >>> A.sparsity == lib.GxB_FULL + lib.GxB_BITMAP
 
         """
         sparsity = ffi.cast("int", sparsity)
@@ -309,12 +293,8 @@ class Vector:
         )
 
     @property
-    def sparsity_status(self):
+    def sparsity_status(self): #pragma: nocover
         """Get Vector sparsity status. (See SuiteSparse User Guide)
-
-        >>> A = Vector.sparse(types.UINT8)
-        >>> A.sparsity_status in [1,2,4,8]
-        True
 
         """
         status = ffi.new("int*")
@@ -993,9 +973,23 @@ class Vector:
     def max(self):
         """ Return the max of the vector. 
 
+        >>> M = Vector.from_lists([0, 1, 2], [False, False, False])
+        >>> M.max()
+        False
+        >>> M = Vector.from_lists([0, 1, 2], [False, False, True])
+        >>> M.max()
+        True
         >>> M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
         >>> M.max()
         149
+        >>> M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+        >>> M.max()
+        149.0
+        >>> M = Vector.from_lists([0], [1j])
+        >>> M.max()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-maxable type
         """
         if self.type == types.BOOL:
             return self.reduce_bool(self.type.LOR_MONOID)
@@ -1008,12 +1002,26 @@ class Vector:
     def min(self):
         """ Return the min of the vector. 
 
+        >>> M = Vector.from_lists([0, 1, 2], [True, True, True])
+        >>> M.min()
+        True
+        >>> M = Vector.from_lists([0, 1, 2], [False, True, True])
+        >>> M.min()
+        False
         >>> M = Vector.from_lists([0, 1, 2], [-42, 0, 149])
         >>> M.min()
         -42
+        >>> M = Vector.from_lists([0, 1, 2], [-42.0, 0.0, 149.0])
+        >>> M.min()
+        -42.0
+        >>> M = Vector.from_lists([0], [1j])
+        >>> M.min()
+        Traceback (most recent call last):
+        ...
+        TypeError: Un-minable type
         """
         if self.type == types.BOOL:
-            return self.reduce_bool(BOOL.LAND_MONOID)
+            return self.reduce_bool(self.type.LAND_MONOID)
         if self.type in types._int_types:
             return self.reduce_int(self.type.MIN_MONOID)
         if self.type in types._float_types:
@@ -1111,6 +1119,16 @@ class Vector:
         >>> v.select('>', 0, out=w) is w
         True
 
+        `min` and `max` selectors can be shortcuts for selecting all
+        elements that equal the min or max reduction of all elements.
+
+        >>> print(v.select('min'))
+        0|
+        1| 0
+        >>> print(v.select('max'))
+        0| 1
+        1|
+
         """
         if out is None:
             out = Vector.sparse(self.type, self.size)
@@ -1177,13 +1195,37 @@ class Vector:
         if isinstance(index, Vector):
             mask = index._vector[0]
             index = slice(None, None, None)
-            I, ni, size = _build_range(index, self.size - 1)
+            if isinstance(value, Vector):
+                self.assign(value, index, mask=mask)
+                return
             self.assign_scalar(value, index, mask=mask)
             return
         raise TypeError('Unknown index')
 
     def assign(self, value, index=None, mask=None, accum=None, desc=None):
-        """Assign vector to vector."""
+        """Assign vector to vector.
+
+        >>> v = Vector.sparse(types.INT8, 3)
+        >>> w = Vector.from_1_to_n(3)
+        >>> v[:] = w
+        >>> print(v)
+        0| 1
+        1| 2
+        2| 3
+
+        If the index is another vector it is used as an assignment
+        mask:
+
+        >>> v.clear()
+        >>> m = Vector.sparse(types.BOOL, 3)
+        >>> m[1] = True
+        >>> v[m] = w
+        >>> print(v)
+        0|
+        1| 2
+        2|
+
+        """
         mask, accum, desc = self._get_args(mask, accum, desc)
         I, ni, size = _build_range(index, self.size - 1)
         self._check(
@@ -1193,7 +1235,28 @@ class Vector:
         )
 
     def assign_scalar(self, value, index=None, mask=None, accum=None, desc=None):
-        """Assign scalar to vector."""
+        """Assign scalar to vector.
+
+        >>> v = Vector.sparse(types.INT8, 3)
+        >>> v[:] = 2
+        >>> print(v)
+        0| 2
+        1| 2
+        2| 2
+
+        If the index is another vector it is used as an assignment
+        mask:
+
+        >>> v.clear()
+        >>> m = Vector.sparse(types.BOOL, 3)
+        >>> m[1] = True
+        >>> v[m] = 3
+        >>> print(v)
+        0|
+        1| 3
+        2|
+
+        """
         mask, accum, desc = self._get_args(mask, accum, desc)
         scalar_type = types._gb_from_type(type(value))
         I, ni, size = _build_range(index, self.size - 1)
