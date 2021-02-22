@@ -1171,8 +1171,14 @@ class Matrix:
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(I)
 
+    I = rows
+    """Alias for `Matrix.rows`.  Useful conciseness and consistency with
+    `Vector.indexes`.
+    """
+
     @property
     def cols(self):
+
         """An iterator of column indexes present in the matrix.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
@@ -1187,6 +1193,10 @@ class Matrix:
         X = NULL
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(J)
+
+    J = rows
+    """Alias for `Matrix.cols`.
+    """
 
     @property
     def vals(self):
@@ -2955,7 +2965,9 @@ class Matrix:
         from scipy import sparse
 
         rows, cols, vals = self.to_arrays()
-        s = sparse.coo_matrix((vals, (rows, cols)), shape=self.shape)
+        s = sparse.coo_matrix(
+            (vals, (rows, cols)), shape=self.shape, dtype=self.type._numpy_t
+        )
         if format == "coo":
             return s
         if format not in {"bsr", "csr", "csc", "coo", "lil", "dia", "dok"}:

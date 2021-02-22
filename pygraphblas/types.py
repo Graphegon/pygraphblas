@@ -14,6 +14,7 @@ from textwrap import dedent
 from operator import methodcaller, itemgetter
 from functools import partial
 import numba
+import numpy
 from numba import cfunc, jit, carray
 from numba.core.typing import cffi_utils as cffi_support
 
@@ -201,6 +202,7 @@ class BOOL(Type):
     zero = False
     _typecode = "B"
     _numba_t = numba.boolean
+    _numpy_t = numpy.bool_
 
     @classmethod
     def _default_addop(self):  # pragma: nocover
@@ -233,6 +235,7 @@ class INT8(Type):
     _c_type = "int8_t"
     _typecode = "b"
     _numba_t = numba.int8
+    _numpy_t = numpy.int8
 
 
 class UINT8(Type):
@@ -242,6 +245,7 @@ class UINT8(Type):
     _c_type = "uint8_t"
     _typecode = "B"
     _numba_t = numba.uint8
+    _numpy_t = numpy.uint8
 
 
 class INT16(Type):
@@ -251,6 +255,7 @@ class INT16(Type):
     _c_type = "int16_t"
     _typecode = "i"
     _numba_t = numba.int16
+    _numpy_t = numpy.int16
 
 
 class UINT16(Type):
@@ -260,6 +265,7 @@ class UINT16(Type):
     _c_type = "uint16_t"
     _typecode = "I"
     _numba_t = numba.uint16
+    _numpy_t = numpy.uint16
 
 
 class INT32(Type):
@@ -269,6 +275,7 @@ class INT32(Type):
     _c_type = "int32_t"
     _typecode = "l"
     _numba_t = numba.int32
+    _numpy_t = numpy.int32
 
 
 class UINT32(Type):
@@ -278,6 +285,7 @@ class UINT32(Type):
     _c_type = "uint32_t"
     _typecode = "L"
     _numba_t = numba.uint32
+    _numpy_t = numpy.uint32
 
 
 class INT64(Type):
@@ -287,6 +295,7 @@ class INT64(Type):
     _c_type = "int64_t"
     _typecode = "q"
     _numba_t = numba.int64
+    _numpy_t = numpy.int64
 
 
 class UINT64(Type):
@@ -296,6 +305,7 @@ class UINT64(Type):
     _c_type = "uint64_t"
     _typecode = "Q"
     _numba_t = numba.uint64
+    _numpy_t = numpy.uint64
 
 
 class FP32(Type):
@@ -307,6 +317,7 @@ class FP32(Type):
     _c_type = "float"
     _typecode = "f"
     _numba_t = numba.float32
+    _numpy_t = numpy.float32
 
     @classmethod
     def format_value(cls, val, width=2, prec=2):
@@ -322,6 +333,7 @@ class FP64(Type):
     _c_type = "double"
     _typecode = "d"
     _numba_t = numba.float64
+    _numpy_t = numpy.float64
 
     @classmethod
     def format_value(cls, val, width=2, prec=2):
@@ -337,6 +349,7 @@ class FC32(Type):
     _gb_type = lib.GxB_FC32
     _c_type = "float _Complex"
     _numba_t = numba.complex64
+    _numpy_t = numpy.complex64
 
 
 class FC64(Type):
@@ -348,26 +361,7 @@ class FC64(Type):
     _gb_type = lib.GxB_FC64
     _c_type = "double _Complex"
     _numba_t = numba.complex128
-
-
-# class Complex(Type):
-#     _gb_type = lib.LAGraph_Complex
-#     C = 'double _Complex'
-#     _typecode = None
-#     udt = True
-#     add_op = lib.Complex_plus
-#     mult_op = lib.Complex_times
-#     eq_op = lib.Complex_eq
-#     monoid = lib.Complex_plus_monoid
-#     semiring = lib.Complex_plus_times
-
-#     @classmethod
-#     def _from_value(cls, value):
-#         return ffi.new(cls._ptr, value)
-
-#     @classmethod
-#     def _to_value(cls, data):
-#         return data
+    _numpy_t = numpy.complex128
 
 
 def _gb_from_type(typ):  # pragma: nocover

@@ -117,6 +117,10 @@ class Vector:
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return iter(I)
 
+    I = indexes
+    """Alias for `Vector.indexes`.
+    """
+
     @property
     def values(self):
         """Iterator of vector values.
@@ -1068,6 +1072,19 @@ class Vector:
         >>> w = Vector.sparse(v.type, v.size)
         >>> v.apply_second(types.UINT64.PLUS, 3, out=w) is w
         True
+        >>> u = Vector.from_lists([0,1], [1.1, 2.2])
+        >>> u.apply_second(u.type.TIMES, 3.3, out=u) is u
+        True
+        >>> u = Vector.from_lists([0,1], [1.1, 2.2])
+        >>> print(u * 3)
+        0|3.3
+        1|6.6
+        >>> x = Vector.from_lists([0,1], [1.1, 2.2])
+        >>> x *= 3.0
+        >>> print(x)
+        0|3.3
+        1|6.6
+
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
@@ -1079,6 +1096,7 @@ class Vector:
             second = second._scalar[0]
         else:
             f = self.type._Vector_apply_BinaryOp2nd
+
         self._check(f(out._vector[0], mask, accum, op, self._vector[0], second, desc))
         return out
 
