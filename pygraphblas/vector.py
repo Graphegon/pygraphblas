@@ -24,7 +24,7 @@ from .semiring import current_semiring
 from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
 from . import descriptor
-from .descriptor import Descriptor, Default, T1, current_desc
+from .descriptor import Descriptor, T1, current_desc
 
 __all__ = ["Vector"]
 __pdoc__ = {"Vector.__init__": False}
@@ -1217,6 +1217,14 @@ class Vector:
         >>> print(v)
         0|
         1| 2
+        2|
+        >>> v.clear()
+        >>> m = Vector.sparse(types.BOOL, 3)
+        >>> m[1] = True
+        >>> v[m] = 3
+        >>> print(v)
+        0|
+        1| 3
         2|
 
         """

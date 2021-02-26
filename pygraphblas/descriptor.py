@@ -53,12 +53,13 @@ class Descriptor:
 
     __slots__ = ("field", "value", "_desc", "token", "name")
 
-    def __init__(self, field, value, name=None):
-        self.field = field
-        self.value = value
+    def __init__(self, desc=None, name=None):
         self._desc = ffi.new("GrB_Descriptor*")
-        _check(lib.GrB_Descriptor_new(self._desc))
-        self[field] = value
+        if desc is None:
+            _check(lib.GrB_Descriptor_new(self._desc))
+        else:
+            self._desc[0] = desc
+
         self.token = None
         self.name = name
 
@@ -77,12 +78,27 @@ class Descriptor:
             _check(lib.GrB_Descriptor_free(self._desc))
 
     def __and__(self, other):
-        d = Descriptor(self.field, self.value, self.name + other.name)
-        d[other.field] = other.value
-        return d
+        default = lib.GxB_DEFAULT
+        d = Descriptor(name=self.name + other.name)
+        _check(lib.GrB_Descriptor_new(d._desc))
+        for f in (
+            lib.GrB_INP0,
+            lib.GrB_INP1,
+            lib.GrB_MASK,
+            lib.GrB_OUTP,
+            lib.GxB_DESCRIPTOR_NTHREADS,
+            lib.GxB_DESCRIPTOR_CHUNK,
+            lib.GxB_AxB_METHOD,
+            lib.GxB_SORT,
+        ):
+            s = self[f]
+            if s != default:
+                d[f] = s
 
-    def __contains__(self, other):
-        return self[other.field] != lib.GxB_DEFAULT
+            o = other[f]
+            if o != default:
+                d[f] = o
+        return d
 
     def __setitem__(self, field, value):
         _check(lib.GrB_Descriptor_set(self._desc[0], field, value))
@@ -107,44 +123,63 @@ class Descriptor:
                 return False
         return True
 
+    def __contains__(self, other):
+        default = lib.GxB_DEFAULT
+        for f in (
+            lib.GrB_INP0,
+            lib.GrB_INP1,
+            lib.GrB_MASK,
+            lib.GrB_OUTP,
+            lib.GxB_DESCRIPTOR_NTHREADS,
+            lib.GxB_DESCRIPTOR_CHUNK,
+            lib.GxB_AxB_METHOD,
+            lib.GxB_SORT,
+        ):
+            s = self[f]
+            o = other[f]
+            if (s != default and o != default) and (s == o):
+                return True
+        return True
+
     def __repr__(self):
         return f"<Descriptor {self.name}>"
 
 
-Default = Descriptor(lib.GrB_INP0, lib.GxB_DEFAULT, "Default")
-T1 = Descriptor(lib.GrB_INP1, lib.GrB_TRAN, "T1")
-T0 = Descriptor(lib.GrB_INP0, lib.GrB_TRAN, "T0")
-T0T1 = T0 & T1
+Default = Descriptor(ffi.NULL, "Default")
 
-C = Descriptor(lib.GrB_MASK, lib.GrB_COMP, "C")
-CT1 = C & T1
-CT0 = C & T0
-CT0T1 = C & T0 & T1
+T0 = Descriptor(lib.GrB_DESC_T0, name="T0")
+T1 = Descriptor(lib.GrB_DESC_T1, name="T1")
+T0T1 = Descriptor(lib.GrB_DESC_T0T1, name="T0T1")
 
-R = Descriptor(lib.GrB_OUTP, lib.GrB_REPLACE, "R")
-RT0 = R & T0
-RT1 = R & T1
-RT0T1 = R & T0 & T1
+C = Descriptor(lib.GrB_DESC_C, name="C")
+CT0 = Descriptor(lib.GrB_DESC_CT0, name="CT0")
+CT1 = Descriptor(lib.GrB_DESC_CT1, name="CT1")
+CT0T1 = Descriptor(lib.GrB_DESC_CT0T1, name="CT0T1")
 
-RC = R & C
-RCT0 = R & C & T0
-RCT1 = R & C & T1
-RCT0T1 = R & C & T0 & T1
+R = Descriptor(lib.GrB_DESC_R, name="R")
+RT0 = Descriptor(lib.GrB_DESC_RT0, name="RT0")
+RT1 = Descriptor(lib.GrB_DESC_RT1, name="RT1")
+RT0T1 = Descriptor(lib.GrB_DESC_RT0T1, name="RT0T1")
 
-S = Descriptor(lib.GrB_MASK, lib.GrB_STRUCTURE, "S")
-ST1 = S & T1
-ST0 = S & T0
-ST0T1 = S & T0 & T1
+RC = Descriptor(lib.GrB_DESC_RC, name="RC")
+RCT0 = Descriptor(lib.GrB_DESC_RCT0, name="RCT0")
+RCT1 = Descriptor(lib.GrB_DESC_RCT1, name="RCT1")
+RCT0T1 = Descriptor(lib.GrB_DESC_RCT0T1, name="RCT0T1")
 
-RS = R & S
-RST1 = R & S & T1
-RST0 = R & S & T0
-RST0T1 = R & S & T0 & T1
+S = Descriptor(lib.GrB_DESC_S, name="S")
+ST0 = Descriptor(lib.GrB_DESC_ST0, name="ST0")
+ST1 = Descriptor(lib.GrB_DESC_ST1, name="ST1")
+ST0T1 = Descriptor(lib.GrB_DESC_ST0T1, name="ST0T1")
 
-RSC = R & S & C
-RSCT1 = R & S & C & T1
-RSCT0 = R & S & C & T0
-RSCT0T1 = R & S & C & T0 & T1
+RS = Descriptor(lib.GrB_DESC_RS, name="RS")
+RST0 = Descriptor(lib.GrB_DESC_RST0, name="RST0")
+RST1 = Descriptor(lib.GrB_DESC_RST1, name="RST1")
+RST0T1 = Descriptor(lib.GrB_DESC_RST0T1, name="RST0T1")
+
+RSC = Descriptor(lib.GrB_DESC_RSC, name="RSC")
+RSCT0 = Descriptor(lib.GrB_DESC_RSCT0, name="RSCT0")
+RSCT1 = Descriptor(lib.GrB_DESC_RSCT1, name="RSCT1")
+RSCT0T1 = Descriptor(lib.GrB_DESC_RSCT0T1, name="RSCT0T1")
 
 __all__ = [
     "Descriptor",

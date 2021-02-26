@@ -28,9 +28,8 @@ from .semiring import current_semiring
 from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
 from .selectop import SelectOp
-from .descriptor import Descriptor, Default, T0, current_desc
 from . import descriptor
-from .descriptor import Descriptor, Default, T0, current_desc
+from .descriptor import Descriptor, T0, current_desc
 from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
