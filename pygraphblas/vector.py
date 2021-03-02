@@ -852,7 +852,7 @@ class Vector:
         """Clear this vector removing all entries."""
         self._check(lib.GrB_Vector_clear(self._vector[0]))
 
-    def resize(self, size):
+    def resize(self, size=lib.GxB_INDEX_MAX):
         """Resize the vector.  If the dimensions decrease, entries that fall
         outside the resized vector are deleted.
 

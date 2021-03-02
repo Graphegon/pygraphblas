@@ -189,7 +189,7 @@ def draw(obj, name="", **kws):  # pragma: nocover
         return draw_vector_dot(obj, name, **kws)
 
 
-def draw_graph_op(left, op, right, result):  # pragma: nocover
+def draw_graph_op(left, op, right, result, **kwargs):  # pragma: nocover
     from pygraphblas import Matrix, Vector
 
     ioff = 0
@@ -215,18 +215,12 @@ def draw_graph_op(left, op, right, result):  # pragma: nocover
     return g
 
 
-def draw_vector(
-    V, scale=10, axes=True, labels=False, mode=None, cmap="viridis", filename=None
-):  # pragma: nocover
-    if not isinstance(V, Vector):
-        raise TypeError
-
-
 def draw_matrix(
     M,
     scale=10,
     axes=True,
-    labels=False,
+    axes_labels=False,
+    labels=True,
     mode=None,
     cmap="viridis",
     filename=None,
@@ -244,6 +238,7 @@ def draw_matrix(
             M,
             scale=scale,
             axes=axes,
+            axes_labels=axes_labels,
             labels=labels,
             mode=mode,
             cmap=cmap,
@@ -268,9 +263,10 @@ def draw_matrix(
         if M.type is BOOL:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
-                fill="#3333ff" if v else "#ff3333",
+                fill=rgb2hex(cmap(1)) if v else rgb2hex(cmap(0)),
                 outline="black",
             )
+            v = 't' if v else 'f'
         elif M.type in [FP32, FP64] and cmap:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
@@ -283,6 +279,7 @@ def draw_matrix(
                 fill=rgb2hex(cmap(int(v) % 255)),
                 outline="black",
             )
+        if labels:
             d.text(
                 ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
                 str(v)[:4],
@@ -292,7 +289,7 @@ def draw_matrix(
     if axes:
         d.line((0, scale, im.size[0], scale), fill="black")
         d.line((scale, 0, scale, im.size[1]), fill="black")
-    if labels:
+    if axes_labels:
         for i in range(M.ncols):
             d.text(
                 (((i + 1) * scale) + scale / 5, scale / 5),
@@ -332,6 +329,7 @@ def draw_matrix_op(
     result,
     font_path=Path("/pygraphblas/demo"),
     filename=None,
+    eqstr='=',
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs["scale"]
@@ -355,7 +353,7 @@ def draw_matrix_op(
     im.paste(right, (left.size[0] + op_width + spacer, 0))
     d.text(
         (left.size[0] + right.size[0] + op_width + (spacer * 1.5), height / 2),
-        "=",
+        eqstr,
         fill="black",
         font=cosmic_font,
     )
@@ -403,21 +401,21 @@ my_style = [
         "selector": "node",
         "style": {
             "background-color": "blue",
-            "label": "data(name)",
-            "width": 2,
-            "height": 2,
+            "label": "data(id)",
+            "width": 3,
+            "height": 3,
             "shape": "circle",
-            "color": "#EEEEEE",
-            "font-weight": 400,
+            "color": "#black",
+            "font-weight": 3,
             "text-halign": "right",
             "text-valign": "bottom",
-            "font-size": 12,
+            "font-size": 3,
         },
     },
     {
         "selector": "edge",
         "style": {
-            "width": 0.2,
+            "width": 0.1,
             "opacity": 1,
             "line-color": "green",
         },

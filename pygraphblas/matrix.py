@@ -714,7 +714,7 @@ class Matrix:
         """
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
-    def resize(self, nrows, ncols):
+    def resize(self, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
         """Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
@@ -1682,12 +1682,14 @@ class Matrix:
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
-            # if op == 'min':
-            #     op = lib.GxB_EQ_THUNK
-            #     thunk = self.
-            op = _get_select_op(op)
-        if isinstance(op, SelectOp):
-            op = op.get_selectop()
+            if op == "min":
+                op = lib.GxB_EQ_THUNK
+                thunk = self.min()
+            elif op == "max":
+                op = lib.GxB_EQ_THUNK
+                thunk = self.max()
+            else:
+                op = _get_select_op(op)
 
         if thunk is None:
             thunk = NULL
