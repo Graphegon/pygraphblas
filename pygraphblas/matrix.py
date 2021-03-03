@@ -1689,7 +1689,9 @@ class Matrix:
                 op = lib.GxB_EQ_THUNK
                 thunk = self.max()
             else:
-                op = _get_select_op(op)
+               op = _get_select_op(op)
+        elif isinstance(op, SelectOp):
+            op = op.get_selectop()
 
         if thunk is None:
             thunk = NULL
