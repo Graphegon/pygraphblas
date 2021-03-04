@@ -98,7 +98,6 @@ def draw_graph(
         labeler = lambda v, i: v.get(i) if labels else ""
 
     for i, j, v in M:
-        size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
         ilabel = (
             _str(labeler(label_vector, i), label_width)
             if label_vector
@@ -115,20 +114,23 @@ def draw_graph(
         )
         vlabel = _str(v, label_width) if show_weight else None
 
-        args = {}
+        size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
+        args = {"width": size, "fixedsize": "true"}
         if node_attr:
             args.update(node_attr)
         if labels:
             args["label"] = ilabel
         inode = g.node(str(i + ioff), **args)
 
-        args = {}
+        size = _str(size_vector[j] * size_scale, label_width) if size_vector else "0.5"
+        args = {"width": size, "fixedsize": "true"}
         if node_attr:
             args.update(node_attr)
         if labels:
             args["label"] = jlabel
         jnode = g.node(str(j + joff), **args)
         w = str(v)
+        
         args = {}
         if edge_attr:
             args.update(edge_attr)
