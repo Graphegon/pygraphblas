@@ -425,10 +425,10 @@ my_style = [
 ]
 
 
-def draw_cy(M, visual_style=my_style):  # pragma: nocover
+def draw_cy(M, visual_style=my_style, layout_name='cose'):  # pragma: nocover
     from cyjupyter import Cytoscape
 
-    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)
+    return Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
 
 
 def draw_vis(M, **kwargs):  # pragma: nocover
