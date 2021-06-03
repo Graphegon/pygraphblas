@@ -1678,6 +1678,24 @@ class Matrix:
           1|         |  1
           2|         |  2
               0  1  2
+        >>> N = M.dup(clear=True)
+        >>> M.select('min', out=N) is N
+        True
+        >>> print(N)
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
+        >>> N = M.dup(clear=True)
+        >>> M.select('max', out=N) is N
+        True
+        >>> print(N)
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)

@@ -34,6 +34,7 @@ from json import dumps
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
+from collections import OrderedDict
 
 __all__ = [
     "draw",
@@ -379,11 +380,11 @@ def draw_matrix_layers(layers, **kwargs):  # pragma: nocover
     return im
 
 
-def cy_matrix(M):  # pragma: nocover
-    nodes = dict()
+def cy_matrix(M, directed=True):  # pragma: nocover
+    nodes = OrderedDict()
     edges = []
 
-    for i, j, v in M:
+    for i, j, v in sorted(M):
         edges.append(
             {"data": {"id": f"{i}:{j}:{v}", "source": str(i), "target": str(j)}}
         )
@@ -393,7 +394,7 @@ def cy_matrix(M):  # pragma: nocover
             nodes[j] = {"data": {"id": str(j)}}
 
     return {
-        "directed": True,
+        "directed": directed,
         "elements": {"nodes": list(nodes.values()), "edges": edges},
     }
 
@@ -428,7 +429,8 @@ my_style = [
 def draw_cy(M, visual_style=my_style, layout_name='cose'):  # pragma: nocover
     from cyjupyter import Cytoscape
 
-    return Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
+    c = Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
+    return c
 
 
 def draw_vis(M, **kwargs):  # pragma: nocover
@@ -440,3 +442,4 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         N.add_node(j, j, title=str(j))
         N.add_edge(i, j, value=str(v))
     return N
+
