@@ -37,5 +37,5 @@ cd -
 
 docker run --rm --env DEST=/$1 --env NEURONS=$2 --env NLAYERS=$3 \
        -v `pwd`/$1:/$1 \
-       -v `pwd`/pygraphblas:/home/jovyan/pygraphblas \
-       -it graphblas/pygraphblas-notebook ipython -i -m pygraphblas.demo.dnn
+       -v `pwd`:/pygraphblas \
+       -it graphblas/pygraphblas-minimal:test ipython -i -m demo.dnn
