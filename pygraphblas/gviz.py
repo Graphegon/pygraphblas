@@ -4,28 +4,29 @@ doctests and Jupyter notebooks.
 >>> from pygraphblas import *
 >>> M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
->>> g = draw_graph(M, show_weight=False, 
+>>> g = draw_graph(M, show_weight=False,
 ...     filename='/docs/imgs/Matrix_from_lists3')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
 
->>> g = draw_matrix(M, scale=50, 
+>>> g = draw_matrix(M, scale=50,
 ...     filename='/docs/imgs/Matrix_from_lists4')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
 
 >>> V = Vector.from_lists([0, 2], [3.14, 1.2])
->>> g = draw_vector(V, scale=50, 
+>>> g = draw_vector(V, scale=50,
 ...     filename='/docs/imgs/Vector_from_lists_1')
 
 ![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
 
->>> g = draw_matrix_op(M, '@', M, (M@M), scale=50, 
+>>> g = draw_matrix_op(M, '@', M, (M@M), scale=50,
 ...     filename='/docs/imgs/mxm1')
 
 ![mxm1](../imgs/mxm1.png)
 """
 import operator
+from math import log
 from itertools import accumulate
 from graphviz import Digraph, Source
 from PIL import Image, ImageDraw, ImageFont
@@ -73,6 +74,7 @@ def draw_graph(
     label_width=None,
     size_vector=None,
     size_scale=1.0,
+    log_scale=False,
     ioff=0,
     joff=0,
     filename=None,
@@ -115,7 +117,14 @@ def draw_graph(
         )
         vlabel = _str(v, label_width) if show_weight else None
 
-        size = _str(size_vector[i] * size_scale, label_width) if size_vector else "0.5"
+        if size_vector:
+            scale = max(size_vector[i] * size_scale, 1)
+            if log_scale:
+                scale = log(scale)
+            size = _str(scale, label_width)
+        else:
+            size = "0.5"
+
         args = {"width": size, "fixedsize": "true"}
         if node_attr:
             args.update(node_attr)
@@ -123,7 +132,6 @@ def draw_graph(
             args["label"] = ilabel
         inode = g.node(str(i + ioff), **args)
 
-        size = _str(size_vector[j] * size_scale, label_width) if size_vector else "0.5"
         args = {"width": size, "fixedsize": "true"}
         if node_attr:
             args.update(node_attr)
@@ -131,7 +139,7 @@ def draw_graph(
             args["label"] = jlabel
         jnode = g.node(str(j + joff), **args)
         w = str(v)
-        
+
         args = {}
         if edge_attr:
             args.update(edge_attr)
@@ -442,4 +450,3 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         N.add_node(j, j, title=str(j))
         N.add_edge(i, j, value=str(v))
     return N
-
