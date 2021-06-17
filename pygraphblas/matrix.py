@@ -677,7 +677,7 @@ class Matrix:
     def to_binfile(self, filename, comments=""):
         """Write this matrix using custom SuiteSparse binary format."""
         self._check(
-            lib.LAGraph_binwrite(self._matrix, filename, bytes(comments, "utf8"))
+            lib.LAGraph_binwrite(self._matrix, bytes(filename), bytes(comments, "utf8"))
         )
 
     def to_lists(self):

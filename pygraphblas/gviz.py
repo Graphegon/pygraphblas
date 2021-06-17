@@ -72,6 +72,7 @@ def draw_graph(
     labels=True,
     label_vector=None,
     label_width=None,
+    label_cmap=None,
     size_vector=None,
     size_scale=1.0,
     log_scale=False,
@@ -94,6 +95,9 @@ def draw_graph(
 
     if edge_cmap is not None:
         edge_cmap = plt.get_cmap(edge_cmap)
+
+    if label_cmap is not None:
+        label_cmap = plt.get_cmap(label_cmap)
 
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i] if labels else ""
@@ -130,6 +134,8 @@ def draw_graph(
             args.update(node_attr)
         if labels:
             args["label"] = ilabel
+        if label_cmap and label_vector:
+            args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, i))))
         inode = g.node(str(i + ioff), **args)
 
         args = {"width": size, "fixedsize": "true"}
@@ -137,6 +143,8 @@ def draw_graph(
             args.update(node_attr)
         if labels:
             args["label"] = jlabel
+        if label_cmap:
+            args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, j))))
         jnode = g.node(str(j + joff), **args)
         w = str(v)
 
