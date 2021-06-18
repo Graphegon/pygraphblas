@@ -28,7 +28,7 @@ doctests and Jupyter notebooks.
 import operator
 from math import log
 from itertools import accumulate
-from graphviz import Digraph, Source
+from graphviz import Graph, Digraph, Source
 from PIL import Image, ImageDraw, ImageFont
 from PIL import Image, ImageDraw
 from json import dumps
@@ -67,6 +67,7 @@ def draw_graph(
     M,
     name="",
     rankdir="LR",
+    directed=True,
     show_weight=True,
     concentrate=True,
     labels=True,
@@ -84,7 +85,10 @@ def draw_graph(
     edge_attr=None,
     edge_cmap=None,
 ):  # pragma: nocover
-    g = Digraph(name)
+    if directed:
+        g = Digraph(name)
+    else:
+        g = Graph(name)
     g.attr(rankdir=rankdir, overlap="false", concentrate="true")
     if graph_attr:
         g.attr(**graph_attr)
