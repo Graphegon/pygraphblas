@@ -76,6 +76,7 @@ def draw_graph(
     label_cmap=None,
     size_vector=None,
     size_scale=1.0,
+    min_size=0.1,
     log_scale=False,
     ioff=0,
     joff=0,
@@ -89,7 +90,7 @@ def draw_graph(
         g = Digraph(name)
     else:
         g = Graph(name)
-    g.attr(rankdir=rankdir, overlap="false", concentrate="true")
+    g.attr(rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false")
     if graph_attr:
         g.attr(**graph_attr)
     if node_attr:
@@ -126,9 +127,9 @@ def draw_graph(
         vlabel = _str(v, label_width) if show_weight else None
 
         if size_vector:
-            scale = max(size_vector[i] * size_scale, 1)
+            scale = max(size_vector[i] * size_scale, min_size)
             if log_scale:
-                scale = log(scale)
+                scale = max(log(scale), min_size)
             size = _str(scale, label_width)
         else:
             size = "0.5"
