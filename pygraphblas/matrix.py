@@ -677,7 +677,7 @@ class Matrix:
     def to_binfile(self, filename, comments=""):
         """Write this matrix using custom SuiteSparse binary format."""
         self._check(
-            lib.LAGraph_binwrite(self._matrix, filename, bytes(comments, "utf8"))
+            lib.LAGraph_binwrite(self._matrix, bytes(filename), bytes(comments, "utf8"))
         )
 
     def to_lists(self):
@@ -714,7 +714,7 @@ class Matrix:
         """
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
-    def resize(self, nrows, ncols):
+    def resize(self, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
         """Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
@@ -1678,15 +1678,37 @@ class Matrix:
           1|         |  1
           2|         |  2
               0  1  2
+        >>> N = M.dup(clear=True)
+        >>> M.select('min', out=N) is N
+        True
+        >>> print(N)
+              0  1  2
+          0|   -42   |  0
+          1|         |  1
+          2|         |  2
+              0  1  2
+        >>> N = M.dup(clear=True)
+        >>> M.select('max', out=N) is N
+        True
+        >>> print(N)
+              0  1  2
+          0|         |  0
+          1|         |  1
+          2|149      |  2
+              0  1  2
         """
         if out is None:
             out = self.__class__.sparse(self.type, self.nrows, self.ncols)
         if isinstance(op, str):
-            # if op == 'min':
-            #     op = lib.GxB_EQ_THUNK
-            #     thunk = self.
-            op = _get_select_op(op)
-        if isinstance(op, SelectOp):
+            if op == "min":
+                op = lib.GxB_EQ_THUNK
+                thunk = self.min()
+            elif op == "max":
+                op = lib.GxB_EQ_THUNK
+                thunk = self.max()
+            else:
+               op = _get_select_op(op)
+        elif isinstance(op, SelectOp):
             op = op.get_selectop()
 
         if thunk is None:
@@ -2529,6 +2551,9 @@ class Matrix:
     ):
         """Assign a submatrix.
 
+        Note: The name for this method `Matrix.assign_matrix()` is
+        deprecated, use the name `Matrix.assign()` instead.
+
         >>> M = Matrix.sparse(types.BOOL, 3, 3)
         >>> S = Matrix.sparse(types.BOOL, 3, 3)
         >>> S[1,1] = True
@@ -2566,6 +2591,8 @@ class Matrix:
                 self._matrix[0], mask, accum, value._matrix[0], I, ni, J, nj, desc
             )
         )
+
+    assign = assign_matrix
 
     def assign_scalar(
         self, value, row_slice=None, col_slice=None, mask=None, accum=None, desc=None

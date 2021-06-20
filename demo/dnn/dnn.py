@@ -1,18 +1,17 @@
 from pygraphblas import FP32, binary_op
 from . import timing
-from pygraphblas.demo.gviz import draw_matrix
-import imageio
+from pygraphblas.gviz import draw_matrix
+#import imageio
 
 
 @timing
 def render_frame(prefix, Y, i):
     im = draw_matrix(Y, scale=2, labels=False)
-    imageio.imwrite(prefix + str(i) + ".png", im)
+    #imageio.imwrite(prefix + str(i) + ".png", im)
 
 
 @timing
 def dnn(W, B, Y, movie=None):
-    breakpoint()
     for i, (w, b) in enumerate(zip(W, B)):  # for every weight, bias matrix
         if movie is not None:
             render_frame(movie, w, i)

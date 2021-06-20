@@ -19,10 +19,9 @@ def load_images(neurons, dest):
     if Path(binfile).exists():
         return Matrix.from_binfile(binfile.encode("ascii"))
     images = Path(fname.format(dest, neurons, "tsv"))
-    with images.open() as i:
-        m = Matrix.from_tsv(i, FP32, NFEATURES, neurons)
-        m.to_binfile(binfile.encode("ascii"))
-        return m
+    m = Matrix.from_tsv(images, FP32, NFEATURES, neurons)
+    m.to_binfile(binfile.encode("ascii"))
+    return m
 
 
 def load_categories(neurons, nlayers, dest):
@@ -41,10 +40,9 @@ def load_layer(neurons, dest, i):
     if Path(binfile).exists():
         return Matrix.from_binfile(binfile.encode("ascii"))
     l = Path(fname.format(dest, neurons, neurons, str(i + 1), "tsv"))
-    with l.open() as f:
-        m = Matrix.from_tsv(f, FP32, neurons, neurons)
-        m.to_binfile(binfile.encode("ascii"))
-        return m
+    m = Matrix.from_tsv(l, FP32, neurons, neurons)
+    m.to_binfile(binfile.encode("ascii"))
+    return m
 
 
 @timing
@@ -71,7 +69,7 @@ def run(neurons, images, layers, bias, dest, movie="/dnn_demo/frames/f"):
     # hyperbias = hypergraph(bias)
     # images.resize(hyperlayers.nrows, hyperlayers.ncols)
     # result = hyperdnn(len(layers), hyperlayers, hyperbias, images)
-    result = dnn(layers, bias, images, movie=movie)
+    result = dnn(layers, bias, images)
     r = result.reduce_vector()
     cats = r.apply(BOOL.ONE, out=Vector.sparse(BOOL, r.size))
     truecats = load_categories(neurons, len(layers), dest)
