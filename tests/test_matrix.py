@@ -8,6 +8,21 @@ import pytest
 from pygraphblas import *
 from pygraphblas.base import ffi, lib, _check
 
+def test_iseq():
+    l = Matrix.sparse(INT8, 10, 10)
+    l[0,0] = 1
+    m = Matrix.sparse(INT8, 10, 10)
+    m[0,0] = 1
+    n = Matrix.sparse(INT64, 10, 10)
+    n[0,0] = 1
+    o = Matrix.sparse(INT64, 10, 9)
+    o[0,0] = 1
+    p = Matrix.sparse(INT64, 10, 9)
+    p[0,1] = 1
+    assert l.iseq(m)
+    assert m.isne(n)
+    assert n.isne(o)
+    assert o.isne(p)
 
 def test_matrix_init_without_type():
     mx = Matrix.sparse(INT8)
@@ -329,7 +344,7 @@ def test_matrix_mm_read_write(tmp_path):
         ]
 
     with mmf.open() as f:
-        n = Matrix.from_mm(f, INT8)
+        n = Matrix.from_mm(f, INT64)
     assert n.iseq(m)
 
 

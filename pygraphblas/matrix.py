@@ -1090,13 +1090,29 @@ class Matrix:
         )
         return out
 
+    def all(self, other, op):
+        """Do all elements in self compare True with op to other?
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> N = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
+        >>> assert M.all(N, types.INT64.EQ)
+        >>> assert not M.all(N, types.INT64.GT)
+
+        """
+        if self.shape != other.shape:
+            return False
+        if self.nvals != other.nvals:
+            return False
+        C = self.emult(other, op, cast=types.BOOL)
+        if C.nvals != self.nvals:
+            return False
+        return C.reduce_bool(types.BOOL.LAND_MONOID)
+
     def iseq(self, other):
         """Compare two matrices for equality returning True or False.
 
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
-
-        Uses code from LAGraph_isequal.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> N = M.dup()
@@ -1107,12 +1123,9 @@ class Matrix:
         False
 
         """
-        result = ffi.new("_Bool*")
-        eq_op = self.type.EQ.get_binaryop(self.type, other.type)
-        self._check(
-            lib.LAGraph_isequal(result, self._matrix[0], other._matrix[0], eq_op)
-        )
-        return result[0]
+        if self.type != other.type:
+            return False
+        return self.all(other, self.type.EQ)
 
     def isne(self, other):
         """Compare two matrices for inequality.  See `Matrix.iseq`."""
