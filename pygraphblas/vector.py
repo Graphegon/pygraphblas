@@ -137,6 +137,24 @@ class Vector:
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return iter(X)
 
+    def all(self, other, op):
+        """Do all elements in self compare True with op to other?
+
+        >>> M = Vector.from_lists([0, 1, 2], [1, 2, 3])
+        >>> N = Vector.from_lists([0, 1, 2], [1, 2, 3])
+        >>> assert M.all(N, types.INT64.EQ)
+        >>> assert not M.all(N, types.INT64.GT)
+
+        """
+        if self.size != other.size:
+            return False
+        if self.nvals != other.nvals:
+            return False
+        C = self.emult(other, op, cast=types.BOOL)
+        if C.nvals != self.nvals:
+            return False
+        return C.reduce_bool(types.BOOL.LAND_MONOID)
+
     def iseq(self, other, eq_op=None):
         """Compare two vectors for equality.
 
@@ -151,15 +169,9 @@ class Vector:
         >>> v.iseq(w, eq_op=types.UINT64.GE)
         True
         """
-        if eq_op is None:
-            eq_op = self.type.EQ
-
-        eq_op = eq_op.get_binaryop()
-        result = ffi.new("_Bool*")
-        self._check(
-            lib.LAGraph_Vector_isequal(result, self._vector[0], other._vector[0], eq_op)
-        )
-        return result[0]
+        if self.type != other.type:
+            return False
+        return self.all(other, self.type.EQ)
 
     def isne(self, other):
         """Compare two vectors for inequality.
