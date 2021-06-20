@@ -10,6 +10,12 @@ function repair_wheel {
     fi
 }
 
+yum install -y cmake make gcc git openmp-dev
+git clone --depth=1 --branch=v4.0.3 https://github.com/DrTimothyAldenDavis/GraphBLAS.git
+cd GraphBLAS/build
+cmake .. && make -j8 && make install
+ldconfig
+
 # Compile wheels
 for PYBIN in /opt/python/cp3[678]*/bin; do
     "${PYBIN}/pip" install -r /io/manylinux-requirements.txt
