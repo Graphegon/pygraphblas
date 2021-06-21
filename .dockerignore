@@ -1,4 +1,9 @@
+build
 demo
 docs
+virt
+wheelhouse
+gap
+*.egg-info
 dnn_*
 **/__pycache__
