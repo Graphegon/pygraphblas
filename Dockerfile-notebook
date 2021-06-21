@@ -37,4 +37,6 @@ RUN chown -R jovyan /home/jovyan
 
 RUN ldconfig
 USER jovyan
+WORKDIR /home/jovyan/demo
+
 # RUN pytest
