@@ -49,15 +49,16 @@ Hub](https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general)
 You can run a "full" [Jupyter notebook](https://jupyter.org/) server
 with docker and try the example Notebooks use the command:
 
-    docker run --rm -it graphblas/pygraphblas-notebook
+    docker run --rm -it -p 8888:8888 graphblas/pygraphblas-notebook
 
-Open up the URL printed on your terminal screen, typically something
-liker `http://127.0.0.1:8888/tree/pygraphblas/demo` and see the
-following Notebooks:
+Open up the URL printed on your terminal screen to see the demo
+Notebook folder, including:
 
  - [Introduction to GraphBLAS with Python](./demo/Introduction-to-GraphBLAS-with-Python.ipynb)
  - [PageRank](./demo/PageRank.ipynb)
  - [Betweeness Centrality](./demo/BetweenessCentrality.ipynb)
+ - [Triangle Centrality](./demo/TriangleCentrality.ipynb)
+ - [Gallery of Centrality](./demo/Centrality.ipynb)
  - [K-Truss Subgraphs](./demo/K-Truss.ipynb)
  - [Triangle Counting](./demo/Triangle-Counting.ipynb)
  - [Louvain Community Detection](./demo/Louvain.ipynb)
