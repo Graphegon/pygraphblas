@@ -41,7 +41,19 @@ class Semiring:
         if udt is None:
             cls = getattr(types, typ)
             setattr(cls, name, self)
+            setattr(cls, name.lower(), self)
             types.__pdoc__[f"{typ}.{pls}_{mul}"] = f"UnaryOp {typ}.{pls}_{mul}"
+
+    def __call__(self, A, B, *args, **kwargs):
+        from .vector import Vector
+        if isinstance(A, Vector):
+            op = A.vxm
+        elif isinstance(B, Vector):
+            op = A.mxv
+        else:
+            op = A.mxm
+        kwargs['semiring'] = self
+        return op(B, *args, **kwargs)
 
     def __enter__(self):
         self.token = current_semiring.set(self)

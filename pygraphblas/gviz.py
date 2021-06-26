@@ -249,13 +249,15 @@ def draw_matrix(
     cmap="viridis",
     filename=None,
     column=True,
-    font_path=Path("/pygraphblas/demo"),
+    font_path=None
 ):  # pragma: nocover
     from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
-    cosmic_font = ImageFont.truetype(
-        str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
-    )
+    font = None
+    if font_path:
+        font = ImageFont.truetype(
+            str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
+        )
 
     if isinstance(M, Vector):
         return draw_vector(
@@ -308,7 +310,7 @@ def draw_matrix(
                 ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
                 str(v)[:4],
                 fill="black",
-                font=cosmic_font,
+                font=font,
             )
     if axes:
         d.line((0, scale, im.size[0], scale), fill="black")
@@ -319,14 +321,14 @@ def draw_matrix(
                 (((i + 1) * scale) + scale / 5, scale / 5),
                 str(i),
                 fill="black",
-                font=cosmic_font,
+                font=font,
             )
         for j in range(M.nrows):
             d.text(
                 (scale / 5, ((j + 1) * scale) + scale / 5),
                 str(j),
                 fill="black",
-                font=cosmic_font,
+                font=font,
             )
     if filename is not None:
         im.save(filename + ".png", "PNG")

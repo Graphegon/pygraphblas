@@ -47,7 +47,7 @@ def _test_udt():
             else:
                 z.pi = x.pi
 
-    BF_monoid = BF.new_monoid(BF.PLUS, BF.one)
+    BF_monoid = BF.new_monoid(BF.PLUS, BF.default_one)
     BF_semiring = BF.new_semiring(BF_monoid, BF.TIMES)
 
     def shortest_path(matrix, start):
@@ -115,7 +115,7 @@ def test_log_semiring():
     A[1, 5] = 1 / 7.0
     A[5, 4] = 1 / 2.0
 
-    Log32_monoid = Log32.new_monoid(Log32.PLUS, Log32.one)
+    Log32_monoid = Log32.new_monoid(Log32.PLUS, Log32.default_one)
     Log32_semiring = Log32.new_semiring(Log32_monoid, Log32.TIMES)
 
     with Log32_semiring:

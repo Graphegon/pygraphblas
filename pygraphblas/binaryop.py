@@ -15,6 +15,7 @@ import re
 import contextvars
 from itertools import chain
 from collections import defaultdict
+from functools import partial
 import numba
 
 from .base import lib, ffi, _check
@@ -43,6 +44,7 @@ class BinaryOp:
             self.binaryop = binaryop
             cls = getattr(types, typ)
             setattr(cls, op, self)
+            setattr(cls, op.lower(), self)
         self.name = "_".join((op, typ))
         self.__doc__ = self.name
         self.token = None

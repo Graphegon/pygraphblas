@@ -5,6 +5,7 @@ import sys
 import operator
 import weakref
 from array import array
+from functools import partial
 
 from .base import (
     lib,
@@ -25,6 +26,7 @@ from .binaryop import current_accum, current_binop, Accum
 from .monoid import current_monoid
 from . import descriptor
 from .descriptor import Descriptor, T1, current_desc
+
 
 __all__ = ["Vector"]
 __pdoc__ = {"Vector.__init__": False}
@@ -101,6 +103,11 @@ class Vector:
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
         return zip(I, X)
 
+    def __getattr__(self, name):
+        """Look up operators as attributes for the given object.
+        """
+        return partial(getattr(self.type, name), self)
+
     @property
     def indexes(self):
         """Iterator of vector indexes.
@@ -140,10 +147,17 @@ class Vector:
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
 
+        >>> from . import INT64
         >>> M = Vector.from_lists([0, 1, 2], [1, 2, 3])
         >>> N = Vector.from_lists([0, 1, 2], [1, 2, 3])
-        >>> assert M.all(N, types.INT64.EQ)
-        >>> assert not M.all(N, types.INT64.GT)
+        >>> O = Vector.from_lists([0, 1], [1, 2])
+        >>> P = Vector.from_lists([0, 1], [1, 2], size=3)
+        >>> Q = Vector.from_lists([0, 1, 3], [1, 2, 3])
+        >>> assert M.all(N, INT64.eq)
+        >>> assert not M.all(N, INT64.gt)
+        >>> assert not M.all(O, INT64.eq)
+        >>> assert not M.all(P, INT64.eq)
+        >>> assert not M.all(Q, INT64.eq)
 
         """
         if self.size != other.size:
@@ -153,7 +167,7 @@ class Vector:
         C = self.emult(other, op, cast=types.BOOL)
         if C.nvals != self.nvals:
             return False
-        return C.reduce_bool(types.BOOL.LAND_MONOID)
+        return C.reduce_bool(types.BOOL.land_monoid)
 
     def iseq(self, other, eq_op=None):
         """Compare two vectors for equality.
@@ -163,11 +177,15 @@ class Vector:
 
         >>> v = Vector.from_lists([0,1], [1, 1])
         >>> w = Vector.from_lists([0,1], [1, 1])
+        >>> x = Vector.from_lists([0,1], [1.0, 1.0])
         >>> v.iseq(w)
         True
 
         >>> v.iseq(w, eq_op=types.UINT64.GE)
         True
+
+        >>> v.iseq(x)
+        False
         """
         if self.type != other.type:
             return False
@@ -204,7 +222,11 @@ class Vector:
         size is not provided, it is computed from the max values of
         the provides size indices.
 
+        If the second argument is a scalar value, an "iso" vector is
+        created where all values equal that scalar.
         """
+        if isinstance(V, (bool, int, float)):
+            V = [V] * len(I)
         assert len(I) == len(V)
         assert len(I) > 0  # must be non empty
         if not size:
@@ -312,7 +334,7 @@ class Vector:
     @classmethod
     def dense(cls, typ, size, fill=None):
         """Return a dense vector of `typ` and `size`.  If `fill` is provided,
-        use that value otherwise use `type.zero`
+        use that value otherwise use `self.type.default_zero`
 
         >>> print(Vector.dense(types.FP32, 3))
         0|0.0
@@ -326,7 +348,7 @@ class Vector:
         """
         v = cls.sparse(typ, size)
         if fill is None:
-            fill = v.type.zero
+            fill = v.type.default_zero
         v[:] = fill
         return v
 
@@ -398,7 +420,7 @@ class Vector:
 
         self._check(
             self.type._Vector_assignScalar(
-                B._vector[0], NULL, NULL, self.type.one, lib.GrB_ALL, 0, NULL
+                B._vector[0], NULL, NULL, self.type.default_one, lib.GrB_ALL, 0, NULL
             )
         )
         return self.eadd(B, self.type.FIRST)
@@ -664,7 +686,7 @@ class Vector:
 
         `vxm` can also be called directly or with the `@` operator:
 
-        >>> from . import Matrix
+        >>> from . import Matrix, INT64
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
         >>> v = Vector.from_lists([0, 1, 2], [2, 3, 4])
         >>> o = v.vxm(M)
@@ -686,14 +708,14 @@ class Vector:
         copying.  This is also supported by the `@=` syntax:
 
         >>> o = v.dup()
-        >>> v.vxm(M, accum=types.INT64.PLUS, out=o) is o
+        >>> v.vxm(M, accum=INT64.plus, out=o) is o
         True
         >>> print(o)
         0|14
         1| 5
         2|10
         >>> o = v.dup()
-        >>> with Accum(types.INT64.MIN):
+        >>> with Accum(INT64.min):
         ...     o @= M
         >>> print(o)
         0| 2
@@ -702,18 +724,28 @@ class Vector:
 
         The default semiring depends on the infered result type.  In
         the case of numbers, the default semiring is `PLUS_TIMES`.  In
-        the case of type `BOOL`, it is `BOOL.LOR_LAND`.
+        the case of type `BOOL`, it is `BOOL.lor_land`.
 
-        An explicit semiring can be passed to the method or provided
-        with a context manager:
-
-        >>> o = v.vxm(M, semiring=types.INT64.MIN_PLUS)
+        >>> o = v.vxm(M, semiring=INT64.min_plus)
         >>> print(o)
         0| 7
         1| 3
         2| 5
-        >>> with types.INT64.MIN_PLUS:
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> with INT64.min_plus:
         ...     o = v @ M
+        >>> print(o)
+        0| 7
+        1| 3
+        2| 5
+
+        Or the semiring can be accessed via an attribute on the
+        vector:
+
+        >>> o = v.min_plus(M)
         >>> print(o)
         0| 7
         1| 3
@@ -1030,8 +1062,16 @@ class Vector:
 
     def apply(self, op, out=None, mask=None, accum=None, desc=None):
         """Apply Unary op to vector elements.
+        >>> from . import UINT64
         >>> v = Vector.from_lists([0,1], [1, 1])
-        >>> print(v.apply(types.UINT64.AINV))
+        >>> print(v.apply(UINT64.ainv))
+        0|-1
+        1|-1
+
+        Unary operators can also be accessed by atribute name on
+        vectors they are applied to:
+
+        >>> print(v.ainv())
         0|-1
         1|-1
 

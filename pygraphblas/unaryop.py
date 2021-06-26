@@ -29,7 +29,11 @@ class UnaryOp:
         self.token = None
         cls = getattr(types, typ)
         setattr(cls, name, self)
+        setattr(cls, name.lower(), self)
         types.__pdoc__[f"{typ}.{name}"] = f"UnaryOp {typ}.{name}"
+
+    def __call__(self, A, *args, **kwargs):
+        return A.apply(self, *args, **kwargs)
 
     def get_unaryop(self, operand1=None):
         return self.unaryop

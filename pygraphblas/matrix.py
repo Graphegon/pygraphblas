@@ -7,6 +7,7 @@ import operator
 from random import randint
 from array import array
 from pathlib import Path
+from functools import partial
 
 from .base import (
     lib,
@@ -160,7 +161,7 @@ class Matrix:
               0  1  2
 
         If a `fill` value is present, use that, otherwise use the
-        `zero` attribte of the given type.
+        `self.type.default_zero` attribute of the given type.
 
         >>> M = Matrix.dense(types.UINT8, 3, 3, fill=1)
         >>> print(M)
@@ -176,7 +177,7 @@ class Matrix:
         if sparsity is not None:
             m.sparsity = sparsity
         if fill is None:
-            fill = m.type.zero
+            fill = m.type.default_zero
         m[:, :] = fill
         return m
 
@@ -207,7 +208,28 @@ class Matrix:
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
 
+        If the third argument is a scalar value instead of a list, it
+        is used to construct an "iso" Matrix where all values equal
+        that scalar.
+
+        >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+        >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+        >>> V = True
+        >>> M = Matrix.from_lists(I, J, V)
+        >>> print(M)
+              0  1  2  3  4  5  6
+          0|     t     t         |  0
+          1|              t     t|  1
+          2|                 t   |  2
+          3|  t     t            |  3
+          4|                 t   |  4
+          5|        t            |  5
+          6|        t  t  t      |  6
+              0  1  2  3  4  5  6
+
         """
+        if isinstance(V, (bool, int, float)):
+            V = [V] * len(I)
         assert len(I) == len(J) == len(V)
         if not nrows:
             nrows = max(I) + 1
@@ -342,7 +364,7 @@ class Matrix:
         """Return a new square identity Matrix of nrows with diagonal set to
         one.
 
-        If one is None, use the default `Type.one` value.
+        If one is None, use the default `Type.default_one` value.
 
         >>> M = Matrix.identity(types.UINT8, 3, value=42)
         >>> print(M)
@@ -355,7 +377,7 @@ class Matrix:
         """
         result = cls.sparse(typ, nrows, nrows)
         if value is None:
-            value = result.type.one
+            value = result.type.default_one
         for i in range(nrows):
             result[i, i] = value
         return result
@@ -1093,10 +1115,11 @@ class Matrix:
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
 
+        >>> from . import INT64
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
         >>> N = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
-        >>> assert M.all(N, types.INT64.EQ)
-        >>> assert not M.all(N, types.INT64.GT)
+        >>> assert M.all(N, INT64.EQ)
+        >>> assert not M.all(N, INT64.GT)
 
         """
         if self.shape != other.shape:
@@ -1106,7 +1129,7 @@ class Matrix:
         C = self.emult(other, op, cast=types.BOOL)
         if C.nvals != self.nvals:
             return False
-        return C.reduce_bool(types.BOOL.LAND_MONOID)
+        return C.reduce_bool(types.BOOL.land_monoid)
 
     def iseq(self, other):
         """Compare two matrices for equality returning True or False.
@@ -1226,6 +1249,12 @@ class Matrix:
         X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
+
+
+    def __getattr__(self, name):
+        """Look up operators as attributes for the given object.
+        """
+        return partial(getattr(self.type, name), self)
 
     def __len__(self):
         """Return the number of elements in the Matrix.
@@ -1884,7 +1913,7 @@ class Matrix:
                 B._matrix[0],
                 NULL,
                 NULL,
-                self.type.one,
+                self.type.default_one,
                 lib.GrB_ALL,
                 0,
                 lib.GrB_ALL,
@@ -2012,7 +2041,7 @@ class Matrix:
         copying.  This is also supported by the `@=` syntax:
 
         >>> o = m.dup()
-        >>> o.mxm(n, accum=types.INT64.MIN, out=o) is o
+        >>> o.mxm(n, accum=types.INT64.min, out=o) is o
         True
         >>> print(o)
               0  1  2
@@ -2021,7 +2050,7 @@ class Matrix:
           2|  3  6   |  2
               0  1  2
         >>> o = m.dup()
-        >>> with Accum(types.INT64.MIN):
+        >>> with Accum(types.INT64.min):
         ...     o @= n
         >>> print(o)
               0  1  2
@@ -2034,17 +2063,19 @@ class Matrix:
         the case of numbers, the default semiring is `PLUS_TIMES`.  In
         the case of type `BOOL`, it is `BOOL.LOR_LAND`.
 
-        An explicit semiring can be passed to the method or provided
-        with a context manager:
-
-        >>> o = m.mxm(n, semiring=types.INT64.MIN_PLUS)
+        >>> from pygraphblas import INT64
+        >>> o = m.mxm(n, semiring=INT64.min_plus)
         >>> print(o)
               0  1  2
           0|        4|  0
           1|  6      |  1
           2|     5   |  2
               0  1  2
-        >>> with types.INT64.MIN_PLUS:
+
+        An explicit semiring can be passed to the method or provided
+        with a context manager:
+
+        >>> with INT64.min_plus:
         ...     o = m @ n
         >>> print(o)
               0  1  2
@@ -2052,6 +2083,18 @@ class Matrix:
           1|  6      |  1
           2|     5   |  2
               0  1  2
+
+        Or the semiring can be accessed via an attribute on the
+        matrix:
+
+        >>> o = m.min_plus(n)
+        >>> print(o)
+              0  1  2
+          0|        4|  0
+          1|  6      |  1
+          2|     5   |  2
+              0  1  2
+
 
         Descriptors and accumulators can also be provided as an
         argument or a context manager:
@@ -2130,6 +2173,7 @@ class Matrix:
 
         `mxv` can also be called directly or with the `@` operator:
 
+        >>> from pygraphblas import INT64
         >>> m = Matrix.from_lists([0, 1, 2], [1, 2, 0], [1, 2, 3])
         >>> v = Vector.from_lists([0, 1, 2], [2, 3, 4])
         >>> o = m.mxv(v)
@@ -2151,7 +2195,7 @@ class Matrix:
         copying.
 
         >>> o = v.dup()
-        >>> m.mxv(v, accum=types.INT64.PLUS, out=o) is o
+        >>> m.mxv(v, accum=INT64.plus, out=o) is o
         True
         >>> print(o)
         0| 5
@@ -2165,14 +2209,20 @@ class Matrix:
         An explicit semiring can be passed to the method or provided
         with a context manager:
 
-        >>> o = m.mxv(v, semiring=types.INT64.MIN_PLUS)
+        >>> o = m.mxv(v, semiring=INT64.min_plus)
         >>> print(o)
         0| 4
         1| 6
         2| 5
 
-        >>> with types.INT64.MIN_PLUS:
+        >>> with INT64.min_plus:
         ...     o = m @ v
+        >>> print(o)
+        0| 4
+        1| 6
+        2| 5
+
+        >>> o = m.min_plus(v)
         >>> print(o)
         0| 4
         1| 6

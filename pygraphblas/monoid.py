@@ -43,6 +43,7 @@ class Monoid:
         cls = getattr(types, typ, None)
         if cls is not None:
             setattr(cls, op + "_MONOID", self)
+            setattr(cls, op.lower() + "_monoid", self)
             types.__pdoc__[f"{typ}.{op}_MONOID"] = f"UnaryOp {typ}.{op}_MONOID"
         self.op = op
         self.type = typ

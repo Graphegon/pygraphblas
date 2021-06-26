@@ -79,8 +79,8 @@ class MetaType(type):
         meta._gb_name_type_map[cls._c_type] = cls
 
         cls._ptr = cls._c_type + "*"
-        cls.zero = getattr(cls, "zero", core_ffi.NULL)
-        cls.one = getattr(cls, "one", core_ffi.NULL)
+        cls.default_zero = getattr(cls, "default_zero", core_ffi.NULL)
+        cls.default_one = getattr(cls, "default_one", core_ffi.NULL)
         get = partial(getattr, lib)
         cls._base_name = base_name = getattr(cls, "_base_name", cls.__name__)
         cls._prefix = prefix = getattr(cls, "_prefix", "GrB")
@@ -150,9 +150,9 @@ class MetaType(type):
 
 
 class Type(metaclass=MetaType):
-    one = 1
+    default_one = 1
     """The default value used to represent 1 for filling in types."""
-    zero = 0
+    default_zero = 0
     """The default value used to represent 0 for filling in types."""
     base = True
     _typecode = None
@@ -198,8 +198,8 @@ class BOOL(Type):
 
     _gb_type = lib.GrB_BOOL
     _c_type = "_Bool"
-    one = True
-    zero = False
+    default_one = True
+    default_zero = False
     _typecode = "B"
     _numba_t = numba.boolean
     _numpy_t = numpy.bool_
@@ -311,8 +311,8 @@ class UINT64(Type):
 class FP32(Type):
     """GraphBLAS 32 bit float."""
 
-    one = 1.0
-    zero = 0.0
+    default_one = 1.0
+    default_zero = 0.0
     _gb_type = lib.GrB_FP32
     _c_type = "float"
     _typecode = "f"
@@ -327,8 +327,8 @@ class FP32(Type):
 class FP64(Type):
     """GraphBLAS 64 bit float."""
 
-    one = 1.0
-    zero = 0.0
+    default_one = 1.0
+    default_zero = 0.0
     _gb_type = lib.GrB_FP64
     _c_type = "double"
     _typecode = "d"
@@ -344,8 +344,8 @@ class FC32(Type):
     """GraphBLAS 32 bit float complex."""
 
     _prefix = "GxB"
-    one = complex(1.0)
-    zero = complex(0.0)
+    default_one = complex(1.0)
+    default_zero = complex(0.0)
     _gb_type = lib.GxB_FC32
     _c_type = "float _Complex"
     _numba_t = numba.complex64
@@ -356,8 +356,8 @@ class FC64(Type):
     """GraphBLAS 64 bit float complex."""
 
     _prefix = "GxB"
-    one = complex(1.0)
-    zero = complex(0.0)
+    default_one = complex(1.0)
+    default_zero = complex(0.0)
     _gb_type = lib.GxB_FC64
     _c_type = "double _Complex"
     _numba_t = numba.complex128

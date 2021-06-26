@@ -847,7 +847,7 @@ def test_identity():
     m = Matrix.identity(UINT8, 10)
     assert len(m) == 10
     for i in range(len(m)):
-        assert m[i, i] == UINT8.one
+        assert m[i, i] == UINT8.default_one
 
 
 def test_to_arrays():
