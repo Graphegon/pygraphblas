@@ -224,6 +224,11 @@ class Vector:
 
         If the second argument is a scalar value, an "iso" vector is
         created where all values equal that scalar.
+
+        >>> v = Vector.from_lists([0, 1, 2], [1, 2, 3])
+        >>> w = Vector.from_lists([0, 1, 2], True)
+        >>> assert not v.iseq(w)
+        >>> assert v.pattern().iseq(w)
         """
         if isinstance(V, (bool, int, float)):
             V = [V] * len(I)
