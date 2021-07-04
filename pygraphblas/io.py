@@ -4,11 +4,20 @@ from pathlib import Path
 import ctypes
 from cffi import FFI
 
+
 stdffi = FFI()
 stdffi.cdef("""
 void *malloc(size_t size);
 """)
 stdlib = stdffi.dlopen(None)
+
+# When "packing" a matrix the owner of the memory buffer is transfered
+# to SuiteSparse, which then becomes responsible for freeing it.  cffi
+# wisely does not allow you to do this without declaring and calling
+# malloc directly.  When SuiteSparse moves over to a more formal
+# memory manager with the cuda work, this will likely change and have
+# to be replaceable with a allocator common to numpy, cuda, and here.
+# Maybe PyDataMem_NEW?
 malloc = stdlib.malloc
 
 GRB_HEADER_LEN=512
@@ -51,6 +60,12 @@ _ss_typecodes = {
     }
 
 _ss_codetypes = {v: k for k, v in _ss_typecodes.items()}
+
+
+def readinto_new_buffer(f, typ, size):
+    buff = ffi.cast(typ, malloc(size))
+    f.readinto(ffi.buffer(buff, size))
+    return buff
 
 def matrix_binwrite(A, filename, comments=None, compression=None):
     from . import get_version
@@ -324,27 +339,23 @@ def matrix_binread(filename, compression=None):
             Ai_size[0] = nvals[0] * Isize
             Ax_size[0] = nvals[0] * typesize[0]
 
-            Ap[0] = frombuff('GrB_Index*', fread(Ap_size[0]))
-            Ah[0] = frombuff('GrB_Index*', fread(Ah_size[0]))
-            Ai[0] = frombuff('GrB_Index*', fread(Ai_size[0]))
+            Ap[0] = readinto_new_buffer(f, 'GrB_Index*', Ap_size[0])
+            Ah[0] = readinto_new_buffer(f, 'GrB_Index*', Ah_size[0])
+            Ai[0] = readinto_new_buffer(f, 'GrB_Index*', Ai_size[0])
         elif is_sparse:
             Ap_size[0] = (nvec[0] + 1) * Isize
             Ai_size[0] = nvals[0] * Isize
             Ax_size[0] = nvals[0] * typesize[0]
-            Ap[0] = frombuff('GrB_Index*', fread(Ap_size[0]))
-            Ai[0] = frombuff('GrB_Index*', fread(Ai_size[0]))
+            Ap[0] = readinto_new_buffer(f, 'GrB_Index*', Ap_size[0])
+            Ai[0] = readinto_new_buffer(f, 'GrB_Index*', Ai_size[0])
         elif is_bitmap:
             Ab_size[0] = nrows[0] * ncols[0] * ffi.sizeof('int8_t')
             Ax_size[0] = nrows[0] * ncols[0] * typesize[0]
-            Ab_buff = ffi.cast('int8_t*', malloc(Ab_size[0]))
-            f.readinto(buff(Ab_buff, Ab_size[0]))
-            Ab[0] = Ab_buff
+            Ab[0] = readinto_new_buffer(f, 'int8_t*', Ab_size[0])
         elif is_full:
             Ax_size[0] = nrows[0] * ncols[0] * typesize[0]
             
-        Ax_buff = malloc(Ax_size[0])
-        f.readinto(buff(Ax_buff, Ax_size[0]))
-        Ax[0] = Ax_buff
+        Ax[0] = readinto_new_buffer(f, 'uint8_t*', Ax_size[0])
 
         _A = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(_A, atype._gb_type, nrows[0], ncols[0]))
