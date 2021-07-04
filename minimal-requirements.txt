@@ -1,3 +1,4 @@
+suitesparse-graphblas
 numpy
 scipy
 numba

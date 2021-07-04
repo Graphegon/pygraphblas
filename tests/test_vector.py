@@ -338,16 +338,6 @@ def test_select():
 
 pytest.mark.skip()
 
-
-def test_to_dense():
-    v = Vector.from_lists(list(range(0, 6, 2)), list(range(3)))
-    assert v.size == 5
-    assert v.nvals == 3
-    w = v.to_dense()
-    assert w.nvals == 5
-    assert w.iseq(Vector.from_lists([0, 1, 2, 3, 4], [0, 0, 1, 0, 2]))
-
-
 def test_dense():
     m = Vector.dense(UINT8, 10)
     assert len(m) == 10
@@ -380,12 +370,9 @@ def test_1_to_n():
         Vector.from_lists(
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            typ=INT32,
+            typ=INT64,
         )
     )
-    # this takes too much ram
-    # w = Vector.from_1_to_n(lib.INT32_MAX + 1)
-    # assert w.type == lib.INT64
 
 
 def test_to_arrays():
@@ -529,11 +516,11 @@ def test_itruediv_scalar():
 
 def test_slicing():
     v = Vector.from_1_to_n(10)
-    assert v[1:9:3].iseq(Vector.from_lists([0, 1, 2], [2, 5, 8], typ=INT32))
+    assert v[1:9:3].iseq(Vector.from_lists([0, 1, 2], [2, 5, 8]))
 
     assert len(v[1:9:-3]) == 0
 
-    assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4], typ=INT32))
+    assert v[9:1:-3].iseq(Vector.from_lists([0, 1, 2], [10, 7, 4]))
 
     assert len(v[9:1:3]) == 0
 

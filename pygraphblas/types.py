@@ -148,6 +148,16 @@ class MetaType(type):
     def gb_from_name(cls, name):
         return cls._gb_name_type_map[name]._gb_type
 
+    @property
+    def GrB_name(cls):
+        return 'GrB_' + cls.__name__
+
+    @property
+    def size(cls):
+        s = cls._ffi.new('size_t*')
+        _check(lib.GxB_Type_size(s, cls._gb_type))
+        return s[0]
+
 
 class Type(metaclass=MetaType):
     default_one = 1

@@ -88,29 +88,35 @@ non_boolean_re = re.compile(
     "^(GxB|GrB)_(MIN|MAX|PLUS|TIMES|ANY)_"
     "(FIRST|FIRSTI|FIRSTJ|FIRSTI1|FIRSTJ1|SECOND|SECONDI|SECONDJ|SECONDI1|SECONDJ1|MIN|MAX|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|ISEQ|ISNE|"
     "ISGT|ISLT|ISGE|ISLE|LOR|LAND|LXOR|PAIR)_"
+    "(?:SEMIRING_)?"
     "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
 )
 
 boolean_re = re.compile(
     "^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_"
     "(EQ|NE|GT|LT|GE|LE)_"
+    "(?:SEMIRING_)?"
     "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
 )
 
 pure_bool_re = re.compile(
     "^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_"
-    "(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_(BOOL)$"
+    "(FIRST|SECOND|LOR|LAND|LXOR|EQ|GT|LT|GE|LE|PAIR)_"
+    "(?:SEMIRING_)?"
+    "(BOOL)$"
 )
 
 complex_re = re.compile(
     "^(GxB|GrB)_(PLUS|TIMES|ANY)_"
     "(FIRST|SECOND|PLUS|MINUS|RMINUS|TIMES|DIV|RDIV|PAIR)_"
+    "(?:SEMIRING_)?"
     "(FC32|FC64)$"
 )
 
 bitwise_re = re.compile(
     "^(GxB|GrB)_(BOR|BAND|BXOR|BXNOR)_"
     "(BOR|BAND|BXOR|BXNOR)_"
+    "(?:SEMIRING_)?"
     "(UINT8|UINT16|UINT32|UINT64)$"
 )
 

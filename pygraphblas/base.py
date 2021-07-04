@@ -4,7 +4,7 @@ level library import.
 """
 
 from pprint import pprint
-from _pygraphblas import lib, ffi
+from suitesparse_graphblas import lib, ffi
 from numba import njit
 
 __all__ = [

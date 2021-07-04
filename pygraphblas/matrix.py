@@ -4,7 +4,7 @@
 import sys
 import weakref
 import operator
-from random import randint
+import random
 from array import array
 from pathlib import Path
 from functools import partial
@@ -20,6 +20,7 @@ from .base import (
     _get_select_op,
     _get_bin_op,
     GxB_INDEX_MAX,
+    GraphBLASException,
 )
 
 from . import types
@@ -85,7 +86,9 @@ class Matrix:
     def _check(self, res):
         if res != lib.GrB_SUCCESS:
             error_string = ffi.new("char**")
-            lib.GrB_Matrix_error(error_string, self._matrix[0])
+            error_res = lib.GrB_Matrix_error(error_string, self._matrix[0])
+            if error_res != lib.GrB_SUCCESS:
+                raise GraphBLASException('Cannot get error, GrB_Matrix_error itself returned an error.')
             raise _error_codes[res](ffi.string(error_string[0]))
 
     def __init__(self, matrix, typ=None):
@@ -109,7 +112,7 @@ class Matrix:
         self._check(lib.GrB_Matrix_free(self._matrix))
 
     @classmethod
-    def sparse(cls, typ, nrows=None, ncols=None):
+    def sparse(cls, typ, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX):
         """Create an empty sparse Matrix from the given type.  The dimensions
         can be specified with `nrows` and `ncols`.  If no dimensions
         are specified, they default to `GxB_INDEX_MAX`.
@@ -134,17 +137,13 @@ class Matrix:
         True
 
         """
-        if nrows is None:
-            nrows = GxB_INDEX_MAX
-        if ncols is None:
-            ncols = GxB_INDEX_MAX
         new_mat = ffi.new("GrB_Matrix*")
         _check(lib.GrB_Matrix_new(new_mat, typ._gb_type, nrows, ncols))
         m = cls(new_mat, typ)
         return m
 
     @classmethod
-    def dense(cls, typ, nrows, ncols, fill=None, sparsity=None):
+    def dense(cls, typ, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX, fill=None, sparsity=None):
         """Return a dense Matrix nrows by ncols.
 
         If `sparsity` is provided it is used for the sparsity of the
@@ -180,6 +179,19 @@ class Matrix:
             fill = m.type.default_zero
         m[:, :] = fill
         return m
+
+    @classmethod
+    def iso(cls, value, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX):
+        """Build an "iso" matrix from a scalar value.
+
+        This is similar to `Matrix.dense` but infers the type of the
+        new Matrix from the provided vbalue.
+
+        >>> M = Matrix.iso(3)
+        >>> assert M[42,42] == 3
+        """
+        typ = types._gb_from_type(type(value))
+        return cls.dense(typ, nrows, ncols, value)
 
     @classmethod
     def from_lists(cls, I, J, V, nrows=None, ncols=None, typ=None):
@@ -244,11 +256,11 @@ class Matrix:
         return m
 
     @classmethod
-    def from_mm(cls, mm_file, typ):
+    def from_mm(cls, mm_file):
         """Create a new matrix by reading a Matrix Market file.
 
-        >>> with open('/docs/test_mm.mm', 'r') as f:
-        ...     M = Matrix.from_mm(f, types.INT8)
+        >>> from pathlib import Path
+        >>> M = Matrix.from_mm(Path('/docs/test_mm.mm'))
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -262,12 +274,12 @@ class Matrix:
 
         """
         m = ffi.new("GrB_Matrix*")
-        i = cls(m, typ)
-        _check(lib.LAGraph_mmread(m, mm_file))
-        return i
+        with open(mm_file, "r") as f:
+            _check(lib.LAGraph_mmread(m, f))
+        return cls(m)
 
     @classmethod
-    def from_tsv(cls, tsv_file, typ, nrows, ncols):
+    def from_tsv(cls, tsv_file, typ, nrows, ncols, **kwargs):
         """Create a new matrix by reading a tab separated value file.
 
         >>> M = Matrix.from_tsv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7)
@@ -283,17 +295,18 @@ class Matrix:
               0  1  2  3  4  5  6
 
         """
-        m = ffi.new("GrB_Matrix*")
-        i = cls(m, typ)
-        with open(tsv_file, "r") as f:
-            _check(lib.LAGraph_tsvread(m, f, typ._gb_type, nrows, ncols))
-        return i
+        kwargs['delimiter'] = '\t'
+        return cls.from_csv(tsv_file, typ, nrows, ncols, **kwargs)
 
     @classmethod
-    def from_binfile(cls, bin_file):
-        """Create a new matrix by reading a SuiteSparse specific binary file.
+    def from_csv(cls, csv_file, typ, nrows, ncols, one_based=True, **reader_kwargs):
+        """Create a new matrix by reading a comma separated value file.
 
-        >>> M = Matrix.from_binfile(Path('/docs/test_binfile.grb'))
+        kwargs to this function are passed to the underlying
+        `csv.Reader` object, so you can control various options like
+        quoting and alternate delimiters that way.
+
+        >>> M = Matrix.from_csv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7, delimiter='\\t')
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -306,17 +319,46 @@ class Matrix:
               0  1  2  3  4  5  6
 
         """
-        m = ffi.new("GrB_Matrix*")
-        _check(lib.LAGraph_binread(m, bytes(bin_file)))
-        return cls(m)
+        import csv
+        if typ is types.BOOL:
+            convert = bool
+        elif typ in (types.INT8, types.INT16, types.INT32, types.INT64,
+                     types.UINT8, types.UINT16, types.UINT32, types.UINT64):
+            convert = int
+        elif typ in (types.FP32, types.FP64):
+            convert = float
+        elif typ in (types.FC32, types.FC64):
+            convert = complex
+            
+        M = cls.sparse(typ, nrows, ncols)
+        with open(csv_file, newline='') as f:
+            reader = csv.reader(f, **reader_kwargs)
+            for row in reader:
+                if len(row) > 3:
+                    raise TypeError('File can contain only 3 columns: row, col and val')
+                i, j, v = row
+                i = int(i)
+                j = int(j)
+                if one_based:
+                    i = i - 1
+                    j = j - 1
+                M[i,j] = convert(v)
+        return M
+
+    @classmethod
+    def from_binfile(cls, bin_file, compression=None):
+        """Create a new matrix by reading a SuiteSparse specific binary file.
+        """
+        from .io import matrix_binread
+        return matrix_binread(bin_file, compression)
 
     @classmethod
     def random(
         cls,
         typ,
-        nrows,
-        ncols,
         nvals,
+        nrows=lib.GxB_INDEX_MAX,
+        ncols=lib.GxB_INDEX_MAX,
         make_pattern=False,
         make_symmetric=False,
         make_skew_symmetric=False,
@@ -328,7 +370,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
-        >>> M = Matrix.random(types.UINT8, 5, 5, 20,
+        >>> M = Matrix.random(types.UINT8, 20, 5, 5,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         >>> draw_graph(M, filename='/docs/imgs/Matrix_random')
         <graphviz.dot.Digraph object at ...>
@@ -336,28 +378,52 @@ class Matrix:
         ![Matrix_random.png](../imgs/Matrix_random.png)
 
         """
-        result = ffi.new("GrB_Matrix*")
-        i = cls(result, typ)
-        fseed = ffi.new("uint64_t*")
-        if seed is None:
-            seed = randint(0, sys.maxsize)
-        fseed[0] = seed
-        _check(
-            lib.LAGraph_random(
-                result,
-                typ._gb_type,
-                nrows,
-                ncols,
-                nvals,
-                make_pattern,
-                make_symmetric,
-                make_skew_symmetric,
-                make_hermitian,
-                no_diagonal,
-                fseed,
-            )
-        )
-        return i
+        M = Matrix.sparse(typ, nrows, ncols)
+        if seed is not None:
+            random.seed(seed)
+        if typ in (types.BOOL, types.UINT8, types.UINT16, types.UINT32, types.UINT64):
+            make_skew_symmetric = False
+        if M.nrows == 0 or M.ncols == 0:
+            nvals = 0
+        if M.nrows != M.ncols:
+            make_symmetric = False
+            make_skew_symmetric = False
+            make_hermitian = False
+        if make_pattern or make_symmetric:
+            make_skew_symmetric = False
+            make_hermitian = False
+        if make_skew_symmetric:
+            make_hermitian = False
+            no_diagonal = true
+        if typ not in (types.FC32, types.FC64):
+            make_hermitian = False
+        if typ is types.BOOL:
+            f = partial(random.randint, 0, 1)
+        if typ is types.UINT8:
+            f = partial(random.randint, 0, (2**8) - 1)
+        if typ is types.UINT16:
+            f = partial(random.randint, 0, (2**16) - 1)
+        if typ is types.UINT32:
+            f = partial(random.randint, 0, (2**32) - 1)
+        if typ is types.UINT64:
+            f = partial(random.randint, 0, (2**64) - 1)
+        if typ is types.INT8:
+            f = partial(random.randint, (-2**7)+1, (2**7) - 1)
+        if typ is types.INT16:
+            f = partial(random.randint, (-2**15)+1, (2**15) - 1)
+        if typ is types.INT32:
+            f = partial(random.randint, (-2**31)+1, (2**31) - 1)
+        if typ is types.INT64:
+            f = partial(random.randint, (-2**63)+1, (2**63) - 1)
+        if typ in (types.FP32, types.FP64):
+            f = random.random
+        if typ in (types.FC32, types.FC64):
+            f = lambda: complex(random.random(), random.random())
+        for i in range(nvals):
+            i = random.randint(0, M.nrows - 1)
+            j = random.randint(0, M.ncols - 1)
+            M[i,j] = f()
+        return M
 
     @classmethod
     def identity(cls, typ, nrows, value=None):
@@ -383,7 +449,7 @@ class Matrix:
         return result
 
     @classmethod
-    def ssget(cls, name_or_id=None):
+    def ssget(cls, name_or_id=None, binary_cache_dir=None):
         """Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
@@ -408,8 +474,15 @@ class Matrix:
         mm_path, _ = result.download(extract=True)
         mm_path = Path(mm_path)
         for m in mm_path.glob("*.mtx"):
-            with open(mm_path / m, "r") as f:
-                yield m.name, cls.from_mm(f, types.FP64)
+            Mbin = mm_path / (m.name + '.grb')
+            if binary_cache_dir and Mbin.exists():
+                M = cls.from_binfile(bytes(Mbin))
+            else:
+                M = cls.from_mm(mm_path / m)
+                if binary_cache_dir:
+                    M.to_binfile(bytes(Mbin))
+            M.wait()
+            yield m.name, M
 
     @property
     def gb_type(self):
@@ -487,6 +560,17 @@ class Matrix:
         """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Matrix_nvals(n, self._matrix[0]))
+        return n[0]
+
+    @property
+    def memory_usage(self):
+        """Returns the memory usage of the Matrix.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> assert M.memory_usage > 0
+        """
+        n = ffi.new("size_t*")
+        self._check(lib.GxB_Matrix_memoryUsage(n, self._matrix[0]))
         return n[0]
 
     @property
@@ -692,15 +776,26 @@ class Matrix:
             out = Matrix.sparse(typ, self.nrows, self.ncols)
         return self.apply(typ.ONE, out=out)
 
+    @property
+    def S(self):
+        """Return the vector "structure".  This is the same as calling
+        `Matrix.pattern()` with no arguments.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [0, 1, 2], [1, 2, 3])
+        >>> assert M.S == M.pattern()
+
+        """
+        return self.pattern()
+
     def to_mm(self, fileobj):
         """Write this matrix to a file using the Matrix Market format."""
         self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))
 
-    def to_binfile(self, filename, comments=""):
+    def to_binfile(self, filename, comments="", compression=None):
         """Write this matrix using custom SuiteSparse binary format."""
-        self._check(
-            lib.LAGraph_binwrite(self._matrix, bytes(filename), bytes(comments, "utf8"))
-        )
+        from .io import matrix_binwrite
+        matrix_binwrite(self, filename, comments, compression)
+        return
 
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists.
@@ -736,7 +831,7 @@ class Matrix:
         """
         self._check(lib.GrB_Matrix_clear(self._matrix[0]))
 
-    def resize(self, nrows=lib.GxB_INDEX_MAX, ncols=lib.GxB_INDEX_MAX):
+    def resize(self, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX):
         """Resize the matrix.  If the dimensions decrease, entries that fall
         outside the resized matrix are deleted.
 
@@ -1207,8 +1302,7 @@ class Matrix:
         return iter(I)
 
     I = rows
-    """Alias for `Matrix.rows`.  Useful conciseness and consistency with
-    `Vector.indexes`.
+    """Alias for `Matrix.rows`.
     """
 
     @property
@@ -1372,6 +1466,12 @@ class Matrix:
         for i in range(1, exponent):
             result.mxm(self, out=result)
         return result
+
+    def concat(self, others):
+        pass
+
+    def split(self):
+        pass
 
     def kronpow(self, exponent):
         """Do "Kronecker Power" expansion.  This is useful for graph
@@ -2332,7 +2432,6 @@ class Matrix:
           8|  4        4        4      |  8
               0  1  2  3  4  5  6  7  8
 
-        >>>
         >>> print(m.kronecker(n, op=types.UINT64.MIN))
               0  1  2  3  4  5  6  7  8
           0|     1        1        1   |  0
@@ -3041,6 +3140,19 @@ class Matrix:
             self.ncols,
             self.nvals,
             self.type.__name__,
+        )
+
+
+    @classmethod
+    def from_scipy_sparse(cls, m, *, dup_op=None, name=None):
+        """
+        dtype is inferred from m.dtype
+        """
+        ss = m.tocoo()
+        nrows, ncols = ss.shape
+        dtype = lookup_dtype(m.dtype)
+        return cls.from_values(
+            ss.row, ss.col, ss.data, nrows=nrows, ncols=ncols
         )
 
     def to_scipy_sparse(self, format="csr"):

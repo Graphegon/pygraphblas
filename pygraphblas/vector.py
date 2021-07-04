@@ -265,11 +265,10 @@ class Vector:
         1| 2
         2| 3
         """
-        new_vec = ffi.new("GrB_Vector*")
-        _check(lib.LAGraph_1_to_n(new_vec, n))
-        if n < lib.INT32_MAX:
-            return cls(new_vec, types.INT32)
-        return cls(new_vec, types.INT64)  # pragma: no cover
+        v = cls.sparse(types.INT64, n)
+        for i in range(n):
+            v[i] = i + 1
+        return v
 
     def dup(self):
         """Create an duplicate Vector from the given argument.
@@ -337,7 +336,7 @@ class Vector:
         return status[0]
 
     @classmethod
-    def dense(cls, typ, size, fill=None):
+    def dense(cls, typ, size=None, fill=None):
         """Return a dense vector of `typ` and `size`.  If `fill` is provided,
         use that value otherwise use `self.type.default_zero`
 
@@ -357,6 +356,19 @@ class Vector:
         v[:] = fill
         return v
 
+    @classmethod
+    def iso(cls, value, size=GxB_INDEX_MAX):
+        """Build an "iso" vector from a scalar value.
+
+        This is similar to `Vector.dense` but infers the type of the
+        new Matrix from the provided vbalue.
+
+        >>> v = Vector.iso(3)
+        >>> assert v[42] == 3
+        """
+        typ = types._gb_from_type(type(value))
+        return cls.dense(typ, size, value)
+
     def to_lists(self):
         """Extract the indices and values of the Vector as 2 lists.
 
@@ -375,7 +387,7 @@ class Vector:
         """Return as python `array` objects.
 
         >>> Vector.from_1_to_n(3).to_arrays()
-        (array('L', [0, 1, 2]), array('l', [1, 2, 3]))
+        (array('L', [0, 1, 2]), array('q', [1, 2, 3]))
 
         """
         if self.type._typecode is None:
@@ -413,6 +425,17 @@ class Vector:
         """
         n = ffi.new("GrB_Index*")
         self._check(lib.GrB_Vector_nvals(n, self._vector[0]))
+        return n[0]
+
+    @property
+    def memory_usage(self):
+        """Returns the memory usage of the Vector.
+
+        >>> v = Vector.from_lists([0, 1, 2], [1, 2, 0])
+        >>> assert v.memory_usage > 0
+        """
+        n = ffi.new("size_t*")
+        self._check(lib.GxB_Vector_memoryUsage(n, self._vector[0]))
         return n[0]
 
     @property
@@ -1218,16 +1241,20 @@ class Vector:
         self.apply(types.BOOL.ONE, out=result)
         return result
 
+    @property
+    def S(self):
+        """Return the vector "structure".  This is the same as calling
+        `Vector.pattern()` with no arguments.
+
+        >>> v = Vector.from_lists([0, 1, 2], [1, 2, 3])
+        >>> assert v.S == v.pattern()
+
+        """
+        return self.pattern()
+
     def nonzero(self):
         """Select vector of nonzero entries."""
         return self.select(lib.GxB_NONZERO)
-
-    def to_dense(self):
-        """Convert to dense vector."""
-        out = ffi.new("GrB_Vector*")
-        _id = ffi.new(self.type._ptr, 0)
-        self._check(lib.LAGraph_Vector_to_dense(out, self._vector[0], _id))
-        return Vector(out, self.type)
 
     def __setitem__(self, index, value):
         if isinstance(index, int):

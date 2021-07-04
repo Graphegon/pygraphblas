@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ "$1" = "build" ]
 then
-	SS_COMPACT=1 ./docker_build.sh v4.0.3 test minimal
+	SS_COMPACT=1 ./docker_build.sh master test minimal
 fi
 docker run --rm \
        -v `pwd`/pygraphblas:/pygraphblas/pygraphblas \
