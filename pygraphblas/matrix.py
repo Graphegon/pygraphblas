@@ -88,7 +88,9 @@ class Matrix:
             error_string = ffi.new("char**")
             error_res = lib.GrB_Matrix_error(error_string, self._matrix[0])
             if error_res != lib.GrB_SUCCESS:
-                raise GraphBLASException('Cannot get error, GrB_Matrix_error itself returned an error.')
+                raise GraphBLASException(
+                    "Cannot get error, GrB_Matrix_error itself returned an error."
+                )
             raise _error_codes[res](ffi.string(error_string[0]))
 
     def __init__(self, matrix, typ=None):
@@ -143,7 +145,9 @@ class Matrix:
         return m
 
     @classmethod
-    def dense(cls, typ, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX, fill=None, sparsity=None):
+    def dense(
+        cls, typ, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX, fill=None, sparsity=None
+    ):
         """Return a dense Matrix nrows by ncols.
 
         If `sparsity` is provided it is used for the sparsity of the
@@ -295,7 +299,7 @@ class Matrix:
               0  1  2  3  4  5  6
 
         """
-        kwargs['delimiter'] = '\t'
+        kwargs["delimiter"] = "\t"
         return cls.from_csv(tsv_file, typ, nrows, ncols, **kwargs)
 
     @classmethod
@@ -320,36 +324,45 @@ class Matrix:
 
         """
         import csv
+
         if typ is types.BOOL:
             convert = bool
-        elif typ in (types.INT8, types.INT16, types.INT32, types.INT64,
-                     types.UINT8, types.UINT16, types.UINT32, types.UINT64):
+        elif typ in (
+            types.INT8,
+            types.INT16,
+            types.INT32,
+            types.INT64,
+            types.UINT8,
+            types.UINT16,
+            types.UINT32,
+            types.UINT64,
+        ):
             convert = int
         elif typ in (types.FP32, types.FP64):
             convert = float
         elif typ in (types.FC32, types.FC64):
             convert = complex
-            
+
         M = cls.sparse(typ, nrows, ncols)
-        with open(csv_file, newline='') as f:
+        with open(csv_file, newline="") as f:
             reader = csv.reader(f, **reader_kwargs)
             for row in reader:
                 if len(row) > 3:
-                    raise TypeError('File can contain only 3 columns: row, col and val')
+                    raise TypeError("File can contain only 3 columns: row, col and val")
                 i, j, v = row
                 i = int(i)
                 j = int(j)
                 if one_based:
                     i = i - 1
                     j = j - 1
-                M[i,j] = convert(v)
+                M[i, j] = convert(v)
         return M
 
     @classmethod
     def from_binfile(cls, bin_file, compression=None):
-        """Create a new matrix by reading a SuiteSparse specific binary file.
-        """
+        """Create a new matrix by reading a SuiteSparse specific binary file."""
         from .io import matrix_binread
+
         return matrix_binread(bin_file, compression)
 
     @classmethod
@@ -400,21 +413,21 @@ class Matrix:
         if typ is types.BOOL:
             f = partial(random.randint, 0, 1)
         if typ is types.UINT8:
-            f = partial(random.randint, 0, (2**8) - 1)
+            f = partial(random.randint, 0, (2 ** 8) - 1)
         if typ is types.UINT16:
-            f = partial(random.randint, 0, (2**16) - 1)
+            f = partial(random.randint, 0, (2 ** 16) - 1)
         if typ is types.UINT32:
-            f = partial(random.randint, 0, (2**32) - 1)
+            f = partial(random.randint, 0, (2 ** 32) - 1)
         if typ is types.UINT64:
-            f = partial(random.randint, 0, (2**64) - 1)
+            f = partial(random.randint, 0, (2 ** 64) - 1)
         if typ is types.INT8:
-            f = partial(random.randint, (-2**7)+1, (2**7) - 1)
+            f = partial(random.randint, (-(2 ** 7)) + 1, (2 ** 7) - 1)
         if typ is types.INT16:
-            f = partial(random.randint, (-2**15)+1, (2**15) - 1)
+            f = partial(random.randint, (-(2 ** 15)) + 1, (2 ** 15) - 1)
         if typ is types.INT32:
-            f = partial(random.randint, (-2**31)+1, (2**31) - 1)
+            f = partial(random.randint, (-(2 ** 31)) + 1, (2 ** 31) - 1)
         if typ is types.INT64:
-            f = partial(random.randint, (-2**63)+1, (2**63) - 1)
+            f = partial(random.randint, (-(2 ** 63)) + 1, (2 ** 63) - 1)
         if typ in (types.FP32, types.FP64):
             f = random.random
         if typ in (types.FC32, types.FC64):
@@ -422,7 +435,7 @@ class Matrix:
         for i in range(nvals):
             i = random.randint(0, M.nrows - 1)
             j = random.randint(0, M.ncols - 1)
-            M[i,j] = f()
+            M[i, j] = f()
         return M
 
     @classmethod
@@ -474,7 +487,7 @@ class Matrix:
         mm_path, _ = result.download(extract=True)
         mm_path = Path(mm_path)
         for m in mm_path.glob("*.mtx"):
-            Mbin = mm_path / (m.name + '.grb')
+            Mbin = mm_path / (m.name + ".grb")
             if binary_cache_dir and Mbin.exists():
                 M = cls.from_binfile(bytes(Mbin))
             else:
@@ -794,6 +807,7 @@ class Matrix:
     def to_binfile(self, filename, comments="", compression=None):
         """Write this matrix using custom SuiteSparse binary format."""
         from .io import matrix_binwrite
+
         matrix_binwrite(self, filename, comments, compression)
         return
 
@@ -1344,11 +1358,13 @@ class Matrix:
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
         return iter(X)
 
-
     def __getattr__(self, name):
-        """Look up operators as attributes for the given object.
-        """
-        return partial(getattr(self.type, name), self)
+        """Look up operators as attributes for the given object."""
+        try:
+            attr = getattr(self.type, name)
+        except AttributeError:
+            raise AttributeError(f"Matrix has no attribute or type operator {name}")
+        return partial(attr, self)
 
     def __len__(self):
         """Return the number of elements in the Matrix.
@@ -1849,7 +1865,7 @@ class Matrix:
                 op = lib.GxB_EQ_THUNK
                 thunk = self.max()
             else:
-               op = _get_select_op(op)
+                op = _get_select_op(op)
         elif isinstance(op, SelectOp):
             op = op.get_selectop()
 
@@ -3142,7 +3158,6 @@ class Matrix:
             self.type.__name__,
         )
 
-
     @classmethod
     def from_scipy_sparse(cls, m, *, dup_op=None, name=None):
         """
@@ -3151,9 +3166,7 @@ class Matrix:
         ss = m.tocoo()
         nrows, ncols = ss.shape
         dtype = lookup_dtype(m.dtype)
-        return cls.from_values(
-            ss.row, ss.col, ss.data, nrows=nrows, ncols=ncols
-        )
+        return cls.from_values(ss.row, ss.col, ss.data, nrows=nrows, ncols=ncols)
 
     def to_scipy_sparse(self, format="csr"):
         """Return a scipy sparse matrix of this Matrix.

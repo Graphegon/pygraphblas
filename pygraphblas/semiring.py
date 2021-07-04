@@ -46,13 +46,14 @@ class Semiring:
 
     def __call__(self, A, B, *args, **kwargs):
         from .vector import Vector
+
         if isinstance(A, Vector):
             op = A.vxm
         elif isinstance(B, Vector):
             op = A.mxv
         else:
             op = A.mxm
-        kwargs['semiring'] = self
+        kwargs["semiring"] = self
         return op(B, *args, **kwargs)
 
     def __enter__(self):
@@ -96,7 +97,7 @@ boolean_re = re.compile(
     "^(GxB|GrB)_(LOR|LAND|LXOR|EQ|ANY)_"
     "(EQ|NE|GT|LT|GE|LE)_"
     "(?:SEMIRING_)?"
-    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
+    "(UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64|FC32|FC64)$"
 )
 
 pure_bool_re = re.compile(

@@ -90,7 +90,9 @@ def draw_graph(
         g = Digraph(name)
     else:
         g = Graph(name)
-    g.attr(rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false")
+    g.attr(
+        rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false"
+    )
     if graph_attr:
         g.attr(**graph_attr)
     if node_attr:
@@ -249,7 +251,7 @@ def draw_matrix(
     cmap="viridis",
     filename=None,
     column=True,
-    font_path=None
+    font_path=None,
 ):  # pragma: nocover
     from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
@@ -292,7 +294,7 @@ def draw_matrix(
                 fill=rgb2hex(cmap(1)) if v else rgb2hex(cmap(0)),
                 outline="black",
             )
-            v = 't' if v else 'f'
+            v = "t" if v else "f"
         elif M.type in [FP32, FP64] and cmap:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
@@ -355,7 +357,7 @@ def draw_matrix_op(
     result,
     font_path=Path("/pygraphblas/demo"),
     filename=None,
-    eqstr='=',
+    eqstr="=",
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs["scale"]
@@ -449,7 +451,7 @@ my_style = [
 ]
 
 
-def draw_cy(M, visual_style=my_style, layout_name='cose'):  # pragma: nocover
+def draw_cy(M, visual_style=my_style, layout_name="cose"):  # pragma: nocover
     from cyjupyter import Cytoscape
 
     c = Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)

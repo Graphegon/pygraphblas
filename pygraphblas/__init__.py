@@ -236,8 +236,10 @@ you with a lot more background information.
 
 from suitesparse_graphblas import lib, ffi, initialize, is_initialized
 
+
 def init(blocking=lib.GrB_NONBLOCKING):
     initialize(blocking=blocking, memory_manager="c")
+
 
 init()
 
@@ -251,11 +253,13 @@ from .base import (
     options_set,
 )
 
-__version__ = '5.1.2.0'
+__version__ = "5.1.2.0"
+
 
 def get_version():
     """Return the pygraphblas version. """
     return __version__
+
 
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op

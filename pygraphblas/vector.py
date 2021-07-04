@@ -104,8 +104,7 @@ class Vector:
         return zip(I, X)
 
     def __getattr__(self, name):
-        """Look up operators as attributes for the given object.
-        """
+        """Look up operators as attributes for the given object."""
         return partial(getattr(self.type, name), self)
 
     @property

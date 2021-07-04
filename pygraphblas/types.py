@@ -150,11 +150,11 @@ class MetaType(type):
 
     @property
     def GrB_name(cls):
-        return 'GrB_' + cls.__name__
+        return "GrB_" + cls.__name__
 
     @property
     def size(cls):
-        s = cls._ffi.new('size_t*')
+        s = cls._ffi.new("size_t*")
         _check(lib.GxB_Type_size(s, cls._gb_type))
         return s[0]
 

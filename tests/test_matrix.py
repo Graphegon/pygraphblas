@@ -8,21 +8,23 @@ import pytest
 from pygraphblas import *
 from pygraphblas.base import ffi, lib, _check
 
+
 def test_iseq():
     l = Matrix.sparse(INT8, 10, 10)
-    l[0,0] = 1
+    l[0, 0] = 1
     m = Matrix.sparse(INT8, 10, 10)
-    m[0,0] = 1
+    m[0, 0] = 1
     n = Matrix.sparse(INT64, 10, 10)
-    n[0,0] = 1
+    n[0, 0] = 1
     o = Matrix.sparse(INT64, 10, 9)
-    o[0,0] = 1
+    o[0, 0] = 1
     p = Matrix.sparse(INT64, 10, 9)
-    p[0,1] = 1
+    p[0, 1] = 1
     assert l.iseq(m)
     assert m.isne(n)
     assert n.isne(o)
     assert o.isne(p)
+
 
 def test_matrix_init_without_type():
     mx = Matrix.sparse(INT8)
@@ -327,6 +329,7 @@ def test_matrix_transpose():
     assert v2.iseq(v)
 
 
+@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / "mmwrite_test.mm"
     mmf.touch()
@@ -370,6 +373,7 @@ def test_matrix_random():
     assert m.nrows == lib.GxB_INDEX_MAX
     assert m.ncols == lib.GxB_INDEX_MAX
     assert m.nvals == 5
+
 
 def test_matrix_slicing():
     I, J = tuple(map(list, zip(*product(range(3), repeat=2))))
@@ -1061,7 +1065,7 @@ def test_to_scipy_sparse():
     v = Matrix.random(INT8, 4, 10, 10, seed=42)
     assert len(v) == 4
     s = v.to_scipy_sparse()
-    assert (s.data == [ 62,  46, -70,  24]).all()
+    assert (s.data == [62, 46, -70, 24]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
     with pytest.raises(TypeError):

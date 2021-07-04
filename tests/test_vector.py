@@ -338,6 +338,7 @@ def test_select():
 
 pytest.mark.skip()
 
+
 def test_dense():
     m = Vector.dense(UINT8, 10)
     assert len(m) == 10
