@@ -359,11 +359,14 @@ class Matrix:
         return M
 
     @classmethod
-    def from_binfile(cls, bin_file, compression=None):
+    def binread(cls, bin_file, compression=None):
         """Create a new matrix by reading a SuiteSparse specific binary file."""
-        from .io import matrix_binread
+        from .io import binread
 
-        return matrix_binread(bin_file, compression)
+        matrix = binread(bin_file, compression)
+        return cls(matrix)
+
+    from_binfile = binread
 
     @classmethod
     def random(
@@ -804,12 +807,14 @@ class Matrix:
         """Write this matrix to a file using the Matrix Market format."""
         self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))
 
-    def to_binfile(self, filename, comments="", compression=None):
+    def binwrite(self, filename, comments="", compression=None):
         """Write this matrix using custom SuiteSparse binary format."""
-        from .io import matrix_binwrite
+        from .io import binwrite
 
-        matrix_binwrite(self, filename, comments, compression)
+        binwrite(self._matrix, filename, comments, compression)
         return
+
+    to_binfile = binwrite
 
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists.
@@ -3159,14 +3164,20 @@ class Matrix:
         )
 
     @classmethod
-    def from_scipy_sparse(cls, m, *, dup_op=None, name=None):
+    def from_scipy_sparse(cls, m):
         """
-        dtype is inferred from m.dtype
+        GrB_Type is inferred from m.dtype.
+
+        >>> A = Matrix.from_lists([0, 1, 2], [1, 1, 2], [1, 2, 3])
+        >>> s = A.to_scipy_sparse()
+        >>> B = Matrix.from_scipy_sparse(s)
+        >>> assert A.iseq(B)
         """
         ss = m.tocoo()
         nrows, ncols = ss.shape
-        dtype = lookup_dtype(m.dtype)
-        return cls.from_values(ss.row, ss.col, ss.data, nrows=nrows, ncols=ncols)
+        typ = types.Type._dtype_gb_map[m.dtype.type]
+        print('Rype!', typ)
+        return cls.from_lists(ss.row, ss.col, ss.data, typ=typ, nrows=nrows, ncols=ncols)
 
     def to_scipy_sparse(self, format="csr"):
         """Return a scipy sparse matrix of this Matrix.

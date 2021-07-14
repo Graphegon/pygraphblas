@@ -51,6 +51,7 @@ class MetaType(type):
     _gb_type_map = {}
     _type_gb_map = {}
     _gb_name_type_map = {}
+    _dtype_gb_map = {}
 
     def __new__(meta, type_name, bases, attrs):
         if attrs.get("base", False):
@@ -75,6 +76,7 @@ class MetaType(type):
         cls = super().__new__(meta, type_name, bases, attrs)
         meta._gb_type_map[cls._gb_type] = cls
         meta._type_gb_map[cls] = cls._gb_type
+        meta._dtype_gb_map[cls._numpy_t] = cls
         meta._gb_name_type_map[type_name] = cls
         meta._gb_name_type_map[cls._c_type] = cls
 

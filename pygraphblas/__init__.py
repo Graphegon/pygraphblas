@@ -237,7 +237,7 @@ you with a lot more background information.
 from suitesparse_graphblas import lib, ffi, initialize, is_initialized
 
 
-def init(blocking=lib.GrB_NONBLOCKING):
+def init(blocking=False):
     initialize(blocking=blocking, memory_manager="c")
 
 
