@@ -131,7 +131,7 @@ def build_binaryops(__pdoc__):
         __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
-def binary_op(arg_type):
+def binary_op(arg_type, nopython=True):
     """Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -167,7 +167,7 @@ def binary_op(arg_type):
             numba.types.CPointer(arg_type._numba_t),
             numba.types.CPointer(arg_type._numba_t),
         )
-        jitfunc = numba.jit(func, nopython=True)
+        jitfunc = numba.jit(func, nopython=nopython)
 
         @numba.cfunc(sig, nopython=True)
         def wrapper(z, x, y):  # pragma: no cover
