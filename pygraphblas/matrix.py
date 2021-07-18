@@ -32,7 +32,6 @@ from .monoid import current_monoid
 from .selectop import SelectOp
 from . import descriptor
 from .descriptor import Descriptor, T0, current_desc
-from .gviz import draw_graph, draw_matrix
 
 __all__ = ["Matrix"]
 __pdoc__ = {"Matrix.__init__": False}
@@ -286,10 +285,23 @@ class Matrix:
               0  1  2  3  4  5  6
 
         """
-        m = ffi.new("GrB_Matrix*")
-        with open(mm_file, "r") as f:
-            _check(lib.LAGraph_mmread(m, f))
-        return cls(m)
+        from mmparse import mmread, get_mm_type_converter
+
+        with mmread(mm_file) as f:
+            header, row_iter = f
+            mm_type = header["mm_type"]
+            nrows = header["nrows"]
+            ncols = header["ncols"]
+            symmetric = header["mm_storage"] == "symmetric"
+            typ = get_mm_type_converter(mm_type)
+            m = cls.sparse(typ, nrows, ncols)
+            for l, i, j, v in row_iter:
+                i -= 1
+                j -= 1
+                m[i, j] = v
+                if symmetric:
+                    m[j, i] = v
+            return m
 
     @classmethod
     def from_tsv(cls, tsv_file, typ, nrows, ncols, **kwargs):
@@ -370,7 +382,7 @@ class Matrix:
     @classmethod
     def binread(cls, bin_file, compression=None):
         """Create a new matrix by reading a SuiteSparse specific binary file."""
-        from .io import binread
+        from suitesparse_graphblas.io import binread
 
         matrix = binread(bin_file, compression)
         return cls(matrix)
@@ -395,6 +407,7 @@ class Matrix:
         columns and values.  Other flags set additional properties the
         matrix will hold.
 
+        >>> from .gviz import draw_graph
         >>> M = Matrix.random(types.UINT8, 20, 5, 5,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
         >>> draw_graph(M, filename='/docs/imgs/Matrix_random')
@@ -483,13 +496,8 @@ class Matrix:
 
         >>> from pprint import pprint
         >>> from operator import itemgetter
-        >>> pprint(sorted(list(Matrix.ssget(596)), key=itemgetter(0)))
-        [('lp_adlittle.mtx', <Matrix (56x138 : 424:FP64)>),
-         ('lp_adlittle_b.mtx', <Matrix (56x1 : 56:FP64)>),
-         ('lp_adlittle_c.mtx', <Matrix (138x1 : 138:FP64)>),
-         ('lp_adlittle_hi.mtx', <Matrix (138x1 : 138:FP64)>),
-         ('lp_adlittle_lo.mtx', <Matrix (138x1 : 138:FP64)>),
-         ('lp_adlittle_z0.mtx', <Matrix (1x1 : 1:FP64)>)]
+        >>> pprint(sorted(list(Matrix.ssget('Newman/karate')), key=itemgetter(0)))
+        [('karate.mtx', <Matrix (34x34 : 156:BOOL)>)]
 
         """
         import ssgetpy
@@ -818,7 +826,7 @@ class Matrix:
 
     def binwrite(self, filename, comments="", compression=None):
         """Write this matrix using custom SuiteSparse binary format."""
-        from .io import binwrite
+        from suitesparse_graphblas.io import binwrite
 
         binwrite(self._matrix, filename, comments, compression)
         return
@@ -1002,6 +1010,7 @@ class Matrix:
         the intersection. Any binary operator can be used
         interchangeably for either operation.
 
+        >>> from .gviz import draw_graph
         >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         >>> V = list(range(len(I)))
@@ -1134,6 +1143,7 @@ class Matrix:
         the intersection. Any binary operator can be used
         interchangeably for either operation.
 
+        >>> from .gviz import draw_graph
         >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         >>> V = list(range(len(I)))
@@ -1508,6 +1518,7 @@ class Matrix:
         generation through expanding patterns.  And it draws pretty
         pictures.
 
+        >>> from .gviz import draw_matrix
         >>> initiator = Matrix.from_lists([0, 0, 1], [0, 1, 1], [0.77, 0.88, 0.99])
         >>> initiator.kronpow(0).iseq(Matrix.identity(types.FP64, 2))
         True
@@ -3117,7 +3128,7 @@ class Matrix:
         return t.render(A=self, title=title)
 
     def _repr_html_(self):  # pragma: nocover
-        """ jupyter notebook magic render method. """
+        """jupyter notebook magic render method."""
         return self.to_html_table()
 
     def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
@@ -3185,8 +3196,14 @@ class Matrix:
         ss = m.tocoo()
         nrows, ncols = ss.shape
         typ = types.Type._dtype_gb_map[m.dtype.type]
-        print('Rype!', typ)
-        return cls.from_lists(ss.row, ss.col, ss.data, typ=typ, nrows=nrows, ncols=ncols)
+        return cls.from_lists(
+            [i.item() for i in ss.row],
+            [j.item() for j in ss.col],
+            [v.item() for v in ss.data],
+            typ=typ,
+            nrows=nrows,
+            ncols=ncols,
+        )
 
     def to_scipy_sparse(self, format="csr"):
         """Return a scipy sparse matrix of this Matrix.

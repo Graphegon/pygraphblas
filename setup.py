@@ -8,7 +8,6 @@ setup(
     author='Michel Pelletier',
     packages=['pygraphblas'],
     setup_requires=["pytest-runner"],
-#    cffi_modules=["pygraphblas/build.py:ffibuilder"],
-    install_requires=["suitesparse-graphblas", "numba", "scipy", "graphviz", "matplotlib", "contextvars"],
+    install_requires=["suitesparse-graphblas", "numba", "scipy", "contextvars"],
 )
 

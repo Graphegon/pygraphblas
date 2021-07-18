@@ -1,4 +1,3 @@
-suitesparse-graphblas
 numpy
 scipy
 numba
@@ -8,8 +7,8 @@ setuptools
 ipython
 contextvars
 pdoc3
-graphviz
-Pillow
-matplotlib
 coveralls
 ssgetpy
+matplotlib
+graphviz
+mmparse==0.4
