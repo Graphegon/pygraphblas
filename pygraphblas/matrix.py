@@ -138,8 +138,17 @@ class Matrix:
         >>> m.nvals == 0
         True
 
+        One of the Python types `(bool, int, float, complex)` can be
+        passed instead.  They are turned into `(BOOL, INT64, FP64,
+        FC64)` respectively:
+
+        >>> Matrix.sparse(int)
+        <Matrix (1152921504606846976x1152921504606846976 : 0:INT64)>
+
         """
         new_mat = ffi.new("GrB_Matrix*")
+        if not issubclass(typ, types.Type):
+            typ = types._gb_from_type(typ)
         _check(lib.GrB_Matrix_new(new_mat, typ._gb_type, nrows, ncols))
         m = cls(new_mat, typ)
         return m
