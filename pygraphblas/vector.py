@@ -164,7 +164,7 @@ class Vector:
         if self.nvals != other.nvals:
             return False
         C = self.emult(other, op, cast=types.BOOL)
-        if C.nvals != self.nvals: # pragma: nocover
+        if C.nvals != self.nvals:  # pragma: nocover
             return False
         return C.reduce_bool(types.BOOL.land_monoid)
 

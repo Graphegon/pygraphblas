@@ -375,7 +375,7 @@ def _gb_from_type(typ):  # pragma: nocover
         return BOOL
     if typ is complex:  # pragma: no cover
         return FC64
-    raise TypeError(f'cannot turn {typ!r} into GraphBLAS type.')
+    raise TypeError(f"cannot turn {typ!r} into GraphBLAS type.")
 
 
 def udt_head(name):  # pragma: nocover
