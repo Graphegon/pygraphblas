@@ -170,6 +170,8 @@ the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
 >>> import pygraphblas as gb
+>>> gb.get_version()
+'5.1.3.0'
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True] * len(I)
@@ -254,11 +256,22 @@ from .base import (
     options_set,
 )
 
-__version__ = "5.1.2.0"
+
+IMPLEMENTATION_MAJOR = lib.GxB_IMPLEMENTATION_MAJOR
+IMPLEMENTATION_MINOR = lib.GxB_IMPLEMENTATION_MINOR
+IMPLEMENTATION_SUB = lib.GxB_IMPLEMENTATION_SUB
+IMPLEMENTATION_VERSION = (
+    IMPLEMENTATION_MAJOR,
+    IMPLEMENTATION_MINOR,
+    IMPLEMENTATION_SUB,
+)
+PY_VERSION_SUB = 0
+PY_VERSION = IMPLEMENTATION_VERSION + (PY_VERSION_SUB,)
+__version__ = ".".join(map(str, PY_VERSION))
 
 
 def get_version():
-    """Return the pygraphblas version. """
+    """Return the pygraphblas version."""
     return __version__
 
 

@@ -86,7 +86,7 @@ class Matrix:
         if res != lib.GrB_SUCCESS:
             error_string = ffi.new("char**")
             error_res = lib.GrB_Matrix_error(error_string, self._matrix[0])
-            if error_res != lib.GrB_SUCCESS:
+            if error_res != lib.GrB_SUCCESS: # pragma: nocover
                 raise GraphBLASException(
                     "Cannot get error, GrB_Matrix_error itself returned an error."
                 )
@@ -324,7 +324,7 @@ class Matrix:
         return cls.from_csv(tsv_file, typ, nrows, ncols, **kwargs)
 
     @classmethod
-    def from_csv(cls, csv_file, typ, nrows, ncols, one_based=True, **reader_kwargs):
+    def from_csv(cls, csv_file, typ, nrows, ncols, one_based=True, **reader_kwargs): # pragma: nocover
         """Create a new matrix by reading a comma separated value file.
 
         kwargs to this function are passed to the underlying
@@ -380,7 +380,7 @@ class Matrix:
         return M
 
     @classmethod
-    def binread(cls, bin_file, compression=None):
+    def binread(cls, bin_file, compression=None): # pragma: nocover
         """Create a new matrix by reading a SuiteSparse specific binary file."""
         from suitesparse_graphblas.io import binread
 
@@ -402,7 +402,7 @@ class Matrix:
         make_hermitian=True,
         no_diagonal=False,
         seed=None,
-    ):
+    ): # pragma: nocover
         """Create a new random Matrix of the given type, number of rows,
         columns and values.  Other flags set additional properties the
         matrix will hold.
@@ -487,7 +487,7 @@ class Matrix:
         return result
 
     @classmethod
-    def ssget(cls, name_or_id=None, binary_cache_dir=None):
+    def ssget(cls, name_or_id=None, binary_cache_dir=None): # pragma: nocover
         """Load a matrix from the [SuiteSparse Matrix Market](https://sparse.tamu.edu/).
 
         See [the ssgetpy
@@ -820,11 +820,7 @@ class Matrix:
         """
         return self.pattern()
 
-    def to_mm(self, fileobj):
-        """Write this matrix to a file using the Matrix Market format."""
-        self._check(lib.LAGraph_mmwrite(self._matrix[0], fileobj))
-
-    def binwrite(self, filename, comments="", compression=None):
+    def binwrite(self, filename, comments="", compression=None): # pragma: nocover
         """Write this matrix using custom SuiteSparse binary format."""
         from suitesparse_graphblas.io import binwrite
 
@@ -1386,7 +1382,7 @@ class Matrix:
         """Look up operators as attributes for the given object."""
         try:
             attr = getattr(self.type, name)
-        except AttributeError:
+        except AttributeError: # pragma: nocover
             raise AttributeError(f"Matrix has no attribute or type operator {name}")
         return partial(attr, self)
 
@@ -1506,12 +1502,6 @@ class Matrix:
         for i in range(1, exponent):
             result.mxm(self, out=result)
         return result
-
-    def concat(self, others):
-        pass
-
-    def split(self):
-        pass
 
     def kronpow(self, exponent):
         """Do "Kronecker Power" expansion.  This is useful for graph
