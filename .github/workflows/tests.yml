@@ -26,5 +26,5 @@ jobs:
       run: |
         sudo apt install graphviz
         sudo pip install -r minimal-requirements.txt
-        python setup.py develop
+        sudo python setup.py install
         pytest tests/
