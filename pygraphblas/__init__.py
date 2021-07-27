@@ -170,6 +170,8 @@ the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
 >>> import pygraphblas as gb
+>>> gb.get_version()
+'5.1.5.0'
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True] * len(I)
@@ -185,13 +187,14 @@ for that edge:
   6|        t  t  t      |  6
       0  1  2  3  4  5  6
 
->>> g = gb.gviz.draw_graph(M, show_weight=False, 
-...     filename='/docs/imgs/Matrix_from_lists2')
+>>> from pygraphblas import gviz
+>>> g = gviz.draw_graph(M, show_weight=False, 
+...     filename='docs/imgs/Matrix_from_lists2')
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)
 
->>> g = gb.gviz.draw_matrix(M, scale=40, 
-...     filename='/docs/imgs/Matrix_from_lists_matrix')
+>>> g = gviz.draw_matrix(M, scale=40, 
+...     filename='docs/imgs/Matrix_from_lists_matrix')
 
 ![Matrix_from_lists_matrix.png](../imgs/Matrix_from_lists_matrix.png)
 
@@ -216,8 +219,8 @@ graph:
 
 >>> v = gb.Vector.from_lists([0], [True], M.nrows)
 >>> y = v @ M
->>> g = gb.gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, 
-... column=False, filename='/docs/imgs/bfs_step')
+>>> g = gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, 
+... column=False, filename='docs/imgs/bfs_step')
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
@@ -234,6 +237,15 @@ you with a lot more background information.
 
 """
 
+from suitesparse_graphblas import lib, ffi, initialize, is_initialized
+
+
+def init(blocking=False):
+    initialize(blocking=blocking, memory_manager="c")
+
+
+init()
+
 from .base import (
     lib,
     ffi,
@@ -244,7 +256,24 @@ from .base import (
     options_set,
 )
 
-lib.LAGraph_init()
+
+IMPLEMENTATION_MAJOR = lib.GxB_IMPLEMENTATION_MAJOR
+IMPLEMENTATION_MINOR = lib.GxB_IMPLEMENTATION_MINOR
+IMPLEMENTATION_SUB = lib.GxB_IMPLEMENTATION_SUB
+IMPLEMENTATION_VERSION = (
+    IMPLEMENTATION_MAJOR,
+    IMPLEMENTATION_MINOR,
+    IMPLEMENTATION_SUB,
+)
+PY_VERSION_SUB = 0
+PY_VERSION = IMPLEMENTATION_VERSION + (PY_VERSION_SUB,)
+__version__ = ".".join(map(str, PY_VERSION))
+
+
+def get_version():
+    """Return the pygraphblas version."""
+    return __version__
+
 
 from .semiring import build_semirings
 from .binaryop import build_binaryops, Accum, binary_op
@@ -339,7 +368,6 @@ def run_doctests(raise_on_error=False):
     from . import vector
     from . import descriptor
     from . import base
-    from . import gviz
     from . import unaryop
     from . import binaryop
     import sys, doctest
@@ -353,7 +381,6 @@ def run_doctests(raise_on_error=False):
         matrix,
         vector,
         descriptor,
-        gviz,
         base,
     ):
         doctest.testmod(

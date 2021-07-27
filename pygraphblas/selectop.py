@@ -115,7 +115,7 @@ def select_op(arg_type, thunk_type=None):
     >>> A.select(random_gt, 0.5, out=A, desc=descriptor.R) is A
     True
     >>> ga = gviz.draw_matrix(A, scale=40,
-    ...     filename='/docs/imgs/select_op_A')
+    ...     filename='docs/imgs/select_op_A')
 
     ![select_op_A.png](../imgs/select_op_A.png)
 

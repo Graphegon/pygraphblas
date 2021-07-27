@@ -1,25 +1,15 @@
-ARG BASE_CONTAINER=ubuntu:20.04
+ARG BASE_CONTAINER=graphblas/python-suitesparse-graphblas:5.1.3.1
 FROM ${BASE_CONTAINER}
-ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -yq cmake make wget libpython3-dev python3-pip libreadline-dev llvm-10-dev git graphviz
+RUN apt-get update \
+    && apt-get install -y graphviz \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG SS_RELEASE=v4.0.3
-ARG SS_BURBLE=0
-ARG SS_COMPACT=0
-
-WORKDIR /build
-RUN git clone https://github.com/DrTimothyAldenDavis/GraphBLAS.git --depth 1 --branch $SS_RELEASE
-
-WORKDIR /build/GraphBLAS/build
-RUN cmake .. -DGB_BURBLE=${SS_BURBLE} -DGBCOMPACT=${SS_COMPACT} && make -j8 && make install
-RUN ldconfig
-RUN /bin/rm -Rf /build
+WORKDIR /pygraphblas
+ADD minimal-requirements.txt /pygraphblas
+RUN pip3 install -r minimal-requirements.txt
 
 ADD . /pygraphblas
-WORKDIR /pygraphblas
     
-RUN pip3 install -r minimal-requirements.txt
 RUN python3 setup.py install
 RUN ldconfig
-# RUN pytest

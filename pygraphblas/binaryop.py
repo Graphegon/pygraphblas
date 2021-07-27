@@ -103,7 +103,7 @@ grb_binop_re = re.compile(
     "FIRSTI|FIRSTI1|FIRSTJ|FIRSTJ1|SECONDI|SECONDI1|SECONDJ|SECONDJ1|"
     "PAIR|ANY|POW|EQ|NE|GT|LT|GE|LE|LOR|LAND|LXOR|BOR|BAND|BXOR|BXNOR|"
     "ATAN2|HYPOT|FMOD|REMAINDER|LDEXP|COPYSIGN|BGET|BSET|BCLR|BSHIFT|CMPLX)_"
-    "(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64)$"
+    "(BOOL|UINT8|UINT16|UINT32|UINT64|INT8|INT16|INT32|INT64|FP32|FP64|FC32|FC64)$"
 )
 
 pure_bool_re = re.compile("^(GrB|GxB)_(LOR|LAND|LXOR)_(BOOL)$")
@@ -131,7 +131,7 @@ def build_binaryops(__pdoc__):
         __pdoc__[f"{typ}.{op}"] = f"""```{str(f.read(), 'utf8')}```"""
 
 
-def binary_op(arg_type):
+def binary_op(arg_type, nopython=True):
     """Decorator to jit-compile Python function into a GrB_BinaryOp
     object.
 
@@ -151,9 +151,9 @@ def binary_op(arg_type):
     >>> B.apply_second(uniform, 1, out=B) is B
     True
     >>> ga = gviz.draw_matrix(A, scale=40,
-    ...     filename='/docs/imgs/binary_op_A')
+    ...     filename='docs/imgs/binary_op_A')
     >>> gb = gviz.draw_matrix(B, scale=40,
-    ...     filename='/docs/imgs/binary_op_B')
+    ...     filename='docs/imgs/binary_op_B')
 
 
     ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)
@@ -167,7 +167,7 @@ def binary_op(arg_type):
             numba.types.CPointer(arg_type._numba_t),
             numba.types.CPointer(arg_type._numba_t),
         )
-        jitfunc = numba.jit(func, nopython=True)
+        jitfunc = numba.jit(func, nopython=nopython)
 
         @numba.cfunc(sig, nopython=True)
         def wrapper(z, x, y):  # pragma: no cover

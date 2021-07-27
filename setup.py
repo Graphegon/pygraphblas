@@ -3,12 +3,11 @@ import os
 
 setup(
     name='pygraphblas',
-    version='4.3.0',
+    version='5.1.5.0',
     description='GraphBLAS Python bindings.',
     author='Michel Pelletier',
     packages=['pygraphblas'],
-    setup_requires=["pytest-runner", "cffi>=1.0.0"],
-    cffi_modules=["pygraphblas/build.py:ffibuilder"],
-    install_requires=["cffi>=1.0.0", "numpy>=1.15", "numba", "scipy", "graphviz", "matplotlib", "contextvars"],
+    setup_requires=["pytest-runner"],
+    install_requires=["suitesparse-graphblas", "numba", "scipy", "contextvars"],
 )
 

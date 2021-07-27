@@ -22,3 +22,5 @@ cyjupyter
 pyvis
 ssgetpy
 ipycytoscape
+ssgetpy
+mmparse

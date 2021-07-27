@@ -10,8 +10,7 @@ function repair_wheel {
     fi
 }
 
-yum install -y cmake make gcc git openmp-dev
-git clone --depth=1 --branch=v4.0.3 https://github.com/DrTimothyAldenDavis/GraphBLAS.git
+git clone --depth=1 --branch=v5.1.1 https://github.com/DrTimothyAldenDavis/GraphBLAS.git
 cd GraphBLAS/build
 cmake .. && make -j8 && make install
 ldconfig

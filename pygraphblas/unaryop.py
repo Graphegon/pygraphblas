@@ -112,7 +112,7 @@ def unary_op(arg_type):
     True
 
     >>> ga = gviz.draw_matrix(A, scale=40,
-    ...     filename='/docs/imgs/unary_op_A')
+    ...     filename='docs/imgs/unary_op_A')
 
     ![unary_op_A.png](../imgs/unary_op_A.png)
 

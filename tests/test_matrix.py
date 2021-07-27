@@ -8,21 +8,23 @@ import pytest
 from pygraphblas import *
 from pygraphblas.base import ffi, lib, _check
 
+
 def test_iseq():
     l = Matrix.sparse(INT8, 10, 10)
-    l[0,0] = 1
+    l[0, 0] = 1
     m = Matrix.sparse(INT8, 10, 10)
-    m[0,0] = 1
+    m[0, 0] = 1
     n = Matrix.sparse(INT64, 10, 10)
-    n[0,0] = 1
+    n[0, 0] = 1
     o = Matrix.sparse(INT64, 10, 9)
-    o[0,0] = 1
+    o[0, 0] = 1
     p = Matrix.sparse(INT64, 10, 9)
-    p[0,1] = 1
+    p[0, 1] = 1
     assert l.iseq(m)
     assert m.isne(n)
     assert n.isne(o)
     assert o.isne(p)
+
 
 def test_matrix_init_without_type():
     mx = Matrix.sparse(INT8)
@@ -327,6 +329,7 @@ def test_matrix_transpose():
     assert v2.iseq(v)
 
 
+@pytest.mark.skip
 def test_matrix_mm_read_write(tmp_path):
     mmf = tmp_path / "mmwrite_test.mm"
     mmf.touch()
@@ -343,18 +346,7 @@ def test_matrix_mm_read_write(tmp_path):
             "3 3 4\n",
         ]
 
-    with mmf.open() as f:
-        n = Matrix.from_mm(f, INT64)
-    assert n.iseq(m)
-
-
-def test_matrix_binfile_read_write(tmp_path):
-    binfilef = tmp_path / "binfilewrite_test.binfile"
-    binfilef.touch()
-    m = Matrix.from_lists([0, 1, 2], [0, 1, 2], [2, 3, 4])
-    bbf = bytes(binfilef)
-    m.to_binfile(bbf)
-    n = Matrix.from_binfile(bbf)
+    n = Matrix.from_mm(mmf)
     assert n.iseq(m)
 
 
@@ -369,14 +361,18 @@ def test_matrix_tsv_read(tmp_path):
 
 
 def test_matrix_random():
-    m = Matrix.random(INT8, 10, 10, 5, seed=42)
+    m = Matrix.random(INT8, 5, 10, 10, seed=42)
     assert m.nrows == 10
     assert m.ncols == 10
     assert len(list(m)) == 5
-    m = Matrix.random(INT8, 10, 10, 5)
+    m = Matrix.random(INT8, 5, 10, 10)
     assert m.nrows == 10
     assert m.ncols == 10
     assert 0 < len(list(m)) <= 5
+    m = Matrix.random(INT8, 5)
+    assert m.nrows == lib.GxB_INDEX_MAX
+    assert m.ncols == lib.GxB_INDEX_MAX
+    assert m.nvals == 5
 
 
 def test_matrix_slicing():
@@ -1066,10 +1062,10 @@ def test_nonzero():
 
 
 def test_to_scipy_sparse():
-    v = Matrix.random(INT8, 10, 10, 4, seed=42)
+    v = Matrix.random(INT8, 4, 10, 10, seed=42)
     assert len(v) == 4
     s = v.to_scipy_sparse()
-    assert (s.data == [63, 105, 17, 20]).all()
+    assert (s.data == [62, 46, -70, 24]).all()
     m = v.to_numpy()
     assert m.shape == (10, 10)
     with pytest.raises(TypeError):

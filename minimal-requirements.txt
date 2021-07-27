@@ -7,8 +7,8 @@ setuptools
 ipython
 contextvars
 pdoc3
-graphviz
-Pillow
-matplotlib
 coveralls
 ssgetpy
+matplotlib
+graphviz
+mmparse==0.4

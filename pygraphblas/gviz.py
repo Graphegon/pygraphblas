@@ -5,23 +5,23 @@ doctests and Jupyter notebooks.
 >>> M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
 >>> g = draw_graph(M, show_weight=False,
-...     filename='/docs/imgs/Matrix_from_lists3')
+...     filename='docs/imgs/Matrix_from_lists3')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
 
 >>> g = draw_matrix(M, scale=50,
-...     filename='/docs/imgs/Matrix_from_lists4')
+...     filename='docs/imgs/Matrix_from_lists4')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
 
 >>> V = Vector.from_lists([0, 2], [3.14, 1.2])
 >>> g = draw_vector(V, scale=50,
-...     filename='/docs/imgs/Vector_from_lists_1')
+...     filename='docs/imgs/Vector_from_lists_1')
 
 ![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
 
 >>> g = draw_matrix_op(M, '@', M, (M@M), scale=50,
-...     filename='/docs/imgs/mxm1')
+...     filename='docs/imgs/mxm1')
 
 ![mxm1](../imgs/mxm1.png)
 """
@@ -90,7 +90,9 @@ def draw_graph(
         g = Digraph(name)
     else:
         g = Graph(name)
-    g.attr(rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false")
+    g.attr(
+        rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false"
+    )
     if graph_attr:
         g.attr(**graph_attr)
     if node_attr:
@@ -249,7 +251,7 @@ def draw_matrix(
     cmap="viridis",
     filename=None,
     column=True,
-    font_path=None
+    font_path=None,
 ):  # pragma: nocover
     from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
@@ -292,7 +294,7 @@ def draw_matrix(
                 fill=rgb2hex(cmap(1)) if v else rgb2hex(cmap(0)),
                 outline="black",
             )
-            v = 't' if v else 'f'
+            v = "t" if v else "f"
         elif M.type in [FP32, FP64] and cmap:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
@@ -353,9 +355,9 @@ def draw_matrix_op(
     op,
     right,
     result,
-    font_path=Path("/pygraphblas/demo"),
+    font_path=Path("demo"),
     filename=None,
-    eqstr='=',
+    eqstr="=",
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs["scale"]
@@ -449,7 +451,7 @@ my_style = [
 ]
 
 
-def draw_cy(M, visual_style=my_style, layout_name='cose'):  # pragma: nocover
+def draw_cy(M, visual_style=my_style, layout_name="cose"):  # pragma: nocover
     from cyjupyter import Cytoscape
 
     c = Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
