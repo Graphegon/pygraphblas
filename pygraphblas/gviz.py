@@ -5,23 +5,23 @@ doctests and Jupyter notebooks.
 >>> M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
 >>> g = draw_graph(M, show_weight=False,
-...     filename='/docs/imgs/Matrix_from_lists3')
+...     filename='docs/imgs/Matrix_from_lists3')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
 
 >>> g = draw_matrix(M, scale=50,
-...     filename='/docs/imgs/Matrix_from_lists4')
+...     filename='docs/imgs/Matrix_from_lists4')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
 
 >>> V = Vector.from_lists([0, 2], [3.14, 1.2])
 >>> g = draw_vector(V, scale=50,
-...     filename='/docs/imgs/Vector_from_lists_1')
+...     filename='docs/imgs/Vector_from_lists_1')
 
 ![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
 
 >>> g = draw_matrix_op(M, '@', M, (M@M), scale=50,
-...     filename='/docs/imgs/mxm1')
+...     filename='docs/imgs/mxm1')
 
 ![mxm1](../imgs/mxm1.png)
 """
@@ -355,7 +355,7 @@ def draw_matrix_op(
     op,
     right,
     result,
-    font_path=Path("/pygraphblas/demo"),
+    font_path=Path("demo"),
     filename=None,
     eqstr="=",
     **kwargs,

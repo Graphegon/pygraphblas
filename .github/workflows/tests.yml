@@ -24,9 +24,7 @@ jobs:
         
     - name: Build
       run: |
-        pip install pytest pytest-cov coveralls
-        python setup.py build_ext --inplace
+        sudo apt install graphviz
+        pip install -r minimal-requirements.txt
         python setup.py develop
-    - name: Test
-      run: |
-        coverage run --branch -m pytest tests/
+        pytest tests/

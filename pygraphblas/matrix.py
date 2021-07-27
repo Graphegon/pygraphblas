@@ -227,7 +227,7 @@ class Matrix:
           6|        t  t  t      |  6
               0  1  2  3  4  5  6
         >>> from pygraphblas.gviz import draw_graph
-        >>> draw_graph(M, filename='/docs/imgs/Matrix_from_lists')
+        >>> draw_graph(M, filename='docs/imgs/Matrix_from_lists')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_from_lists.png](../imgs/Matrix_from_lists.png)
@@ -272,7 +272,7 @@ class Matrix:
         """Create a new matrix by reading a Matrix Market file.
 
         >>> from pathlib import Path
-        >>> M = Matrix.from_mm(Path('/docs/test_mm.mm'))
+        >>> M = Matrix.from_mm(Path('docs/test_mm.mm'))
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -307,7 +307,7 @@ class Matrix:
     def from_tsv(cls, tsv_file, typ, nrows, ncols, **kwargs):
         """Create a new matrix by reading a tab separated value file.
 
-        >>> M = Matrix.from_tsv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7)
+        >>> M = Matrix.from_tsv(Path('docs/test_tsvfile.tsv'), types.INT32, 7, 7)
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -333,7 +333,7 @@ class Matrix:
         `csv.Reader` object, so you can control various options like
         quoting and alternate delimiters that way.
 
-        >>> M = Matrix.from_csv(Path('/docs/test_tsvfile.tsv'), types.INT32, 7, 7, delimiter='\\t')
+        >>> M = Matrix.from_csv(Path('docs/test_tsvfile.tsv'), types.INT32, 7, 7, delimiter='\\t')
         >>> print(M)
               0  1  2  3  4  5  6
           0|     0     1         |  0
@@ -412,7 +412,7 @@ class Matrix:
         >>> from .gviz import draw_graph
         >>> M = Matrix.random(types.UINT8, 20, 5, 5,
         ...                   make_symmetric=True, no_diagonal=True, seed=42)
-        >>> draw_graph(M, filename='/docs/imgs/Matrix_random')
+        >>> draw_graph(M, filename='../docs/imgs/Matrix_random')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_random.png](../imgs/Matrix_random.png)
@@ -1013,7 +1013,7 @@ class Matrix:
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         >>> V = list(range(len(I)))
         >>> A = Matrix.from_lists(I, J, V, 7, 7)
-        >>> draw_graph(A, filename='/docs/imgs/Matrix_eadd_A')
+        >>> draw_graph(A, filename='docs/imgs/Matrix_eadd_A')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
@@ -1022,12 +1022,12 @@ class Matrix:
         ...    [0, 1, 4, 6],
         ...    [1, 3, 5, 5],
         ...    [9, 1, 4, 7], 7, 7)
-        >>> draw_graph(B, filename='/docs/imgs/Matrix_eadd_B')
+        >>> draw_graph(B, filename='docs/imgs/Matrix_eadd_B')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
 
-        >>> draw_graph(A.eadd(B), filename='/docs/imgs/Matrix_eadd_C')
+        >>> draw_graph(A.eadd(B), filename='docs/imgs/Matrix_eadd_C')
         <graphviz.dot.Digraph object at ...>
         >>> print(A.eadd(B))
               0  1  2  3  4  5  6
@@ -1146,7 +1146,7 @@ class Matrix:
         >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
         >>> V = list(range(len(I)))
         >>> A = Matrix.from_lists(I, J, V, 7, 7)
-        >>> draw_graph(A, filename='/docs/imgs/Matrix_emult_A')
+        >>> draw_graph(A, filename='docs/imgs/Matrix_emult_A')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
@@ -1155,12 +1155,12 @@ class Matrix:
         ...    [0, 1, 1, 6, 6],
         ...    [1, 4, 6, 3, 5],
         ...    [9, 1, 4, 7, 11], 7, 7)
-        >>> draw_graph(B, filename='/docs/imgs/Matrix_emult_B')
+        >>> draw_graph(B, filename='docs/imgs/Matrix_emult_B')
         <graphviz.dot.Digraph object at ...>
 
         ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
 
-        >>> draw_graph(A.emult(B), filename='/docs/imgs/Matrix_emult_C')
+        >>> draw_graph(A.emult(B), filename='docs/imgs/Matrix_emult_C')
         <graphviz.dot.Digraph object at ...>
         >>> print(A.emult(B))
               0  1  2  3  4  5  6
@@ -1303,7 +1303,7 @@ class Matrix:
 
     def to_arrays(self):
         """Convert Matrix to tuple of three dense
-        [array](https://docs.python.org/3/library/array.html) objects.
+        [array](https:/docs.python.org/3/library/array.html) objects.
 
         >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
         >>> M.to_arrays()
@@ -1518,7 +1518,7 @@ class Matrix:
         True
         >>> M = initiator.kronpow(3)
         >>> g = draw_matrix(M, scale=40,
-        ...     filename='/docs/imgs/Matrix_kronpow')
+        ...     filename='docs/imgs/Matrix_kronpow')
 
         ![Matrix_kronpow.png](../imgs/Matrix_kronpow.png)
 

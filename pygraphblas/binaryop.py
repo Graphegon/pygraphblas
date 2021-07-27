@@ -151,9 +151,9 @@ def binary_op(arg_type, nopython=True):
     >>> B.apply_second(uniform, 1, out=B) is B
     True
     >>> ga = gviz.draw_matrix(A, scale=40,
-    ...     filename='/docs/imgs/binary_op_A')
+    ...     filename='docs/imgs/binary_op_A')
     >>> gb = gviz.draw_matrix(B, scale=40,
-    ...     filename='/docs/imgs/binary_op_B')
+    ...     filename='docs/imgs/binary_op_B')
 
 
     ![binary_op_A.png](../imgs/binary_op_A.png) ![binary_op_B.png](../imgs/binary_op_B.png)

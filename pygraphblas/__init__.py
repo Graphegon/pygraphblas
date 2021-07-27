@@ -189,12 +189,12 @@ for that edge:
 
 >>> from pygraphblas import gviz
 >>> g = gviz.draw_graph(M, show_weight=False, 
-...     filename='/docs/imgs/Matrix_from_lists2')
+...     filename='docs/imgs/Matrix_from_lists2')
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)
 
 >>> g = gviz.draw_matrix(M, scale=40, 
-...     filename='/docs/imgs/Matrix_from_lists_matrix')
+...     filename='docs/imgs/Matrix_from_lists_matrix')
 
 ![Matrix_from_lists_matrix.png](../imgs/Matrix_from_lists_matrix.png)
 
@@ -220,7 +220,7 @@ graph:
 >>> v = gb.Vector.from_lists([0], [True], M.nrows)
 >>> y = v @ M
 >>> g = gviz.draw_matrix_op(v, '@', M, y, scale=40, labels=True, 
-... column=False, filename='/docs/imgs/bfs_step')
+... column=False, filename='docs/imgs/bfs_step')
 
 ![bfs_step.png](../imgs/bfs_step.png)
 
