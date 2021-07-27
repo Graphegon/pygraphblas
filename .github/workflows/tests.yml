@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+      
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        
+    - name: Build
+      run: |
+        pip install pytest pytest-cov coveralls
+        python setup.py build_ext --inplace
+        python setup.py develop
+    - name: Test
+      run: |
+        coverage run --branch -m pytest tests/
