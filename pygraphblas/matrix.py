@@ -268,6 +268,50 @@ class Matrix:
         return m
 
     @classmethod
+    def from_diag(cls, v, k=0, desc=None):
+        """
+        GxB_Matrix_diag constructs a matrix from a vector.  Let n be the length of
+        the v vector, from GrB_Vector_size (&n, v).  If k = 0, then C is an n-by-n
+        diagonal matrix with the entries from v along the main diagonal of C, with
+        C(i,i) = v(i).  If k is nonzero, C is square with dimension n+abs(k).  If k
+        is positive, it denotes diagonals above the main diagonal, with C(i,i+k) =
+        v(i).  If k is negative, it denotes diagonals below the main diagonal of C,
+        with C(i-k,i) = v(i).  This behavior is identical to the MATLAB statement
+        C = diag(v,k), where v is a vector, except that GxB_Matrix_diag can also
+        do typecasting.
+
+        >>> v = Vector.from_lists([0, 1, 2], [1, 2, 3])
+        >>> print(Matrix.from_diag(v))
+              0  1  2
+          0|  1      |  0
+          1|     2   |  1
+          2|        3|  2
+              0  1  2
+        >>> print(Matrix.from_diag(v, 1))
+              0  1  2  3
+          0|     1      |  0
+          1|        2   |  1
+          2|           3|  2
+          3|            |  3
+              0  1  2  3
+        >>> print(Matrix.from_diag(v, -1))
+              0  1  2  3
+          0|            |  0
+          1|  1         |  1
+          2|     2      |  2
+          3|        3   |  3
+              0  1  2  3
+        """
+        l = v.size + abs(k)
+        C = cls.sparse(v.type, l, l)
+        if desc is None:  # pragma: nocover
+            desc = current_desc.get(NULL)
+        if desc is not NULL:  # pragma: nocover
+            desc = desc.get_desc()
+        C._check(lib.GxB_Matrix_diag(C._matrix[0], v._vector[0], k, desc))
+        return C
+
+    @classmethod
     def from_mm(cls, mm_file):
         """Create a new matrix by reading a Matrix Market file.
 
@@ -296,8 +340,6 @@ class Matrix:
             typ = get_mm_type_converter(mm_type)
             m = cls.sparse(typ, nrows, ncols)
             for l, i, j, v in row_iter:
-                i -= 1
-                j -= 1
                 m[i, j] = v
                 if symmetric:
                     m[j, i] = v
@@ -382,11 +424,11 @@ class Matrix:
         return M
 
     @classmethod
-    def binread(cls, bin_file, compression=None):  # pragma: nocover
+    def binread(cls, bin_file, opener=Path.open):  # pragma: nocover
         """Create a new matrix by reading a SuiteSparse specific binary file."""
-        from suitesparse_graphblas.io import binread
+        from suitesparse_graphblas.io import binary
 
-        matrix = binread(bin_file, compression)
+        matrix = binary.binread(bin_file, opener)
         return cls(matrix)
 
     from_binfile = binread
@@ -511,11 +553,11 @@ class Matrix:
         for m in mm_path.glob("*.mtx"):
             Mbin = mm_path / (m.name + ".grb")
             if binary_cache_dir and Mbin.exists():
-                M = cls.from_binfile(bytes(Mbin))
+                M = cls.from_binfile(Mbin)
             else:
                 M = cls.from_mm(mm_path / m)
                 if binary_cache_dir:
-                    M.to_binfile(bytes(Mbin))
+                    M.to_binfile(Mbin)
             M.wait()
             yield m.name, M
 
@@ -822,11 +864,11 @@ class Matrix:
         """
         return self.pattern()
 
-    def binwrite(self, filename, comments="", compression=None):  # pragma: nocover
+    def binwrite(self, filename, comments="", opener=Path.open):  # pragma: nocover
         """Write this matrix using custom SuiteSparse binary format."""
-        from suitesparse_graphblas.io import binwrite
+        from suitesparse_graphblas.io import binary
 
-        binwrite(self._matrix, filename, comments, compression)
+        binary.binwrite(self._matrix, filename, comments, opener)
         return
 
     to_binfile = binwrite
@@ -1601,7 +1643,7 @@ class Matrix:
         )
         return result[0]
 
-    def reduce_vector(self, mon=None, out=None, mask=None, accum=None, desc=None):
+    def reduce(self, mon=None, out=None, mask=None, accum=None, desc=None):
         """Reduce matrix to a vector.
 
         >>> M = Matrix.sparse(types.FP32, 3, 3)
@@ -1640,6 +1682,8 @@ class Matrix:
             )
         )
         return out
+
+    reduce_vector = reduce  # deprecated
 
     def max(self):
         """Return the max of the matrix.
@@ -1992,6 +2036,53 @@ class Matrix:
 
         """
         return self.select(lib.GxB_DIAG, thunk=offset)
+
+    def vector_diag(self, k=0, desc=None):
+        """
+        GxB_Vector_diag extracts a vector v from an input matrix A, which
+        may be rectangular.  If k = 0, the main diagonal of A is
+        extracted; k > 0 denotes diagonals above the main diagonal of
+        A, and k < 0 denotes diagonals below the main diagonal of A.
+        Let A have dimension m-by-n.  If k is in the range 0 to n-1,
+        then v has length min(m,n-k).  If k is negative and in the
+        range -1 to -m+1, then v has length min(m+k,n).  If k is
+        outside these ranges, v has length 0 (this is not an error).
+        This function computes the same thing as the MATLAB statement
+        v = diag(A,k) when A is a matrix, except that GxB_Vector_diag
+        can also do typecasting.
+
+        >>> from pygraphblas import UINT8
+        >>> A = Matrix.dense(UINT8, 2, 2, fill=1)
+        >>> print(A)
+              0  1
+          0|  1  1|  0
+          1|  1  1|  1
+              0  1
+        >>> print(A.vector_diag())
+        0| 1
+        1| 1
+        >>> print(A.vector_diag(1))
+        0| 1
+        >>> A.vector_diag(2)
+        <Vector (0: 0:UINT8)>
+        >>> print(A.vector_diag(-1))
+        0| 1
+        >>> A.vector_diag(-2)
+        <Vector (0: 0:UINT8)>
+        """
+        n, m = self.shape
+        if k in range(0, n):
+            l = min(m, n - k)
+        elif k in range(-1, -m, -1):
+            l = min(m + k, n)
+        else:
+            l = 0
+        v = Vector.sparse(self.type, l)
+
+        _, _, desc = self._get_args(desc=desc)
+
+        self._check(lib.GxB_Vector_diag(v._vector[0], self._matrix[0], k, desc))
+        return v
 
     def offdiag(self, offset=None):
         """Select the off-diagonal Matrix.
