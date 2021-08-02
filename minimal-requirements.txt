@@ -11,4 +11,4 @@ coveralls
 ssgetpy
 matplotlib
 graphviz
-mmparse==0.4
+mmparse
