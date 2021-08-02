@@ -260,6 +260,8 @@ def draw_matrix(
         font = ImageFont.truetype(
             str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
         )
+    else:
+        font = ImageFont.load_default()
 
     if isinstance(M, Vector):
         return draw_vector(
@@ -355,35 +357,38 @@ def draw_matrix_op(
     op,
     right,
     result,
-    font_path=Path("demo"),
+    font_path=None,
     filename=None,
     eqstr="=",
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs["scale"]
-    cosmic_font = ImageFont.truetype(
-        str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
-    )
+    font = None
+    if font_path is not None:
+        font = ImageFont.truetype(
+            str(font_path / "FantasqueSansMono-Bold.ttf"), int(scale * 0.5)
+        )
+    else:
+        font = ImageFont.load_default()
+
     kwargs["font_path"] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
-    op_width = cosmic_font.getsize(op)[0]
+    op_width = font.getsize(op)[0]
     spacer = int(scale * 2)
     width = left.size[0] + op_width + spacer + right.size[0] + spacer + result.size[0]
     height = max(op_width + spacer, left.size[1], right.size[1], result.size[1])
     im = Image.new(left.mode, (width, height), color="white")
     d = ImageDraw.Draw(im)
     im.paste(left, (0, 0))
-    d.text(
-        (left.size[0] + int(spacer / 2), height / 2), op, fill="black", font=cosmic_font
-    )
+    d.text((left.size[0] + int(spacer / 2), height / 2), op, fill="black", font=font)
     im.paste(right, (left.size[0] + op_width + spacer, 0))
     d.text(
         (left.size[0] + right.size[0] + op_width + (spacer * 1.5), height / 2),
         eqstr,
         fill="black",
-        font=cosmic_font,
+        font=font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
     if filename is not None:
