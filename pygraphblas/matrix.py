@@ -1647,19 +1647,19 @@ class Matrix:
         """Reduce matrix to a vector.
 
         >>> M = Matrix.sparse(types.FP32, 3, 3)
-        >>> print(M.reduce_vector())
+        >>> print(M.reduce())
         0|
         1|
         2|
         >>> M[0,1] = 42.0
         >>> M[0,2] = 42.0
         >>> M[2,0] = -42.0
-        >>> print(M.reduce_vector())
+        >>> print(M.reduce())
         0|84.0
         1|
         2|-42.0
 
-        >>> print(M.reduce_vector(types.FP32.MIN_MONOID))
+        >>> print(M.reduce(types.FP32.MIN_MONOID))
         0|42.0
         1|
         2|-42.0
@@ -1669,9 +1669,27 @@ class Matrix:
         0|84.0
         1|
         2|-42.0
+
+        >>> M = Matrix.sparse(types.BOOL, 3, 3)
+        >>> print(M.reduce())
+        0|
+        1|
+        2|
+
+        >>> M[0,1] = True
+        >>> M[0,2] = True
+        >>> M[2,0] = True
+        >>> print(M.reduce())
+        0| t
+        1|
+        2| t
+
         """
         if mon is None:
-            mon = current_monoid.get(getattr(self.type, "PLUS_MONOID", NULL))
+            if self.type is types.BOOL:
+                mon = current_monoid.get(getattr(self.type, "lor_monoid"))
+            else:
+                mon = current_monoid.get(getattr(self.type, "plus_monoid"))
         mon = mon.get_monoid(self.type)
         if out is None:
             out = Vector.sparse(self.type, self.nrows)
