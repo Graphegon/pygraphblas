@@ -28,21 +28,21 @@ doctests and Jupyter notebooks.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
 &gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 </code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
-...     filename='/docs/imgs/Matrix_from_lists3')
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M, show_weight=False,
+...     filename='docs/imgs/Matrix_from_lists3')
 </code></pre>
 <p><img alt="Matrix_from_lists3.png" src="../imgs/Matrix_from_lists3.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix(M, scale=50, 
-...     filename='/docs/imgs/Matrix_from_lists4')
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix(M, scale=50,
+...     filename='docs/imgs/Matrix_from_lists4')
 </code></pre>
 <p><img alt="Matrix_from_lists3.png" src="../imgs/Matrix_from_lists4.png"></p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; V = Vector.from_lists([0, 2], [3.14, 1.2])
-&gt;&gt;&gt; g = draw_vector(V, scale=50, 
-...     filename='/docs/imgs/Vector_from_lists_1')
+&gt;&gt;&gt; g = draw_vector(V, scale=50,
+...     filename='docs/imgs/Vector_from_lists_1')
 </code></pre>
 <p><img alt="Vector_from_lists_1" src="../imgs/Vector_from_lists_1.png"></p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix_op(M, '@', M, (M@M), scale=50, 
-...     filename='/docs/imgs/mxm1')
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_matrix_op(M, '@', M, (M@M), scale=50,
+...     filename='docs/imgs/mxm1')
 </code></pre>
 <p><img alt="mxm1" src="../imgs/mxm1.png"></p>
 <details class="source">
@@ -55,36 +55,38 @@ doctests and Jupyter notebooks.
 &gt;&gt;&gt; from pygraphblas import *
 &gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
-&gt;&gt;&gt; g = draw_graph(M, show_weight=False, 
-...     filename=&#39;/docs/imgs/Matrix_from_lists3&#39;)
+&gt;&gt;&gt; g = draw_graph(M, show_weight=False,
+...     filename=&#39;docs/imgs/Matrix_from_lists3&#39;)
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
 
-&gt;&gt;&gt; g = draw_matrix(M, scale=50, 
-...     filename=&#39;/docs/imgs/Matrix_from_lists4&#39;)
+&gt;&gt;&gt; g = draw_matrix(M, scale=50,
+...     filename=&#39;docs/imgs/Matrix_from_lists4&#39;)
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists4.png)
 
 &gt;&gt;&gt; V = Vector.from_lists([0, 2], [3.14, 1.2])
-&gt;&gt;&gt; g = draw_vector(V, scale=50, 
-...     filename=&#39;/docs/imgs/Vector_from_lists_1&#39;)
+&gt;&gt;&gt; g = draw_vector(V, scale=50,
+...     filename=&#39;docs/imgs/Vector_from_lists_1&#39;)
 
 ![Vector_from_lists_1](../imgs/Vector_from_lists_1.png)
 
-&gt;&gt;&gt; g = draw_matrix_op(M, &#39;@&#39;, M, (M@M), scale=50, 
-...     filename=&#39;/docs/imgs/mxm1&#39;)
+&gt;&gt;&gt; g = draw_matrix_op(M, &#39;@&#39;, M, (M@M), scale=50,
+...     filename=&#39;docs/imgs/mxm1&#39;)
 
 ![mxm1](../imgs/mxm1.png)
 &#34;&#34;&#34;
 import operator
+from math import log
 from itertools import accumulate
-from graphviz import Digraph, Source
+from graphviz import Graph, Digraph, Source
 from PIL import Image, ImageDraw, ImageFont
 from PIL import Image, ImageDraw
 from json import dumps
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
+from collections import OrderedDict
 
 __all__ = [
     &#34;draw&#34;,
@@ -116,13 +118,17 @@ def draw_graph(
     M,
     name=&#34;&#34;,
     rankdir=&#34;LR&#34;,
+    directed=True,
     show_weight=True,
     concentrate=True,
     labels=True,
     label_vector=None,
     label_width=None,
+    label_cmap=None,
     size_vector=None,
     size_scale=1.0,
+    min_size=0.1,
+    log_scale=False,
     ioff=0,
     joff=0,
     filename=None,
@@ -131,8 +137,13 @@ def draw_graph(
     edge_attr=None,
     edge_cmap=None,
 ):  # pragma: nocover
-    g = Digraph(name)
-    g.attr(rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34;)
+    if directed:
+        g = Digraph(name)
+    else:
+        g = Graph(name)
+    g.attr(
+        rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34; if concentrate else &#34;false&#34;
+    )
     if graph_attr:
         g.attr(**graph_attr)
     if node_attr:
@@ -143,13 +154,15 @@ def draw_graph(
     if edge_cmap is not None:
         edge_cmap = plt.get_cmap(edge_cmap)
 
+    if label_cmap is not None:
+        label_cmap = plt.get_cmap(label_cmap)
+
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i] if labels else &#34;&#34;
     else:
         labeler = lambda v, i: v.get(i) if labels else &#34;&#34;
 
     for i, j, v in M:
-        size = _str(size_vector[i] * size_scale, label_width) if size_vector else &#34;0.5&#34;
         ilabel = (
             _str(labeler(label_vector, i), label_width)
             if label_vector
@@ -166,20 +179,33 @@ def draw_graph(
         )
         vlabel = _str(v, label_width) if show_weight else None
 
-        args = {}
+        if size_vector:
+            scale = max(size_vector[i] * size_scale, min_size)
+            if log_scale:
+                scale = max(log(scale), min_size)
+            size = _str(scale, label_width)
+        else:
+            size = &#34;0.5&#34;
+
+        args = {&#34;width&#34;: size, &#34;fixedsize&#34;: &#34;true&#34;}
         if node_attr:
             args.update(node_attr)
         if labels:
             args[&#34;label&#34;] = ilabel
+        if label_cmap and label_vector:
+            args[&#34;color&#34;] = rgb2hex(label_cmap(float(labeler(label_vector, i))))
         inode = g.node(str(i + ioff), **args)
 
-        args = {}
+        args = {&#34;width&#34;: size, &#34;fixedsize&#34;: &#34;true&#34;}
         if node_attr:
             args.update(node_attr)
         if labels:
             args[&#34;label&#34;] = jlabel
+        if label_cmap:
+            args[&#34;color&#34;] = rgb2hex(label_cmap(float(labeler(label_vector, j))))
         jnode = g.node(str(j + joff), **args)
         w = str(v)
+
         args = {}
         if edge_attr:
             args.update(edge_attr)
@@ -240,7 +266,7 @@ def draw(obj, name=&#34;&#34;, **kws):  # pragma: nocover
         return draw_vector_dot(obj, name, **kws)
 
 
-def draw_graph_op(left, op, right, result):  # pragma: nocover
+def draw_graph_op(left, op, right, result, **kwargs):  # pragma: nocover
     from pygraphblas import Matrix, Vector
 
     ioff = 0
@@ -266,35 +292,34 @@ def draw_graph_op(left, op, right, result):  # pragma: nocover
     return g
 
 
-def draw_vector(
-    V, scale=10, axes=True, labels=False, mode=None, cmap=&#34;viridis&#34;, filename=None
-):  # pragma: nocover
-    if not isinstance(V, Vector):
-        raise TypeError
-
-
 def draw_matrix(
     M,
     scale=10,
     axes=True,
-    labels=False,
+    axes_labels=False,
+    labels=True,
     mode=None,
     cmap=&#34;viridis&#34;,
     filename=None,
     column=True,
-    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    font_path=None,
 ):  # pragma: nocover
     from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
-    cosmic_font = ImageFont.truetype(
-        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
-    )
+    font = None
+    if font_path:
+        font = ImageFont.truetype(
+            str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+        )
+    else:
+        font = ImageFont.load_default()
 
     if isinstance(M, Vector):
         return draw_vector(
             M,
             scale=scale,
             axes=axes,
+            axes_labels=axes_labels,
             labels=labels,
             mode=mode,
             cmap=cmap,
@@ -319,9 +344,10 @@ def draw_matrix(
         if M.type is BOOL:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
-                fill=&#34;#3333ff&#34; if v else &#34;#ff3333&#34;,
+                fill=rgb2hex(cmap(1)) if v else rgb2hex(cmap(0)),
                 outline=&#34;black&#34;,
             )
+            v = &#34;t&#34; if v else &#34;f&#34;
         elif M.type in [FP32, FP64] and cmap:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
@@ -334,29 +360,30 @@ def draw_matrix(
                 fill=rgb2hex(cmap(int(v) % 255)),
                 outline=&#34;black&#34;,
             )
+        if labels:
             d.text(
                 ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
                 str(v)[:4],
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
     if axes:
         d.line((0, scale, im.size[0], scale), fill=&#34;black&#34;)
         d.line((scale, 0, scale, im.size[1]), fill=&#34;black&#34;)
-    if labels:
+    if axes_labels:
         for i in range(M.ncols):
             d.text(
                 (((i + 1) * scale) + scale / 5, scale / 5),
                 str(i),
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
         for j in range(M.nrows):
             d.text(
                 (scale / 5, ((j + 1) * scale) + scale / 5),
                 str(j),
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
     if filename is not None:
         im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
@@ -381,34 +408,38 @@ def draw_matrix_op(
     op,
     right,
     result,
-    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    font_path=None,
     filename=None,
+    eqstr=&#34;=&#34;,
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs[&#34;scale&#34;]
-    cosmic_font = ImageFont.truetype(
-        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
-    )
+    font = None
+    if font_path is not None:
+        font = ImageFont.truetype(
+            str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+        )
+    else:
+        font = ImageFont.load_default()
+
     kwargs[&#34;font_path&#34;] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
-    op_width = cosmic_font.getsize(op)[0]
+    op_width = font.getsize(op)[0]
     spacer = int(scale * 2)
     width = left.size[0] + op_width + spacer + right.size[0] + spacer + result.size[0]
     height = max(op_width + spacer, left.size[1], right.size[1], result.size[1])
     im = Image.new(left.mode, (width, height), color=&#34;white&#34;)
     d = ImageDraw.Draw(im)
     im.paste(left, (0, 0))
-    d.text(
-        (left.size[0] + int(spacer / 2), height / 2), op, fill=&#34;black&#34;, font=cosmic_font
-    )
+    d.text((left.size[0] + int(spacer / 2), height / 2), op, fill=&#34;black&#34;, font=font)
     im.paste(right, (left.size[0] + op_width + spacer, 0))
     d.text(
         (left.size[0] + right.size[0] + op_width + (spacer * 1.5), height / 2),
-        &#34;=&#34;,
+        eqstr,
         fill=&#34;black&#34;,
-        font=cosmic_font,
+        font=font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
     if filename is not None:
@@ -430,11 +461,11 @@ def draw_matrix_layers(layers, **kwargs):  # pragma: nocover
     return im
 
 
-def cy_matrix(M):  # pragma: nocover
-    nodes = dict()
+def cy_matrix(M, directed=True):  # pragma: nocover
+    nodes = OrderedDict()
     edges = []
 
-    for i, j, v in M:
+    for i, j, v in sorted(M):
         edges.append(
             {&#34;data&#34;: {&#34;id&#34;: f&#34;{i}:{j}:{v}&#34;, &#34;source&#34;: str(i), &#34;target&#34;: str(j)}}
         )
@@ -444,7 +475,7 @@ def cy_matrix(M):  # pragma: nocover
             nodes[j] = {&#34;data&#34;: {&#34;id&#34;: str(j)}}
 
     return {
-        &#34;directed&#34;: True,
+        &#34;directed&#34;: directed,
         &#34;elements&#34;: {&#34;nodes&#34;: list(nodes.values()), &#34;edges&#34;: edges},
     }
 
@@ -454,21 +485,21 @@ my_style = [
         &#34;selector&#34;: &#34;node&#34;,
         &#34;style&#34;: {
             &#34;background-color&#34;: &#34;blue&#34;,
-            &#34;label&#34;: &#34;data(name)&#34;,
-            &#34;width&#34;: 2,
-            &#34;height&#34;: 2,
+            &#34;label&#34;: &#34;data(id)&#34;,
+            &#34;width&#34;: 3,
+            &#34;height&#34;: 3,
             &#34;shape&#34;: &#34;circle&#34;,
-            &#34;color&#34;: &#34;#EEEEEE&#34;,
-            &#34;font-weight&#34;: 400,
+            &#34;color&#34;: &#34;#black&#34;,
+            &#34;font-weight&#34;: 3,
             &#34;text-halign&#34;: &#34;right&#34;,
             &#34;text-valign&#34;: &#34;bottom&#34;,
-            &#34;font-size&#34;: 12,
+            &#34;font-size&#34;: 3,
         },
     },
     {
         &#34;selector&#34;: &#34;edge&#34;,
         &#34;style&#34;: {
-            &#34;width&#34;: 0.2,
+            &#34;width&#34;: 0.1,
             &#34;opacity&#34;: 1,
             &#34;line-color&#34;: &#34;green&#34;,
         },
@@ -476,10 +507,11 @@ my_style = [
 ]
 
 
-def draw_cy(M, visual_style=my_style):  # pragma: nocover
+def draw_cy(M, visual_style=my_style, layout_name=&#34;cose&#34;):  # pragma: nocover
     from cyjupyter import Cytoscape
 
-    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)
+    c = Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
+    return c
 
 
 def draw_vis(M, **kwargs):  # pragma: nocover
@@ -521,7 +553,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_graph"><code class="name flex">
-<span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', show_weight=True, concentrate=True, labels=True, label_vector=None, label_width=None, size_vector=None, size_scale=1.0, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None)</span>
+<span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', directed=True, show_weight=True, concentrate=True, labels=True, label_vector=None, label_width=None, label_cmap=None, size_vector=None, size_scale=1.0, min_size=0.1, log_scale=False, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -533,13 +565,17 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     M,
     name=&#34;&#34;,
     rankdir=&#34;LR&#34;,
+    directed=True,
     show_weight=True,
     concentrate=True,
     labels=True,
     label_vector=None,
     label_width=None,
+    label_cmap=None,
     size_vector=None,
     size_scale=1.0,
+    min_size=0.1,
+    log_scale=False,
     ioff=0,
     joff=0,
     filename=None,
@@ -548,8 +584,13 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     edge_attr=None,
     edge_cmap=None,
 ):  # pragma: nocover
-    g = Digraph(name)
-    g.attr(rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34;)
+    if directed:
+        g = Digraph(name)
+    else:
+        g = Graph(name)
+    g.attr(
+        rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34; if concentrate else &#34;false&#34;
+    )
     if graph_attr:
         g.attr(**graph_attr)
     if node_attr:
@@ -560,13 +601,15 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     if edge_cmap is not None:
         edge_cmap = plt.get_cmap(edge_cmap)
 
+    if label_cmap is not None:
+        label_cmap = plt.get_cmap(label_cmap)
+
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i] if labels else &#34;&#34;
     else:
         labeler = lambda v, i: v.get(i) if labels else &#34;&#34;
 
     for i, j, v in M:
-        size = _str(size_vector[i] * size_scale, label_width) if size_vector else &#34;0.5&#34;
         ilabel = (
             _str(labeler(label_vector, i), label_width)
             if label_vector
@@ -583,20 +626,33 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         )
         vlabel = _str(v, label_width) if show_weight else None
 
-        args = {}
+        if size_vector:
+            scale = max(size_vector[i] * size_scale, min_size)
+            if log_scale:
+                scale = max(log(scale), min_size)
+            size = _str(scale, label_width)
+        else:
+            size = &#34;0.5&#34;
+
+        args = {&#34;width&#34;: size, &#34;fixedsize&#34;: &#34;true&#34;}
         if node_attr:
             args.update(node_attr)
         if labels:
             args[&#34;label&#34;] = ilabel
+        if label_cmap and label_vector:
+            args[&#34;color&#34;] = rgb2hex(label_cmap(float(labeler(label_vector, i))))
         inode = g.node(str(i + ioff), **args)
 
-        args = {}
+        args = {&#34;width&#34;: size, &#34;fixedsize&#34;: &#34;true&#34;}
         if node_attr:
             args.update(node_attr)
         if labels:
             args[&#34;label&#34;] = jlabel
+        if label_cmap:
+            args[&#34;color&#34;] = rgb2hex(label_cmap(float(labeler(label_vector, j))))
         jnode = g.node(str(j + joff), **args)
         w = str(v)
+
         args = {}
         if edge_attr:
             args.update(edge_attr)
@@ -612,7 +668,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix"><code class="name flex">
-<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, labels=False, mode=None, cmap='viridis', filename=None, column=True, font_path=PosixPath('/pygraphblas/demo'))</span>
+<span>def <span class="ident">draw_matrix</span></span>(<span>M, scale=10, axes=True, axes_labels=False, labels=True, mode=None, cmap='viridis', filename=None, column=True, font_path=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -624,24 +680,30 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     M,
     scale=10,
     axes=True,
-    labels=False,
+    axes_labels=False,
+    labels=True,
     mode=None,
     cmap=&#34;viridis&#34;,
     filename=None,
     column=True,
-    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    font_path=None,
 ):  # pragma: nocover
     from pygraphblas import BOOL, FP32, FP64, Matrix, Vector
 
-    cosmic_font = ImageFont.truetype(
-        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
-    )
+    font = None
+    if font_path:
+        font = ImageFont.truetype(
+            str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+        )
+    else:
+        font = ImageFont.load_default()
 
     if isinstance(M, Vector):
         return draw_vector(
             M,
             scale=scale,
             axes=axes,
+            axes_labels=axes_labels,
             labels=labels,
             mode=mode,
             cmap=cmap,
@@ -666,9 +728,10 @@ def draw_vis(M, **kwargs):  # pragma: nocover
         if M.type is BOOL:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
-                fill=&#34;#3333ff&#34; if v else &#34;#ff3333&#34;,
+                fill=rgb2hex(cmap(1)) if v else rgb2hex(cmap(0)),
                 outline=&#34;black&#34;,
             )
+            v = &#34;t&#34; if v else &#34;f&#34;
         elif M.type in [FP32, FP64] and cmap:
             d.rectangle(
                 (x - offset, y - offset, x + scale - offset, y + scale - offset),
@@ -681,29 +744,30 @@ def draw_vis(M, **kwargs):  # pragma: nocover
                 fill=rgb2hex(cmap(int(v) % 255)),
                 outline=&#34;black&#34;,
             )
+        if labels:
             d.text(
                 ((x - offset) + (scale / 4), (y - offset) + (scale / 10)),
                 str(v)[:4],
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
     if axes:
         d.line((0, scale, im.size[0], scale), fill=&#34;black&#34;)
         d.line((scale, 0, scale, im.size[1]), fill=&#34;black&#34;)
-    if labels:
+    if axes_labels:
         for i in range(M.ncols):
             d.text(
                 (((i + 1) * scale) + scale / 5, scale / 5),
                 str(i),
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
         for j in range(M.nrows):
             d.text(
                 (scale / 5, ((j + 1) * scale) + scale / 5),
                 str(j),
                 fill=&#34;black&#34;,
-                font=cosmic_font,
+                font=font,
             )
     if filename is not None:
         im.save(filename + &#34;.png&#34;, &#34;PNG&#34;)
@@ -779,7 +843,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_graph_op"><code class="name flex">
-<span>def <span class="ident">draw_graph_op</span></span>(<span>left, op, right, result)</span>
+<span>def <span class="ident">draw_graph_op</span></span>(<span>left, op, right, result, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -787,7 +851,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_graph_op(left, op, right, result):  # pragma: nocover
+<pre><code class="python">def draw_graph_op(left, op, right, result, **kwargs):  # pragma: nocover
     from pygraphblas import Matrix, Vector
 
     ioff = 0
@@ -814,7 +878,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_matrix_op"><code class="name flex">
-<span>def <span class="ident">draw_matrix_op</span></span>(<span>left, op, right, result, font_path=PosixPath('/pygraphblas/demo'), filename=None, **kwargs)</span>
+<span>def <span class="ident">draw_matrix_op</span></span>(<span>left, op, right, result, font_path=None, filename=None, eqstr='=', **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -827,34 +891,38 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     op,
     right,
     result,
-    font_path=Path(&#34;/pygraphblas/demo&#34;),
+    font_path=None,
     filename=None,
+    eqstr=&#34;=&#34;,
     **kwargs,
 ):  # pragma: nocover
     scale = kwargs[&#34;scale&#34;]
-    cosmic_font = ImageFont.truetype(
-        str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
-    )
+    font = None
+    if font_path is not None:
+        font = ImageFont.truetype(
+            str(font_path / &#34;FantasqueSansMono-Bold.ttf&#34;), int(scale * 0.5)
+        )
+    else:
+        font = ImageFont.load_default()
+
     kwargs[&#34;font_path&#34;] = font_path
     left = draw_matrix(left, **kwargs)
     right = draw_matrix(right, **kwargs)
     result = draw_matrix(result, **kwargs)
-    op_width = cosmic_font.getsize(op)[0]
+    op_width = font.getsize(op)[0]
     spacer = int(scale * 2)
     width = left.size[0] + op_width + spacer + right.size[0] + spacer + result.size[0]
     height = max(op_width + spacer, left.size[1], right.size[1], result.size[1])
     im = Image.new(left.mode, (width, height), color=&#34;white&#34;)
     d = ImageDraw.Draw(im)
     im.paste(left, (0, 0))
-    d.text(
-        (left.size[0] + int(spacer / 2), height / 2), op, fill=&#34;black&#34;, font=cosmic_font
-    )
+    d.text((left.size[0] + int(spacer / 2), height / 2), op, fill=&#34;black&#34;, font=font)
     im.paste(right, (left.size[0] + op_width + spacer, 0))
     d.text(
         (left.size[0] + right.size[0] + op_width + (spacer * 1.5), height / 2),
-        &#34;=&#34;,
+        eqstr,
         fill=&#34;black&#34;,
-        font=cosmic_font,
+        font=font,
     )
     im.paste(result, (left.size[0] + right.size[0] + op_width + spacer + spacer, 0))
     if filename is not None:
@@ -886,7 +954,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_cy"><code class="name flex">
-<span>def <span class="ident">draw_cy</span></span>(<span>M, visual_style=[{'selector': 'node', 'style': {'background-color': 'blue', 'label': 'data(name)', 'width': 2, 'height': 2, 'shape': 'circle', 'color': '#EEEEEE', 'font-weight': 400, 'text-halign': 'right', 'text-valign': 'bottom', 'font-size': 12}}, {'selector': 'edge', 'style': {'width': 0.2, 'opacity': 1, 'line-color': 'green'}}])</span>
+<span>def <span class="ident">draw_cy</span></span>(<span>M, visual_style=[{'selector': 'node', 'style': {'background-color': 'blue', 'label': 'data(id)', 'width': 3, 'height': 3, 'shape': 'circle', 'color': '#black', 'font-weight': 3, 'text-halign': 'right', 'text-valign': 'bottom', 'font-size': 3}}, {'selector': 'edge', 'style': {'width': 0.1, 'opacity': 1, 'line-color': 'green'}}], layout_name='cose')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -894,10 +962,11 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def draw_cy(M, visual_style=my_style):  # pragma: nocover
+<pre><code class="python">def draw_cy(M, visual_style=my_style, layout_name=&#34;cose&#34;):  # pragma: nocover
     from cyjupyter import Cytoscape
 
-    return Cytoscape(data=cy_matrix(M), visual_style=visual_style)</code></pre>
+    c = Cytoscape(data=cy_matrix(M), visual_style=visual_style, layout_name=layout_name)
+    return c</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_vis"><code class="name flex">
