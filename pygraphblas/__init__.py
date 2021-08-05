@@ -2,7 +2,8 @@
 
 pygraphblas requires the
 [SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
-library.  The easiest way currently to install pygraphblas on Linux is to use pip:
+library.  The easiest way currently to install pygraphblas on Linux is
+to use pip:
 
     pip install pygraphblas
 
@@ -30,8 +31,7 @@ An installation script for Ubuntu 18.04 is provided in the
 
 NOTE: DO NOT USE THESE PRE-COMPILED BINARIES FOR BENCHMARKING
 SUITESPARSE.  These binaries are not guaranteed to be idealy compiled
-for your environment.  You must build your own binaries on your own
-platforms if you intend to do ANY valid benchmarking.
+for your environment.
 
 ## Docker 
 

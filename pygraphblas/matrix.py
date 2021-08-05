@@ -1020,7 +1020,17 @@ class Matrix:
             2|149.0          |  2
                   0    1    2
 
+        >>> N = M.cast(types.INT64)
+        >>> print(N.to_string(width=5, prec=4))
+                  0    1    2
+            0|        42     |  0
+            1|            314|  1
+            2|  149          |  2
+                  0    1    2
+
         """
+        if out is None and self.type == cast:
+            return self
         return self.transpose(cast, out, desc=T0)
 
     def eadd(
@@ -3391,3 +3401,15 @@ class Matrix:
         """
         s = self.to_scipy_sparse("coo")
         return s.toarray()
+
+    def out_degree(self):
+        """Return a UINT64 vector of the out-degree of this graph:
+
+        >>> M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
+        >>> print(M.out_degree())
+        0| 2
+        1| 1
+        2| 1
+
+        """
+        return self.cast(types.UINT64).plus_pair(Vector.iso(1, self.nrows))
