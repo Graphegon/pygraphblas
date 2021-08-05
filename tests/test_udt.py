@@ -1,4 +1,5 @@
 import pytest
+from numpy.testing import assert_array_almost_equal
 
 from pygraphblas import *
 from pygraphblas.binaryop import binary_op
@@ -121,16 +122,19 @@ def test_log_semiring():
     with Log32_semiring:
         B = A @ A
 
-    assert B.to_lists() == [
-        [0, 0, 0, 1, 3, 3, 5],
-        [2, 4, 5, 4, 2, 4, 2],
+    assert_array_almost_equal(
+        B.to_lists(),
         [
-            0.01388888825858143,
-            0.055555553245953966,
-            0.34920633498203557,
-            0.0714285835851032,
-            0.041666665602164574,
-            0.49999999904767284,
-            0.12499999928575464,
+            [0, 0, 0, 1, 3, 3, 5],
+            [2, 4, 5, 4, 2, 4, 2],
+            [
+                0.01388888825858143,
+                0.055555553245953966,
+                0.34920633498203557,
+                0.0714285835851032,
+                0.041666665602164574,
+                0.49999999904767284,
+                0.12499999928575464,
+            ],
         ],
-    ]
+    )
