@@ -108,11 +108,11 @@ class Vector:
         return partial(getattr(self.type, name), self)
 
     @property
-    def indexes(self):
-        """Iterator of vector indexes.
+    def indices(self):
+        """cdata array of vector indexes.
 
         >>> v = Vector.from_1_to_n(3)
-        >>> list(v.indexes)
+        >>> list(v.indices)
         [0, 1, 2]
 
         """
@@ -121,27 +121,45 @@ class Vector:
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = NULL
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(I)
-
-    I = indexes
-    """Alias for `Vector.indexes`.
-    """
+        return I
 
     @property
-    def values(self):
+    def I(self):
+        """Iterator over for `Vector.indices`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.I)
+        [0, 1, 2]
+
+        """
+        return iter(self.indices)
+
+    @property
+    def vals(self):
         """Iterator of vector values.
 
         >>> v = Vector.from_1_to_n(3)
-        >>> list(v.values)
+        >>> list(v.vals)
         [1, 2, 3]
 
         """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
-        X = ffi.new("%s[%s]" % (self.type._c_type, nvals))
-        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(X)
+        V = ffi.new("%s[%s]" % (self.type._c_type, nvals))
+        self._check(self.type._Vector_extractTuples(I, V, _nvals, self._vector[0]))
+        return V
+
+    @property
+    def V(self):
+        """Iterator over for `Vector.vals`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.V)
+        [1, 2, 3]
+
+        """
+        return iter(self.vals)
 
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
@@ -256,7 +274,7 @@ class Vector:
 
     @classmethod
     def from_1_to_n(cls, n):
-        """Wrapper around LAGraph_1_to_n()
+        """Generate a vector from 1 to n.
 
         >>> v = Vector.from_1_to_n(3)
         >>> print(v)
