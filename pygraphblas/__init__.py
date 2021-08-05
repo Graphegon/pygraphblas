@@ -244,7 +244,8 @@ def init(blocking=False):
     initialize(blocking=blocking, memory_manager="c")
 
 
-init()
+if not is_initialized():
+    init()
 
 from .base import (
     lib,
