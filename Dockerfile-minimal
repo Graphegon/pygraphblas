@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=graphblas/python-suitesparse-graphblas:5.1.3.1
+ARG BASE_CONTAINER=python:3.9-slim-buster
 FROM ${BASE_CONTAINER}
 
 RUN apt-get update \
@@ -11,5 +11,5 @@ RUN pip3 install -r minimal-requirements.txt
 
 ADD . /pygraphblas
     
-RUN python3 setup.py install
+RUN python3 setup.py develop
 RUN ldconfig

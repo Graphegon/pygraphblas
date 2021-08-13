@@ -8,6 +8,7 @@ import random
 from array import array
 from pathlib import Path
 from functools import partial
+import numpy as np
 
 from .base import (
     lib,
@@ -630,7 +631,7 @@ class Matrix:
     def nvals(self):
         """Return the number of values stored in the Matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> M.nvals
         3
 
@@ -643,7 +644,7 @@ class Matrix:
     def memory_usage(self):
         """Returns the memory usage of the Matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> assert M.memory_usage > 0
         """
         n = ffi.new("size_t*")
@@ -658,7 +659,7 @@ class Matrix:
         transpose more than once, consider storing this in a local
         variable.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> MT = M.T
         >>> MT.iseq(M.transpose())
         True
@@ -876,9 +877,9 @@ class Matrix:
     def to_lists(self):
         """Extract the rows, columns and values of the Matrix as 3 lists.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> M.to_lists()
-        [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+        [[0, 1, 2], [1, 2, 0], [42, 314, 4224]]
 
         """
         I = ffi.new("GrB_Index[%s]" % self.nvals)
@@ -893,7 +894,7 @@ class Matrix:
         """Clear the matrix.  This does not change the size but removes all
         values.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> M.nvals == 3
         True
         >>> M.clear()
@@ -1019,7 +1020,17 @@ class Matrix:
             2|149.0          |  2
                   0    1    2
 
+        >>> N = M.cast(types.INT64)
+        >>> print(N.to_string(width=5, prec=4))
+                  0    1    2
+            0|        42     |  0
+            1|            314|  1
+            2|  149          |  2
+                  0    1    2
+
         """
+        if out is None and self.type == cast:
+            return self
         return self.transpose(cast, out, desc=T0)
 
     def eadd(
@@ -1151,6 +1162,8 @@ class Matrix:
             )
         )
         return out
+
+    union = eadd
 
     def emult(
         self,
@@ -1285,6 +1298,8 @@ class Matrix:
         )
         return out
 
+    intersection = emult
+
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
 
@@ -1310,7 +1325,7 @@ class Matrix:
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> N = M.dup()
         >>> M.iseq(N)
         True
@@ -1330,9 +1345,9 @@ class Matrix:
     def __iter__(self):
         """Iterate over the (row, col, value) triples of the Matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> sorted(list(iter(M)))
-        [(0, 1, 42), (1, 2, 314), (2, 0, 1492)]
+        [(0, 1, 42), (1, 2, 314), (2, 0, 4224)]
 
         """
         nvals = self.nvals
@@ -1347,9 +1362,9 @@ class Matrix:
         """Convert Matrix to tuple of three dense
         [array](https:/docs.python.org/3/library/array.html) objects.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> M.to_arrays()
-        (array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 1492]))
+        (array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 4224]))
 
         """
         if self.type._typecode is None:
@@ -1364,9 +1379,9 @@ class Matrix:
 
     @property
     def rows(self):
-        """An iterator of row indexes present in the matrix.
+        """An cffi cdata array of row indexes present in the matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> list(M.rows)
         [0, 1, 2]
 
@@ -1377,18 +1392,33 @@ class Matrix:
         J = NULL
         X = NULL
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(I)
+        return I
 
-    I = rows
-    """Alias for `Matrix.rows`.
-    """
+    @property
+    def I(self):
+        """Iterator over `Matrix.rows`.
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> list(M.I)
+        [0, 1, 2]
+
+        """
+        return iter(self.rows)
+
+    @property
+    def npI(self):
+        """numpy array from `Matrix.rows`.
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> M.npI
+        array([0, 1, 2], dtype=uint64)
+
+        """
+        return np.frombuffer(ffi.buffer(self.rows), dtype=np.uint64)
 
     @property
     def cols(self):
+        """An cdata array of column indexes present in the matrix.
 
-        """An iterator of column indexes present in the matrix.
-
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> list(M.cols)
         [1, 2, 0]
 
@@ -1399,28 +1429,66 @@ class Matrix:
         J = ffi.new("GrB_Index[%s]" % nvals)
         X = NULL
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(J)
+        return J
 
-    J = rows
-    """Alias for `Matrix.cols`.
-    """
+    @property
+    def J(self):
+        """Iterator over `Matrix.cols`.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> list(M.J)
+        [1, 2, 0]
+
+        """
+        return iter(self.cols)
+
+    @property
+    def npJ(self):
+        """numpy array from `Matrix.cols`.
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> M.npJ
+        array([1, 2, 0], dtype=uint64)
+
+        """
+        return np.frombuffer(ffi.buffer(self.cols), dtype=np.uint64)
 
     @property
     def vals(self):
-        """An iterator of values present in the matrix.
+        """An cdata array of values present in the matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> list(M.vals)
-        [42, 314, 1492]
+        [42, 314, 4224]
 
         """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
         J = NULL
-        X = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
-        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(X)
+        V = self.type._ffi.new("%s[%s]" % (self.type._c_type, nvals))
+        self._check(self.type._Matrix_extractTuples(I, J, V, _nvals, self._matrix[0]))
+        return V
+
+    @property
+    def V(self):
+        """Iterator over `Matrix.vals`.
+
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> list(M.V)
+        [42, 314, 4224]
+
+        """
+        return iter(self.vals)
+
+    @property
+    def npV(self):
+        """numpy array from `Matrix.vals`.
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        >>> M.npV
+        array([  42,  314, 4224])
+
+        """
+        return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)
 
     def __getattr__(self, name):
         """Look up operators as attributes for the given object."""
@@ -1433,7 +1501,7 @@ class Matrix:
     def __len__(self):
         """Return the number of elements in the Matrix.
 
-        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        >>> M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         >>> len(M)
         3
 
@@ -3337,3 +3405,41 @@ class Matrix:
         """
         s = self.to_scipy_sparse("coo")
         return s.toarray()
+
+    def out_degree(self, typ=types.UINT64, out=None):
+        """Return a UINT64 vector of the out-degree of this graph:
+
+        >>> M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
+        >>> print(M.out_degree())
+        0| 2
+        1| 1
+        2| 1
+
+        """
+        return self.cast(typ).plus_pair(Vector.iso(1, self.nrows), out=out)
+
+    def gini(self, typ=types.FP64):
+        """Calculate the Gini coefficient of the graph.
+
+        >>> M = Matrix.random(types.UINT8, 10, 10, 10, seed=42)
+        >>> M.gini()
+        0.23333333333333334
+
+        >>> M = Matrix.random(types.UINT8, 100, 10, 10, seed=42)
+        >>> M.gini()
+        0.0967741935483871
+
+        >>> M = Matrix.random(types.UINT8, 10000, 100, 100, seed=42)
+        >>> M.gini()
+        0.0483808618504436
+
+        >>> M = Matrix.dense(types.UINT8, 100, 100)
+        >>> M.gini()
+        0.0
+
+        """
+        array = self.out_degree(typ).npV
+        array.sort()
+        n = array.shape[0]
+        index = np.arange(1, n + 1)
+        return (np.sum((2 * index - n - 1) * array)) / (n * np.sum(array))

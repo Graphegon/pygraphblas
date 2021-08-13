@@ -6,6 +6,7 @@ import operator
 import weakref
 from array import array
 from functools import partial
+import numpy as np
 
 from .base import (
     lib,
@@ -108,11 +109,11 @@ class Vector:
         return partial(getattr(self.type, name), self)
 
     @property
-    def indexes(self):
-        """Iterator of vector indexes.
+    def indices(self):
+        """cdata array of vector indexes.
 
         >>> v = Vector.from_1_to_n(3)
-        >>> list(v.indexes)
+        >>> list(v.indices)
         [0, 1, 2]
 
         """
@@ -121,27 +122,67 @@ class Vector:
         I = ffi.new("GrB_Index[%s]" % nvals)
         X = NULL
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(I)
-
-    I = indexes
-    """Alias for `Vector.indexes`.
-    """
+        return I
 
     @property
-    def values(self):
+    def I(self):
+        """Iterator over for `Vector.indices`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.I)
+        [0, 1, 2]
+
+        """
+        return iter(self.indices)
+
+    @property
+    def npI(self):
+        """numpy array over `Vector.indices`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.npI
+        array([0, 1, 2], dtype=uint64)
+
+        """
+        return np.frombuffer(ffi.buffer(self.indices), dtype=np.uint64)
+
+    @property
+    def vals(self):
         """Iterator of vector values.
 
         >>> v = Vector.from_1_to_n(3)
-        >>> list(v.values)
+        >>> list(v.vals)
         [1, 2, 3]
 
         """
         nvals = self.nvals
         _nvals = ffi.new("GrB_Index[1]", [nvals])
         I = NULL
-        X = ffi.new("%s[%s]" % (self.type._c_type, nvals))
-        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(X)
+        V = ffi.new("%s[%s]" % (self.type._c_type, nvals))
+        self._check(self.type._Vector_extractTuples(I, V, _nvals, self._vector[0]))
+        return V
+
+    @property
+    def V(self):
+        """Iterator over for `Vector.vals`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> list(v.V)
+        [1, 2, 3]
+
+        """
+        return iter(self.vals)
+
+    @property
+    def npV(self):
+        """numpy array over `Vector.vals`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.npV
+        array([1, 2, 3])
+
+        """
+        return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)
 
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
@@ -188,7 +229,9 @@ class Vector:
         """
         if self.type != other.type:
             return False
-        return self.all(other, self.type.EQ)
+        if eq_op is None:
+            eq_op = self.type.EQ
+        return self.all(other, eq_op)
 
     def isne(self, other):
         """Compare two vectors for inequality.
@@ -256,7 +299,7 @@ class Vector:
 
     @classmethod
     def from_1_to_n(cls, n):
-        """Wrapper around LAGraph_1_to_n()
+        """Generate a vector from 1 to n.
 
         >>> v = Vector.from_1_to_n(3)
         >>> print(v)
