@@ -1163,6 +1163,8 @@ class Matrix:
         )
         return out
 
+    union = eadd
+
     def emult(
         self,
         other,
@@ -1295,6 +1297,8 @@ class Matrix:
             )
         )
         return out
+
+    intersection = emult
 
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
@@ -3402,7 +3406,7 @@ class Matrix:
         s = self.to_scipy_sparse("coo")
         return s.toarray()
 
-    def out_degree(self):
+    def out_degree(self, typ=types.UINT64, out=None):
         """Return a UINT64 vector of the out-degree of this graph:
 
         >>> M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
@@ -3412,4 +3416,30 @@ class Matrix:
         2| 1
 
         """
-        return self.cast(types.UINT64).plus_pair(Vector.iso(1, self.nrows))
+        return self.cast(typ).plus_pair(Vector.iso(1, self.nrows), out=out)
+
+    def gini(self, typ=types.FP64):
+        """Calculate the Gini coefficient of the graph.
+
+        >>> M = Matrix.random(types.UINT8, 10, 10, 10, seed=42)
+        >>> M.gini()
+        0.23333333333333334
+
+        >>> M = Matrix.random(types.UINT8, 100, 10, 10, seed=42)
+        >>> M.gini()
+        0.0967741935483871
+
+        >>> M = Matrix.random(types.UINT8, 10000, 100, 100, seed=42)
+        >>> M.gini()
+        0.0483808618504436
+
+        >>> M = Matrix.dense(types.UINT8, 100, 100)
+        >>> M.gini()
+        0.0
+
+        """
+        array = self.out_degree(typ).npV
+        array.sort()
+        n = array.shape[0]
+        index = np.arange(1, n + 1)
+        return (np.sum((2 * index - n - 1) * array)) / (n * np.sum(array))

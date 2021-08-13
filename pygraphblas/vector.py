@@ -6,6 +6,7 @@ import operator
 import weakref
 from array import array
 from functools import partial
+import numpy as np
 
 from .base import (
     lib,
@@ -135,6 +136,17 @@ class Vector:
         return iter(self.indices)
 
     @property
+    def npI(self):
+        """numpy array over `Vector.indices`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.npI
+        array([0, 1, 2], dtype=uint64)
+
+        """
+        return np.frombuffer(ffi.buffer(self.indices), dtype=np.uint64)
+
+    @property
     def vals(self):
         """Iterator of vector values.
 
@@ -160,6 +172,17 @@ class Vector:
 
         """
         return iter(self.vals)
+
+    @property
+    def npV(self):
+        """numpy array over `Vector.vals`.
+
+        >>> v = Vector.from_1_to_n(3)
+        >>> v.npV
+        array([1, 2, 3])
+
+        """
+        return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)
 
     def all(self, other, op):
         """Do all elements in self compare True with op to other?
@@ -206,7 +229,9 @@ class Vector:
         """
         if self.type != other.type:
             return False
-        return self.all(other, self.type.EQ)
+        if eq_op is None:
+            eq_op = self.type.EQ
+        return self.all(other, eq_op)
 
     def isne(self, other):
         """Compare two vectors for inequality.
