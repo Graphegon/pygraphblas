@@ -143,7 +143,7 @@ class Matrix:
         FC64)` respectively:
 
         >>> Matrix.sparse(int)
-        <Matrix (1152921504606846976x1152921504606846976 : 0:INT64)>
+        <Matrix (0 INT64)>
 
         """
         new_mat = ffi.new("GrB_Matrix*")
@@ -542,7 +542,7 @@ class Matrix:
         >>> from pprint import pprint
         >>> from operator import itemgetter
         >>> pprint(sorted(list(Matrix.ssget('Newman/karate')), key=itemgetter(0)))
-        [('karate.mtx', <Matrix (34x34 : 156:BOOL)>)]
+        [('karate.mtx', <Matrix (34x34 : 156 BOOL)>)]
 
         """
         import ssgetpy
@@ -2150,11 +2150,11 @@ class Matrix:
         >>> print(A.vector_diag(1))
         0| 1
         >>> A.vector_diag(2)
-        <Vector (0: 0:UINT8)>
+        <Vector (0 : 0 UINT8)>
         >>> print(A.vector_diag(-1))
         0| 1
         >>> A.vector_diag(-2)
-        <Vector (0: 0:UINT8)>
+        <Vector (0 : 0 UINT8)>
         """
         n, m = self.shape
         if k in range(0, n):
@@ -3345,7 +3345,13 @@ class Matrix:
         return self.to_string()
 
     def __repr__(self):
-        return "<Matrix (%sx%s : %s:%s)>" % (
+        if self.nrows == lib.GxB_INDEX_MAX and self.ncols == lib.GxB_INDEX_MAX:
+            return "<Matrix (%s %s)>" % (
+                self.nvals,
+                self.type.__name__,
+            )
+
+        return "<Matrix (%sx%s : %s %s)>" % (
             self.nrows,
             self.ncols,
             self.nvals,

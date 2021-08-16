@@ -1481,7 +1481,13 @@ class Vector:
         return self.to_string()
 
     def __repr__(self):
-        return "<Vector (%s: %s:%s)>" % (self.size, self.nvals, self.type.__name__)
+        if self.size == lib.GxB_INDEX_MAX:
+            return "<Vector (%s %s)>" % (
+                self.nvals,
+                self.type.__name__,
+            )
+
+        return "<Vector (%s : %s %s)>" % (self.size, self.nvals, self.type.__name__)
 
     def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
         """Print the matrix using `GxB_Matrix_fprint()`, by default to
