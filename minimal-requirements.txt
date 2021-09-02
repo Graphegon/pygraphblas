@@ -1,6 +1,3 @@
-suitesparse-graphblas
-scipy
-numba
 pytest
 pytest-cov
 setuptools

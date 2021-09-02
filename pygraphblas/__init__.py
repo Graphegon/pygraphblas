@@ -178,7 +178,7 @@ for that edge:
 
 >>> import pygraphblas as gb
 >>> gb.get_version()
-'5.1.5.0'
+'5.1.7.0'
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True] * len(I)
