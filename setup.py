@@ -9,6 +9,7 @@ setup(
     packages=["pygraphblas"],
     setup_requires=["pytest-runner"],
     install_requires=[
+        "numpy<1.2.1",
         "numba",
         "suitesparse-graphblas",
         "scipy",
