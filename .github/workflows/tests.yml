@@ -25,6 +25,6 @@ jobs:
     - name: Build
       run: |
         sudo apt install graphviz
-        sudo pip install -r minimal-requirements.txt
         sudo python setup.py install
-        pytest tests/
+        sudo pip install -r minimal-requirements.txt
+        ./test.sh
