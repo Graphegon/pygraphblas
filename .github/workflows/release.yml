@@ -8,10 +8,13 @@ jobs:
   deploy:
     runs-on: ubuntu-20.04
 
+    - name: build
+      run: |
+        python setup.py sdist
+
     steps:
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
-    
