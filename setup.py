@@ -1,5 +1,5 @@
 from setuptools import setup
-
+import versioneer
 
 with open("README.md") as f:
     long_description = f.read()
@@ -7,7 +7,8 @@ with open("README.md") as f:
 
 setup(
     name="pygraphblas",
-    version="5.1.7.1",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description="GraphBLAS Python bindings.",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -177,8 +177,6 @@ the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
 >>> import pygraphblas as gb
->>> gb.get_version()
-'5.1.7.0'
 >>> I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 >>> J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 >>> V = [True] * len(I)
@@ -273,12 +271,13 @@ IMPLEMENTATION_VERSION = (
     IMPLEMENTATION_MINOR,
     IMPLEMENTATION_SUB,
 )
-PY_VERSION_SUB = 0
-PY_VERSION = IMPLEMENTATION_VERSION + (PY_VERSION_SUB,)
-__version__ = ".".join(map(str, PY_VERSION))
+
+from . import _version
+
+__version__ = _version.get_versions()["version"]
 
 
-def get_version():
+def get_version():  # pragma: nocover
     """Return the pygraphblas version."""
     return __version__
 
@@ -394,3 +393,8 @@ def run_doctests(raise_on_error=False):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
         )
+
+
+from . import _version
+
+__version__ = _version.get_versions()["version"]

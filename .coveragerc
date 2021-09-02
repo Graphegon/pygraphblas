@@ -4,3 +4,4 @@ omit =
     pygraphblas/demo/*
     pygraphblas/build.py
     pygraphblas/rdflib.py
+    pygraphblas/_version.py

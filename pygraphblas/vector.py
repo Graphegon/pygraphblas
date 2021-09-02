@@ -716,8 +716,6 @@ class Vector:
         5|
         6|77
 
-        The following operators default to use `eadd`:
-
         """
         if mult_op is None:
             mult_op = current_binop.get(NULL)
