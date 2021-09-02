@@ -4,20 +4,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
 
-RUN conda install -y -c conda-forge python-suitesparse-graphblas
 RUN conda install -y graphviz
 
-ADD . /home/jovyan
 WORKDIR /home/jovyan
     
+ADD notebook-requirements.txt /home/jovyan
+RUN pip3 install -r notebook-requirements.txt
+
+ADD . /home/jovyan
+    
 RUN python setup.py develop
-RUN pip install -r notebook-requirements.txt
-#RUN jupyter nbextension install rise --py --sys-prefix
-#RUN jupyter nbextension enable rise --py --sys-prefix
 RUN chown -R jovyan /home/jovyan
 
 RUN ldconfig
 USER jovyan
 WORKDIR /home/jovyan/demo
-
-# RUN pytest

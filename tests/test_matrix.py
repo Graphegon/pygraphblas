@@ -817,7 +817,7 @@ def test_select_cmp():
 def test_shape_repr():
     m = Matrix.from_lists([2, 2, 2], [0, 1, 2], [6, 7, 8])
     assert m.shape == (3, 3)
-    assert repr(m) == "<Matrix (3x3 : 3:INT64)>"
+    assert repr(m) == "<Matrix(INT64, shape: (3, 3), nvals: 3)>"
 
 
 def test_iters():

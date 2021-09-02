@@ -143,7 +143,7 @@ class Matrix:
         FC64)` respectively:
 
         >>> Matrix.sparse(int)
-        <Matrix (1152921504606846976x1152921504606846976 : 0:INT64)>
+        <Matrix(INT64, nvals: 0)>
 
         """
         new_mat = ffi.new("GrB_Matrix*")
@@ -542,7 +542,7 @@ class Matrix:
         >>> from pprint import pprint
         >>> from operator import itemgetter
         >>> pprint(sorted(list(Matrix.ssget('Newman/karate')), key=itemgetter(0)))
-        [('karate.mtx', <Matrix (34x34 : 156:BOOL)>)]
+        [('karate.mtx', <Matrix(BOOL, shape: (34, 34), nvals: 156)>)]
 
         """
         import ssgetpy
@@ -2150,11 +2150,11 @@ class Matrix:
         >>> print(A.vector_diag(1))
         0| 1
         >>> A.vector_diag(2)
-        <Vector (0: 0:UINT8)>
+        <Vector(UINT8 size: 0, nvals: 0)>
         >>> print(A.vector_diag(-1))
         0| 1
         >>> A.vector_diag(-2)
-        <Vector (0: 0:UINT8)>
+        <Vector(UINT8 size: 0, nvals: 0)>
         """
         n, m = self.shape
         if k in range(0, n):
@@ -2431,15 +2431,25 @@ class Matrix:
         helper class to distinguish it from binary ops used in `eadd`
         and `emult`.
 
+        Output can be cast to a specific type by passing the cast parameter:
+        >>> o = m.mxm(n, cast=types.FP32)
+        >>> print(o)
+              0  1  2
+          0|      3.0|  0
+          1|8.0      |  1
+          2|   6.0   |  2
+              0  1  2
         """
         if semiring is None:
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            if semiring is not NULL:
+            if cast is not None:
+                typ = cast
+            elif semiring is not NULL:
                 typ = semiring.ztype
             else:
-                typ = cast or types.promote(self.type, other.type)
+                typ = types.promote(self.type, other.type)
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
         else:
             typ = out.type
@@ -2561,6 +2571,12 @@ class Matrix:
         1|
         2| 6
 
+        >>> o = m.mxv(v, cast=types.FP32)
+        >>> print(o)
+        0|3.0
+        1|8.0
+        2|6.0
+
         """
 
         if semiring is None:
@@ -2568,10 +2584,12 @@ class Matrix:
 
         if out is None:
             new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
-            if semiring is not NULL:
+            if cast is not None:
+                typ = cast
+            elif semiring is not NULL:
                 typ = semiring.ztype
             else:
-                typ = cast or types.promote(self.type, other.type)
+                typ = types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
         else:
             typ = out.type
@@ -3177,6 +3195,8 @@ class Matrix:
         ):
             raise TypeError(
                 "__delitem__ currently only supports single element removal"
+                "assign an empty vector like `A[i] = Vector.sparse(A.type, A.nrows)`"
+                "to remove rows or columns. "
             )
         self._check(lib.GrB_Matrix_removeElement(self._matrix[0], index[0], index[1]))
 
@@ -3345,12 +3365,11 @@ class Matrix:
         return self.to_string()
 
     def __repr__(self):
-        return "<Matrix (%sx%s : %s:%s)>" % (
-            self.nrows,
-            self.ncols,
-            self.nvals,
-            self.type.__name__,
-        )
+        tname = self.type.__name__
+        if self.nrows == lib.GxB_INDEX_MAX and self.ncols == lib.GxB_INDEX_MAX:
+            return f"<Matrix({tname}, nvals: {self.nvals})>"
+
+        return f"<Matrix({tname}, shape: {self.shape}, nvals: {self.nvals})>"
 
     @classmethod
     def from_scipy_sparse(cls, m):

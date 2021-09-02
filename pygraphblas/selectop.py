@@ -126,7 +126,7 @@ def select_op(arg_type, thunk_type=None):
     ...     return False
     >>> A = Matrix.dense(types.FP64, 3, 3, fill=1)
     >>> A.select(coin_flip)
-    <Matrix (3x3 : ...:FP64)>
+    <Matrix(FP64, shape: (3, 3), nvals: ...)>
     """
     if thunk_type is not None:
         thunk_type = thunk_type._gb_type
