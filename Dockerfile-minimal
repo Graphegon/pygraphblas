@@ -6,10 +6,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /pygraphblas
-ADD minimal-requirements.txt /pygraphblas
-RUN pip3 install -r minimal-requirements.txt
 
 ADD . /pygraphblas
     
-RUN python3 setup.py develop
+RUN python3 setup.py install
+RUN pip3 install -r minimal-requirements.txt
 RUN ldconfig

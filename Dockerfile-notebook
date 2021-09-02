@@ -8,12 +8,10 @@ RUN conda install -y graphviz
 
 WORKDIR /home/jovyan
     
-ADD notebook-requirements.txt /home/jovyan
-RUN pip3 install -r notebook-requirements.txt
-
 ADD . /home/jovyan
     
-RUN python setup.py develop
+RUN python setup.py install
+RUN pip3 install -r notebook-requirements.txt
 RUN chown -R jovyan /home/jovyan
 
 RUN ldconfig
