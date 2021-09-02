@@ -3,7 +3,7 @@ import os
 
 setup(
     name="pygraphblas",
-    version="5.1.5.1",
+    version="5.1.7.0",
     description="GraphBLAS Python bindings.",
     author="Michel Pelletier",
     packages=["pygraphblas"],
