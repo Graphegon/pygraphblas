@@ -8,11 +8,11 @@ jobs:
   deploy:
     runs-on: ubuntu-20.04
 
+    steps:
     - name: build
       run: |
         python setup.py sdist
 
-    steps:
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
