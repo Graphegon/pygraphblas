@@ -1,4 +1,4 @@
-python-suitesparse-graphblas
+suitesparse-graphblas
 scipy
 numba
 pytest
