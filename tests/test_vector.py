@@ -542,7 +542,7 @@ def test_str_and_repr():
 0| t
 1| t"""
     )
-    assert repr(b) == "<Vector (2: 2:BOOL)>"
+    assert repr(b) == "<Vector(BOOL size: 2, nvals: 2)>"
 
 
 def test_nonzero():

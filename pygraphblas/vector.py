@@ -251,6 +251,17 @@ class Vector:
         """Create an empty Vector from the given type.  If `size` is not
         specified it defaults to `pygraphblas.GxB_INDEX_MAX`.
 
+        >>> v = Vector.sparse(types.INT64, 3)
+        >>> v
+        <Vector(INT64 size: 3, nvals: 0)>
+        >>> v.size
+        3
+        >>> v = Vector.sparse(types.INT64)
+        >>> v
+        <Vector(INT64, nvals: 0)>
+        >>> v.size == lib.GxB_INDEX_MAX
+        True
+
         """
         if size is None:
             size = GxB_INDEX_MAX
@@ -1481,13 +1492,11 @@ class Vector:
         return self.to_string()
 
     def __repr__(self):
+        tname = self.type.__name__
         if self.size == lib.GxB_INDEX_MAX:
-            return "<Vector (%s %s)>" % (
-                self.nvals,
-                self.type.__name__,
-            )
+            return f"<Vector({tname}, nvals: {self.nvals})>"
 
-        return "<Vector (%s : %s %s)>" % (self.size, self.nvals, self.type.__name__)
+        return f"<Vector({tname} size: {self.size}, nvals: {self.nvals})>"
 
     def print(self, level=2, name="A", f=sys.stdout):  # pragma: nocover
         """Print the matrix using `GxB_Matrix_fprint()`, by default to

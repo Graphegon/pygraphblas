@@ -34,9 +34,6 @@ then
 fi
 
 docker build \
-       --build-arg SS_RELEASE=${SS_RELEASE} \
-       --build-arg SS_COMPACT=${SS_COMPACT} \
-       --build-arg SS_BURBLE=${SS_BURBLE} \
        -f Dockerfile-${BASE_NAME} \
        -t graphblas/pygraphblas-${BASE_NAME}:${PY_RELEASE} \
        .

@@ -251,7 +251,7 @@ def init(blocking=False):
     initialize(blocking=blocking, memory_manager="c")
 
 
-if not is_initialized():
+if not is_initialized():  # pragma: nocover
     init()
 
 from .base import (
@@ -291,7 +291,6 @@ from .monoid import build_monoids
 from .matrix import Matrix
 from .vector import Vector
 from .scalar import Scalar
-from .graph import Graph
 from . import descriptor
 
 __pdoc__ = {
@@ -373,7 +372,6 @@ GxB_SPEC = GxB_SPEC
 
 
 def run_doctests(raise_on_error=False):
-    from . import graph
     from . import matrix
     from . import vector
     from . import descriptor
@@ -390,7 +388,6 @@ def run_doctests(raise_on_error=False):
         binaryop,
         matrix,
         vector,
-        graph,
         descriptor,
         base,
     ):
