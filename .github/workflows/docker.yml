@@ -23,6 +23,6 @@ jobs:
       run: |
         VERSION=`python setup.py version | sed -n "s/^.*Version:\s*\(\S*\).*$/\1/p"`
         docker login --username pygraphblas --password ${{ secrets.DOCKERHUB_TOKEN }}
-        ./docker_build $VERSION notebook $VERSION clone push
-        ./docker_build $VERSION minimal $VERSION clone push
+        ./docker_build.sh $VERSION notebook $VERSION clone push
+        ./docker_build.sh $VERSION minimal $VERSION clone push
         
