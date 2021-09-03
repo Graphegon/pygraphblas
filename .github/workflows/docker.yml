@@ -1,13 +1,7 @@
 name: Upload Docker Images
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-# on:
-#   release:
-#     types: [created]
+  release:
+    types: [created]
 
 jobs:
   deploy:
