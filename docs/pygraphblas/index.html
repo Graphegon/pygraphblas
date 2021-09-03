@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>pygraphblas API documentation</title>
 <meta name="description" content="Installation …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -26,7 +26,13 @@
 <p>pygraphblas requires the
 <a href="http://faculty.cse.tamu.edu/davis/GraphBLAS.html">SuiteSparse:GraphBLAS</a>
 library.
-To install from source, first install SuiteSparse, then run:</p>
+The easiest way currently to install pygraphblas on Linux is
+to use pip:</p>
+<pre><code>pip install pygraphblas
+</code></pre>
+<p>This is currently only supported on Linux but Windows and MacOS binary
+packages are currently a work in progress.</p>
+<p>To install from source, first install SuiteSparse, then run:</p>
 <pre><code>python setup.py install
 </code></pre>
 <p>There are two ways to download precompiled binaries of pygraphblas
@@ -49,9 +55,7 @@ containers also work on Mac.</p>
 <p>NOTE: DO NOT USE THESE PRE-COMPILED BINARIES FOR BENCHMARKING
 SUITESPARSE.
 These binaries are not guaranteed to be idealy compiled
-for your environment.
-You must build your own binaries on your own
-platforms if you intend to do ANY valid benchmarking.</p>
+for your environment.</p>
 <h2 id="docker">Docker</h2>
 <p>pygraphblas is distributed as two different docker images on <a href="https://cloud.docker.com/repository/docker/pygraphblas/pygraphblas/general">Docker
 Hub</a>
@@ -187,8 +191,6 @@ the first are are lists of the row and column positions that define
 the begining and end of a graph edge, and the third list is the weight
 for that edge:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; import pygraphblas as gb
-&gt;&gt;&gt; gb.get_version()
-'5.1.5.0'
 &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = [True] * len(I)
@@ -256,7 +258,15 @@ you with a lot more background information.</p>
 
 pygraphblas requires the
 [SuiteSparse:GraphBLAS](http://faculty.cse.tamu.edu/davis/GraphBLAS.html)
-library.  To install from source, first install SuiteSparse, then run:
+library.  The easiest way currently to install pygraphblas on Linux is
+to use pip:
+
+    pip install pygraphblas
+
+This is currently only supported on Linux but Windows and MacOS binary
+packages are currently a work in progress.
+
+To install from source, first install SuiteSparse, then run:
 
     python setup.py install
   
@@ -277,8 +287,7 @@ An installation script for Ubuntu 18.04 is provided in the
 
 NOTE: DO NOT USE THESE PRE-COMPILED BINARIES FOR BENCHMARKING
 SUITESPARSE.  These binaries are not guaranteed to be idealy compiled
-for your environment.  You must build your own binaries on your own
-platforms if you intend to do ANY valid benchmarking.
+for your environment.
 
 ## Docker 
 
@@ -424,8 +433,6 @@ the begining and end of a graph edge, and the third list is the weight
 for that edge:
 
 &gt;&gt;&gt; import pygraphblas as gb
-&gt;&gt;&gt; gb.get_version()
-&#39;5.1.5.0&#39;
 &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
 &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
 &gt;&gt;&gt; V = [True] * len(I)
@@ -498,7 +505,8 @@ def init(blocking=False):
     initialize(blocking=blocking, memory_manager=&#34;c&#34;)
 
 
-init()
+if not is_initialized():  # pragma: nocover
+    init()
 
 from .base import (
     lib,
@@ -519,12 +527,13 @@ IMPLEMENTATION_VERSION = (
     IMPLEMENTATION_MINOR,
     IMPLEMENTATION_SUB,
 )
-PY_VERSION_SUB = 0
-PY_VERSION = IMPLEMENTATION_VERSION + (PY_VERSION_SUB,)
-__version__ = &#34;.&#34;.join(map(str, PY_VERSION))
+
+from . import _version
+
+__version__ = _version.get_versions()[&#34;version&#34;]
 
 
-def get_version():
+def get_version():  # pragma: nocover
     &#34;&#34;&#34;Return the pygraphblas version.&#34;&#34;&#34;
     return __version__
 
@@ -639,7 +648,12 @@ def run_doctests(raise_on_error=False):
     ):
         doctest.testmod(
             mod, optionflags=doctest.ELLIPSIS, raise_on_error=raise_on_error
-        )</code></pre>
+        )
+
+
+from . import _version
+
+__version__ = _version.get_versions()[&#34;version&#34;]</code></pre>
 </details>
 </section>
 <section>
@@ -923,7 +937,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         FC64)` respectively:
 
         &gt;&gt;&gt; Matrix.sparse(int)
-        &lt;Matrix (1152921504606846976x1152921504606846976 : 0:INT64)&gt;
+        &lt;Matrix(INT64, nvals: 0)&gt;
 
         &#34;&#34;&#34;
         new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -1322,7 +1336,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; from pprint import pprint
         &gt;&gt;&gt; from operator import itemgetter
         &gt;&gt;&gt; pprint(sorted(list(Matrix.ssget(&#39;Newman/karate&#39;)), key=itemgetter(0)))
-        [(&#39;karate.mtx&#39;, &lt;Matrix (34x34 : 156:BOOL)&gt;)]
+        [(&#39;karate.mtx&#39;, &lt;Matrix(BOOL, shape: (34, 34), nvals: 156)&gt;)]
 
         &#34;&#34;&#34;
         import ssgetpy
@@ -1411,7 +1425,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def nvals(self):
         &#34;&#34;&#34;Return the number of values stored in the Matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; M.nvals
         3
 
@@ -1424,7 +1438,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def memory_usage(self):
         &#34;&#34;&#34;Returns the memory usage of the Matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; assert M.memory_usage &gt; 0
         &#34;&#34;&#34;
         n = ffi.new(&#34;size_t*&#34;)
@@ -1439,7 +1453,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         transpose more than once, consider storing this in a local
         variable.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; MT = M.T
         &gt;&gt;&gt; MT.iseq(M.transpose())
         True
@@ -1657,9 +1671,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def to_lists(self):
         &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; M.to_lists()
-        [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+        [[0, 1, 2], [1, 2, 0], [42, 314, 4224]]
 
         &#34;&#34;&#34;
         I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
@@ -1674,7 +1688,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Clear the matrix.  This does not change the size but removes all
         values.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; M.nvals == 3
         True
         &gt;&gt;&gt; M.clear()
@@ -1800,7 +1814,17 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             2|149.0          |  2
                   0    1    2
 
+        &gt;&gt;&gt; N = M.cast(types.INT64)
+        &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+                  0    1    2
+            0|        42     |  0
+            1|            314|  1
+            2|  149          |  2
+                  0    1    2
+
         &#34;&#34;&#34;
+        if out is None and self.type == cast:
+            return self
         return self.transpose(cast, out, desc=T0)
 
     def eadd(
@@ -1932,6 +1956,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
             )
         )
         return out
+
+    union = eadd
 
     def emult(
         self,
@@ -2066,6 +2092,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         )
         return out
 
+    intersection = emult
+
     def all(self, other, op):
         &#34;&#34;&#34;Do all elements in self compare True with op to other?
 
@@ -2091,7 +2119,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         Not to be confused with `==` which will return a matrix of
         BOOL values comparing *elements* for equality.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; N = M.dup()
         &gt;&gt;&gt; M.iseq(N)
         True
@@ -2111,9 +2139,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __iter__(self):
         &#34;&#34;&#34;Iterate over the (row, col, value) triples of the Matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; sorted(list(iter(M)))
-        [(0, 1, 42), (1, 2, 314), (2, 0, 1492)]
+        [(0, 1, 42), (1, 2, 314), (2, 0, 4224)]
 
         &#34;&#34;&#34;
         nvals = self.nvals
@@ -2128,9 +2156,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &#34;&#34;&#34;Convert Matrix to tuple of three dense
         [array](https:/docs.python.org/3/library/array.html) objects.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; M.to_arrays()
-        (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 1492]))
+        (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 4224]))
 
         &#34;&#34;&#34;
         if self.type._typecode is None:
@@ -2145,9 +2173,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
     @property
     def rows(self):
-        &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+        &#34;&#34;&#34;An cffi cdata array of row indexes present in the matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; list(M.rows)
         [0, 1, 2]
 
@@ -2158,18 +2186,33 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         J = NULL
         X = NULL
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(I)
+        return I
 
-    I = rows
-    &#34;&#34;&#34;Alias for `Matrix.rows`.
-    &#34;&#34;&#34;
+    @property
+    def I(self):
+        &#34;&#34;&#34;Iterator over `Matrix.rows`.
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; list(M.I)
+        [0, 1, 2]
+
+        &#34;&#34;&#34;
+        return iter(self.rows)
+
+    @property
+    def npI(self):
+        &#34;&#34;&#34;numpy array from `Matrix.rows`.
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; M.npI
+        array([0, 1, 2], dtype=uint64)
+
+        &#34;&#34;&#34;
+        return np.frombuffer(ffi.buffer(self.rows), dtype=np.uint64)
 
     @property
     def cols(self):
+        &#34;&#34;&#34;An cdata array of column indexes present in the matrix.
 
-        &#34;&#34;&#34;An iterator of column indexes present in the matrix.
-
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; list(M.cols)
         [1, 2, 0]
 
@@ -2180,28 +2223,66 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = NULL
         self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(J)
+        return J
 
-    J = rows
-    &#34;&#34;&#34;Alias for `Matrix.cols`.
-    &#34;&#34;&#34;
+    @property
+    def J(self):
+        &#34;&#34;&#34;Iterator over `Matrix.cols`.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; list(M.J)
+        [1, 2, 0]
+
+        &#34;&#34;&#34;
+        return iter(self.cols)
+
+    @property
+    def npJ(self):
+        &#34;&#34;&#34;numpy array from `Matrix.cols`.
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; M.npJ
+        array([1, 2, 0], dtype=uint64)
+
+        &#34;&#34;&#34;
+        return np.frombuffer(ffi.buffer(self.cols), dtype=np.uint64)
 
     @property
     def vals(self):
-        &#34;&#34;&#34;An iterator of values present in the matrix.
+        &#34;&#34;&#34;An cdata array of values present in the matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; list(M.vals)
-        [42, 314, 1492]
+        [42, 314, 4224]
 
         &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
         J = NULL
-        X = self.type._ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
-        self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-        return iter(X)
+        V = self.type._ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+        self._check(self.type._Matrix_extractTuples(I, J, V, _nvals, self._matrix[0]))
+        return V
+
+    @property
+    def V(self):
+        &#34;&#34;&#34;Iterator over `Matrix.vals`.
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; list(M.V)
+        [42, 314, 4224]
+
+        &#34;&#34;&#34;
+        return iter(self.vals)
+
+    @property
+    def npV(self):
+        &#34;&#34;&#34;numpy array from `Matrix.vals`.
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+        &gt;&gt;&gt; M.npV
+        array([  42,  314, 4224])
+
+        &#34;&#34;&#34;
+        return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)
 
     def __getattr__(self, name):
         &#34;&#34;&#34;Look up operators as attributes for the given object.&#34;&#34;&#34;
@@ -2214,7 +2295,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
     def __len__(self):
         &#34;&#34;&#34;Return the number of elements in the Matrix.
 
-        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
         &gt;&gt;&gt; len(M)
         3
 
@@ -2863,11 +2944,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         &gt;&gt;&gt; print(A.vector_diag(1))
         0| 1
         &gt;&gt;&gt; A.vector_diag(2)
-        &lt;Vector (0: 0:UINT8)&gt;
+        &lt;Vector(UINT8 size: 0, nvals: 0)&gt;
         &gt;&gt;&gt; print(A.vector_diag(-1))
         0| 1
         &gt;&gt;&gt; A.vector_diag(-2)
-        &lt;Vector (0: 0:UINT8)&gt;
+        &lt;Vector(UINT8 size: 0, nvals: 0)&gt;
         &#34;&#34;&#34;
         n, m = self.shape
         if k in range(0, n):
@@ -3144,15 +3225,25 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         helper class to distinguish it from binary ops used in `eadd`
         and `emult`.
 
+        Output can be cast to a specific type by passing the cast parameter:
+        &gt;&gt;&gt; o = m.mxm(n, cast=types.FP32)
+        &gt;&gt;&gt; print(o)
+              0  1  2
+          0|      3.0|  0
+          1|8.0      |  1
+          2|   6.0   |  2
+              0  1  2
         &#34;&#34;&#34;
         if semiring is None:
             semiring = current_semiring.get(NULL)
 
         if out is None:
-            if semiring is not NULL:
+            if cast is not None:
+                typ = cast
+            elif semiring is not NULL:
                 typ = semiring.ztype
             else:
-                typ = cast or types.promote(self.type, other.type)
+                typ = types.promote(self.type, other.type)
             out = self.__class__.sparse(typ, self.nrows, other.ncols)
         else:
             typ = out.type
@@ -3274,6 +3365,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         1|
         2| 6
 
+        &gt;&gt;&gt; o = m.mxv(v, cast=types.FP32)
+        &gt;&gt;&gt; print(o)
+        0|3.0
+        1|8.0
+        2|6.0
+
         &#34;&#34;&#34;
 
         if semiring is None:
@@ -3281,10 +3378,12 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
 
         if out is None:
             new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
-            if semiring is not NULL:
+            if cast is not None:
+                typ = cast
+            elif semiring is not NULL:
                 typ = semiring.ztype
             else:
-                typ = cast or types.promote(self.type, other.type)
+                typ = types.promote(self.type, other.type)
             out = Vector.sparse(typ, new_dimension)
         else:
             typ = out.type
@@ -3890,6 +3989,8 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         ):
             raise TypeError(
                 &#34;__delitem__ currently only supports single element removal&#34;
+                &#34;assign an empty vector like `A[i] = Vector.sparse(A.type, A.nrows)`&#34;
+                &#34;to remove rows or columns. &#34;
             )
         self._check(lib.GrB_Matrix_removeElement(self._matrix[0], index[0], index[1]))
 
@@ -4058,12 +4159,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
         return self.to_string()
 
     def __repr__(self):
-        return &#34;&lt;Matrix (%sx%s : %s:%s)&gt;&#34; % (
-            self.nrows,
-            self.ncols,
-            self.nvals,
-            self.type.__name__,
-        )
+        tname = self.type.__name__
+        if self.nrows == lib.GxB_INDEX_MAX and self.ncols == lib.GxB_INDEX_MAX:
+            return f&#34;&lt;Matrix({tname}, nvals: {self.nvals})&gt;&#34;
+
+        return f&#34;&lt;Matrix({tname}, shape: {self.shape}, nvals: {self.nvals})&gt;&#34;
 
     @classmethod
     def from_scipy_sparse(cls, m):
@@ -4117,7 +4217,45 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxm" href="#p
                [149,   0,   0]], dtype=int64)
         &#34;&#34;&#34;
         s = self.to_scipy_sparse(&#34;coo&#34;)
-        return s.toarray()</code></pre>
+        return s.toarray()
+
+    def out_degree(self, typ=types.UINT64, out=None):
+        &#34;&#34;&#34;Return a UINT64 vector of the out-degree of this graph:
+
+        &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
+        &gt;&gt;&gt; print(M.out_degree())
+        0| 2
+        1| 1
+        2| 1
+
+        &#34;&#34;&#34;
+        return self.cast(typ).plus_pair(Vector.iso(1, self.nrows), out=out)
+
+    def gini(self, typ=types.FP64):
+        &#34;&#34;&#34;Calculate the Gini coefficient of the graph.
+
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 10, 10, 10, seed=42)
+        &gt;&gt;&gt; M.gini()
+        0.23333333333333334
+
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 100, 10, 10, seed=42)
+        &gt;&gt;&gt; M.gini()
+        0.0967741935483871
+
+        &gt;&gt;&gt; M = Matrix.random(types.UINT8, 10000, 100, 100, seed=42)
+        &gt;&gt;&gt; M.gini()
+        0.0483808618504436
+
+        &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 100, 100)
+        &gt;&gt;&gt; M.gini()
+        0.0
+
+        &#34;&#34;&#34;
+        array = self.out_degree(typ).npV
+        array.sort()
+        n = array.shape[0]
+        index = np.arange(1, n + 1)
+        return (np.sum((2 * index - n - 1) * array)) / (n * np.sum(array))</code></pre>
 </details>
 <h3 class="caret">Static methods</h3>
 <dl class="nested active">
@@ -4153,7 +4291,7 @@ passed instead.
 They are turned into <code>(BOOL, INT64, FP64,
 FC64)</code> respectively:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; Matrix.sparse(int)
-&lt;Matrix (1152921504606846976x1152921504606846976 : 0:INT64)&gt;
+&lt;Matrix(INT64, nvals: 0)&gt;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -4189,7 +4327,7 @@ def sparse(cls, typ, nrows=GxB_INDEX_MAX, ncols=GxB_INDEX_MAX):
     FC64)` respectively:
 
     &gt;&gt;&gt; Matrix.sparse(int)
-    &lt;Matrix (1152921504606846976x1152921504606846976 : 0:INT64)&gt;
+    &lt;Matrix(INT64, nvals: 0)&gt;
 
     &#34;&#34;&#34;
     new_mat = ffi.new(&#34;GrB_Matrix*&#34;)
@@ -4869,7 +5007,7 @@ argument:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from pprint import pprint
 &gt;&gt;&gt; from operator import itemgetter
 &gt;&gt;&gt; pprint(sorted(list(Matrix.ssget('Newman/karate')), key=itemgetter(0)))
-[('karate.mtx', &lt;Matrix (34x34 : 156:BOOL)&gt;)]
+[('karate.mtx', &lt;Matrix(BOOL, shape: (34, 34), nvals: 156)&gt;)]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -4886,7 +5024,7 @@ def ssget(cls, name_or_id=None, binary_cache_dir=None):  # pragma: nocover
     &gt;&gt;&gt; from pprint import pprint
     &gt;&gt;&gt; from operator import itemgetter
     &gt;&gt;&gt; pprint(sorted(list(Matrix.ssget(&#39;Newman/karate&#39;)), key=itemgetter(0)))
-    [(&#39;karate.mtx&#39;, &lt;Matrix (34x34 : 156:BOOL)&gt;)]
+    [(&#39;karate.mtx&#39;, &lt;Matrix(BOOL, shape: (34, 34), nvals: 156)&gt;)]
 
     &#34;&#34;&#34;
     import ssgetpy
@@ -5080,7 +5218,7 @@ def square(self):
 <dt id="pygraphblas.Matrix.nvals"><code class="name">var <span class="ident">nvals</span></code></dt>
 <dd>
 <div class="desc"><p>Return the number of values stored in the Matrix.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; M.nvals
 3
 </code></pre></div>
@@ -5092,7 +5230,7 @@ def square(self):
 def nvals(self):
     &#34;&#34;&#34;Return the number of values stored in the Matrix.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; M.nvals
     3
 
@@ -5105,7 +5243,7 @@ def nvals(self):
 <dt id="pygraphblas.Matrix.memory_usage"><code class="name">var <span class="ident">memory_usage</span></code></dt>
 <dd>
 <div class="desc"><p>Returns the memory usage of the Matrix.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; assert M.memory_usage &gt; 0
 </code></pre></div>
 <details class="source">
@@ -5116,7 +5254,7 @@ def nvals(self):
 def memory_usage(self):
     &#34;&#34;&#34;Returns the memory usage of the Matrix.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; assert M.memory_usage &gt; 0
     &#34;&#34;&#34;
     n = ffi.new(&#34;size_t*&#34;)
@@ -5131,7 +5269,7 @@ See <code><a title="pygraphblas.Matrix.transpose" href="#pygraphblas.Matrix.tran
 <p>Note: This property can be expensive, if you need the
 transpose more than once, consider storing this in a local
 variable.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; MT = M.T
 &gt;&gt;&gt; MT.iseq(M.transpose())
 True
@@ -5148,7 +5286,7 @@ def T(self):
     transpose more than once, consider storing this in a local
     variable.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; MT = M.T
     &gt;&gt;&gt; MT.iseq(M.transpose())
     True
@@ -5339,8 +5477,8 @@ def S(self):
 </dd>
 <dt id="pygraphblas.Matrix.rows"><code class="name">var <span class="ident">rows</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of row indexes present in the matrix.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<div class="desc"><p>An cffi cdata array of row indexes present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; list(M.rows)
 [0, 1, 2]
 </code></pre></div>
@@ -5350,9 +5488,9 @@ def S(self):
 </summary>
 <pre><code class="python">@property
 def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+    &#34;&#34;&#34;An cffi cdata array of row indexes present in the matrix.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; list(M.rows)
     [0, 1, 2]
 
@@ -5363,38 +5501,57 @@ def rows(self):
     J = NULL
     X = NULL
     self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-    return iter(I)</code></pre>
+    return I</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.I"><code class="name">var <span class="ident">I</span></code></dt>
 <dd>
-<div class="desc"><p>Alias for <code><a title="pygraphblas.Matrix.rows" href="#pygraphblas.Matrix.rows">Matrix.rows</a></code>.</p></div>
+<div class="desc"><p>Iterator over <code><a title="pygraphblas.Matrix.rows" href="#pygraphblas.Matrix.rows">Matrix.rows</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; list(M.I)
+[0, 1, 2]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
-
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-    &gt;&gt;&gt; list(M.rows)
+def I(self):
+    &#34;&#34;&#34;Iterator over `Matrix.rows`.
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; list(M.I)
     [0, 1, 2]
 
     &#34;&#34;&#34;
-    nvals = self.nvals
-    _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
-    I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
-    J = NULL
-    X = NULL
-    self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-    return iter(I)</code></pre>
+    return iter(self.rows)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.npI"><code class="name">var <span class="ident">npI</span></code></dt>
+<dd>
+<div class="desc"><p>numpy array from <code><a title="pygraphblas.Matrix.rows" href="#pygraphblas.Matrix.rows">Matrix.rows</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; M.npI
+array([0, 1, 2], dtype=uint64)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npI(self):
+    &#34;&#34;&#34;numpy array from `Matrix.rows`.
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; M.npI
+    array([0, 1, 2], dtype=uint64)
+
+    &#34;&#34;&#34;
+    return np.frombuffer(ffi.buffer(self.rows), dtype=np.uint64)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.cols"><code class="name">var <span class="ident">cols</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of column indexes present in the matrix.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<div class="desc"><p>An cdata array of column indexes present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; list(M.cols)
 [1, 2, 0]
 </code></pre></div>
@@ -5404,10 +5561,9 @@ def rows(self):
 </summary>
 <pre><code class="python">@property
 def cols(self):
+    &#34;&#34;&#34;An cdata array of column indexes present in the matrix.
 
-    &#34;&#34;&#34;An iterator of column indexes present in the matrix.
-
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; list(M.cols)
     [1, 2, 0]
 
@@ -5418,40 +5574,60 @@ def cols(self):
     J = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     X = NULL
     self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-    return iter(J)</code></pre>
+    return J</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.J"><code class="name">var <span class="ident">J</span></code></dt>
 <dd>
-<div class="desc"><p>Alias for <code><a title="pygraphblas.Matrix.cols" href="#pygraphblas.Matrix.cols">Matrix.cols</a></code>.</p></div>
+<div class="desc"><p>Iterator over <code><a title="pygraphblas.Matrix.cols" href="#pygraphblas.Matrix.cols">Matrix.cols</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; list(M.J)
+[1, 2, 0]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def rows(self):
-    &#34;&#34;&#34;An iterator of row indexes present in the matrix.
+def J(self):
+    &#34;&#34;&#34;Iterator over `Matrix.cols`.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
-    &gt;&gt;&gt; list(M.rows)
-    [0, 1, 2]
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; list(M.J)
+    [1, 2, 0]
 
     &#34;&#34;&#34;
-    nvals = self.nvals
-    _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
-    I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
-    J = NULL
-    X = NULL
-    self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-    return iter(I)</code></pre>
+    return iter(self.cols)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.npJ"><code class="name">var <span class="ident">npJ</span></code></dt>
+<dd>
+<div class="desc"><p>numpy array from <code><a title="pygraphblas.Matrix.cols" href="#pygraphblas.Matrix.cols">Matrix.cols</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; M.npJ
+array([1, 2, 0], dtype=uint64)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npJ(self):
+    &#34;&#34;&#34;numpy array from `Matrix.cols`.
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; M.npJ
+    array([1, 2, 0], dtype=uint64)
+
+    &#34;&#34;&#34;
+    return np.frombuffer(ffi.buffer(self.cols), dtype=np.uint64)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.vals"><code class="name">var <span class="ident">vals</span></code></dt>
 <dd>
-<div class="desc"><p>An iterator of values present in the matrix.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<div class="desc"><p>An cdata array of values present in the matrix.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; list(M.vals)
-[42, 314, 1492]
+[42, 314, 4224]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -5459,20 +5635,65 @@ def rows(self):
 </summary>
 <pre><code class="python">@property
 def vals(self):
-    &#34;&#34;&#34;An iterator of values present in the matrix.
+    &#34;&#34;&#34;An cdata array of values present in the matrix.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; list(M.vals)
-    [42, 314, 1492]
+    [42, 314, 4224]
 
     &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
     J = NULL
-    X = self.type._ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
-    self._check(self.type._Matrix_extractTuples(I, J, X, _nvals, self._matrix[0]))
-    return iter(X)</code></pre>
+    V = self.type._ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+    self._check(self.type._Matrix_extractTuples(I, J, V, _nvals, self._matrix[0]))
+    return V</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.V"><code class="name">var <span class="ident">V</span></code></dt>
+<dd>
+<div class="desc"><p>Iterator over <code><a title="pygraphblas.Matrix.vals" href="#pygraphblas.Matrix.vals">Matrix.vals</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; list(M.V)
+[42, 314, 4224]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def V(self):
+    &#34;&#34;&#34;Iterator over `Matrix.vals`.
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; list(M.V)
+    [42, 314, 4224]
+
+    &#34;&#34;&#34;
+    return iter(self.vals)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.npV"><code class="name">var <span class="ident">npV</span></code></dt>
+<dd>
+<div class="desc"><p>numpy array from <code><a title="pygraphblas.Matrix.vals" href="#pygraphblas.Matrix.vals">Matrix.vals</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+&gt;&gt;&gt; M.npV
+array([  42,  314, 4224])
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npV(self):
+    &#34;&#34;&#34;numpy array from `Matrix.vals`.
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
+    &gt;&gt;&gt; M.npV
+    array([  42,  314, 4224])
+
+    &#34;&#34;&#34;
+    return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.type"><code class="name">var <span class="ident">type</span></code></dt>
@@ -5642,9 +5863,9 @@ defaults to BOOL.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract the rows, columns and values of the Matrix as 3 lists.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; M.to_lists()
-[[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+[[0, 1, 2], [1, 2, 0], [42, 314, 4224]]
 </code></pre></div>
 <details class="source">
 <summary>
@@ -5653,9 +5874,9 @@ defaults to BOOL.</p>
 <pre><code class="python">def to_lists(self):
     &#34;&#34;&#34;Extract the rows, columns and values of the Matrix as 3 lists.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; M.to_lists()
-    [[0, 1, 2], [1, 2, 0], [42, 314, 1492]]
+    [[0, 1, 2], [1, 2, 0], [42, 314, 4224]]
 
     &#34;&#34;&#34;
     I = ffi.new(&#34;GrB_Index[%s]&#34; % self.nvals)
@@ -5674,7 +5895,7 @@ defaults to BOOL.</p>
 <div class="desc"><p>Clear the matrix.
 This does not change the size but removes all
 values.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; M.nvals == 3
 True
 &gt;&gt;&gt; M.clear()
@@ -5693,7 +5914,7 @@ True
     &#34;&#34;&#34;Clear the matrix.  This does not change the size but removes all
     values.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; M.nvals == 3
     True
     &gt;&gt;&gt; M.clear()
@@ -5899,6 +6120,14 @@ new matrix is of the cast type is created.</p>
     1|          314.0|  1
     2|149.0          |  2
           0    1    2
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; N = M.cast(types.INT64)
+&gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+          0    1    2
+    0|        42     |  0
+    1|            314|  1
+    2|  149          |  2
+          0    1    2
 </code></pre></div>
 <details class="source">
 <summary>
@@ -5931,12 +6160,280 @@ new matrix is of the cast type is created.</p>
         2|149.0          |  2
               0    1    2
 
+    &gt;&gt;&gt; N = M.cast(types.INT64)
+    &gt;&gt;&gt; print(N.to_string(width=5, prec=4))
+              0    1    2
+        0|        42     |  0
+        1|            314|  1
+        2|  149          |  2
+              0    1    2
+
     &#34;&#34;&#34;
+    if out is None and self.type == cast:
+        return self
     return self.transpose(cast, out, desc=T0)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Matrix.eadd"><code class="name flex">
 <span>def <span class="ident">eadd</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Element-wise addition with other matrix</p>
+<p>Element-wise addition takes the set union of the patterns of A
+and B and applies a binary operator for all entries that
+appear in the set intersection of the patterns of A and B.
+The default operators is the <code>PLUS</code> binary operator of the
+output type.</p>
+<p>The only difference between element-wise multiplication and
+addition is the pattern of the result, and what happens to
+entries outside the intersection. With multiplication the
+pattern of T is the intersection; with addition it is the set
+union. Entries outside the set intersection are dropped for
+multiplication, and kept for addition; in both cases the
+operator is only applied to those (and only those) entries in
+the intersection. Any binary operator can be used
+interchangeably for either operation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from .gviz import draw_graph
+&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+&gt;&gt;&gt; V = list(range(len(I)))
+&gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+&gt;&gt;&gt; draw_graph(A, filename='docs/imgs/Matrix_eadd_A')
+&lt;graphviz.dot.Digraph object at ...&gt;
+</code></pre>
+<p><img alt="Matrix_eadd_A.png" src="../imgs/Matrix_eadd_A.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
+...    [0, 1, 4, 6],
+...    [1, 3, 5, 5],
+...    [9, 1, 4, 7], 7, 7)
+&gt;&gt;&gt; draw_graph(B, filename='docs/imgs/Matrix_eadd_B')
+&lt;graphviz.dot.Digraph object at ...&gt;
+</code></pre>
+<p><img alt="Matrix_eadd_B.png" src="../imgs/Matrix_eadd_B.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; draw_graph(A.eadd(B), filename='docs/imgs/Matrix_eadd_C')
+&lt;graphviz.dot.Digraph object at ...&gt;
+&gt;&gt;&gt; print(A.eadd(B))
+      0  1  2  3  4  5  6
+  0|     9     1         |  0
+  1|           1  2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                11   |  4
+  5|        8            |  5
+  6|        9 10 11  7   |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p><img alt="Matrix_eadd_C.png" src="../imgs/Matrix_eadd_C.png"></p>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(A + B)
+      0  1  2  3  4  5  6
+  0|     9     1         |  0
+  1|           1  2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                11   |  4
+  5|        8            |  5
+  6|        9 10 11  7   |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN:
+...     print(A + B)
+      0  1  2  3  4  5  6
+  0|     0     1         |  0
+  1|           1  2     3|  1
+  2|                 4   |  2
+  3|  5     6            |  3
+  4|                 4   |  4
+  5|        8            |  5
+  6|        9 10 11  7   |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The following operators default to use <code>eadd</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A |
+B</td>
+<td>Matrix Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A |= B</td>
+<td>In-place Matrix Union</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A +
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A +=
+B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default PLUS combiner</td>
+</tr>
+<tr>
+<td>A -
+B</td>
+<td>Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+<tr>
+<td>A -=
+B</td>
+<td>In-place Matrix Element-Wise Union</td>
+<td>type default MINUS combiner</td>
+</tr>
+</tbody>
+</table></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def eadd(
+    self,
+    other,
+    add_op=None,
+    cast=None,
+    out=None,
+    mask=None,
+    accum=None,
+    desc=None,
+):
+    &#34;&#34;&#34;Element-wise addition with other matrix
+
+    Element-wise addition takes the set union of the patterns of A
+    and B and applies a binary operator for all entries that
+    appear in the set intersection of the patterns of A and B.
+    The default operators is the `PLUS` binary operator of the
+    output type.
+
+    The only difference between element-wise multiplication and
+    addition is the pattern of the result, and what happens to
+    entries outside the intersection. With multiplication the
+    pattern of T is the intersection; with addition it is the set
+    union. Entries outside the set intersection are dropped for
+    multiplication, and kept for addition; in both cases the
+    operator is only applied to those (and only those) entries in
+    the intersection. Any binary operator can be used
+    interchangeably for either operation.
+
+    &gt;&gt;&gt; from .gviz import draw_graph
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+    &gt;&gt;&gt; V = list(range(len(I)))
+    &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+    &gt;&gt;&gt; draw_graph(A, filename=&#39;docs/imgs/Matrix_eadd_A&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+
+    ![Matrix_eadd_A.png](../imgs/Matrix_eadd_A.png)
+
+    &gt;&gt;&gt; B = Matrix.from_lists(
+    ...    [0, 1, 4, 6],
+    ...    [1, 3, 5, 5],
+    ...    [9, 1, 4, 7], 7, 7)
+    &gt;&gt;&gt; draw_graph(B, filename=&#39;docs/imgs/Matrix_eadd_B&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+
+    ![Matrix_eadd_B.png](../imgs/Matrix_eadd_B.png)
+
+    &gt;&gt;&gt; draw_graph(A.eadd(B), filename=&#39;docs/imgs/Matrix_eadd_C&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+    &gt;&gt;&gt; print(A.eadd(B))
+          0  1  2  3  4  5  6
+      0|     9     1         |  0
+      1|           1  2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                11   |  4
+      5|        8            |  5
+      6|        9 10 11  7   |  6
+          0  1  2  3  4  5  6
+
+    ![Matrix_eadd_C.png](../imgs/Matrix_eadd_C.png)
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(A + B)
+          0  1  2  3  4  5  6
+      0|     9     1         |  0
+      1|           1  2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                11   |  4
+      5|        8            |  5
+      6|        9 10 11  7   |  6
+          0  1  2  3  4  5  6
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MIN:
+    ...     print(A + B)
+          0  1  2  3  4  5  6
+      0|     0     1         |  0
+      1|           1  2     3|  1
+      2|                 4   |  2
+      3|  5     6            |  3
+      4|                 4   |  4
+      5|        8            |  5
+      6|        9 10 11  7   |  6
+          0  1  2  3  4  5  6
+
+    The following operators default to use `eadd`:
+
+    Operator | Description | Default
+    --- | --- | ---
+    A \\|  B | Matrix Union | type default SECOND combiner
+    A \\|= B | In-place Matrix Union | type default SECOND combiner
+    A +    B | Matrix Element-Wise Union | type default PLUS combiner
+    A +=   B | In-place Matrix Element-Wise Union | type default PLUS combiner
+    A -    B | Matrix Element-Wise Union | type default MINUS combiner
+    A -=   B | In-place Matrix Element-Wise Union | type default MINUS combiner
+
+    &#34;&#34;&#34;
+    if add_op is None:
+        add_op = current_binop.get(NULL)
+    elif isinstance(add_op, str):
+        add_op = _get_bin_op(add_op, self.type)
+
+    mask, accum, desc = self._get_args(mask, accum, desc)
+    if out is None:
+        typ = cast or types.promote(self.type, other.type)
+        _out = ffi.new(&#34;GrB_Matrix*&#34;)
+        self._check(lib.GrB_Matrix_new(_out, typ._gb_type, self.nrows, self.ncols))
+        out = Matrix(_out, typ)
+
+    if add_op is NULL:
+        add_op = out.type._default_addop()
+    add_op = add_op.get_binaryop(self.type, other.type)
+    self._check(
+        lib.GrB_Matrix_eWiseAdd_BinaryOp(
+            out._matrix[0],
+            mask,
+            accum,
+            add_op,
+            self._matrix[0],
+            other._matrix[0],
+            desc,
+        )
+    )
+    return out</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.union"><code class="name flex">
+<span>def <span class="ident">union</span></span>(<span>self, other, add_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Element-wise addition with other matrix</p>
@@ -6457,6 +6954,270 @@ B</td>
     return out</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Matrix.intersection"><code class="name flex">
+<span>def <span class="ident">intersection</span></span>(<span>self, other, mult_op=None, cast=None, out=None, mask=None, accum=None, desc=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Element-wise multiplication with other matrix.</p>
+<p>Element-wise multiplication applies a binary operator
+element-wise on two matrices A and B, for all entries that
+appear in the set intersection of the patterns of A and B.
+Other operators other than addition can be used.</p>
+<p>The pattern of the result of the element-wise multiplication
+is exactly this set intersection. Entries in A but not B, or
+visa versa, do not appear in the result.</p>
+<p>The only difference between element-wise multiplication and
+addition is the pattern of the result, and what happens to
+entries outside the intersection. With multiplication the
+pattern of T is the intersection; with addition it is the set
+union. Entries outside the set intersection are dropped for
+multiplication, and kept for addition; in both cases the
+operator is only applied to those (and only those) entries in
+the intersection. Any binary operator can be used
+interchangeably for either operation.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from .gviz import draw_graph
+&gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+&gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+&gt;&gt;&gt; V = list(range(len(I)))
+&gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+&gt;&gt;&gt; draw_graph(A, filename='docs/imgs/Matrix_emult_A')
+&lt;graphviz.dot.Digraph object at ...&gt;
+</code></pre>
+<p><img alt="Matrix_emult_A.png" src="../imgs/Matrix_emult_A.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; B = Matrix.from_lists(
+...    [0, 1, 1, 6, 6],
+...    [1, 4, 6, 3, 5],
+...    [9, 1, 4, 7, 11], 7, 7)
+&gt;&gt;&gt; draw_graph(B, filename='docs/imgs/Matrix_emult_B')
+&lt;graphviz.dot.Digraph object at ...&gt;
+</code></pre>
+<p><img alt="Matrix_emult_B.png" src="../imgs/Matrix_emult_B.png"></p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; draw_graph(A.emult(B), filename='docs/imgs/Matrix_emult_C')
+&lt;graphviz.dot.Digraph object at ...&gt;
+&gt;&gt;&gt; print(A.emult(B))
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              2    12|  1
+  2|                     |  2
+  3|                     |  3
+  4|                     |  4
+  5|                     |  5
+  6|          70         |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p><img alt="Matrix_emult_C.png" src="../imgs/Matrix_emult_C.png"></p>
+<p>This can also be accomplished with the <code>+</code> operators:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; print(A * B)
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              2    12|  1
+  2|                     |  2
+  3|                     |  3
+  4|                     |  4
+  5|                     |  5
+  6|          70         |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The combining operator used can be provided either as a
+context manager or passed to <code>mxv</code> as the <code>add_op</code> argument.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; with types.INT64.MIN:
+...     print(A * B)
+      0  1  2  3  4  5  6
+  0|     0               |  0
+  1|              1     3|  1
+  2|                     |  2
+  3|                     |  3
+  4|                     |  4
+  5|                     |  5
+  6|           7         |  6
+      0  1  2  3  4  5  6
+</code></pre>
+<p>The following operators default to using <code>emult</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A &amp;
+B</td>
+<td>Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A &amp;=
+B</td>
+<td>In-place Matrix Intersection</td>
+<td>type default SECOND combiner</td>
+</tr>
+<tr>
+<td>A *
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A *=
+B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default TIMES combiner</td>
+</tr>
+<tr>
+<td>A /
+B</td>
+<td>Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+<tr>
+<td>A /=
+B</td>
+<td>In-place Matrix Element-Wise Intersection</td>
+<td>type default DIV combiner</td>
+</tr>
+</tbody>
+</table></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def emult(
+    self,
+    other,
+    mult_op=None,
+    cast=None,
+    out=None,
+    mask=None,
+    accum=None,
+    desc=None,
+):
+    &#34;&#34;&#34;Element-wise multiplication with other matrix.
+
+    Element-wise multiplication applies a binary operator
+    element-wise on two matrices A and B, for all entries that
+    appear in the set intersection of the patterns of A and B.
+    Other operators other than addition can be used.
+
+    The pattern of the result of the element-wise multiplication
+    is exactly this set intersection. Entries in A but not B, or
+    visa versa, do not appear in the result.
+
+    The only difference between element-wise multiplication and
+    addition is the pattern of the result, and what happens to
+    entries outside the intersection. With multiplication the
+    pattern of T is the intersection; with addition it is the set
+    union. Entries outside the set intersection are dropped for
+    multiplication, and kept for addition; in both cases the
+    operator is only applied to those (and only those) entries in
+    the intersection. Any binary operator can be used
+    interchangeably for either operation.
+
+    &gt;&gt;&gt; from .gviz import draw_graph
+    &gt;&gt;&gt; I = [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 6]
+    &gt;&gt;&gt; J = [1, 3, 4, 6, 5, 0, 2, 5, 2, 2, 3, 4]
+    &gt;&gt;&gt; V = list(range(len(I)))
+    &gt;&gt;&gt; A = Matrix.from_lists(I, J, V, 7, 7)
+    &gt;&gt;&gt; draw_graph(A, filename=&#39;docs/imgs/Matrix_emult_A&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+
+    ![Matrix_emult_A.png](../imgs/Matrix_emult_A.png)
+
+    &gt;&gt;&gt; B = Matrix.from_lists(
+    ...    [0, 1, 1, 6, 6],
+    ...    [1, 4, 6, 3, 5],
+    ...    [9, 1, 4, 7, 11], 7, 7)
+    &gt;&gt;&gt; draw_graph(B, filename=&#39;docs/imgs/Matrix_emult_B&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+
+    ![Matrix_emult_B.png](../imgs/Matrix_emult_B.png)
+
+    &gt;&gt;&gt; draw_graph(A.emult(B), filename=&#39;docs/imgs/Matrix_emult_C&#39;)
+    &lt;graphviz.dot.Digraph object at ...&gt;
+    &gt;&gt;&gt; print(A.emult(B))
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              2    12|  1
+      2|                     |  2
+      3|                     |  3
+      4|                     |  4
+      5|                     |  5
+      6|          70         |  6
+          0  1  2  3  4  5  6
+
+    ![Matrix_emult_C.png](../imgs/Matrix_emult_C.png)
+
+    This can also be accomplished with the `+` operators:
+
+    &gt;&gt;&gt; print(A * B)
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              2    12|  1
+      2|                     |  2
+      3|                     |  3
+      4|                     |  4
+      5|                     |  5
+      6|          70         |  6
+          0  1  2  3  4  5  6
+
+    The combining operator used can be provided either as a
+    context manager or passed to `mxv` as the `add_op` argument.
+
+    &gt;&gt;&gt; with types.INT64.MIN:
+    ...     print(A * B)
+          0  1  2  3  4  5  6
+      0|     0               |  0
+      1|              1     3|  1
+      2|                     |  2
+      3|                     |  3
+      4|                     |  4
+      5|                     |  5
+      6|           7         |  6
+          0  1  2  3  4  5  6
+
+    The following operators default to using `emult`:
+
+    Operator | Description | Default
+    --- | --- | ---
+    A &amp;    B | Matrix Intersection | type default SECOND combiner
+    A &amp;=   B | In-place Matrix Intersection | type default SECOND combiner
+    A *    B | Matrix Element-Wise Intersection | type default TIMES combiner
+    A *=   B | In-place Matrix Element-Wise Intersection | type default TIMES combiner
+    A /    B | Matrix Element-Wise Intersection | type default DIV combiner
+    A /=   B | In-place Matrix Element-Wise Intersection | type default DIV combiner
+
+    &#34;&#34;&#34;
+    if mult_op is None:
+        mult_op = current_binop.get(NULL)
+    elif isinstance(mult_op, str):
+        mult_op = _get_bin_op(mult_op, self.type)
+
+    mask, accum, desc = self._get_args(mask, accum, desc)
+    if out is None:
+        typ = cast or types.promote(self.type, other.type)
+        _out = ffi.new(&#34;GrB_Matrix*&#34;)
+        self._check(lib.GrB_Matrix_new(_out, typ._gb_type, self.nrows, self.ncols))
+        out = Matrix(_out, typ)
+
+    if mult_op is NULL:
+        mult_op = out.type._default_multop()
+    mult_op = mult_op.get_binaryop(self.type, other.type)
+    self._check(
+        lib.GrB_Matrix_eWiseMult_BinaryOp(
+            out._matrix[0],
+            mask,
+            accum,
+            mult_op,
+            self._matrix[0],
+            other._matrix[0],
+            desc,
+        )
+    )
+    return out</code></pre>
+</details>
+</dd>
 <dt id="pygraphblas.Matrix.all"><code class="name flex">
 <span>def <span class="ident">all</span></span>(<span>self, other, op)</span>
 </code></dt>
@@ -6499,7 +7260,7 @@ B</td>
 <div class="desc"><p>Compare two matrices for equality returning True or False.</p>
 <p>Not to be confused with <code>==</code> which will return a matrix of
 BOOL values comparing <em>elements</em> for equality.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; N = M.dup()
 &gt;&gt;&gt; M.iseq(N)
 True
@@ -6517,7 +7278,7 @@ False
     Not to be confused with `==` which will return a matrix of
     BOOL values comparing *elements* for equality.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; N = M.dup()
     &gt;&gt;&gt; M.iseq(N)
     True
@@ -6552,9 +7313,9 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
 <dd>
 <div class="desc"><p>Convert Matrix to tuple of three dense
 <a href="https:/docs.python.org/3/library/array.html">array</a> objects.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
 &gt;&gt;&gt; M.to_arrays()
-(array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 1492]))
+(array('L', [0, 1, 2]), array('L', [1, 2, 0]), array('q', [42, 314, 4224]))
 </code></pre></div>
 <details class="source">
 <summary>
@@ -6564,9 +7325,9 @@ See <code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">Mat
     &#34;&#34;&#34;Convert Matrix to tuple of three dense
     [array](https:/docs.python.org/3/library/array.html) objects.
 
-    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 1492])
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 2], [1, 2, 0], [42, 314, 4224])
     &gt;&gt;&gt; M.to_arrays()
-    (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 1492]))
+    (array(&#39;L&#39;, [0, 1, 2]), array(&#39;L&#39;, [1, 2, 0]), array(&#39;q&#39;, [42, 314, 4224]))
 
     &#34;&#34;&#34;
     if self.type._typecode is None:
@@ -7737,11 +8498,11 @@ can also do typecasting.</p>
 &gt;&gt;&gt; print(A.vector_diag(1))
 0| 1
 &gt;&gt;&gt; A.vector_diag(2)
-&lt;Vector (0: 0:UINT8)&gt;
+&lt;Vector(UINT8 size: 0, nvals: 0)&gt;
 &gt;&gt;&gt; print(A.vector_diag(-1))
 0| 1
 &gt;&gt;&gt; A.vector_diag(-2)
-&lt;Vector (0: 0:UINT8)&gt;
+&lt;Vector(UINT8 size: 0, nvals: 0)&gt;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -7774,11 +8535,11 @@ can also do typecasting.</p>
     &gt;&gt;&gt; print(A.vector_diag(1))
     0| 1
     &gt;&gt;&gt; A.vector_diag(2)
-    &lt;Vector (0: 0:UINT8)&gt;
+    &lt;Vector(UINT8 size: 0, nvals: 0)&gt;
     &gt;&gt;&gt; print(A.vector_diag(-1))
     0| 1
     &gt;&gt;&gt; A.vector_diag(-2)
-    &lt;Vector (0: 0:UINT8)&gt;
+    &lt;Vector(UINT8 size: 0, nvals: 0)&gt;
     &#34;&#34;&#34;
     n, m = self.shape
     if k in range(0, n):
@@ -8018,7 +8779,16 @@ argument or a context manager:</p>
 </code></pre>
 <p>The accumulator context manager requires an extra <code><a title="pygraphblas.Accum" href="#pygraphblas.Accum">Accum</a></code>
 helper class to distinguish it from binary ops used in <code>eadd</code>
-and <code>emult</code>.</p></div>
+and <code>emult</code>.</p>
+<p>Output can be cast to a specific type by passing the cast parameter:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxm(n, cast=types.FP32)
+&gt;&gt;&gt; print(o)
+      0  1  2
+  0|      3.0|  0
+  1|8.0      |  1
+  2|   6.0   |  2
+      0  1  2
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8166,15 +8936,25 @@ and <code>emult</code>.</p></div>
     helper class to distinguish it from binary ops used in `eadd`
     and `emult`.
 
+    Output can be cast to a specific type by passing the cast parameter:
+    &gt;&gt;&gt; o = m.mxm(n, cast=types.FP32)
+    &gt;&gt;&gt; print(o)
+          0  1  2
+      0|      3.0|  0
+      1|8.0      |  1
+      2|   6.0   |  2
+          0  1  2
     &#34;&#34;&#34;
     if semiring is None:
         semiring = current_semiring.get(NULL)
 
     if out is None:
-        if semiring is not NULL:
+        if cast is not None:
+            typ = cast
+        elif semiring is not NULL:
             typ = semiring.ztype
         else:
-            typ = cast or types.promote(self.type, other.type)
+            typ = types.promote(self.type, other.type)
         out = self.__class__.sparse(typ, self.nrows, other.ncols)
     else:
         typ = out.type
@@ -8286,6 +9066,12 @@ argument or a context manager:</p>
 0| 3
 1|
 2| 6
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; o = m.mxv(v, cast=types.FP32)
+&gt;&gt;&gt; print(o)
+0|3.0
+1|8.0
+2|6.0
 </code></pre></div>
 <details class="source">
 <summary>
@@ -8390,6 +9176,12 @@ argument or a context manager:</p>
     1|
     2| 6
 
+    &gt;&gt;&gt; o = m.mxv(v, cast=types.FP32)
+    &gt;&gt;&gt; print(o)
+    0|3.0
+    1|8.0
+    2|6.0
+
     &#34;&#34;&#34;
 
     if semiring is None:
@@ -8397,10 +9189,12 @@ argument or a context manager:</p>
 
     if out is None:
         new_dimension = self.ncols if T0 in (desc or ()) else self.nrows
-        if semiring is not NULL:
+        if cast is not None:
+            typ = cast
+        elif semiring is not NULL:
             typ = semiring.ztype
         else:
-            typ = cast or types.promote(self.type, other.type)
+            typ = types.promote(self.type, other.type)
         out = Vector.sparse(typ, new_dimension)
     else:
         typ = out.type
@@ -9640,6 +10434,86 @@ array([[  0,  42,   0],
     return s.toarray()</code></pre>
 </details>
 </dd>
+<dt id="pygraphblas.Matrix.out_degree"><code class="name flex">
+<span>def <span class="ident">out_degree</span></span>(<span>self, typ=pygraphblas.types.UINT64, out=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a UINT64 vector of the out-degree of this graph:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
+&gt;&gt;&gt; print(M.out_degree())
+0| 2
+1| 1
+2| 1
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def out_degree(self, typ=types.UINT64, out=None):
+    &#34;&#34;&#34;Return a UINT64 vector of the out-degree of this graph:
+
+    &gt;&gt;&gt; M = Matrix.from_lists([0, 1, 0, 2], [1, 2, 2, 0], [42, 0, 3, 149])
+    &gt;&gt;&gt; print(M.out_degree())
+    0| 2
+    1| 1
+    2| 1
+
+    &#34;&#34;&#34;
+    return self.cast(typ).plus_pair(Vector.iso(1, self.nrows), out=out)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Matrix.gini"><code class="name flex">
+<span>def <span class="ident">gini</span></span>(<span>self, typ=pygraphblas.types.FP64)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate the Gini coefficient of the graph.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 10, 10, 10, seed=42)
+&gt;&gt;&gt; M.gini()
+0.23333333333333334
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 100, 10, 10, seed=42)
+&gt;&gt;&gt; M.gini()
+0.0967741935483871
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.random(types.UINT8, 10000, 100, 100, seed=42)
+&gt;&gt;&gt; M.gini()
+0.0483808618504436
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; M = Matrix.dense(types.UINT8, 100, 100)
+&gt;&gt;&gt; M.gini()
+0.0
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gini(self, typ=types.FP64):
+    &#34;&#34;&#34;Calculate the Gini coefficient of the graph.
+
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 10, 10, 10, seed=42)
+    &gt;&gt;&gt; M.gini()
+    0.23333333333333334
+
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 100, 10, 10, seed=42)
+    &gt;&gt;&gt; M.gini()
+    0.0967741935483871
+
+    &gt;&gt;&gt; M = Matrix.random(types.UINT8, 10000, 100, 100, seed=42)
+    &gt;&gt;&gt; M.gini()
+    0.0483808618504436
+
+    &gt;&gt;&gt; M = Matrix.dense(types.UINT8, 100, 100)
+    &gt;&gt;&gt; M.gini()
+    0.0
+
+    &#34;&#34;&#34;
+    array = self.out_degree(typ).npV
+    array.sort()
+    n = array.shape[0]
+    index = np.arange(1, n + 1)
+    return (np.sum((2 * index - n - 1) * array)) / (n * np.sum(array))</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 <dt id="pygraphblas.Vector"><code class="flex name class">
@@ -9866,11 +10740,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return partial(getattr(self.type, name), self)
 
     @property
-    def indexes(self):
-        &#34;&#34;&#34;Iterator of vector indexes.
+    def indices(self):
+        &#34;&#34;&#34;cdata array of vector indexes.
 
         &gt;&gt;&gt; v = Vector.from_1_to_n(3)
-        &gt;&gt;&gt; list(v.indexes)
+        &gt;&gt;&gt; list(v.indices)
         [0, 1, 2]
 
         &#34;&#34;&#34;
@@ -9879,27 +10753,67 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
         X = NULL
         self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(I)
-
-    I = indexes
-    &#34;&#34;&#34;Alias for `Vector.indexes`.
-    &#34;&#34;&#34;
+        return I
 
     @property
-    def values(self):
+    def I(self):
+        &#34;&#34;&#34;Iterator over for `Vector.indices`.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; list(v.I)
+        [0, 1, 2]
+
+        &#34;&#34;&#34;
+        return iter(self.indices)
+
+    @property
+    def npI(self):
+        &#34;&#34;&#34;numpy array over `Vector.indices`.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; v.npI
+        array([0, 1, 2], dtype=uint64)
+
+        &#34;&#34;&#34;
+        return np.frombuffer(ffi.buffer(self.indices), dtype=np.uint64)
+
+    @property
+    def vals(self):
         &#34;&#34;&#34;Iterator of vector values.
 
         &gt;&gt;&gt; v = Vector.from_1_to_n(3)
-        &gt;&gt;&gt; list(v.values)
+        &gt;&gt;&gt; list(v.vals)
         [1, 2, 3]
 
         &#34;&#34;&#34;
         nvals = self.nvals
         _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
         I = NULL
-        X = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
-        self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-        return iter(X)
+        V = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+        self._check(self.type._Vector_extractTuples(I, V, _nvals, self._vector[0]))
+        return V
+
+    @property
+    def V(self):
+        &#34;&#34;&#34;Iterator over for `Vector.vals`.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; list(v.V)
+        [1, 2, 3]
+
+        &#34;&#34;&#34;
+        return iter(self.vals)
+
+    @property
+    def npV(self):
+        &#34;&#34;&#34;numpy array over `Vector.vals`.
+
+        &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+        &gt;&gt;&gt; v.npV
+        array([1, 2, 3])
+
+        &#34;&#34;&#34;
+        return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)
 
     def all(self, other, op):
         &#34;&#34;&#34;Do all elements in self compare True with op to other?
@@ -9946,7 +10860,9 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         &#34;&#34;&#34;
         if self.type != other.type:
             return False
-        return self.all(other, self.type.EQ)
+        if eq_op is None:
+            eq_op = self.type.EQ
+        return self.all(other, eq_op)
 
     def isne(self, other):
         &#34;&#34;&#34;Compare two vectors for inequality.
@@ -9965,6 +10881,17 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
     def sparse(cls, typ, size=None):
         &#34;&#34;&#34;Create an empty Vector from the given type.  If `size` is not
         specified it defaults to `pygraphblas.GxB_INDEX_MAX`.
+
+        &gt;&gt;&gt; v = Vector.sparse(types.INT64, 3)
+        &gt;&gt;&gt; v
+        &lt;Vector(INT64 size: 3, nvals: 0)&gt;
+        &gt;&gt;&gt; v.size
+        3
+        &gt;&gt;&gt; v = Vector.sparse(types.INT64)
+        &gt;&gt;&gt; v
+        &lt;Vector(INT64, nvals: 0)&gt;
+        &gt;&gt;&gt; v.size == lib.GxB_INDEX_MAX
+        True
 
         &#34;&#34;&#34;
         if size is None:
@@ -10014,7 +10941,7 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
 
     @classmethod
     def from_1_to_n(cls, n):
-        &#34;&#34;&#34;Wrapper around LAGraph_1_to_n()
+        &#34;&#34;&#34;Generate a vector from 1 to n.
 
         &gt;&gt;&gt; v = Vector.from_1_to_n(3)
         &gt;&gt;&gt; print(v)
@@ -10419,8 +11346,6 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         4|28
         5|
         6|77
-
-        The following operators default to use `eadd`:
 
         &#34;&#34;&#34;
         if mult_op is None:
@@ -11196,7 +12121,11 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
         return self.to_string()
 
     def __repr__(self):
-        return &#34;&lt;Vector (%s: %s:%s)&gt;&#34; % (self.size, self.nvals, self.type.__name__)
+        tname = self.type.__name__
+        if self.size == lib.GxB_INDEX_MAX:
+            return f&#34;&lt;Vector({tname}, nvals: {self.nvals})&gt;&#34;
+
+        return f&#34;&lt;Vector({tname} size: {self.size}, nvals: {self.nvals})&gt;&#34;
 
     def print(self, level=2, name=&#34;A&#34;, f=sys.stdout):  # pragma: nocover
         &#34;&#34;&#34;Print the matrix using `GxB_Matrix_fprint()`, by default to
@@ -11221,7 +12150,18 @@ various combinations of calling <code><a title="pygraphblas.Matrix.mxv" href="#p
 <dd>
 <div class="desc"><p>Create an empty Vector from the given type.
 If <code>size</code> is not
-specified it defaults to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p></div>
+specified it defaults to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygraphblas.GxB_INDEX_MAX">GxB_INDEX_MAX</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.sparse(types.INT64, 3)
+&gt;&gt;&gt; v
+&lt;Vector(INT64 size: 3, nvals: 0)&gt;
+&gt;&gt;&gt; v.size
+3
+&gt;&gt;&gt; v = Vector.sparse(types.INT64)
+&gt;&gt;&gt; v
+&lt;Vector(INT64, nvals: 0)&gt;
+&gt;&gt;&gt; v.size == lib.GxB_INDEX_MAX
+True
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -11230,6 +12170,17 @@ specified it defaults to <code><a title="pygraphblas.GxB_INDEX_MAX" href="#pygra
 def sparse(cls, typ, size=None):
     &#34;&#34;&#34;Create an empty Vector from the given type.  If `size` is not
     specified it defaults to `pygraphblas.GxB_INDEX_MAX`.
+
+    &gt;&gt;&gt; v = Vector.sparse(types.INT64, 3)
+    &gt;&gt;&gt; v
+    &lt;Vector(INT64 size: 3, nvals: 0)&gt;
+    &gt;&gt;&gt; v.size
+    3
+    &gt;&gt;&gt; v = Vector.sparse(types.INT64)
+    &gt;&gt;&gt; v
+    &lt;Vector(INT64, nvals: 0)&gt;
+    &gt;&gt;&gt; v.size == lib.GxB_INDEX_MAX
+    True
 
     &#34;&#34;&#34;
     if size is None:
@@ -11312,7 +12263,7 @@ def from_list(cls, I):
 <span>def <span class="ident">from_1_to_n</span></span>(<span>n)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Wrapper around LAGraph_1_to_n()</p>
+<div class="desc"><p>Generate a vector from 1 to n.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
 &gt;&gt;&gt; print(v)
 0| 1
@@ -11325,7 +12276,7 @@ def from_list(cls, I):
 </summary>
 <pre><code class="python">@classmethod
 def from_1_to_n(cls, n):
-    &#34;&#34;&#34;Wrapper around LAGraph_1_to_n()
+    &#34;&#34;&#34;Generate a vector from 1 to n.
 
     &gt;&gt;&gt; v = Vector.from_1_to_n(3)
     &gt;&gt;&gt; print(v)
@@ -11412,11 +12363,11 @@ def iso(cls, value, size=GxB_INDEX_MAX):
 </dl>
 <h3 class="caret">Instance Attributes</h3>
 <dl class="nested active">
-<dt id="pygraphblas.Vector.indexes"><code class="name">var <span class="ident">indexes</span></code></dt>
+<dt id="pygraphblas.Vector.indices"><code class="name">var <span class="ident">indices</span></code></dt>
 <dd>
-<div class="desc"><p>Iterator of vector indexes.</p>
+<div class="desc"><p>cdata array of vector indexes.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
-&gt;&gt;&gt; list(v.indexes)
+&gt;&gt;&gt; list(v.indices)
 [0, 1, 2]
 </code></pre></div>
 <details class="source">
@@ -11424,11 +12375,11 @@ def iso(cls, value, size=GxB_INDEX_MAX):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def indexes(self):
-    &#34;&#34;&#34;Iterator of vector indexes.
+def indices(self):
+    &#34;&#34;&#34;cdata array of vector indexes.
 
     &gt;&gt;&gt; v = Vector.from_1_to_n(3)
-    &gt;&gt;&gt; list(v.indexes)
+    &gt;&gt;&gt; list(v.indices)
     [0, 1, 2]
 
     &#34;&#34;&#34;
@@ -11437,38 +12388,60 @@ def indexes(self):
     I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
     X = NULL
     self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-    return iter(I)</code></pre>
+    return I</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.I"><code class="name">var <span class="ident">I</span></code></dt>
 <dd>
-<div class="desc"><p>Alias for <code><a title="pygraphblas.Vector.indexes" href="#pygraphblas.Vector.indexes">Vector.indexes</a></code>.</p></div>
+<div class="desc"><p>Iterator over for <code><a title="pygraphblas.Vector.indices" href="#pygraphblas.Vector.indices">Vector.indices</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; list(v.I)
+[0, 1, 2]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def indexes(self):
-    &#34;&#34;&#34;Iterator of vector indexes.
+def I(self):
+    &#34;&#34;&#34;Iterator over for `Vector.indices`.
 
     &gt;&gt;&gt; v = Vector.from_1_to_n(3)
-    &gt;&gt;&gt; list(v.indexes)
+    &gt;&gt;&gt; list(v.I)
     [0, 1, 2]
 
     &#34;&#34;&#34;
-    nvals = self.nvals
-    _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
-    I = ffi.new(&#34;GrB_Index[%s]&#34; % nvals)
-    X = NULL
-    self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-    return iter(I)</code></pre>
+    return iter(self.indices)</code></pre>
 </details>
 </dd>
-<dt id="pygraphblas.Vector.values"><code class="name">var <span class="ident">values</span></code></dt>
+<dt id="pygraphblas.Vector.npI"><code class="name">var <span class="ident">npI</span></code></dt>
+<dd>
+<div class="desc"><p>numpy array over <code><a title="pygraphblas.Vector.indices" href="#pygraphblas.Vector.indices">Vector.indices</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; v.npI
+array([0, 1, 2], dtype=uint64)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npI(self):
+    &#34;&#34;&#34;numpy array over `Vector.indices`.
+
+    &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; v.npI
+    array([0, 1, 2], dtype=uint64)
+
+    &#34;&#34;&#34;
+    return np.frombuffer(ffi.buffer(self.indices), dtype=np.uint64)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.vals"><code class="name">var <span class="ident">vals</span></code></dt>
 <dd>
 <div class="desc"><p>Iterator of vector values.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
-&gt;&gt;&gt; list(v.values)
+&gt;&gt;&gt; list(v.vals)
 [1, 2, 3]
 </code></pre></div>
 <details class="source">
@@ -11476,20 +12449,66 @@ def indexes(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def values(self):
+def vals(self):
     &#34;&#34;&#34;Iterator of vector values.
 
     &gt;&gt;&gt; v = Vector.from_1_to_n(3)
-    &gt;&gt;&gt; list(v.values)
+    &gt;&gt;&gt; list(v.vals)
     [1, 2, 3]
 
     &#34;&#34;&#34;
     nvals = self.nvals
     _nvals = ffi.new(&#34;GrB_Index[1]&#34;, [nvals])
     I = NULL
-    X = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
-    self._check(self.type._Vector_extractTuples(I, X, _nvals, self._vector[0]))
-    return iter(X)</code></pre>
+    V = ffi.new(&#34;%s[%s]&#34; % (self.type._c_type, nvals))
+    self._check(self.type._Vector_extractTuples(I, V, _nvals, self._vector[0]))
+    return V</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.V"><code class="name">var <span class="ident">V</span></code></dt>
+<dd>
+<div class="desc"><p>Iterator over for <code><a title="pygraphblas.Vector.vals" href="#pygraphblas.Vector.vals">Vector.vals</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; list(v.V)
+[1, 2, 3]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def V(self):
+    &#34;&#34;&#34;Iterator over for `Vector.vals`.
+
+    &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; list(v.V)
+    [1, 2, 3]
+
+    &#34;&#34;&#34;
+    return iter(self.vals)</code></pre>
+</details>
+</dd>
+<dt id="pygraphblas.Vector.npV"><code class="name">var <span class="ident">npV</span></code></dt>
+<dd>
+<div class="desc"><p>numpy array over <code><a title="pygraphblas.Vector.vals" href="#pygraphblas.Vector.vals">Vector.vals</a></code>.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; v = Vector.from_1_to_n(3)
+&gt;&gt;&gt; v.npV
+array([1, 2, 3])
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npV(self):
+    &#34;&#34;&#34;numpy array over `Vector.vals`.
+
+    &gt;&gt;&gt; v = Vector.from_1_to_n(3)
+    &gt;&gt;&gt; v.npV
+    array([1, 2, 3])
+
+    &#34;&#34;&#34;
+    return np.frombuffer(ffi.buffer(self.vals), dtype=self.type._numpy_t)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.hyper_switch"><code class="name">var <span class="ident">hyper_switch</span></code></dt>
@@ -11755,7 +12774,9 @@ False
     &#34;&#34;&#34;
     if self.type != other.type:
         return False
-    return self.all(other, self.type.EQ)</code></pre>
+    if eq_op is None:
+        eq_op = self.type.EQ
+    return self.all(other, eq_op)</code></pre>
 </details>
 </dd>
 <dt id="pygraphblas.Vector.isne"><code class="name flex">
@@ -12152,8 +13173,7 @@ context manager or passed to <code>mxv</code> as the <code>add_op</code> argumen
 4|28
 5|
 6|77
-</code></pre>
-<p>The following operators default to use <code>eadd</code>:</p></div>
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -12224,8 +13244,6 @@ context manager or passed to <code>mxv</code> as the <code>add_op</code> argumen
     4|28
     5|
     6|77
-
-    The following operators default to use `eadd`:
 
     &#34;&#34;&#34;
     if mult_op is None:
@@ -52648,7 +53666,7 @@ True
 ...     return False
 &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
 &gt;&gt;&gt; A.select(coin_flip)
-&lt;Matrix (3x3 : ...:FP64)&gt;
+&lt;Matrix(FP64, shape: (3, 3), nvals: ...)&gt;
 </code></pre></div>
 <details class="source">
 <summary>
@@ -52680,7 +53698,7 @@ True
     ...     return False
     &gt;&gt;&gt; A = Matrix.dense(types.FP64, 3, 3, fill=1)
     &gt;&gt;&gt; A.select(coin_flip)
-    &lt;Matrix (3x3 : ...:FP64)&gt;
+    &lt;Matrix(FP64, shape: (3, 3), nvals: ...)&gt;
     &#34;&#34;&#34;
     if thunk_type is not None:
         thunk_type = thunk_type._gb_type
@@ -52897,6 +53915,7 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Matrix.M" href="#pygraphblas.Matrix.M">M</a></code></li>
 <li><code><a title="pygraphblas.Matrix.S" href="#pygraphblas.Matrix.S">S</a></code></li>
 <li><code><a title="pygraphblas.Matrix.T" href="#pygraphblas.Matrix.T">T</a></code></li>
+<li><code><a title="pygraphblas.Matrix.V" href="#pygraphblas.Matrix.V">V</a></code></li>
 <li><code><a title="pygraphblas.Matrix.all" href="#pygraphblas.Matrix.all">all</a></code></li>
 <li><code><a title="pygraphblas.Matrix.apply" href="#pygraphblas.Matrix.apply">apply</a></code></li>
 <li><code><a title="pygraphblas.Matrix.apply_first" href="#pygraphblas.Matrix.apply_first">apply_first</a></code></li>
@@ -52929,8 +53948,10 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Matrix.from_tsv" href="#pygraphblas.Matrix.from_tsv">from_tsv</a></code></li>
 <li><code><a title="pygraphblas.Matrix.gb_type" href="#pygraphblas.Matrix.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.Matrix.get" href="#pygraphblas.Matrix.get">get</a></code></li>
+<li><code><a title="pygraphblas.Matrix.gini" href="#pygraphblas.Matrix.gini">gini</a></code></li>
 <li><code><a title="pygraphblas.Matrix.hyper_switch" href="#pygraphblas.Matrix.hyper_switch">hyper_switch</a></code></li>
 <li><code><a title="pygraphblas.Matrix.identity" href="#pygraphblas.Matrix.identity">identity</a></code></li>
+<li><code><a title="pygraphblas.Matrix.intersection" href="#pygraphblas.Matrix.intersection">intersection</a></code></li>
 <li><code><a title="pygraphblas.Matrix.iseq" href="#pygraphblas.Matrix.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.Matrix.isne" href="#pygraphblas.Matrix.isne">isne</a></code></li>
 <li><code><a title="pygraphblas.Matrix.iso" href="#pygraphblas.Matrix.iso">iso</a></code></li>
@@ -52943,9 +53964,13 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Matrix.mxv" href="#pygraphblas.Matrix.mxv">mxv</a></code></li>
 <li><code><a title="pygraphblas.Matrix.ncols" href="#pygraphblas.Matrix.ncols">ncols</a></code></li>
 <li><code><a title="pygraphblas.Matrix.nonzero" href="#pygraphblas.Matrix.nonzero">nonzero</a></code></li>
+<li><code><a title="pygraphblas.Matrix.npI" href="#pygraphblas.Matrix.npI">npI</a></code></li>
+<li><code><a title="pygraphblas.Matrix.npJ" href="#pygraphblas.Matrix.npJ">npJ</a></code></li>
+<li><code><a title="pygraphblas.Matrix.npV" href="#pygraphblas.Matrix.npV">npV</a></code></li>
 <li><code><a title="pygraphblas.Matrix.nrows" href="#pygraphblas.Matrix.nrows">nrows</a></code></li>
 <li><code><a title="pygraphblas.Matrix.nvals" href="#pygraphblas.Matrix.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.Matrix.offdiag" href="#pygraphblas.Matrix.offdiag">offdiag</a></code></li>
+<li><code><a title="pygraphblas.Matrix.out_degree" href="#pygraphblas.Matrix.out_degree">out_degree</a></code></li>
 <li><code><a title="pygraphblas.Matrix.pattern" href="#pygraphblas.Matrix.pattern">pattern</a></code></li>
 <li><code><a title="pygraphblas.Matrix.print" href="#pygraphblas.Matrix.print">print</a></code></li>
 <li><code><a title="pygraphblas.Matrix.random" href="#pygraphblas.Matrix.random">random</a></code></li>
@@ -52975,6 +54000,7 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Matrix.tril" href="#pygraphblas.Matrix.tril">tril</a></code></li>
 <li><code><a title="pygraphblas.Matrix.triu" href="#pygraphblas.Matrix.triu">triu</a></code></li>
 <li><code><a title="pygraphblas.Matrix.type" href="#pygraphblas.Matrix.type">type</a></code></li>
+<li><code><a title="pygraphblas.Matrix.union" href="#pygraphblas.Matrix.union">union</a></code></li>
 <li><code><a title="pygraphblas.Matrix.vals" href="#pygraphblas.Matrix.vals">vals</a></code></li>
 <li><code><a title="pygraphblas.Matrix.vector_diag" href="#pygraphblas.Matrix.vector_diag">vector_diag</a></code></li>
 <li><code><a title="pygraphblas.Matrix.wait" href="#pygraphblas.Matrix.wait">wait</a></code></li>
@@ -52985,6 +54011,7 @@ See SuiteSparse User Guide.</p>
 <ul class="two-column nested ">
 <li><code><a title="pygraphblas.Vector.I" href="#pygraphblas.Vector.I">I</a></code></li>
 <li><code><a title="pygraphblas.Vector.S" href="#pygraphblas.Vector.S">S</a></code></li>
+<li><code><a title="pygraphblas.Vector.V" href="#pygraphblas.Vector.V">V</a></code></li>
 <li><code><a title="pygraphblas.Vector.all" href="#pygraphblas.Vector.all">all</a></code></li>
 <li><code><a title="pygraphblas.Vector.apply" href="#pygraphblas.Vector.apply">apply</a></code></li>
 <li><code><a title="pygraphblas.Vector.apply_first" href="#pygraphblas.Vector.apply_first">apply_first</a></code></li>
@@ -53004,7 +54031,7 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Vector.gb_type" href="#pygraphblas.Vector.gb_type">gb_type</a></code></li>
 <li><code><a title="pygraphblas.Vector.get" href="#pygraphblas.Vector.get">get</a></code></li>
 <li><code><a title="pygraphblas.Vector.hyper_switch" href="#pygraphblas.Vector.hyper_switch">hyper_switch</a></code></li>
-<li><code><a title="pygraphblas.Vector.indexes" href="#pygraphblas.Vector.indexes">indexes</a></code></li>
+<li><code><a title="pygraphblas.Vector.indices" href="#pygraphblas.Vector.indices">indices</a></code></li>
 <li><code><a title="pygraphblas.Vector.iseq" href="#pygraphblas.Vector.iseq">iseq</a></code></li>
 <li><code><a title="pygraphblas.Vector.isne" href="#pygraphblas.Vector.isne">isne</a></code></li>
 <li><code><a title="pygraphblas.Vector.iso" href="#pygraphblas.Vector.iso">iso</a></code></li>
@@ -53012,6 +54039,8 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Vector.memory_usage" href="#pygraphblas.Vector.memory_usage">memory_usage</a></code></li>
 <li><code><a title="pygraphblas.Vector.min" href="#pygraphblas.Vector.min">min</a></code></li>
 <li><code><a title="pygraphblas.Vector.nonzero" href="#pygraphblas.Vector.nonzero">nonzero</a></code></li>
+<li><code><a title="pygraphblas.Vector.npI" href="#pygraphblas.Vector.npI">npI</a></code></li>
+<li><code><a title="pygraphblas.Vector.npV" href="#pygraphblas.Vector.npV">npV</a></code></li>
 <li><code><a title="pygraphblas.Vector.nvals" href="#pygraphblas.Vector.nvals">nvals</a></code></li>
 <li><code><a title="pygraphblas.Vector.pattern" href="#pygraphblas.Vector.pattern">pattern</a></code></li>
 <li><code><a title="pygraphblas.Vector.print" href="#pygraphblas.Vector.print">print</a></code></li>
@@ -53028,7 +54057,7 @@ See SuiteSparse User Guide.</p>
 <li><code><a title="pygraphblas.Vector.to_lists" href="#pygraphblas.Vector.to_lists">to_lists</a></code></li>
 <li><code><a title="pygraphblas.Vector.to_string" href="#pygraphblas.Vector.to_string">to_string</a></code></li>
 <li><code><a title="pygraphblas.Vector.type" href="#pygraphblas.Vector.type">type</a></code></li>
-<li><code><a title="pygraphblas.Vector.values" href="#pygraphblas.Vector.values">values</a></code></li>
+<li><code><a title="pygraphblas.Vector.vals" href="#pygraphblas.Vector.vals">vals</a></code></li>
 <li><code><a title="pygraphblas.Vector.vxm" href="#pygraphblas.Vector.vxm">vxm</a></code></li>
 <li><code><a title="pygraphblas.Vector.wait" href="#pygraphblas.Vector.wait">wait</a></code></li>
 </ul>
@@ -57582,7 +58611,7 @@ this.classList.toggle("caret-down");
 });
 }
 </script>
-<h4>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</h4>
+<h4>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.10.0</a>.</h4>
 </footer>
 </body>
 </html>
