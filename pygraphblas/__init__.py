@@ -193,7 +193,7 @@ for that edge:
       0  1  2  3  4  5  6
 
 >>> from pygraphblas import gviz
->>> g = gviz.draw_graph(M, show_weight=False, 
+>>> g = gviz.draw_graph(M, weights=False, 
 ...     filename='docs/imgs/Matrix_from_lists2')
 
 ![Matrix_from_lists2.png](../imgs/Matrix_from_lists2.png)

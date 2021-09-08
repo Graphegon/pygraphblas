@@ -35,7 +35,7 @@ class UnaryOp:
     def __call__(self, A, *args, **kwargs):
         return A.apply(self, *args, **kwargs)
 
-    def get_unaryop(self, operand1=None):
+    def get_op(self):
         return self.unaryop
 
     def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover

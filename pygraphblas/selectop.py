@@ -37,7 +37,7 @@ class SelectOp:
         self.name = name
         self.selectop = op
 
-    def get_selectop(self):
+    def get_op(self):
         return self.selectop
 
     def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover

@@ -83,46 +83,31 @@ class MetaType(type):
         cls._ptr = cls._c_type + "*"
         cls.default_zero = getattr(cls, "default_zero", core_ffi.NULL)
         cls.default_one = getattr(cls, "default_one", core_ffi.NULL)
-        get = partial(getattr, lib)
+
+        def get(n):
+            try:
+                return getattr(lib, "GrB_" + n)
+            except AttributeError:
+                return getattr(lib, "GxB_" + n)
+
         cls._base_name = base_name = getattr(cls, "_base_name", cls.__name__)
-        cls._prefix = prefix = getattr(cls, "_prefix", "GrB")
-        cls._Monoid_new = get("{}_Monoid_new_{}".format(prefix, base_name))
-        cls._Matrix_setElement = get(
-            "{}_Matrix_setElement_{}".format(prefix, base_name)
-        )
-        cls._Matrix_extractElement = get(
-            "{}_Matrix_extractElement_{}".format(prefix, base_name)
-        )
-        cls._Matrix_extractTuples = get(
-            "{}_Matrix_extractTuples_{}".format(prefix, base_name)
-        )
-        cls._Matrix_assignScalar = get("{}_Matrix_assign_{}".format(prefix, base_name))
-        cls._Matrix_apply_BinaryOp1st = get(
-            "{}_Matrix_apply_BinaryOp1st_{}".format(prefix, base_name)
-        )
-        cls._Matrix_apply_BinaryOp2nd = get(
-            "{}_Matrix_apply_BinaryOp2nd_{}".format(prefix, base_name)
-        )
-        cls._Vector_setElement = get(
-            "{}_Vector_setElement_{}".format(prefix, base_name)
-        )
-        cls._Vector_extractElement = get(
-            "{}_Vector_extractElement_{}".format(prefix, base_name)
-        )
-        cls._Vector_extractTuples = get(
-            "{}_Vector_extractTuples_{}".format(prefix, base_name)
-        )
-        cls._Vector_assignScalar = get("{}_Vector_assign_{}".format(prefix, base_name))
-        cls._Vector_apply_BinaryOp1st = get(
-            "{}_Vector_apply_BinaryOp1st_{}".format(prefix, base_name)
-        )
-        cls._Vector_apply_BinaryOp2nd = get(
-            "{}_Vector_apply_BinaryOp2nd_{}".format(prefix, base_name)
-        )
-        cls._Scalar_setElement = get("GxB_Scalar_setElement_{}".format(base_name))
-        cls._Scalar_extractElement = get(
-            "GxB_Scalar_extractElement_{}".format(base_name)
-        )
+        cls._Monoid_new = get(f"Monoid_new_{base_name}")
+        cls._Matrix_setElement = get(f"Matrix_setElement_{base_name}")
+        cls._Matrix_extractElement = get(f"Matrix_extractElement_{base_name}")
+        cls._Matrix_extractTuples = get(f"Matrix_extractTuples_{base_name}")
+        cls._Matrix_assignScalar = get(f"Matrix_assign_{base_name}")
+        cls._Matrix_apply_BinaryOp1st = get(f"Matrix_apply_BinaryOp1st_{base_name}")
+        cls._Matrix_apply_BinaryOp2nd = get(f"Matrix_apply_BinaryOp2nd_{base_name}")
+        cls._Vector_setElement = get(f"Vector_setElement_{base_name}")
+        cls._Vector_extractElement = get(f"Vector_extractElement_{base_name}")
+        cls._Vector_extractTuples = get(f"Vector_extractTuples_{base_name}")
+        cls._Vector_assignScalar = get(f"Vector_assign_{base_name}")
+        cls._Vector_apply_BinaryOp1st = get(f"Vector_apply_BinaryOp1st_{base_name}")
+        cls._Vector_apply_BinaryOp2nd = get(f"Vector_apply_BinaryOp2nd_{base_name}")
+        cls._Scalar_setElement = get(f"Scalar_setElement_{base_name}")
+        cls._Scalar_extractElement = get(f"Scalar_extractElement_{base_name}")
+        cls._Vector_reduce = get(f"Vector_reduce_{base_name}")
+        cls._Matrix_reduce = get(f"Matrix_reduce_{base_name}")
         return cls
 
     def new_monoid(cls, op, identity):
@@ -140,11 +125,7 @@ class MetaType(type):
         from .semiring import Semiring
 
         semiring = core_ffi.new("GrB_Semiring[1]")
-        _check(
-            lib.GrB_Semiring_new(
-                semiring, monoid.get_monoid(), op.get_binaryop(core_ffi.NULL)
-            )
-        )
+        _check(lib.GrB_Semiring_new(semiring, monoid.get_op(), op.get_op()))
         return Semiring("PLUS", "TIMES", cls.__name__, semiring[0], udt=cls)
 
     def gb_from_name(cls, name):
@@ -345,7 +326,6 @@ class FP64(Type):
 class FC32(Type):
     """GraphBLAS 32 bit float complex."""
 
-    _prefix = "GxB"
     default_one = complex(1.0)
     default_zero = complex(0.0)
     _gb_type = lib.GxB_FC32
@@ -357,7 +337,6 @@ class FC32(Type):
 class FC64(Type):
     """GraphBLAS 64 bit float complex."""
 
-    _prefix = "GxB"
     default_one = complex(1.0)
     default_zero = complex(0.0)
     _gb_type = lib.GxB_FC64

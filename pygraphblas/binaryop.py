@@ -57,7 +57,10 @@ class BinaryOp:
         current_binop.reset(self.token)
         return False
 
-    def get_binaryop(self, left=None, right=None):
+    def __call__(self, A, B, *args, **kwargs):
+        return A.emult(B, self, *args, **kwargs)
+
+    def get_op(self):
         return self.binaryop
 
     def print(self, level=2, name="", f=sys.stdout):  # pragma: nocover

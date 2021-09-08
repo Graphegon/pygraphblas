@@ -4,7 +4,7 @@ doctests and Jupyter notebooks.
 >>> from pygraphblas import *
 >>> M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
->>> g = draw_graph(M, show_weight=False,
+>>> g = draw_graph(M, weights=False,
 ...     filename='docs/imgs/Matrix_from_lists3')
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
@@ -65,10 +65,11 @@ def draw_vector_dot(V, name="", rankdir="LR", ioff=0, joff=0):  # pragma: nocove
 
 def draw_graph(
     M,
+    g=None,
     name="",
     rankdir="LR",
     directed=True,
-    show_weight=True,
+    weights=True,
     concentrate=True,
     labels=True,
     label_vector=None,
@@ -85,11 +86,13 @@ def draw_graph(
     node_attr=None,
     edge_attr=None,
     edge_cmap=None,
+    weight_prefix="",
 ):  # pragma: nocover
-    if directed:
-        g = Digraph(name)
-    else:
-        g = Graph(name)
+    if g is None:
+        if directed:
+            g = Digraph(name)
+        else:
+            g = Graph(name)
     g.attr(
         rankdir=rankdir, overlap="false", concentrate="true" if concentrate else "false"
     )
@@ -126,7 +129,7 @@ def draw_graph(
             if labels
             else ""
         )
-        vlabel = _str(v, label_width) if show_weight else None
+        vlabel = weight_prefix + _str(v, label_width) if weights else None
 
         if size_vector:
             scale = max(size_vector[i] * size_scale, min_size)
@@ -163,6 +166,8 @@ def draw_graph(
             args["tooltip"] = vlabel
         if edge_cmap:
             args["color"] = rgb2hex(edge_cmap(float(v)))
+        if not weights:
+            w = None
         g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format="png")

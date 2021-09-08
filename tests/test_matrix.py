@@ -160,10 +160,6 @@ def test_matrix_eadd():
     prod_ref[0, 1] = 1
     prod_ref[1, 0] = 1
 
-    prod5 = v.eadd(w, "*")
-    assert prod5.iseq(prod_ref)
-    assert prod5.isne(sum1)
-
 
 def test_sub():
     I = list(range(10))

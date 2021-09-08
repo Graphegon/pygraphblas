@@ -53,8 +53,7 @@ class Semiring:
             op = A.mxv
         else:
             op = A.mxm
-        kwargs["semiring"] = self
-        return op(B, *args, **kwargs)
+        return op(B, self, *args, **kwargs)
 
     def __enter__(self):
         self.token = current_semiring.set(self)
@@ -64,7 +63,7 @@ class Semiring:
         current_semiring.reset(self.token)
         return False
 
-    def get_semiring(self, typ=None):
+    def get_op(self):
         return self.semiring
 
     @property

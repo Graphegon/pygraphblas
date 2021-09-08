@@ -1,6 +1,7 @@
 """High level wrapper around GraphBLAS Vectors.
 
 """
+import random
 import sys
 import operator
 import weakref
@@ -22,9 +23,9 @@ from .base import (
 )
 from . import types
 from .scalar import Scalar
-from .semiring import current_semiring
+from .semiring import current_semiring, Semiring
 from .binaryop import current_accum, current_binop, Accum
-from .monoid import current_monoid
+from .monoid import current_monoid, Monoid
 from . import descriptor
 from .descriptor import Descriptor, T1, current_desc
 
@@ -247,7 +248,7 @@ class Vector:
         return not self.iseq(other)
 
     @classmethod
-    def sparse(cls, typ, size=None):
+    def sparse(cls, typ, size=None, fill=None, mask=None):
         """Create an empty Vector from the given type.  If `size` is not
         specified it defaults to `pygraphblas.GxB_INDEX_MAX`.
 
@@ -262,12 +263,69 @@ class Vector:
         >>> v.size == lib.GxB_INDEX_MAX
         True
 
+        >>> v[42] = True
+        >>> w = Vector.sparse(types.INT64, fill=42, mask=v)
+        >>> list(w)
+        [(42, 42)]
+
+        If no `fill` is provided, the `type.default_zero` is used:
+
+        >>> w = Vector.sparse(types.INT64, mask=v)
+        >>> list(w)
+        [(42, 0)]
         """
         if size is None:
             size = GxB_INDEX_MAX
         new_vec = ffi.new("GrB_Vector*")
         _check(lib.GrB_Vector_new(new_vec, typ._gb_type, size))
-        return cls(new_vec, typ)
+        m = cls(new_vec, typ)
+        if mask is not None:
+            if fill is None:
+                fill = m.type.default_zero
+            m.assign_scalar(fill, mask=mask)
+        return m
+
+    @classmethod
+    def random(
+        cls,
+        typ,
+        nvals,
+        size=lib.GxB_INDEX_MAX,
+        make_pattern=False,
+        seed=None,
+    ):  # pragma: nocover
+        """ """
+        V = Vector.sparse(typ, size)
+        if seed is not None:
+            random.seed(seed)
+        if V.size == 0:
+            nvals = 0
+        if typ is types.BOOL:
+            f = partial(random.randint, 0, 1)
+        if typ is types.UINT8:
+            f = partial(random.randint, 0, (2 ** 8) - 1)
+        if typ is types.UINT16:
+            f = partial(random.randint, 0, (2 ** 16) - 1)
+        if typ is types.UINT32:
+            f = partial(random.randint, 0, (2 ** 32) - 1)
+        if typ is types.UINT64:
+            f = partial(random.randint, 0, (2 ** 64) - 1)
+        if typ is types.INT8:
+            f = partial(random.randint, (-(2 ** 7)) + 1, (2 ** 7) - 1)
+        if typ is types.INT16:
+            f = partial(random.randint, (-(2 ** 15)) + 1, (2 ** 15) - 1)
+        if typ is types.INT32:
+            f = partial(random.randint, (-(2 ** 31)) + 1, (2 ** 31) - 1)
+        if typ is types.INT64:
+            f = partial(random.randint, (-(2 ** 63)) + 1, (2 ** 63) - 1)
+        if typ in (types.FP32, types.FP64):
+            f = random.random
+        if typ in (types.FC32, types.FC64):
+            f = lambda: complex(random.random(), random.random())
+        for i in range(nvals):
+            i = random.randint(0, V.size - 1)
+            V[i] = f()
+        return V
 
     @classmethod
     def from_lists(cls, I, V, size=None, typ=None):
@@ -610,6 +668,28 @@ class Vector:
         5| 8
         6| 7
 
+        You can provide a monoid for the operation:
+
+        >>> print(v.eadd(w, v.type.min_monoid))
+        0| 1
+        1| 1
+        2| 4
+        3| 6
+        4| 4
+        5| 8
+        6| 7
+
+        Or you can use a semiring:
+
+        >>> print(v.eadd(w, v.type.min_plus))
+        0| 1
+        1| 1
+        2| 4
+        3| 6
+        4| 4
+        5| 8
+        6| 7
+
         The following operators default to use `eadd`:
 
         Operator | Description | Default
@@ -622,8 +702,13 @@ class Vector:
         v -=   w | In-place Vector Element-Wise Union | type default MINUS combiner
 
         """
+        func = lib.GrB_Vector_eWiseAdd_BinaryOp
         if add_op is None:
             add_op = current_binop.get(NULL)
+        elif isinstance(add_op, Monoid):
+            func = lib.GrB_Vector_eWiseAdd_Monoid
+        elif isinstance(add_op, Semiring):
+            func = lib.GrB_Vector_eWiseAdd_Semiring
 
         mask, accum, desc = self._get_args(mask, accum, desc)
 
@@ -635,9 +720,10 @@ class Vector:
 
         if add_op is NULL:
             add_op = out.type._default_addop()
-        add_op = add_op.get_binaryop(self.type, other.type)
+
+        add_op = add_op.get_op()
         self._check(
-            lib.GrB_Vector_eWiseAdd_BinaryOp(
+            func(
                 out._vector[0],
                 mask,
                 accum,
@@ -732,7 +818,7 @@ class Vector:
         if mult_op is NULL:
             mult_op = out.type._default_multop()
 
-        mult_op = mult_op.get_binaryop(self.type, other.type)
+        mult_op = mult_op.get_op()
         self._check(
             lib.GrB_Vector_eWiseMult_BinaryOp(
                 out._vector[0],
@@ -749,9 +835,9 @@ class Vector:
     def vxm(
         self,
         other,
+        semiring=None,
         cast=None,
         out=None,
-        semiring=None,
         mask=None,
         accum=None,
         desc=None,
@@ -869,7 +955,7 @@ class Vector:
         if semiring is NULL:
             semiring = out.type._default_semiring()
 
-        semiring = semiring.get_semiring()
+        semiring = semiring.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_vxm(
@@ -994,7 +1080,7 @@ class Vector:
             accum = current_accum.get(NULL)
 
         if accum is not NULL:
-            accum = accum.get_binaryop(self.type)
+            accum = accum.get_op()
 
         if desc is None:
             desc = current_desc.get(NULL)
@@ -1004,10 +1090,44 @@ class Vector:
 
         if mask is None:
             mask = NULL
+        # else:
+        #     if desc is None:
+        #         desc = S
 
         if isinstance(mask, Vector):
             mask = mask._vector[0]
         return mask, accum, desc
+
+    def reduce(self, mon=None, accum=None, desc=None):
+        """Do a scalar reduce based on this object's type:
+
+        >>> V = Vector.random(types.UINT8, 10, 3, seed=42)
+        >>> V.reduce()
+        114
+
+        >>> V = Vector.random(types.FP32, 10, 3, seed=42)
+        >>> V.reduce()
+        0.9517456293106079
+
+        >>> V = Vector.random(types.UINT8, 10, 3, seed=42)
+        >>> V.reduce(V.type.min_monoid)
+        13
+
+        >>> V = Vector.random(types.BOOL, 10, 3, seed=42)
+        >>> V.reduce()
+        False
+
+        """
+        if mon is None:
+            if self.type is types.BOOL:
+                mon = current_monoid.get(getattr(self.type, "lor_monoid"))
+            else:
+                mon = current_monoid.get(getattr(self.type, "plus_monoid"))
+        mon = mon.get_op()
+        mask, accum, desc = self._get_args(None, accum, desc)
+        result = ffi.new(self.type._c_type + "*")
+        self._check(self.type._Vector_reduce(result, accum, mon, self._vector[0], desc))
+        return result[0]
 
     def reduce_bool(self, mon=None, mask=None, accum=None, desc=None):
         """Reduce vector to a boolean.
@@ -1025,7 +1145,7 @@ class Vector:
         """
         if mon is None:
             mon = current_monoid.get(types.BOOL.LOR_MONOID)
-        mon = mon.get_monoid(self.type)
+        mon = mon.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("_Bool*")
         self._check(
@@ -1049,7 +1169,7 @@ class Vector:
         """
         if mon is None:
             mon = current_monoid.get(types.INT64.PLUS_MONOID)
-        mon = mon.get_monoid(self.type)
+        mon = mon.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("int64_t*")
         self._check(
@@ -1073,7 +1193,7 @@ class Vector:
         """
         if mon is None:
             mon = current_monoid.get(types.FP64.PLUS_MONOID)
-        mon = mon.get_monoid(self.type)
+        mon = mon.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         result = ffi.new("double*")
         self._check(
@@ -1158,7 +1278,7 @@ class Vector:
         if out is None:
             out = Vector.sparse(self.type, self.size)
 
-        op = op.get_unaryop(self)
+        op = op.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         self._check(
             lib.GrB_Vector_apply(out._vector[0], mask, accum, op, self._vector[0], desc)
@@ -1182,7 +1302,7 @@ class Vector:
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
 
-        op = op.get_binaryop(self)
+        op = op.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(first, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp1st
@@ -1220,7 +1340,7 @@ class Vector:
         if out is None:
             out = self.__class__.sparse(self.type, self.size)
 
-        op = op.get_binaryop(self)
+        op = op.get_op()
         mask, accum, desc = self._get_args(mask, accum, desc)
         if isinstance(second, Scalar):
             f = lib.GxB_Vector_apply_BinaryOp2nd
