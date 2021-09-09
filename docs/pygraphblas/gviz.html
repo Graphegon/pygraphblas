@@ -28,7 +28,7 @@ doctests and Jupyter notebooks.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from pygraphblas import *
 &gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 </code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M, show_weight=False,
+<pre><code class="language-python-repl">&gt;&gt;&gt; g = draw_graph(M, weights=False,
 ...     filename='docs/imgs/Matrix_from_lists3')
 </code></pre>
 <p><img alt="Matrix_from_lists3.png" src="../imgs/Matrix_from_lists3.png"></p>
@@ -55,7 +55,7 @@ doctests and Jupyter notebooks.
 &gt;&gt;&gt; from pygraphblas import *
 &gt;&gt;&gt; M = Matrix.random(UINT8, 4, 4, 15, seed=8)
 
-&gt;&gt;&gt; g = draw_graph(M, show_weight=False,
+&gt;&gt;&gt; g = draw_graph(M, weights=False,
 ...     filename=&#39;docs/imgs/Matrix_from_lists3&#39;)
 
 ![Matrix_from_lists3.png](../imgs/Matrix_from_lists3.png)
@@ -116,10 +116,11 @@ def draw_vector_dot(V, name=&#34;&#34;, rankdir=&#34;LR&#34;, ioff=0, joff=0):  
 
 def draw_graph(
     M,
+    g=None,
     name=&#34;&#34;,
     rankdir=&#34;LR&#34;,
     directed=True,
-    show_weight=True,
+    weights=True,
     concentrate=True,
     labels=True,
     label_vector=None,
@@ -136,11 +137,13 @@ def draw_graph(
     node_attr=None,
     edge_attr=None,
     edge_cmap=None,
+    weight_prefix=&#34;&#34;,
 ):  # pragma: nocover
-    if directed:
-        g = Digraph(name)
-    else:
-        g = Graph(name)
+    if g is None:
+        if directed:
+            g = Digraph(name)
+        else:
+            g = Graph(name)
     g.attr(
         rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34; if concentrate else &#34;false&#34;
     )
@@ -177,7 +180,7 @@ def draw_graph(
             if labels
             else &#34;&#34;
         )
-        vlabel = _str(v, label_width) if show_weight else None
+        vlabel = weight_prefix + _str(v, label_width) if weights else None
 
         if size_vector:
             scale = max(size_vector[i] * size_scale, min_size)
@@ -214,6 +217,8 @@ def draw_graph(
             args[&#34;tooltip&#34;] = vlabel
         if edge_cmap:
             args[&#34;color&#34;] = rgb2hex(edge_cmap(float(v)))
+        if not weights:
+            w = None
         g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format=&#34;png&#34;)
@@ -553,7 +558,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </details>
 </dd>
 <dt id="pygraphblas.gviz.draw_graph"><code class="name flex">
-<span>def <span class="ident">draw_graph</span></span>(<span>M, name='', rankdir='LR', directed=True, show_weight=True, concentrate=True, labels=True, label_vector=None, label_width=None, label_cmap=None, size_vector=None, size_scale=1.0, min_size=0.1, log_scale=False, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None)</span>
+<span>def <span class="ident">draw_graph</span></span>(<span>M, g=None, name='', rankdir='LR', directed=True, weights=True, concentrate=True, labels=True, label_vector=None, label_width=None, label_cmap=None, size_vector=None, size_scale=1.0, min_size=0.1, log_scale=False, ioff=0, joff=0, filename=None, graph_attr=None, node_attr=None, edge_attr=None, edge_cmap=None, weight_prefix='')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -563,10 +568,11 @@ def draw_vis(M, **kwargs):  # pragma: nocover
 </summary>
 <pre><code class="python">def draw_graph(
     M,
+    g=None,
     name=&#34;&#34;,
     rankdir=&#34;LR&#34;,
     directed=True,
-    show_weight=True,
+    weights=True,
     concentrate=True,
     labels=True,
     label_vector=None,
@@ -583,11 +589,13 @@ def draw_vis(M, **kwargs):  # pragma: nocover
     node_attr=None,
     edge_attr=None,
     edge_cmap=None,
+    weight_prefix=&#34;&#34;,
 ):  # pragma: nocover
-    if directed:
-        g = Digraph(name)
-    else:
-        g = Graph(name)
+    if g is None:
+        if directed:
+            g = Digraph(name)
+        else:
+            g = Graph(name)
     g.attr(
         rankdir=rankdir, overlap=&#34;false&#34;, concentrate=&#34;true&#34; if concentrate else &#34;false&#34;
     )
@@ -624,7 +632,7 @@ def draw_vis(M, **kwargs):  # pragma: nocover
             if labels
             else &#34;&#34;
         )
-        vlabel = _str(v, label_width) if show_weight else None
+        vlabel = weight_prefix + _str(v, label_width) if weights else None
 
         if size_vector:
             scale = max(size_vector[i] * size_scale, min_size)
@@ -661,6 +669,8 @@ def draw_vis(M, **kwargs):  # pragma: nocover
             args[&#34;tooltip&#34;] = vlabel
         if edge_cmap:
             args[&#34;color&#34;] = rgb2hex(edge_cmap(float(v)))
+        if not weights:
+            w = None
         g.edge(str(i + ioff), str(j + joff), weight=w, **args)
     if filename is not None:
         g.render(filename, format=&#34;png&#34;)

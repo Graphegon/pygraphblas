@@ -124,7 +124,7 @@ simpler, but the same ideas apply to both, both are suported by
 GraphBLAS and pygraphblas, and it is easy to switch back and forth
 between them.
 
-![An example graph and adjacency matrix](../imgs/AdjacencyMatrixBFS.png)
+![An example graph and adjacency matrix](../imgs/Adjacency.png)
 
 On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every node in the
