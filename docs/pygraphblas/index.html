@@ -135,10 +135,8 @@ Center</a>.</p>
 <p>There are two useful matrix representations of graphs: <a href="https://en.wikipedia.org/wiki/Adjacency_matrix">Adjacency
 Matrices</a> and
 <a href="https://en.wikipedia.org/wiki/Incidence_matrix">Incidence Matrices</a>.
-For this introduction we will focus on the adjacency type as they are
-simpler, but the same ideas apply to both, both are suported by
-GraphBLAS and pygraphblas, and it is easy to switch back and forth
-between them.</p>
+An Adjacency Matrix can hold a simple graph where a single edge joins
+one source node to one destination:</p>
 <p><img alt="An example graph and adjacency matrix" src="../imgs/Adjacency.png"></p>
 <p>On the left is a graph, and on the right, the adjacency matrix that
 represents it. The matrix has a row and column for every node in the
@@ -149,6 +147,10 @@ How it
 differs from many other matrix representations is that the matrix is
 sparse, nothing is stored in computer memory where there are unused
 elements.</p>
+<p>Two Incidence Matrices are used to store a relationship between two
+distinct sets of objects of nodes and edge elements.
+</p>
+<p><img alt="An example graph and incidence matrix" src="../imgs/Projection.png"></p>
 <p>Sparsity is important because one practical problem with
 matrix-encoding graphs is that most real-world graphs tend to be
 sparse, as above, only 7 of 36 possible elements have a value. Those
@@ -375,10 +377,8 @@ Center](http://news.mit.edu/2016/lincoln-laboratory-establishes-supercomputing-c
 There are two useful matrix representations of graphs: [Adjacency
 Matrices](https://en.wikipedia.org/wiki/Adjacency_matrix) and
 [Incidence Matrices](https://en.wikipedia.org/wiki/Incidence_matrix).
-For this introduction we will focus on the adjacency type as they are
-simpler, but the same ideas apply to both, both are suported by
-GraphBLAS and pygraphblas, and it is easy to switch back and forth
-between them.
+An Adjacency Matrix can hold a simple graph where a single edge joins
+one source node to one destination:
 
 ![An example graph and adjacency matrix](../imgs/Adjacency.png)
 
@@ -389,6 +389,11 @@ a value present in the intersection of As row with Bs column.  How it
 differs from many other matrix representations is that the matrix is
 sparse, nothing is stored in computer memory where there are unused
 elements.
+
+Two Incidence Matrices are used to store a relationship between two
+distinct sets of objects of nodes and edge elements.  
+
+![An example graph and incidence matrix](../imgs/Projection.png)
 
 Sparsity is important because one practical problem with
 matrix-encoding graphs is that most real-world graphs tend to be
