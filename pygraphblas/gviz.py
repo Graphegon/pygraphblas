@@ -64,7 +64,8 @@ def draw_vector_dot(V, name="", rankdir="LR", ioff=0, joff=0):  # pragma: nocove
 
 
 def draw_graph(
-    M,
+    A,
+    B=None,
     g=None,
     name="",
     rankdir="LR",
@@ -112,63 +113,90 @@ def draw_graph(
     if isinstance(label_vector, list):
         labeler = lambda v, i: v[i] if labels else ""
     else:
-        labeler = lambda v, i: v.get(i) if labels else ""
+        labeler = lambda v, i: v.get(i, i) if labels else ""
 
-    for i, j, v in M:
-        ilabel = (
-            _str(labeler(label_vector, i), label_width)
-            if label_vector
-            else str(i)
-            if labels
-            else ""
-        )
-        jlabel = (
-            _str(labeler(label_vector, j), label_width)
-            if label_vector
-            else str(j)
-            if labels
-            else ""
-        )
-        vlabel = weight_prefix + _str(v, label_width) if weights else None
+    if B is not None:
+        hyper = True
+        M = [A, B]
+    else:
+        hyper = False
+        M = [A]
 
-        if size_vector:
-            scale = max(size_vector[i] * size_scale, min_size)
-            if log_scale:
-                scale = max(log(scale), min_size)
-            size = _str(scale, label_width)
-        else:
-            size = "0.5"
+    for m in M:
+        for i, j, v in m:
+            ilabel = (
+                _str(labeler(label_vector, i), label_width)
+                if label_vector
+                else str(i)
+                if labels
+                else ""
+            )
+            jlabel = (
+                _str(labeler(label_vector, j), label_width)
+                if label_vector
+                else str(j)
+                if labels
+                else ""
+            )
+            vlabel = weight_prefix + _str(v, label_width) if weights else None
 
-        args = {"width": size, "fixedsize": "true"}
-        if node_attr:
-            args.update(node_attr)
-        if labels:
-            args["label"] = ilabel
-        if label_cmap and label_vector:
-            args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, i))))
-        inode = g.node(str(i + ioff), **args)
+            if size_vector:
+                scale = max(size_vector[i] * size_scale, min_size)
+                if log_scale:
+                    scale = max(log(scale), min_size)
+                size = _str(scale, label_width)
+            else:
+                size = "0.5"
 
-        args = {"width": size, "fixedsize": "true"}
-        if node_attr:
-            args.update(node_attr)
-        if labels:
-            args["label"] = jlabel
-        if label_cmap:
-            args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, j))))
-        jnode = g.node(str(j + joff), **args)
-        w = str(v)
+            args = {"width": size, "fixedsize": "true"}
+            if hyper and m is B:
+                args["shape"] = "point"
+                args["style"] = "invis"
+                args["width"] = "0"
+            if node_attr:
+                args.update(node_attr)
+            if labels and m is A:
+                args["label"] = ilabel
+            if label_cmap and label_vector:
+                args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, i))))
+            inode = g.node(str(i + ioff), **args)
 
-        args = {}
-        if edge_attr:
-            args.update(edge_attr)
-        if labels:
-            args["label"] = vlabel
-            args["tooltip"] = vlabel
-        if edge_cmap:
-            args["color"] = rgb2hex(edge_cmap(float(v)))
-        if not weights:
-            w = None
-        g.edge(str(i + ioff), str(j + joff), weight=w, **args)
+            args = {"width": size, "fixedsize": "true"}
+            if hyper and m is A:
+                args["shape"] = "point"
+                args["style"] = "invis"
+                args["width"] = "0"
+            if node_attr:
+                args.update(node_attr)
+            if labels and (B is None or m is B):
+                args["label"] = jlabel
+            if label_cmap:
+                args["color"] = rgb2hex(label_cmap(float(labeler(label_vector, j))))
+            jnode = g.node(str(j + joff), **args)
+            w = str(v)
+
+            args = {}
+            if edge_attr:
+                args.update(edge_attr)
+            if labels and (B is None or m is B):
+                args["label"] = vlabel
+                args["tooltip"] = vlabel
+            if edge_cmap:
+                args["color"] = rgb2hex(edge_cmap(float(v)))
+            if not weights:
+                w = None
+            if hyper:
+                if m is A:
+                    args["dir"] = "none"
+                    args["headclips"] = "false"
+                    args["tailclips"] = "false"
+                elif m is B:
+                    args["dir"] = "forward"
+                    args["headclips"] = "false"
+                    args["tailclips"] = "false"
+
+            g.edge(str(i + ioff), str(j + joff), weight=w, **args)
+
     if filename is not None:
         g.render(filename, format="png")
     return g
