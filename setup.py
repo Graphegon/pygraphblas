@@ -18,7 +18,7 @@ setup(
     install_requires=[
         "numpy<1.21",
         "numba",
-        "suitesparse-graphblas",
+        "suitesparse-graphblas<6.1.4",
         "scipy",
         "contextvars",
         "mmparse",
