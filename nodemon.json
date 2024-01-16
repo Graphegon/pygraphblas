@@ -1,0 +1,17 @@
+{
+  "verbose": true,
+  "watch": [
+    "Makefile",
+    "nodemon.json",
+    "setup.py",
+    "pygraphblas",
+    "tests"
+  ],
+  "exec": "make debug-command || exit 1",
+  "env": {},
+  "ext": "*",
+  "ignore": [
+      "pygraphblas.egg-info",
+    "**/*.pyc"
+  ]
+}
